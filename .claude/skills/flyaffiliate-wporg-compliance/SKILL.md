@@ -120,7 +120,7 @@ Run before the first submission and before every release:
       but shipping code, one top-level `flyaffiliate/` directory.
 - [ ] `npm run plugin-check` — 0 errors, 0 warnings. Paste the table into the PR.
 - [ ] `composer phpcs` clean repo-wide.
-- [ ] `npm run phpunit` green.
+- [ ] `npm run phpunit` green with and without Dokan.
 - [ ] Header `Version` = readme `Stable tag` = `FlyAffiliate_Plugin::$version` =
       `package.json`.
 - [ ] `Tested up to` is the current WordPress version.

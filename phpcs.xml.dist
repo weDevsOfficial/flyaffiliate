@@ -52,12 +52,13 @@
 		</properties>
 	</rule>
 
-	<!-- WooCommerce capabilities this plugin legitimately checks. -->
+	<!-- WooCommerce and Dokan capabilities this plugin legitimately checks. -->
 	<rule ref="WordPress.WP.Capabilities">
 		<properties>
 			<property name="custom_capabilities" type="array">
 				<element value="manage_woocommerce"/>
 				<element value="view_woocommerce_reports"/>
+				<element value="dokandar"/>
 			</property>
 		</properties>
 	</rule>

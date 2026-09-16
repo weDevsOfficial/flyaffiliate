@@ -460,7 +460,7 @@ class SettingsSchema {
 				'type'        => 'page',
 				'title'       => __( 'Commissions', 'flyaffiliate' ),
 				'icon'        => 'Percent',
-				'description' => __( 'Commissions are calculated per order item. The rate comes from the product, then the default — and is always clamped to the maximum.', 'flyaffiliate' ),
+				'description' => __( 'Commissions are calculated per order item. The rate comes from the product, then the vendor on a Dokan marketplace, then the default — and is always clamped to the maximum.', 'flyaffiliate' ),
 				'priority'    => 20,
 			],
 
@@ -665,14 +665,14 @@ class SettingsSchema {
 	}
 
 	/**
-	 * The Integrations page: WooCommerce.
+	 * The Integrations page: WooCommerce and, when present, Dokan.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function integrations_page(): array {
-		return [
+		$elements = [
 			[
 				'id'          => 'integrations',
 				'type'        => 'page',
@@ -704,6 +704,91 @@ class SettingsSchema {
 				true
 			),
 		];
+
+		// Dokan is optional. Its settings only exist while it is active, so an
+		// admin without a marketplace never sees vendor programs.
+		if ( function_exists( 'dokan' ) ) {
+			$elements = array_merge(
+				$elements,
+				[
+					[
+						'id'          => 'dokan',
+						'type'        => 'subpage',
+						'page_id'     => 'integrations',
+						'title'       => __( 'Dokan', 'flyaffiliate' ),
+						'description' => __( 'Vendors can run their own affiliate programs. The commission comes out of the vendor’s earning, not the marketplace’s.', 'flyaffiliate' ),
+						'priority'    => 20,
+					],
+					[
+						'id'         => 'dokan_settings',
+						'type'       => 'section',
+						'subpage_id' => 'dokan',
+						'title'      => __( 'Vendor programs', 'flyaffiliate' ),
+						'description' => __( 'Whether vendors can run affiliate programs for their own stores, and how much say they have over the rate.', 'flyaffiliate' ),
+					],
+					self::switch_field(
+						'dokan_vendor_programs',
+						'dokan_settings',
+						__( 'Let vendors run affiliate programs', 'flyaffiliate' ),
+						__( 'Each vendor can opt their store in from their store settings.', 'flyaffiliate' ),
+						true
+					),
+					array_merge(
+						self::switch_field(
+							'dokan_vendor_can_set_rate',
+							'dokan_settings',
+							__( 'Let vendors set their own rate', 'flyaffiliate' ),
+							__( 'When off, every vendor program uses the default rate.', 'flyaffiliate' ),
+							true
+						),
+						[
+							'dependencies' => [
+								[
+									'key'        => 'dokan_vendor_programs',
+									'value'      => 'on',
+									'comparison' => '==',
+									'to_self'    => true,
+									'attribute'  => 'display',
+									'effect'     => 'show',
+								],
+							],
+						]
+					),
+					array_merge(
+						self::percent_field(
+							'dokan_vendor_max_rate',
+							'dokan_settings',
+							__( 'Maximum vendor rate', 'flyaffiliate' ),
+							__( 'A vendor cannot set a rate above this.', 'flyaffiliate' ),
+							50.0
+						),
+						[
+							// Both switches must be on: no programs means no vendor rate to cap.
+							'dependencies' => [
+								[
+									'key'        => 'dokan_vendor_programs',
+									'value'      => 'on',
+									'comparison' => '==',
+									'to_self'    => true,
+									'attribute'  => 'display',
+									'effect'     => 'show',
+								],
+								[
+									'key'        => 'dokan_vendor_can_set_rate',
+									'value'      => 'on',
+									'comparison' => '==',
+									'to_self'    => true,
+									'attribute'  => 'display',
+									'effect'     => 'show',
+								],
+							],
+						]
+					),
+				]
+			);
+		}
+
+		return $elements;
 	}
 
 	/**

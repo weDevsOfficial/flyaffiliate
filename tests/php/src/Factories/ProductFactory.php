@@ -14,7 +14,7 @@ use WP_UnitTest_Factory_For_Thing;
  * Creates WooCommerce products for tests.
  *
  * `vendor_id` sets the product's author, which is how a product is attributed to
- * the vendor — on a single-merchant store the author is just a user.
+ * a Dokan vendor. It works with Dokan absent too — the author is just a user.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -47,7 +47,7 @@ class ProductFactory extends WP_UnitTest_Factory_For_Thing {
 	 *     Product fields.
 	 *
 	 *     @type float  $regular_price     Price.
-	 *     @type int    $vendor_id         Author, which is the vendor.
+	 *     @type int    $vendor_id         Author, which is the Dokan vendor.
 	 *     @type float  $flyaffiliate_rate Per-product commission rate override.
 	 * }
 	 *

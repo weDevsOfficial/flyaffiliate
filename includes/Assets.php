@@ -257,6 +257,7 @@ class Assets implements Hookable {
 			'version'    => FLYAFFILIATE_VERSION,
 			'restNonce'  => wp_create_nonce( 'wp_rest' ),
 			'currency'   => $this->get_currency_data(),
+			'hasDokan'   => function_exists( 'dokan' ),
 			'settings'   => [
 				'payoutMinimum' => (float) flyaffiliate_get_option( 'minimum_amount', 0 ),
 			],

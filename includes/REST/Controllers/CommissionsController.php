@@ -375,7 +375,7 @@ class CommissionsController extends AdminBaseController {
 				),
 				'vendor_id'     => $ro(
 					[
-						'description' => __( 'The vendor the item belongs to, or 0 on a single-merchant store.', 'flyaffiliate' ),
+						'description' => __( 'The Dokan vendor, or 0.', 'flyaffiliate' ),
 						'type' => 'integer',
 						'context' => [ 'view', 'edit' ],
 					]
@@ -480,7 +480,7 @@ class CommissionsController extends AdminBaseController {
 			'type' => 'integer',
 		];
 		$params['vendor_id']    = [
-			'description' => __( 'Limit to a vendor.', 'flyaffiliate' ),
+			'description' => __( 'Limit to a Dokan vendor.', 'flyaffiliate' ),
 			'type' => 'integer',
 		];
 		$params['source']       = [

@@ -22,7 +22,7 @@ find out early.
 ```bash
 composer install        # dev dependencies only — nothing from vendor/ ships
 npm install
-npm run env:start       # WordPress + WooCommerce in Docker
+npm run env:start       # WordPress + WooCommerce + Dokan Lite in Docker
 ```
 
 `npm run env:start` needs Docker running. The dev site is on
@@ -73,6 +73,7 @@ reserved for Phase 2 React work and is wired the same way.
 ```bash
 npm run phpunit                       # whole suite
 npm run phpunit -- --filter CommissionCalculatorTest
+npm run phpunit:no-dokan              # what CI's "without Dokan" leg runs
 npm run test:phpunit                  # env:start → phpunit → env:stop
 composer test-f <filter>              # outside wp-env, needs WP_TESTS_DIR or wp-phpunit's WP_PHPUNIT__DIR
 ```
@@ -89,12 +90,14 @@ composer test-f <filter>              # outside wp-env, needs WP_TESTS_DIR or wp
 - Assertions on tables use `DBAssertionTrait`
   (`assertDatabaseHas`, `assertDatabaseCount`, `assertDatabaseMissing`); money
   uses `MoneyAssertionTrait`, which compares integer cents.
+- Dokan-dependent tests carry `@group dokan` and skip themselves when Dokan is
+  not loaded. CI runs a leg with Dokan absent, so a missing skip fails there.
 - Container tests carry `@group container`.
 
 ### What a money test must cover
 
-Any change to commission calculation, maturation, refunds, or payouts needs
-all four:
+Any change to commission calculation, maturation, refunds, payouts, or the Dokan
+vendor charge needs all four:
 
 1. **Happy path**, asserted in integer cents.
 2. **Partial refund** — the commission rescales by the unrefunded fraction of its
@@ -125,7 +128,7 @@ or it lands in the zip.
 | Workflow | Trigger | What fails it |
 |---|---|---|
 | `phpcs.yml` | PR touching `**.php` | Any violation on a changed file (no `--graceful-warnings`) |
-| `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 7.4/8.3 |
+| `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 7.4/8.3 × with/without Dokan |
 | `plugin-check.yml` | push, PR, manual | Any Plugin Check error **or warning** on the built zip |
 | `deploy.yml` | `v*` tag | Disabled until the wp.org slug is approved |
 

@@ -13,7 +13,7 @@ the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Repository tooling: Composer and npm dependency sets, PHPCS ruleset,
   PHPUnit configuration, wp-env environments, webpack build, release archiver,
   and the Plugin Check runner.
-- CI: PHPCS on changed files, PHPUnit across PHP 7.4/8.3,
+- CI: PHPCS on changed files, PHPUnit across PHP 7.4/8.3 with and without Dokan,
   Plugin Check on the built zip, and a tag-triggered WordPress.org deploy that
   stays disabled until the slug is approved.
 - Architecture Decision Records 0001–0004 and the accepted-warnings register.

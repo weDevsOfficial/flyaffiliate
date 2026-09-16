@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FlyAffiliate
  * Plugin URI: https://wedevs.com/flyaffiliate/
- * Description: Affiliate marketing for WooCommerce. Referral tracking, per-item commissions, hold periods, refund handling and manual payouts.
+ * Description: Affiliate marketing for WooCommerce, with native Dokan multivendor support. Referral tracking, per-item commissions, hold periods, refund handling and manual payouts.
  * Version: 1.0.0
  * Author: weDevs
  * Author URI: https://wedevs.com/
@@ -59,7 +59,8 @@ $flyaffiliate_container = new FlyAffiliate\DependencyManagement\Container();
 
 // The root provider registers the named services and adds the rest of the
 // providers. This happens while the plugin file loads — before `plugins_loaded`
-// — so any listener a provider attaches is in place before other plugins load.
+// — so the `dokan_loaded` listener the integration provider attaches is always
+// in place before any plugin can fire it.
 $flyaffiliate_container->addServiceProvider( new FlyAffiliate\DependencyManagement\Providers\ServiceProvider() );
 
 if ( ! function_exists( 'flyaffiliate_get_container' ) ) {

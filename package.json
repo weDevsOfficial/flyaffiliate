@@ -1,7 +1,7 @@
 {
     "name": "flyaffiliate",
     "version": "1.0.0",
-    "description": "Affiliate marketing for WordPress and WooCommerce.",
+    "description": "Affiliate marketing for WordPress and WooCommerce, with native Dokan multivendor support.",
     "author": "weDevs",
     "license": "GPL-2.0-or-later",
     "private": true,
@@ -19,6 +19,7 @@
         "env:stop": "wp-env stop",
         "env:destroy": "wp-env destroy",
         "phpunit": "wp-env run tests-cli --env-cwd=wp-content/plugins/flyaffiliate-src vendor/bin/phpunit -c phpunit.xml",
+        "phpunit:no-dokan": "npm run phpunit -- --exclude-group dokan",
         "test:phpunit": "npm run env:start && npm run phpunit && npm run env:stop",
         "plugin-check": "bash bin/plugin-check.sh",
         "typecheck": "tsc --noEmit -p tsconfig.json",

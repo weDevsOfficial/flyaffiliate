@@ -18,12 +18,13 @@ concurrency:
 
 jobs:
   phpunit:
-    name: PHP ${{ matrix.php }}
+    name: PHP ${{ matrix.php }} / Dokan ${{ matrix.dokan }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         php: ['7.4', '8.3']
+        dokan: ['with', 'without']
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,12 +47,21 @@ jobs:
       - name: Install Node dependencies
         run: npm ci --no-audit --no-fund
 
-      # wp-env reads .wp-env.override.json on top of .wp-env.json; this leg only
-      # pins the PHP version.
+      # wp-env reads .wp-env.override.json on top of .wp-env.json. The "without"
+      # leg drops Dokan from the tests environment entirely, so a @group dokan
+      # test that forgot to skip itself fails loudly instead of passing by accident.
       - name: Configure the test environment
         run: |
+          if [ "${{ matrix.dokan }}" = "with" ]; then
+            PLUGINS='"https://downloads.wordpress.org/plugin/woocommerce.zip","https://downloads.wordpress.org/plugin/dokan-lite.zip"'
+          else
+            PLUGINS='"https://downloads.wordpress.org/plugin/woocommerce.zip"'
+          fi
           cat > .wp-env.override.json <<JSON
-          { "phpVersion": "${{ matrix.php }}" }
+          {
+            "phpVersion": "${{ matrix.php }}",
+            "env": { "tests": { "plugins": [ ${PLUGINS} ] } }
+          }
           JSON
           cat .wp-env.override.json
 
@@ -59,7 +69,12 @@ jobs:
         run: npx wp-env start --update
 
       - name: Run PHPUnit
-        run: npm run phpunit
+        run: |
+          if [ "${{ matrix.dokan }}" = "with" ]; then
+            npm run phpunit
+          else
+            npm run phpunit:no-dokan
+          fi
 
       - name: Stop wp-env
         if: always()

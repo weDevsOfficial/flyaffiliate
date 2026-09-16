@@ -1,12 +1,16 @@
 # FlyAffiliate
 
-Affiliate marketing for WordPress and WooCommerce.
+Affiliate marketing for WordPress and WooCommerce, with native
+[Dokan](https://dokan.co/wordpress/) multivendor support.
 
 Affiliates get a referral link, a frontend dashboard, and a balance. Store owners
-get per-item commissions with a configurable hold period, commission statuses
-that follow the order, and manual payouts with a CSV export.
+get per-item commissions with a configurable hold period, refund handling that
+rescales rather than guesses, and manual payouts with a CSV export. On a Dokan
+marketplace, each vendor can run their own program — and the vendor, not the
+marketplace, funds the commission.
 
 - **Requires:** PHP 7.4+, WordPress 6.4+, WooCommerce 8.5+
+- **Optional:** Dokan Lite 5.0+, detected at runtime
 - **Licence:** GPL-2.0-or-later
 
 ## Status

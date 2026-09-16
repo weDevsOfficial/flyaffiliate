@@ -24,11 +24,11 @@ Check against `CONTEXT.md`; these are not matters of opinion.
 - Commission calculated per **order**, not per **order item**.
 - A rate used without clamping to the global maximum — including a stored rate
   saved before the maximum changed.
-- Rate hierarchy out of order. It is product → vendor (filter) → global.
+- Rate hierarchy out of order. It is product → vendor (Dokan) → global.
 - Money compared or summed as a float. It is integer cents:
   `(int) round( $amount * 100 )`.
-- A write that is not idempotent. Commissions key on `order_item_id`, paid
-  marking on `payout_id`. Ask:
+- A write that is not idempotent. Commissions key on `order_item_id`, the vendor
+  charge on `_flyaffiliate_vendor_charged`, paid marking on `payout_id`. Ask:
   what happens when this hook fires twice?
 - A `paid` commission edited, rescaled, or deleted. `paid` is terminal.
 - A commission maturing without both conditions: hold period elapsed **and**
@@ -38,12 +38,22 @@ Check against `CONTEXT.md`; these are not matters of opinion.
 - More than one affiliate attributed to an order.
 - Self-referral earning a commission while the block is enabled.
 
-## Blockers — integrations
+## Blockers — Dokan
 
-- A third-party plugin's symbol referenced outside `includes/Integrations/`, or
-  an integration loading before that plugin has confirmed it is loaded.
-- Anything Dokan-specific on this branch — the marketplace integration lives
-  on `feature/dokan-integration`.
+- The **marketplace** absorbing the commission instead of the vendor (ADR-0004).
+- A smaller number written into `dokan_orders` earnings — Dokan recalculates and
+  overwrites it.
+- `dokan_order_net_amount` hooked (double-deducts) or
+  `dokan_refund_approve_vendor_refund_amount` hooked (double-refunds).
+- The `dokan_get_earning_from_order_table` filter used without writing the
+  adjusted figure into the cache key it returns early from.
+- Reverse withdrawal used as the charge mechanism.
+- Two refund mechanisms both active — the vendor charge *and* Dokan's clawback.
+- The vendor charged at order placement rather than at maturation.
+- A Dokan symbol referenced outside `includes/Integrations/Dokan/`, or the
+  integration loading anywhere but on `dokan_loaded` behind
+  `function_exists( 'dokan' )`.
+- A commission row missing `vendor_id` on a multi-vendor cart.
 
 ## Blockers — security and wp.org
 
@@ -72,6 +82,7 @@ Check against `CONTEXT.md`; these are not matters of opinion.
 - An unbounded query over commissions or visits with no `LIMIT` and no paging.
 - A new hook without `flyaffiliate_` prefix or without a documented contract.
 - A test asserting a float equality on money.
+- A `@group dokan` test that does not skip itself when Dokan is absent.
 
 ## Minor
 

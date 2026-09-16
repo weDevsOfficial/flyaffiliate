@@ -25,3 +25,4 @@ Lookup order is child theme, parent theme, then this directory.
 | `admin/` | wp-admin screens |
 | `affiliate-dashboard/` | the `[flyaffiliate_dashboard]` shortcode |
 | `registration/` | the `[flyaffiliate_register]` shortcode |
+| `dokan/` | the vendor-facing screens, loaded only when Dokan is active |
