@@ -15,8 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Product rate, then vendor rate, then the default — clamped to the maximum.
  *
  * The hierarchy is the one `CONTEXT.md` fixes. The vendor step is a filter so
- * a marketplace integration can supply a store rate without this class
- * knowing the marketplace exists.
+ * the Dokan integration can supply a store rate without this class knowing
+ * Dokan exists.
  *
  * @since FLYAFFILIATE_SINCE
  */

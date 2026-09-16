@@ -3,6 +3,7 @@
 	"phpVersion": "7.4",
 	"plugins": [
 		"https://downloads.wordpress.org/plugin/woocommerce.zip",
+		"https://downloads.wordpress.org/plugin/dokan-lite.zip",
 		"."
 	],
 	"config": {
@@ -14,7 +15,8 @@
 		"tests": {
 			"plugins": [
 				"https://downloads.wordpress.org/plugin/woocommerce.zip",
-						"https://downloads.wordpress.org/plugin/plugin-check.zip"
+				"https://downloads.wordpress.org/plugin/dokan-lite.zip",
+				"https://downloads.wordpress.org/plugin/plugin-check.zip"
 			],
 			"mappings": {
 				"wp-content/plugins/flyaffiliate-src": "."

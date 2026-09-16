@@ -5,7 +5,7 @@
 ```bash
 composer install     # dev dependencies only — nothing from vendor/ ships
 npm install
-npm run env:start    # WordPress + WooCommerce in Docker
+npm run env:start    # WordPress + WooCommerce + Dokan Lite in Docker
 ```
 
 Dev site: <http://localhost:8888>. Tests site: <http://localhost:8889>.
@@ -14,7 +14,7 @@ Dev site: <http://localhost:8888>. Tests site: <http://localhost:8889>.
 
 1. [`CLAUDE.md`](CLAUDE.md) — the project map, commands, and standards.
 2. [`CONTEXT.md`](CONTEXT.md) — the vocabulary and the money rules. Anything
-   touching commissions, refunds, or payouts is decided there.
+   touching commissions, refunds, payouts, or Dokan balances is decided there.
 3. [`docs/adr/`](docs/adr/) — check here before "fixing" surprising behaviour.
 4. [`.claude/skills/`](.claude/skills/) — the procedural how-to for backend
    conventions, the dev cycle, the WordPress.org gate, review standards, and git.
@@ -25,7 +25,7 @@ This plugin ships on WordPress.org. Every change passes:
 
 ```bash
 composer phpcs          # 0 violations
-npm run phpunit         # green
+npm run phpunit         # green, with and without Dokan
 npm run plugin-check    # 0 errors, 0 warnings on the built zip
 ```
 
@@ -50,10 +50,10 @@ The full convention is in [`.claude/skills/flyaffiliate-git`](.claude/skills/fly
 - A remote asset, an inline `<style>`/`<script>`, or a database write on
   `admin_init`.
 - A version number guessed instead of `@since FLYAFFILIATE_SINCE`.
-- A third-party plugin's symbol referenced outside `includes/Integrations/`.
+- A Dokan symbol referenced outside `includes/Integrations/Dokan/`.
 - A new root-level file missing from `.distignore`.
 
 ## Reporting a bug
 
-Include the WordPress, WooCommerce and PHP versions, and whether the problem
-reproduces with other plugins deactivated.
+Include the WordPress, WooCommerce, PHP, and (if relevant) Dokan versions, and
+whether the problem reproduces with Dokan deactivated.

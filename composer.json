@@ -1,6 +1,6 @@
 {
     "name": "wedevs/flyaffiliate",
-    "description": "Affiliate marketing for WordPress and WooCommerce.",
+    "description": "Affiliate marketing for WordPress and WooCommerce, with native Dokan multivendor support.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [

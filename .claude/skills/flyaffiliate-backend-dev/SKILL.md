@@ -1,13 +1,13 @@
 ---
 name: flyaffiliate-backend-dev
-description: Write or modify FlyAffiliate backend PHP — classes, services, hooks, settings, templates, REST controllers, models, and integrations. Invoke before writing any PHP code or PHP tests.
+description: Write or modify FlyAffiliate backend PHP — classes, services, hooks, settings, templates, REST controllers, models, and the Dokan integration. Invoke before writing any PHP code or PHP tests.
 ---
 
 # FlyAffiliate Backend Development
 
 How PHP is written in this plugin. Read `CONTEXT.md` first if the change touches
-commissions, refunds, or payouts — the money rules there are not re-derived
-here.
+commissions, refunds, payouts, or Dokan balances — the money rules there are not
+re-derived here.
 
 ## Before you write
 
@@ -345,20 +345,34 @@ sends `X-WP-Total` / `X-WP-TotalPages` on collection responses.
 - Currency and rounding go through `wc_price()`, `wc_format_decimal()`,
   `wc_get_price_decimals()`.
 
-## Integration guardrails
+## Dokan integration guardrails
 
-Third-party code lives under `includes/Integrations/{Plugin}/` and loads only
-once that plugin has confirmed it is loaded (`woocommerce_loaded` for
-WooCommerce). No other directory may reference the plugin's symbols.
+Everything Dokan-specific lives under `includes/Integrations/Dokan/` and loads
+**only** on the `dokan_loaded` action, behind `function_exists( 'dokan' )`. The
+plugin is fully functional with Dokan absent; no other directory may reference a
+Dokan symbol.
 
-The marketplace (Dokan) integration is not on this branch. It lives on
-`feature/dokan-integration`, which is this branch plus that work; keep the
-neutral seams it plugs into — `vendor_id` on commissions, the
-`flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters —
-and add nothing Dokan-specific here.
+The rules in `CONTEXT.md` → "Dokan rules" and ADR-0004 are binding. The short
+version, so you do not have to relearn it:
 
-Verify any third-party hook signature against the installed source before
-using it. Never assume a version number or a function's availability.
+- The **vendor** funds the commission. The marketplace share is untouched.
+- Deduct in exactly two places: the `dokan_get_earning_from_order_table` and
+  `dokan_get_vendor_earning_subtotal_by_order` filters, and one credit row in
+  `{prefix}dokan_vendor_balance` with `trn_type = 'flyaffiliate_commission'`.
+- `dokan_get_earning_from_order_table()` caches **before** running filters and
+  returns early on a cache hit. Write the adjusted figure into that cache key
+  from inside the filter; leave the raw internal entry alone.
+- Charge the vendor when the commission **matures**, not at order placement.
+- Never write a smaller number into `dokan_orders` — Dokan recalculates and
+  overwrites it.
+- Do not hook `dokan_order_net_amount` (double-deducts) or
+  `dokan_refund_approve_vendor_refund_amount` (double-refunds).
+- Reverse withdrawal is the wrong mechanism.
+- On refund, one mechanism only: the vendor charge tracks the commission,
+  Dokan's clawback is left alone.
+
+Verify any Dokan hook signature against the installed source before using it.
+Never assume a version number or a function's availability.
 
 ## Idempotency
 

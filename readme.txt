@@ -1,6 +1,6 @@
 === FlyAffiliate ===
 Contributors: wedevs, tareq1988
-Tags: affiliate, woocommerce, referral, commission, payouts
+Tags: affiliate, woocommerce, referral, commission, dokan
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Affiliate marketing for WooCommerce: referral links, per-item commissions, hold periods and manual payouts.
+Affiliate marketing for WooCommerce, with native Dokan multivendor support.
 
 == Description ==
 
@@ -21,12 +21,28 @@ pays the right amount on the right products. A configurable hold period keeps a
 commission pending until the order has settled, and it never touches a
 commission you have already paid.
 
+= On a Dokan marketplace =
+
+FlyAffiliate has native support for [Dokan](https://wordpress.org/plugins/dokan-lite/)
+multivendor marketplaces, and it is entirely optional — the plugin works the
+same on a single-vendor store.
+
+When Dokan is active, each vendor can opt in to running an affiliate program for
+their own store, with their own rate. The commission comes out of **the vendor's**
+earning, not the marketplace's: on a $100 sale with a 20% marketplace commission
+and a 15% affiliate rate, the vendor withdraws $65, the affiliate is paid $15,
+and the marketplace keeps its $20. The vendor's dashboard shows the deduction as
+a line item rather than as an unexplained shortfall.
+
+A multi-vendor cart is split the way Dokan splits it: each vendor's items produce
+their own commission rows, attributed to their own sub-order.
+
 = What is in this version =
 
 * Email-only affiliate signup with a one-time activation link
 * A referral link per affiliate, and a visit log
-* Per-item commission calculation with a product → global rate hierarchy,
-  clamped to a maximum you set
+* Per-item commission calculation with a product → vendor → global rate
+  hierarchy, clamped to a maximum you set
 * A configurable hold period, matured by a daily background job
 * Payouts the way you already pay people: a payout creates one payment per
   affiliate, you send the money, then mark each payment paid — with a CSV export
@@ -57,12 +73,20 @@ home.
 4. Go to **FlyAffiliate → Settings** and set your default commission rate, your
    maximum rate, and the hold period.
 
+If you run Dokan, activate it as usual — FlyAffiliate detects it and adds the
+vendor program controls to your marketplace settings.
+
 == Frequently Asked Questions ==
 
 = Do I need WooCommerce? =
 
 Yes. FlyAffiliate calculates commissions from WooCommerce orders and does not
 work without it.
+
+= Do I need Dokan? =
+
+No. Dokan support is optional. Without it, FlyAffiliate runs as a single-vendor
+affiliate plugin and every commission is funded by the store.
 
 = Do affiliates get a user role? =
 
@@ -82,8 +106,9 @@ cookie, it is `HttpOnly`, and it lasts for the attribution window you configure
 
 = How is a commission calculated? =
 
-Per order item. The rate is resolved from the product, then your global
-default, and is always clamped to the maximum rate you set. Shipping and tax are excluded from the amount the rate applies to, unless
+Per order item. The rate is resolved from the product, then the vendor if you run
+Dokan, then your global default, and is always clamped to the maximum rate you
+set. Shipping and tax are excluded from the amount the rate applies to, unless
 you turn that off.
 
 = What happens when an order is refunded? =
