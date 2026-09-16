@@ -1,0 +1,71 @@
+# Everything listed here is stripped from build/flyaffiliate.zip.
+# A new root-level file that is not shipping code MUST be added here
+# (CLAUDE.md, "Domain Model").
+
+# Version control and CI
+/.git
+/.github
+/.gitignore
+/.distignore
+/.editorconfig
+
+# Agent / contributor tooling
+/.claude
+/CLAUDE.md
+/CONTEXT.md
+/README.md
+/CHANGELOG.md
+/CONTRIBUTING.md
+/RELEASE.md
+/docs
+
+# Dependencies and build tooling (nothing from vendor/ ships)
+/node_modules
+/vendor
+/composer.json
+/composer.lock
+/package.json
+/package-lock.json
+/webpack.config.js
+/postcss.config.js
+/tsconfig.json
+/.eslintrc
+/.prettierrc.js
+/.stylelintrc.json
+/.wp-env.json
+/.wp-env.override.json
+
+# Local secrets, mirroring .gitignore: never in a zip, whoever builds it.
+/.env
+/secret.json
+
+# Sources that are compiled into assets/ before packaging
+/src
+/assets/src
+
+# Repo-only guides that sit next to shipping code
+/templates/README.md
+
+# Tests and dev scripts
+/tests
+/bin
+/phpunit.xml
+/phpcs.xml.dist
+/.phpunit.result.cache
+/phpcs-report.txt
+
+# wp.org listing art lives in the SVN /assets directory, not in the zip
+/.wordpress-org
+
+# Build output must not contain a copy of itself
+/build
+
+# Editor and OS noise
+/.idea
+/.vscode
+/**/.DS_Store
+/**/*.map
+/**/*.LICENSE.txt
+
+# Screenshots dropped into the plugin root while reviewing.
+/img*.png

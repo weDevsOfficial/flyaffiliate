@@ -1,0 +1,28 @@
+{
+	"core": "https://wordpress.org/latest.zip",
+	"phpVersion": "7.4",
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/woocommerce.zip",
+		"."
+	],
+	"config": {
+		"WP_DEBUG": true,
+		"WP_DEBUG_DISPLAY": false,
+		"SCRIPT_DEBUG": true
+	},
+	"env": {
+		"tests": {
+			"plugins": [
+				"https://downloads.wordpress.org/plugin/woocommerce.zip",
+						"https://downloads.wordpress.org/plugin/plugin-check.zip"
+			],
+			"mappings": {
+				"wp-content/plugins/flyaffiliate-src": "."
+			},
+			"config": {
+				"WP_DEBUG": true,
+				"WP_DEBUG_DISPLAY": false
+			}
+		}
+	}
+}

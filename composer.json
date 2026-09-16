@@ -1,0 +1,72 @@
+{
+    "name": "wedevs/flyaffiliate",
+    "description": "Affiliate marketing for WordPress and WooCommerce.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "weDevs",
+            "email": "support@wedevs.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^3.1",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "phpunit/phpunit": "^9.6",
+        "wp-phpunit/wp-phpunit": "^6.4",
+        "yoast/phpunit-polyfills": "^1.1",
+        "brain/monkey": "^2.6",
+        "mockery/mockery": "^1.6"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "FlyAffiliate\\": "includes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FlyAffiliate\\Test\\": "tests/php/src/"
+        }
+    },
+    "scripts": {
+        "phpcs": [
+            "phpcs -p -s"
+        ],
+        "phpcs:report": [
+            "phpcs --report-file='phpcs-report.txt'"
+        ],
+        "phpcbf": [
+            "phpcbf -p"
+        ],
+        "test": [
+            "phpunit"
+        ],
+        "test-f": [
+            "phpunit --filter"
+        ],
+        "release": [
+            "@php bin/build-zip.php"
+        ]
+    },
+    "scripts-descriptions": {
+        "phpcs": "Run PHP CodeSniffer against the plugin (WordPress-Extra + PHPCompatibilityWP).",
+        "phpcbf": "Auto-fix the code style violations PHPCS can fix.",
+        "test": "Run the PHPUnit suite (requires a provisioned WP test install or wp-env).",
+        "release": "Build build/flyaffiliate.zip honouring .distignore."
+    }
+}

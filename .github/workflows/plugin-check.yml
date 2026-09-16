@@ -1,0 +1,57 @@
+name: Plugin Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plugin-check:
+    name: WordPress.org Plugin Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+          extensions: zip
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Node dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build assets
+        run: npm run build
+
+      # Stages build/flyaffiliate honouring .distignore. Plugin Check then runs
+      # against that directory, so the gate inspects exactly what ships.
+      - name: Stage the release directory
+        run: php bin/build-zip.php
+
+      - uses: WordPress/plugin-check-action@v1
+        with:
+          build-dir: ./build/flyaffiliate
+          ignore-warnings: false
+          ignore-errors: false
+
+      - name: Upload the release archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: flyaffiliate-zip
+          path: build/flyaffiliate.zip
+          if-no-files-found: error

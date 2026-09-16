@@ -1,0 +1,226 @@
+<?php
+/**
+ * The maturation job.
+ *
+ * @package FlyAffiliate\Test
+ */
+
+namespace FlyAffiliate\Test\Commission;
+
+use FlyAffiliate\Commission\HoldPeriod;
+use FlyAffiliate\Models\Commission;
+use FlyAffiliate\Test\FlyAffiliateTestCase;
+
+/**
+ * Pending becomes unpaid when the hold is over and the order allows it.
+ */
+class HoldPeriodTest extends FlyAffiliateTestCase {
+
+	/**
+	 * A due WooCommerce commission on a completed order matures; a pending order holds it.
+	 *
+	 * @return void
+	 */
+	public function test_due_commissions_mature_only_with_a_paid_order(): void {
+		$product   = $this->factory()->product->create();
+		$completed = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'completed' ] );
+		$pending   = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'pending' ] );
+		$past      = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$future    = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+
+		$due       = $this->factory()->commission->create( [ 'order_id' => $completed, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $past ] );
+		$held      = $this->factory()->commission->create( [ 'order_id' => $pending, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $past ] );
+		$early     = $this->factory()->commission->create( [ 'order_id' => $completed, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $future ] );
+		$manual    = $this->factory()->commission->create( [ 'order_id' => 0, 'source' => Commission::SOURCE_MANUAL, 'status' => Commission::STATUS_PENDING, 'matures_at' => $past ] );
+
+		$matured = ( new HoldPeriod() )->run();
+
+		$this->assertSame( 2, $matured );
+		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $due )->get( 'status' ) );
+		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $manual )->get( 'status' ) );
+		$this->assertSame( Commission::STATUS_PENDING, flyaffiliate()->commission->get( $held )->get( 'status' ) );
+		$this->assertSame( Commission::STATUS_PENDING, flyaffiliate()->commission->get( $early )->get( 'status' ) );
+
+		// Running again changes nothing.
+		$this->assertSame( 0, ( new HoldPeriod() )->run() );
+	}
+
+	/**
+	 * A due commission behind a full page of held ones is still reached.
+	 *
+	 * @return void
+	 */
+	public function test_pages_past_a_full_page_of_held_commissions(): void {
+		$product   = $this->factory()->product->create();
+		$pending   = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'pending' ] );
+		$completed = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'completed' ] );
+		$past      = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+
+		$this->factory()->commission->create_many(
+			HoldPeriod::PER_PAGE + 1,
+			[ 'order_id' => $pending, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $past ]
+		);
+		$due = $this->factory()->commission->create( [ 'order_id' => $completed, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $past ] );
+
+		$this->assertSame( 1, ( new HoldPeriod() )->run() );
+		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $due )->get( 'status' ) );
+		$this->assertSame( HoldPeriod::PER_PAGE + 1, flyaffiliate()->commission->count( [ 'where' => [ 'status' => Commission::STATUS_PENDING ] ] ) );
+	}
+
+	/**
+	 * Held commissions scattered through the pages do not hide the due ones behind them.
+	 *
+	 * The job pages through the due rows while maturing them, so the matured
+	 * ones leave the result set and the held ones stay at its head. The offset
+	 * has to be how many rows are stuck, not how many times one was skipped.
+	 *
+	 * @return void
+	 */
+	public function test_held_commissions_do_not_hide_the_due_ones_behind_them(): void {
+		$product   = $this->factory()->product->create();
+		$pending   = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'pending' ] );
+		$completed = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'completed' ] );
+		$past      = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$due       = [];
+
+		// Held, due, held, due, held, due — read two rows at a time.
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->factory()->commission->create( [ 'order_id' => $pending, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $past ] );
+			$due[] = $this->factory()->commission->create( [ 'order_id' => $completed, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $past ] );
+		}
+
+		$job = new class() extends HoldPeriod {
+			const PER_PAGE = 2;
+		};
+
+		$this->assertSame( 3, $job->run() );
+
+		foreach ( $due as $id ) {
+			$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $id )->get( 'status' ) );
+		}
+
+		$this->assertSame( 3, flyaffiliate()->commission->count( [ 'where' => [ 'status' => Commission::STATUS_PENDING ] ] ), 'the held ones are all that is left' );
+	}
+
+	/**
+	 * An order reaching completed matures its due commissions at once, like
+	 * SliceWP marking them unpaid; a hold that has not ended keeps them pending.
+	 *
+	 * @return void
+	 */
+	public function test_an_order_completing_matures_its_due_commissions(): void {
+		$product = $this->factory()->product->create();
+		$order   = wc_get_order( $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'on-hold' ] ) );
+		$past    = gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS );
+		$future  = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+
+		$due    = $this->factory()->commission->create( [ 'order_id' => $order->get_id(), 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $past ] );
+		$held   = $this->factory()->commission->create( [ 'order_id' => $order->get_id(), 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $future ] );
+		$manual = $this->factory()->commission->create( [ 'order_id' => $order->get_id(), 'source' => Commission::SOURCE_MANUAL, 'status' => Commission::STATUS_PENDING, 'matures_at' => $future ] );
+
+		// The real status change, through the hook the plugin registered.
+		$order->update_status( 'completed' );
+
+		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $due )->get( 'status' ) );
+		$this->assertSame( Commission::STATUS_PENDING, flyaffiliate()->commission->get( $held )->get( 'status' ) );
+		$this->assertSame( Commission::STATUS_PENDING, flyaffiliate()->commission->get( $manual )->get( 'status' ), 'a manual commission waits for its own date' );
+
+		// Firing again changes nothing.
+		$this->assertSame( 0, ( new HoldPeriod() )->handle_order_status_change( $order->get_id(), 'on-hold', 'completed', $order ) );
+	}
+
+	/**
+	 * A status that is not paid yet, and cash on delivery in processing, mature nothing.
+	 *
+	 * @return void
+	 */
+	public function test_unpaid_statuses_and_cash_on_delivery_wait(): void {
+		$product = $this->factory()->product->create();
+		$past    = gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS );
+		$cod     = wc_get_order( $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'processing' ] ) );
+		$cod->set_payment_method( 'cod' );
+		$cod->save();
+
+		$commission = $this->factory()->commission->create( [ 'order_id' => $cod->get_id(), 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'matures_at' => $past ] );
+		$period     = new HoldPeriod();
+
+		$this->assertSame( 0, $period->handle_order_status_change( $cod->get_id(), 'pending', 'on-hold', $cod ) );
+		$this->assertSame( 0, $period->handle_order_status_change( $cod->get_id(), 'pending', 'processing', $cod ) );
+		$this->assertSame( Commission::STATUS_PENDING, flyaffiliate()->commission->get( $commission )->get( 'status' ) );
+
+		$cod->update_status( 'completed' );
+
+		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $commission )->get( 'status' ) );
+	}
+
+	/**
+	 * A commission that is due the moment it is created does not wait for the job.
+	 *
+	 * @return void
+	 */
+	public function test_a_commission_created_without_a_hold_matures_at_once(): void {
+		flyaffiliate()->settings->save( [ 'hold_days' => 0 ] );
+
+		$affiliate  = $this->factory()->affiliate->create();
+		$commission = flyaffiliate()->commission->create_manual(
+			[
+				'affiliate_id' => $affiliate,
+				'amount'       => 25,
+				'status'       => Commission::STATUS_PENDING,
+			]
+		);
+
+		$this->assertNotWPError( $commission );
+		$this->assertSame(
+			Commission::STATUS_UNPAID,
+			flyaffiliate()->commission->get( $commission->get_id() )->get( 'status' ),
+			'with no hold period a manual commission is payable at once'
+		);
+
+		// A hold period still holds.
+		flyaffiliate()->settings->save( [ 'hold_days' => 30 ] );
+
+		$held = flyaffiliate()->commission->create_manual(
+			[
+				'affiliate_id' => $affiliate,
+				'amount'       => 25,
+				'status'       => Commission::STATUS_PENDING,
+			]
+		);
+
+		$this->assertNotWPError( $held );
+		$this->assertSame(
+			Commission::STATUS_PENDING,
+			flyaffiliate()->commission->get( $held->get_id() )->get( 'status' )
+		);
+	}
+
+	/**
+	 * Changing the hold period moves pending maturity dates and matures what is now due.
+	 *
+	 * @return void
+	 */
+	public function test_changing_the_hold_period_reschedules_pending_commissions(): void {
+		$product   = $this->factory()->product->create();
+		$completed = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'completed' ] );
+		$created   = gmdate( 'Y-m-d H:i:s', time() - 2 * DAY_IN_SECONDS );
+		$later     = gmdate( 'Y-m-d H:i:s', time() + 28 * DAY_IN_SECONDS );
+
+		$pending = $this->factory()->commission->create( [ 'order_id' => $completed, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING, 'created_at' => $created, 'matures_at' => $later ] );
+		$paid    = $this->factory()->commission->create( [ 'order_id' => $completed, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PAID, 'created_at' => $created, 'matures_at' => $later ] );
+
+		$saved = flyaffiliate()->settings->save( [ 'hold_days' => 0 ] );
+
+		$this->assertNotWPError( $saved );
+		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $pending )->get( 'status' ) );
+		$this->assertSame( $later, (string) flyaffiliate()->commission->get( $paid )->get( 'matures_at' ), 'a paid commission keeps its dates' );
+
+		// Back to a longer hold: a still-pending commission moves out again.
+		$another = $this->factory()->commission->create( [ 'order_id' => $completed, 'source' => Commission::SOURCE_MANUAL, 'status' => Commission::STATUS_PENDING, 'created_at' => $created, 'matures_at' => $created ] );
+
+		flyaffiliate()->settings->save( [ 'hold_days' => 10 ] );
+
+		$this->assertSame( gmdate( 'Y-m-d H:i:s', strtotime( $created . ' UTC' ) + 10 * DAY_IN_SECONDS ), (string) flyaffiliate()->commission->get( $another )->get( 'matures_at' ) );
+		$this->assertSame( Commission::STATUS_PENDING, flyaffiliate()->commission->get( $another )->get( 'status' ) );
+	}
+}

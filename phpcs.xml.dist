@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Coding Standards for FlyAffiliate">
+	<description>
+		WordPress-Extra plus PHPCompatibilityWP for the FlyAffiliate plugin.
+
+		This ruleset deliberately does NOT relax the security sniffs (escaping,
+		sanitization, nonce verification, prepared SQL). FlyAffiliate ships on
+		WordPress.org and Plugin Check enforces those rules on the built zip, so
+		silencing them here would only hide a failure until submission.
+		See docs/adr/0003-wporg-over-dokan-conventions.md.
+	</description>
+
+	<!-- What to scan. -->
+	<file>.</file>
+	<exclude-pattern>*/\.git/*</exclude-pattern>
+	<exclude-pattern>*/\.github/*</exclude-pattern>
+	<exclude-pattern>*/\.wordpress-org/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/build/*</exclude-pattern>
+	<exclude-pattern>*/languages/*</exclude-pattern>
+	<exclude-pattern>*/assets/*</exclude-pattern>
+	<exclude-pattern>*/src/*</exclude-pattern>
+	<exclude-pattern>*\.asset\.php</exclude-pattern>
+
+	<!-- How to scan. -->
+	<arg value="sp"/><!-- Show sniff codes and progress. -->
+	<arg name="basepath" value="./"/>
+	<arg name="colors"/>
+	<arg name="extensions" value="php"/>
+	<arg name="parallel" value="8"/>
+
+	<!-- Rules: PHP cross-version compatibility. -->
+	<config name="testVersion" value="7.4-"/>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<!-- Rules: WordPress Coding Standards. -->
+	<config name="minimum_supported_wp_version" value="6.4"/>
+	<rule ref="WordPress-Extra"/>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="flyaffiliate"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.WhiteSpace.ControlStructureSpacing">
+		<properties>
+			<property name="blank_line_check" value="true"/>
+		</properties>
+	</rule>
+
+	<!-- WooCommerce capabilities this plugin legitimately checks. -->
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="manage_woocommerce"/>
+				<element value="view_woocommerce_reports"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- WooCommerce sanitizers count as sanitization. -->
+	<rule ref="WordPress.Security.ValidatedSanitizedInput">
+		<properties>
+			<property name="customSanitizingFunctions" type="array">
+				<element value="wc_clean"/>
+				<element value="wc_format_decimal"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Strictness this codebase commits to (CLAUDE.md "Coding Standards"). -->
+	<rule ref="WordPress.PHP.StrictInArray.MissingTrueStrict">
+		<type>error</type>
+	</rule>
+	<rule ref="Universal.Operators.StrictComparisons">
+		<type>error</type>
+	</rule>
+
+	<!--
+		Style-only sniffs turned off. None of these are security or correctness
+		checks and none of them are run by Plugin Check.
+	-->
+	<!-- PSR-4 class files are named after the class, not the WP file convention. -->
+	<rule ref="WordPress.Files.FileName">
+		<severity>0</severity>
+	</rule>
+	<!-- The DI container mirrors League\Container's public API, which is camelCase. -->
+	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
+		<severity>0</severity>
+	</rule>
+	<!-- Yoda conditions are not enforced here. -->
+	<rule ref="WordPress.PHP.YodaConditions.NotYoda">
+		<severity>0</severity>
+	</rule>
+	<!-- Short array syntax is the house style. -->
+	<rule ref="Universal.Arrays.DisallowShortArraySyntax">
+		<severity>0</severity>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
+		<severity>0</severity>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.SpacingBeforeTags">
+		<severity>0</severity>
+	</rule>
+	<rule ref="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned">
+		<severity>0</severity>
+	</rule>
+	<rule ref="Generic.Formatting.MultipleStatementAlignment.NotSameWarning">
+		<severity>0</severity>
+	</rule>
+	<rule ref="PEAR.Functions.FunctionCallSignature.MultipleArguments">
+		<severity>0</severity>
+	</rule>
+	<rule ref="Squiz.PHP.CommentedOutCode.Found">
+		<severity>0</severity>
+	</rule>
+
+	<!--
+		Every table this plugin queries directly is its own custom table, which the
+		WordPress API cannot reach. The queries still have to be prepared: the
+		WordPress.DB.PreparedSQL* sniffs below stay at their default error severity.
+	-->
+	<rule ref="WordPress.DB.DirectDatabaseQuery.DirectQuery">
+		<severity>0</severity>
+	</rule>
+	<rule ref="WordPress.DB.DirectDatabaseQuery.NoCaching">
+		<severity>0</severity>
+	</rule>
+
+	<!--
+		Test code: assertions and fixtures do not render output, handle requests or
+		serve web traffic, so the request-lifecycle sniffs do not apply there.
+	-->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+		<!-- bin/ holds CLI build scripts that run outside WordPress, where the
+		     esc_*() functions do not exist and there is no HTML context. -->
+		<exclude-pattern>*/bin/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.NonceVerification">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+		<exclude-pattern>*/bin/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DevelopmentFunctions">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+		<exclude-pattern>*/bin/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.GlobalVariablesOverride">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+</ruleset>

@@ -1,0 +1,296 @@
+/**
+ * The plugin's own rules, shared by both React apps. The Tailwind half of the
+ * foundation (tokens, scoped preflight and utilities) is `tailwind.css`, which
+ * each app imports first; each app's stylesheet then `@use`s this file.
+ */
+
+/* The logo teal, and the tint its hovers sit on. Keep in step with src/admin/theme.ts. */
+$brand: #0d7377;
+
+/* ─── Shared reset ─── */
+
+/*
+ * wp-admin's stylesheets, and most themes', are unlayered, so they beat the
+ * preflight, which sits in the `base` layer: a <p> inside a card picked up
+ * wp-admin's 1em margins, an <h3> its 18px ones, a <ul> its list styling.
+ * This block is unlayered too and scoped to `.pui-root`, which dialogs,
+ * popovers and tooltips also carry on their portal roots. Written against
+ * plugin-ui 45dd413; re-check when the package is bumped.
+ */
+.pui-root {
+
+	:is(h1, h2, h3, h4, h5, h6, p, ul, ol, li, dl, dd, figure, blockquote, pre, hr, fieldset, legend, label) {
+		margin: 0;
+		padding: 0;
+	}
+
+	:is(h1, h2, h3, h4, h5, h6) {
+		font-size: inherit;
+		font-weight: inherit;
+		line-height: inherit;
+		color: inherit;
+	}
+
+	:is(ul, ol) {
+		list-style: none;
+	}
+
+	code {
+		padding: 0;
+		background: none;
+		font-size: inherit;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: none;
+		box-shadow: none;
+
+		&:hover,
+		&:focus {
+			color: inherit;
+			box-shadow: none;
+		}
+	}
+
+	/*
+	 * Themes style every button and input; plugin-ui's classes set what they
+	 * need with `!important`, so the theme's defaults are cleared underneath.
+	 * wp-components' own controls keep their padding; they defend themselves
+	 * against themes already.
+	 */
+	:is(button, [type="button"], [type="submit"], [type="reset"], input, textarea, select):not([class*="components-"]) {
+		margin: 0;
+		padding: 0;
+		background-color: transparent;
+		background-image: none;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		color: inherit;
+		font: inherit;
+		line-height: inherit;
+		letter-spacing: normal;
+		text-shadow: none;
+		text-transform: inherit;
+	}
+
+	:is(button, [type="button"], [type="submit"], [type="reset"]):not([class*="components-"]):hover {
+		background-color: transparent;
+		color: inherit;
+	}
+
+	/*
+	 * wp-admin's forms.css, and many themes, draw their own border and box-shadow
+	 * on a focused input. plugin-ui's inputs carry a focus ring of their own; the
+	 * one that does not is the search box inside a SmartSelect's list.
+	 */
+	[data-slot="command-input"]:focus,
+	[data-slot="command-input"]:focus-visible {
+		border-color: transparent;
+		box-shadow: none;
+		outline: none;
+	}
+
+	/*
+	 * A button clicked with the mouse keeps focus, and some admin stylesheets
+	 * outline every focused button; the ring belongs to keyboard focus only.
+	 */
+	button:focus:not(:focus-visible) {
+		outline: none;
+		box-shadow: none;
+	}
+
+	/* stylelint-disable selector-class-pattern -- WordPress DataViews' own classes. */
+
+	/*
+	 * A list's own rhythm, after Dokan's admin tables. It lives here rather
+	 * than with the app's rules because a dialog is portalled to the end of
+	 * the document, where only `.pui-root` reaches it.
+	 */
+	table.dataviews-view-table {
+
+		th {
+			background: #f9fafb;
+		}
+
+		tbody tr td {
+			min-height: 65px;
+			padding-top: 14px;
+			padding-bottom: 14px;
+			vertical-align: middle;
+		}
+	}
+
+	/* The skeleton rows keep the same rhythm as the rows they stand in for. */
+	.pui-root-dataviews > div table tbody tr td {
+		height: 65px;
+		min-height: 65px;
+	}
+
+	table.dataviews-view-table tr {
+
+		td:first-child,
+		th:first-child {
+			padding-left: 20px;
+		}
+
+		td:last-child,
+		th:last-child {
+			padding-right: 20px;
+		}
+	}
+
+	.dataviews-view-table__actions-column .components-button {
+		width: auto;
+		padding: 6px;
+
+		&:hover,
+		&:focus {
+			background: transparent;
+			border: 0;
+			box-shadow: none;
+		}
+	}
+
+	.components-flex.components-h-stack.dataviews-pagination {
+		width: 100%;
+		justify-content: space-between;
+		padding: 15px 20px;
+	}
+
+	/* stylelint-enable selector-class-pattern */
+}
+
+/*
+ * The date pickers' calendar is a table, and a popover portalled outside the
+ * app. Themes pad, shade and space table cells: a storefront theme's 1.6em of
+ * header padding left each 36px weekday column room for one letter per line.
+ * The calendar's own utility classes set everything it needs, so the theme's
+ * table styling is cleared under it.
+ */
+.pui-root .rdp-root {
+
+	table {
+		margin: 0;
+		border: 0;
+		background: transparent;
+	}
+
+	:is(th, td) {
+		padding: 0;
+		border: 0;
+		background: transparent;
+	}
+}
+
+/* stylelint-disable selector-class-pattern -- WordPress DataViews' own classes. */
+
+/* Both apps carry this class on their mount point. */
+.flyaffiliate-app {
+	font-size: 14px;
+
+	/*
+	 * WordPress's own components (the DataViews checkboxes, for one) read
+	 * their accent from these variables. They follow each app's plugin-ui
+	 * theme — the brand teal in the admin, plugin-ui's neutral near-black on
+	 * the frontend — and are set on `.pui-root`, the only place `--primary`
+	 * exists.
+	 */
+	.pui-root {
+		--wp-components-color-accent: var(--primary);
+		--wp-components-color-accent-darker-10: color-mix(in srgb, var(--primary), #000 10%);
+		--wp-components-color-accent-darker-20: color-mix(in srgb, var(--primary), #000 20%);
+		--wp-components-color-accent-inverted: var(--primary-foreground);
+	}
+
+	/* ─── DataViews tables, after Dokan's admin lists ─── */
+
+	.pui-root-dataviews {
+		overflow: hidden;
+		background: #fff;
+		border-radius: 10px;
+		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+
+		.dataviews-wrapper {
+			background: transparent;
+			border-radius: 0;
+			box-shadow: none;
+		}
+	}
+
+	/*
+	 * The bulk toolbar covers the header row while rows are selected, as on
+	 * Dokan's lists. plugin-ui measures the header to offset it, but measures
+	 * while the loading skeleton is up and never again, so the offset stays 0;
+	 * the header row's height is fixed by the rules above, so it is set here.
+	 */
+	.pui-root-dataviews .dataviews-wrapper > :has(> .dataviews-bulk-actions-footer__container) {
+		position: relative;
+		z-index: 1;
+		box-sizing: border-box;
+		min-height: 49px;
+		margin-bottom: -49px;
+		padding-top: 0;
+		padding-bottom: 0;
+		background: #fff;
+		border-bottom: 1px solid #e9e9e9;
+	}
+
+	/*
+	 * wp-components' HStack sets the buttons' gap inline as
+	 * `var(--wpds-dimension-gap-xs, 4px)`, which no stylesheet `gap` can beat;
+	 * the variable it reads can be, so the spacing is supplied through it.
+	 */
+	.dataviews-bulk-actions-footer__action-buttons {
+		/* stylelint-disable-next-line plugin-wpds/no-setting-wpds-custom-properties -- scoped to this one container; the inline style reads it and nothing else can set it. */
+		--wpds-dimension-gap-xs: 12px;
+	}
+
+	/*
+	 * The buttons themselves, sized like Dokan's (32px, 4px 12px, 13px medium).
+	 * plugin-ui pins their colour with a selector no stock hover rule outranks,
+	 * so the hover is restated above it: the app's primary as text and border
+	 * on a light tint of it. The last button is the icon-only close, which
+	 * only changes colour.
+	 */
+	.pui-root-dataviews .dataviews-wrapper .dataviews-bulk-actions-footer__action-buttons .components-button.is-compact {
+
+		&:not(:last-child) {
+			height: 32px;
+			padding: 4px 12px;
+			font-size: 13px;
+			font-weight: 500;
+			transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+
+			&:hover:not(:disabled, [aria-disabled="true"]) {
+				color: var(--primary);
+				border-color: var(--primary);
+				background-color: color-mix(in srgb, var(--primary) 8%, #fff);
+			}
+		}
+
+		&:last-child:hover:not(:disabled, [aria-disabled="true"]) {
+			color: var(--primary);
+		}
+	}
+}
+
+/* stylelint-enable selector-class-pattern */
+
+
+/*
+ * An action's icon beside its text (`lib/actions.tsx`). Unscoped on purpose:
+ * the row menu is portalled outside the app, where no utility class reaches.
+ * Lucide draws with strokes; wp-components fills button SVGs, so undo that.
+ */
+.flyaffiliate-action-label {
+	display: inline-flex;
+	gap: 10px;
+	align-items: center;
+
+	svg.lucide {
+		flex-shrink: 0;
+		fill: none;
+	}
+}

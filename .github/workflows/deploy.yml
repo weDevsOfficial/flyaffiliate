@@ -1,0 +1,50 @@
+# Publishes a tagged release to the WordPress.org plugin repository.
+#
+# DISABLED until the flyaffiliate slug is approved: every job is gated on the
+# repository variable WPORG_DEPLOY_ENABLED being the string "true". Set that
+# variable (and the SVN_USERNAME / SVN_PASSWORD secrets) only after approval.
+# See RELEASE.md for the manual first-submission steps.
+name: Deploy to WordPress.org
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    if: vars.WPORG_DEPLOY_ENABLED == 'true'
+    environment: wordpress-org
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Node dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build the release
+        run: npm run release
+
+      - name: WordPress.org plugin deploy
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: flyaffiliate
+          BUILD_DIR: ./build/flyaffiliate
+          ASSETS_DIR: .wordpress-org

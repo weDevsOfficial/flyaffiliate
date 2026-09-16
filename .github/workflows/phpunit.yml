@@ -1,0 +1,66 @@
+name: PHPUnit
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - '**.php'
+      - 'phpunit.xml'
+      - 'composer.json'
+      - '.wp-env.json'
+      - '.github/workflows/phpunit.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phpunit:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci --no-audit --no-fund
+
+      # wp-env reads .wp-env.override.json on top of .wp-env.json; this leg only
+      # pins the PHP version.
+      - name: Configure the test environment
+        run: |
+          cat > .wp-env.override.json <<JSON
+          { "phpVersion": "${{ matrix.php }}" }
+          JSON
+          cat .wp-env.override.json
+
+      - name: Start wp-env
+        run: npx wp-env start --update
+
+      - name: Run PHPUnit
+        run: npm run phpunit
+
+      - name: Stop wp-env
+        if: always()
+        run: npx wp-env stop

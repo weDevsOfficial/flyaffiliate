@@ -1,0 +1,58 @@
+{
+    "name": "flyaffiliate",
+    "version": "1.0.0",
+    "description": "Affiliate marketing for WordPress and WooCommerce.",
+    "author": "weDevs",
+    "license": "GPL-2.0-or-later",
+    "private": true,
+    "scripts": {
+        "start": "wp-scripts start --progress",
+        "build": "wp-scripts build --progress",
+        "format": "wp-scripts format",
+        "lint:js": "wp-scripts lint-js",
+        "lint:css": "wp-scripts lint-style",
+        "packages-update": "wp-scripts packages-update",
+        "makepot": "wp i18n make-pot --domain=flyaffiliate --exclude=node_modules,vendor,tests,bin,docs,build,assets/src,src --headers='{\"Report-Msgid-Bugs-To\":\"https://wedevs.com/support/\"}' . languages/flyaffiliate.pot",
+        "release": "npm run build && npm run makepot && php bin/build-zip.php",
+        "wp-env": "wp-env",
+        "env:start": "wp-env start",
+        "env:stop": "wp-env stop",
+        "env:destroy": "wp-env destroy",
+        "phpunit": "wp-env run tests-cli --env-cwd=wp-content/plugins/flyaffiliate-src vendor/bin/phpunit -c phpunit.xml",
+        "test:phpunit": "npm run env:start && npm run phpunit && npm run env:stop",
+        "plugin-check": "bash bin/plugin-check.sh",
+        "typecheck": "tsc --noEmit -p tsconfig.json",
+        "test:e2e": "playwright test -c tests/pw/playwright.config.ts",
+        "test:e2e:ui": "playwright test -c tests/pw/playwright.config.ts --ui"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.63.0",
+        "@tailwindcss/postcss": "^4.3.3",
+        "@types/react": "^18.3.31",
+        "@types/react-dom": "^18.3.7",
+        "@wordpress/env": "^10.10.0",
+        "@wordpress/scripts": "^30.0.0",
+        "postcss": "^8.5.28",
+        "tailwindcss": "^4.3.3",
+        "typescript": "~5.9.3",
+        "webpack-remove-empty-scripts": "^1.1.1"
+    },
+    "engines": {
+        "node": ">=22"
+    },
+    "dependencies": {
+        "@wedevs/plugin-ui": "github:getdokan/plugin-ui#45dd41355d5146fd066053079aa6b2d4ec992969",
+        "@wordpress/api-fetch": "^7.54.0",
+        "@wordpress/components": "^30.9.0",
+        "@wordpress/date": "^5.54.0",
+        "@wordpress/dom-ready": "^4.54.0",
+        "@wordpress/element": "^6.46.0",
+        "@wordpress/hooks": "^4.54.0",
+        "@wordpress/i18n": "^6.27.0",
+        "@wordpress/url": "^4.54.0",
+        "lucide-react": "^0.563.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-router-dom": "^6.30.6"
+    }
+}

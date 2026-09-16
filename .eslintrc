@@ -1,0 +1,21 @@
+{
+	"extends": "plugin:@wordpress/eslint-plugin/recommended",
+	"root": true,
+	"env": {
+		"browser": true,
+		"es2021": true
+	},
+	"globals": {
+		"flyaffiliate": "readonly"
+	},
+	"ignorePatterns": [
+		"assets/js/**",
+		"assets/css/**",
+		"build/**",
+		"node_modules/**",
+		"vendor/**",
+		"tests/pw/test-results/**",
+		"tests/pw/report/**",
+		"tests/pw/.auth/**"
+	]
+}

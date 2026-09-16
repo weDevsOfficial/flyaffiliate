@@ -1,0 +1,125 @@
+/**
+ * FlyAffiliate front-end styles: the registration form and the states around
+ * the affiliate dashboard (logged out, not an affiliate, pending). The
+ * dashboard itself is a React app with its own stylesheet. Scoped to
+ * .flyaffiliate-area so a theme's own form styling is left alone.
+ */
+
+.flyaffiliate-area {
+	--flyaffiliate-accent: #0d7377;
+	--flyaffiliate-text: #1f2937;
+	--flyaffiliate-muted: #6b7280;
+	--flyaffiliate-border: #e5e7eb;
+
+	/* Full width of the theme's content column, so it lines up with the page title. */
+	margin: 0;
+	color: var(--flyaffiliate-text);
+	font-size: 15px;
+}
+
+.flyaffiliate-form label {
+	display: block;
+	margin: 16px 0 8px;
+	font-weight: 600;
+}
+
+.flyaffiliate-button {
+	display: inline-block;
+	padding: 10px 18px;
+	background: var(--flyaffiliate-accent);
+	border: 0;
+	border-radius: 8px;
+	color: #fff;
+	font-weight: 500;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.flyaffiliate-button:hover,
+.flyaffiliate-button:focus {
+	background: #0a5c5f;
+	color: #fff;
+	text-decoration: none;
+}
+
+/* Themes underline every link; the buttons are controls, not prose. */
+.flyaffiliate-area a.flyaffiliate-button,
+.flyaffiliate-area a.flyaffiliate-button:hover,
+.flyaffiliate-area a.flyaffiliate-button:focus {
+	color: #fff;
+	text-decoration: none;
+	box-shadow: none;
+}
+
+/* A page that has nothing to show yet: not an affiliate, logged out, pending. */
+.flyaffiliate-state {
+	padding: 32px 28px;
+	background: #fff;
+	border: 1px solid var(--flyaffiliate-border);
+	border-radius: 12px;
+	text-align: center;
+}
+
+.flyaffiliate-state--success {
+	background: #ecfdf5;
+	border-color: #a7f3d0;
+}
+
+.flyaffiliate-state__title {
+	margin: 0 0 8px;
+	font-size: 1.25rem;
+	font-weight: 600;
+}
+
+.flyaffiliate-state__text {
+	max-width: 480px;
+	margin: 0 auto 20px;
+	color: var(--flyaffiliate-muted);
+}
+
+.flyaffiliate-state .flyaffiliate-button {
+	margin: 0;
+}
+
+.flyaffiliate-intro {
+	margin: 0 0 8px;
+	color: var(--flyaffiliate-muted);
+}
+
+.flyaffiliate-form input[type="email"],
+.flyaffiliate-form input[type="text"],
+.flyaffiliate-form select,
+.flyaffiliate-form textarea {
+	display: block;
+	width: 100%;
+	max-width: 440px;
+	padding: 10px 12px;
+	border: 1px solid var(--flyaffiliate-border);
+	border-radius: 8px;
+	font-family: inherit;
+}
+
+.flyaffiliate-form .flyaffiliate-button {
+	margin-top: 8px;
+}
+
+.flyaffiliate-muted {
+	color: var(--flyaffiliate-muted);
+	font-size: 0.9em;
+}
+
+.flyaffiliate-notice {
+	margin: 0 0 16px;
+	padding: 12px 16px;
+	border-radius: 8px;
+}
+
+.flyaffiliate-notice--success {
+	background: #d1fae5;
+	color: #065f46;
+}
+
+.flyaffiliate-notice--error {
+	background: #fee2e2;
+	color: #991b1b;
+}

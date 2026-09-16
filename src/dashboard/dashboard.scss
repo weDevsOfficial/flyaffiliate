@@ -1,0 +1,66 @@
+/**
+ * The affiliate dashboard's own rules: the shared ones from base.scss, then
+ * the rules that keep the app tidy inside a theme. Tailwind comes from
+ * ./tailwind.css.
+ */
+@use "../styles/base";
+
+/* The mount point, before and after React takes over. */
+.flyaffiliate-dashboard-app {
+	min-height: 200px;
+
+	&__loading {
+		padding: 24px 0;
+		color: #6b7280;
+	}
+
+	/* On a white theme background the shadow alone does not draw the box. */
+	.pui-root-dataviews {
+		border: 1px solid var(--border);
+	}
+
+	/*
+	 * Themes style every table, link and heading. The app's own elements sit
+	 * under `.pui-root`, which the shared reset covers; the few that reach
+	 * further are pinned here.
+	 */
+	.pui-root {
+
+		table {
+			margin: 0;
+			border: 0;
+		}
+
+		:is(th, td) {
+			border: 0;
+		}
+
+		a:not([class*="text-"]) {
+			color: inherit;
+		}
+	}
+}
+
+/*
+ * The commissions inside a payout sit in their own bordered box inside the
+ * dialog, so the list drops the card it would otherwise draw: its rounded
+ * corners and shadow would read as a second edge inside that box.
+ */
+/* stylelint-disable selector-class-pattern -- plugin-ui's own classes. */
+.flyaffiliate-payout-commissions {
+
+	.pui-root-dataviews {
+		background: transparent;
+		border-radius: 0;
+		box-shadow: none;
+	}
+
+	/*
+	 * DataViews' 15ch column floor would push the last column past the edge,
+	 * so the columns share the width the view gives them.
+	 */
+	.dataviews-view-table__cell-content-wrapper {
+		min-width: 0;
+	}
+}
+/* stylelint-enable selector-class-pattern */

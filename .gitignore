@@ -1,0 +1,34 @@
+# OS / editor
+.DS_Store
+/**/.DS_Store
+.idea
+.vscode
+
+# Dependencies (never shipped, never committed)
+/node_modules/
+/vendor/
+
+# Build output
+/build/
+/assets/css/
+/assets/js/
+/languages/*.mo
+/languages/*.l10n.php
+
+# Local tooling
+*.log
+debug.log
+npm-debug.log
+phpcs-report.txt
+phpunit-junit.xml
+test-results/
+.phpunit.result.cache
+/phpcs.xml
+/phpunit.xml.local
+# wp-env local overrides (e.g. a different phpVersion); CI writes its own.
+.wp-env.override.json
+
+# Secrets
+.env
+secret.json
+config.json

@@ -1,0 +1,119 @@
+/**
+ * The admin app's own rules: the shared ones from base.scss, then the rules
+ * that only make sense inside wp-admin. Tailwind comes from ./tailwind.css.
+ */
+@use "../styles/base";
+
+/*
+ * The mount point, before and after React takes over. The same gap on every
+ * side, matching wp-admin's 20px content gutter.
+ */
+.flyaffiliate-wrap {
+	margin: 20px 20px 0 0;
+
+	@media screen and (max-width: 782px) {
+		margin: 10px 10px 0 0;
+	}
+}
+
+.flyaffiliate-admin-app {
+
+	&__loading {
+		color: #646970;
+		padding: 24px 0;
+	}
+
+	/*
+	 * The settings save bar sits at the bottom of the panel. plugin-ui makes it
+	 * sticky inside the content's scroll area, which only reaches the panel's
+	 * bottom once the content overflows; on a short subpage it sat right under
+	 * the last field with the rest of the panel empty beneath it. Letting the
+	 * scroll viewport and its wrapper grow as flex columns pushes the bar down,
+	 * and the sticky rule still takes over when the content is taller than the
+	 * panel.
+	 */
+	[data-testid="settings-content"] > [class~="base-ui-disable-scrollbar"] {
+		display: flex;
+		flex-direction: column;
+
+		> div {
+			display: flex;
+			flex: 1 1 auto;
+			flex-direction: column;
+			min-height: 100%;
+		}
+	}
+
+	/* The header bar's links are buttons; wp-admin must not underline them. */
+	.flyaffiliate-topbar a {
+		text-decoration: none;
+	}
+}
+
+/*
+ * The row-actions dropdown is a wp-components popover portalled to the body,
+ * outside the app. Tint its hover the brand way, as Dokan does.
+ */
+/* stylelint-disable selector-class-pattern, selector-id-pattern -- WordPress' own selectors. */
+.toplevel_page_flyaffiliate [id^="portal/:"] {
+	--wp-components-color-accent: #e7f1f1;
+	--wp-components-color-accent-inverted: #{base.$brand};
+
+	div[role="menu"] {
+		padding: 10px 0;
+	}
+
+	div[role="menuitem"] {
+		min-height: 36px;
+		padding: 0 16px;
+		box-sizing: content-box;
+		color: #646970;
+	}
+}
+
+/* stylelint-enable selector-class-pattern, selector-id-pattern */
+
+/*
+ * The dashboard's two half-width lists: the columns keep the widths the view
+ * gives them and a long cell truncates, instead of the table growing. Five
+ * rows show at a time; the rest are a scroll away, under a pinned header.
+ */
+.flyaffiliate-dashboard-list {
+
+	table {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	/* stylelint-disable selector-class-pattern -- plugin-ui's own classes. */
+	.pui-root-dataviews {
+
+		/* Header (49px) plus five rows of 65px. */
+		max-height: 374px;
+		overflow-y: auto;
+	}
+
+	thead th {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		background: #fff;
+	}
+
+	.dataviews-view-table__cell-content-wrapper,
+	.dataviews-view-table__primary-column-content {
+		min-width: 0;
+		max-width: 100%;
+	}
+	/* stylelint-enable selector-class-pattern */
+}
+
+/*
+ * The sidebar lists hold ten and show five. A row is 65px, so the height is
+ * exactly five of them: no strip of empty card under the fifth, and the rest
+ * are a scroll away.
+ */
+.flyaffiliate-sidebar-list {
+	max-height: 325px;
+	overflow-y: auto;
+}

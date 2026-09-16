@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<phpunit
+	bootstrap="tests/php/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	beStrictAboutTestsThatDoNotTestAnything="true"
+	>
+	<php>
+		<env name="WP_PHPUNIT__TESTS_CONFIG" value="tests/php/phpunit-wp-config.php"/>
+	</php>
+	<testsuites>
+		<testsuite name="FlyAffiliate Test Suite">
+			<directory prefix="" suffix="Test.php">./tests/php/src</directory>
+		</testsuite>
+	</testsuites>
+	<coverage>
+		<include>
+			<directory suffix=".php">./includes</directory>
+		</include>
+	</coverage>
+</phpunit>

@@ -1,0 +1,9 @@
+/**
+ * The affiliate dashboard's Tailwind entry: the shared foundation plus where
+ * to look for class names. Plain CSS, because Sass cannot parse Tailwind's directives.
+ */
+@import "../styles/tailwind.css";
+@source "./";
+@source "../admin/components";
+@source "../admin/lib";
+@source "../../node_modules/@wedevs/plugin-ui/dist";
