@@ -42,7 +42,9 @@ type Detail = Affiliate & {
 	visits?: { all: number; converted: number; not_converted: number };
 };
 
-const TAB_TRIGGER = 'px-4 data-active:text-primary';
+// Inactive tabs stay readable on the grey track; the active one is the brand teal.
+const TAB_TRIGGER =
+	'px-4 text-foreground/80 hover:text-foreground data-active:text-primary';
 
 export default function AffiliatePage() {
 	const { id } = useParams();
