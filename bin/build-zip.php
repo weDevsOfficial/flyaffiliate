@@ -35,6 +35,19 @@ if ( ! file_exists( $entry_file ) ) {
 	exit( 1 );
 }
 
+/*
+ * The version from the plugin header. New code is documented with the literal
+ * `@since FLYAFFILIATE_SINCE`; the zip is where it becomes the version it
+ * first shipped in, so a docblock in the repository never guesses one.
+ */
+preg_match( '/^\s*\*\s*Version:\s*(\S+)/m', (string) file_get_contents( $entry_file ), $version_match );
+$version = $version_match[1] ?? '';
+
+if ( '' === $version ) {
+	fwrite( STDERR, "error: no Version header in {$entry_file}.\n" );
+	exit( 1 );
+}
+
 /**
  * Read .distignore into a list of patterns.
  *
@@ -183,7 +196,12 @@ foreach ( $iterator as $file ) {
 		exit( 1 );
 	}
 
-	copy( $file->getPathname(), $target );
+	if ( 'php' === strtolower( $file->getExtension() ) ) {
+		// Ship a real version where the source carries the placeholder.
+		file_put_contents( $target, str_replace( 'FLYAFFILIATE_SINCE', $version, (string) file_get_contents( $file->getPathname() ) ) );
+	} else {
+		copy( $file->getPathname(), $target );
+	}
 
 	++$file_count;
 	$byte_count += $file->getSize();
