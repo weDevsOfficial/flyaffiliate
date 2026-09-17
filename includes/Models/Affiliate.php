@@ -100,6 +100,19 @@ class Affiliate extends BaseModel {
 	}
 
 	/**
+	 * The affiliate's website, kept on their user's `user_url`.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return string
+	 */
+	public function get_website(): string {
+		$user = $this->get_user();
+
+		return null === $user ? '' : (string) $user->user_url;
+	}
+
+	/**
 	 * The WordPress user behind this affiliate.
 	 *
 	 * @since FLYAFFILIATE_SINCE

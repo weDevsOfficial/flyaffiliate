@@ -348,4 +348,56 @@ class AffiliatesControllerTest extends FlyAffiliateTestCase {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( $account, $response->get_data()['payment_email'] );
 	}
+
+	/**
+	 * The website lives on the user, and the welcome email is sent only when asked.
+	 *
+	 * @return void
+	 */
+	public function test_the_website_and_the_welcome_email(): void {
+		$this->acting_as( $this->admin_id );
+
+		$sent = [];
+		add_filter(
+			'pre_wp_mail',
+			static function ( $short_circuit, $atts ) use ( &$sent ) {
+				$sent[] = $atts;
+
+				return true;
+			},
+			10,
+			2
+		);
+
+		$quiet = $this->post_request( '/affiliates', [ 'user_id' => $this->factory()->user->create(), 'status' => Affiliate::STATUS_ACTIVE ] );
+
+		$this->assertSame( 201, $quiet->get_status() );
+		$this->assertSame( '', $quiet->get_data()['website'] );
+		$this->assertCount( 0, $sent, 'no welcome email unless the form asks for one' );
+
+		$user     = $this->factory()->user->create();
+		$response = $this->post_request(
+			'/affiliates',
+			[
+				'user_id'            => $user,
+				'status'             => Affiliate::STATUS_ACTIVE,
+				'website'            => 'https://example.org/blog',
+				'send_welcome_email' => true,
+			]
+		);
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( 'https://example.org/blog', $response->get_data()['website'] );
+		$this->assertSame( 'https://example.org/blog', get_userdata( $user )->user_url );
+		$this->assertSame( get_userdata( $user )->user_email, $response->get_data()['email'] );
+		$this->assertCount( 1, $sent );
+		$this->assertSame( get_userdata( $user )->user_email, $sent[0]['to'] );
+		$this->assertStringContainsString( $response->get_data()['referral_url'], $sent[0]['message'] );
+
+		$id      = $response->get_data()['id'];
+		$updated = $this->put_request( "/affiliates/{$id}", [ 'website' => 'https://example.org/new' ] );
+
+		$this->assertSame( 200, $updated->get_status() );
+		$this->assertSame( 'https://example.org/new', get_userdata( $user )->user_url );
+	}
 }

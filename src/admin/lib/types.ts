@@ -18,10 +18,12 @@ export type Affiliate = {
 	user_id: number;
 	name: string;
 	user_login: string;
+	email: string;
 	totals?: CommissionTotals;
 	status: string;
 	payment_email: string;
 	promo_method: string;
+	website: string;
 	referral_url: string;
 	created_at: string | null;
 	updated_at: string | null;
