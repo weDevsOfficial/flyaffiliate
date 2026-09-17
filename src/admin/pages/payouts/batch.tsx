@@ -16,6 +16,11 @@ import {
 import { Button, toast } from '@wedevs/plugin-ui';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import PageHeader from '@/components/PageHeader';
+import {
+	HeaderSkeleton,
+	StatGridSkeleton,
+	TableSkeleton,
+} from '@/components/PageSkeleton';
 import StatCard from '@/components/StatCard';
 import { errorMessage, fetchList, send } from '@/lib/api';
 import { formatDate, formatMoney } from '@/lib/format';
@@ -28,6 +33,7 @@ export default function PayoutBatchPage() {
 	const { batchKey = '' } = useParams();
 	const navigate = useNavigate();
 	const [ rows, setRows ] = useState< Payout[] >( [] );
+	const [ loading, setLoading ] = useState( true );
 	const [ version, setVersion ] = useState( 0 );
 	const [ dialog, setDialog ] = useState< 'pay' | 'delete' | null >( null );
 	const [ busy, setBusy ] = useState( false );
@@ -38,7 +44,8 @@ export default function PayoutBatchPage() {
 			per_page: 100,
 		} )
 			.then( ( result ) => setRows( result.items ) )
-			.catch( () => setRows( [] ) );
+			.catch( () => setRows( [] ) )
+			.finally( () => setLoading( false ) );
 	}, [ batchKey ] );
 
 	useEffect( load, [ load ] );
@@ -102,6 +109,16 @@ export default function PayoutBatchPage() {
 			setBusy( false );
 		}
 	};
+
+	if ( loading ) {
+		return (
+			<div data-testid="flyaffiliate-batch-loading">
+				<HeaderSkeleton actions={ 2 } />
+				<StatGridSkeleton />
+				<TableSkeleton tabs={ 3 } rows={ 3 } columns={ 8 } />
+			</div>
+		);
+	}
 
 	return (
 		<>

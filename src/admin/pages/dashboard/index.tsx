@@ -301,7 +301,7 @@ function SideCard( {
 }
 
 export default function DashboardPage() {
-	const { urls, statuses } = getGlobals();
+	const { statuses } = getGlobals();
 	const [ preset, setPreset ] = useState< Preset >( '30' );
 	const [ custom, setCustom ] = useState< DateRange | undefined >();
 	const [ stats, setStats ] = useState< DashboardStats | null >( null );
@@ -1124,10 +1124,11 @@ export default function DashboardPage() {
 															true
 														) }` }
 													>
-														{ commission.order_id >
-														0 ? (
+														{ commission.order_url ? (
 															<a
-																href={ `${ urls.orders }${ commission.order_id }` }
+																href={
+																	commission.order_url
+																}
 																className="font-medium text-primary hover:underline"
 															>
 																{ linked }

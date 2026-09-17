@@ -200,13 +200,36 @@ class Stats {
 		);
 		// phpcs:enable
 
-		$trend = [];
+		$by_day = [];
 
 		foreach ( (array) $rows as $row ) {
-			$trend[] = [
+			$by_day[ (string) $row->day ] = [
 				'date'      => (string) $row->day,
 				'visits'    => (int) $row->visits,
 				'converted' => (int) $row->converted,
+			];
+		}
+
+		/*
+		 * One point per day of the range, zero where nothing happened, so the
+		 * chart's axis spans the dates asked for rather than the days with
+		 * visits. A range wider than a year is left to the days that have rows.
+		 */
+		$start = strtotime( ( '' !== $after ? $after : ( array_key_first( $by_day ) ?? gmdate( 'Y-m-d' ) ) ) . ' UTC' );
+		$end   = strtotime( ( '' !== $before ? $before : gmdate( 'Y-m-d H:i:s' ) ) . ' UTC' );
+
+		if ( false === $start || false === $end || $end < $start || ( $end - $start ) > YEAR_IN_SECONDS ) {
+			return array_values( $by_day );
+		}
+
+		$trend = [];
+
+		for ( $day = strtotime( gmdate( 'Y-m-d', $start ) . ' UTC' ); $day <= $end; $day += DAY_IN_SECONDS ) {
+			$key     = gmdate( 'Y-m-d', $day );
+			$trend[] = $by_day[ $key ] ?? [
+				'date'      => $key,
+				'visits'    => 0,
+				'converted' => 0,
 			];
 		}
 
@@ -350,7 +373,7 @@ class Stats {
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
 	 *
-	 * @return array<int, array{id: int, affiliate_id: int, affiliate_name: string, order_id: int, amount: float, status: string, created_at: string}>
+	 * @return array<int, array{id: int, affiliate_id: int, affiliate_name: string, order_id: int, order_url: string|null, amount: float, status: string, created_at: string}>
 	 */
 	public function get_recent_commissions( string $after = '', string $before = '' ): array {
 		$rows = [];
@@ -365,12 +388,14 @@ class Stats {
 			]
 		) as $commission ) {
 			$affiliate = Affiliate::find( (int) $commission->get( 'affiliate_id' ) );
+			$order     = (int) $commission->get( 'order_id', 0 ) > 0 ? $commission->get_order() : null;
 
 			$rows[] = [
 				'id'             => $commission->get_id(),
 				'affiliate_id'   => (int) $commission->get( 'affiliate_id' ),
 				'affiliate_name' => null === $affiliate ? '' : $affiliate->get_display_name(),
 				'order_id'       => (int) $commission->get( 'order_id', 0 ),
+				'order_url'      => null === $order ? null : $order->get_edit_order_url(),
 				'amount'         => (float) $commission->get( 'amount', 0 ),
 				'status'         => (string) $commission->get( 'status' ),
 				'created_at'     => empty( $commission->get( 'created_at' ) ) ? '' : mysql_to_rfc3339( (string) $commission->get( 'created_at' ) ),

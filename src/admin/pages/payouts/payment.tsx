@@ -1,6 +1,8 @@
 /**
  * One payment: what it is, the commissions in it, and the actions on it —
- * mark it paid or unpaid, take a commission out while it is unpaid, delete it.
+ * mark it paid, take a commission out while it is unpaid, delete it. Paid is
+ * the end of the road on the screens, as in SliceWP; the API keeps
+ * `PUT { status: 'unpaid' }` for a correction.
  */
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -12,7 +14,6 @@ import {
 	Hash,
 	MinusCircle,
 	Pencil,
-	RotateCcw,
 	Trash2,
 	UserRound,
 	Wallet,
@@ -20,7 +21,6 @@ import {
 import {
 	Button,
 	DataViews,
-	Skeleton,
 	toast,
 	type DataViewAction,
 	type DataViewField,
@@ -30,8 +30,15 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import DateTime from '@/components/DateTime';
 import Money from '@/components/Money';
 import PageHeader from '@/components/PageHeader';
+import Reference from '@/components/Reference';
+import {
+	HeaderSkeleton,
+	StatGridSkeleton,
+	TableSkeleton,
+} from '@/components/PageSkeleton';
 import StatCard, { StatCardSkeleton } from '@/components/StatCard';
 import StatusBadge from '@/components/StatusBadge';
+import Truncated from '@/components/Truncated';
 import { useListView } from '@/hooks/useListView';
 import { errorMessage, fetchOne, send } from '@/lib/api';
 import { withIconLabels } from '@/lib/actions';
@@ -73,14 +80,12 @@ export default function PaymentPage() {
 	const paymentId = Number( id );
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { urls, statuses } = getGlobals();
+	const { statuses } = getGlobals();
 	const [ payment, setPayment ] = useState< Payout | null >( null );
 	const [ loading, setLoading ] = useState( true );
 	// The commission form comes back here when it is done.
 	const here = { from: location.pathname };
-	const [ dialog, setDialog ] = useState< 'pay' | 'unpay' | 'delete' | null >(
-		null
-	);
+	const [ dialog, setDialog ] = useState< 'pay' | 'delete' | null >( null );
 	const [ busy, setBusy ] = useState( false );
 
 	const load = useCallback( () => {
@@ -104,20 +109,16 @@ export default function PaymentPage() {
 
 	const isPaid = payment?.status === 'paid';
 
-	const setStatus = async ( next: 'paid' | 'unpaid' ) => {
+	const markPaid = async () => {
 		setBusy( true );
 
 		try {
 			setPayment(
 				await send< Payout >( `/payouts/${ paymentId }`, 'PUT', {
-					status: next,
+					status: 'paid',
 				} )
 			);
-			toast.success(
-				next === 'paid'
-					? __( 'Payment marked paid.', 'flyaffiliate' )
-					: __( 'Payment marked unpaid.', 'flyaffiliate' )
-			);
+			toast.success( __( 'Payment marked paid.', 'flyaffiliate' ) );
 			setDialog( null );
 			list.refresh();
 		} catch ( error ) {
@@ -170,20 +171,12 @@ export default function PaymentPage() {
 			id: 'order',
 			label: __( 'Reference', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) =>
-				item.order_id > 0 ? (
-					<a
-						href={ `${ urls.orders }${ item.order_id }` }
-						className="inline-flex items-center gap-1 text-primary hover:underline"
-					>
-						#{ item.order_id }
-						<ExternalLink className="size-3" aria-hidden="true" />
-					</a>
-				) : (
-					<span className="text-muted-foreground">
-						{ __( 'Manual', 'flyaffiliate' ) }
-					</span>
-				),
+			render: ( { item } ) => (
+				<Reference
+					commission={ item }
+					fallback={ __( 'Manual', 'flyaffiliate' ) }
+				/>
+			),
 		},
 		{
 			id: 'base_amount',
@@ -241,9 +234,9 @@ export default function PaymentPage() {
 			id: 'view-order',
 			label: __( 'View order', 'flyaffiliate' ),
 			icon: <ExternalLink size={ 16 } />,
-			isEligible: ( item ) => item.order_id > 0,
+			isEligible: ( item ) => Boolean( item.order_url ),
 			callback: ( [ item ] ) => {
-				window.location.assign( `${ urls.orders }${ item.order_id }` );
+				window.location.assign( item.order_url ?? '' );
 			},
 		},
 		{
@@ -290,18 +283,9 @@ export default function PaymentPage() {
 	if ( loading ) {
 		return (
 			<div data-testid="flyaffiliate-payment-loading">
-				<Skeleton className="mb-3 h-4 w-28" />
-				<div className="mb-6 flex items-center justify-between">
-					<Skeleton className="h-8 w-56" />
-					<Skeleton className="h-9 w-36" />
-				</div>
-				<div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					<StatCardSkeleton />
-					<StatCardSkeleton />
-					<StatCardSkeleton />
-					<StatCardSkeleton />
-				</div>
-				<Skeleton className="h-64 w-full rounded-md" />
+				<HeaderSkeleton actions={ 2 } />
+				<StatGridSkeleton />
+				<TableSkeleton tabs={ 0 } rows={ 4 } columns={ 7 } />
 			</div>
 		);
 	}
@@ -345,16 +329,7 @@ export default function PaymentPage() {
 									{ __( 'Delete', 'flyaffiliate' ) }
 								</Button>
 							) }
-							{ isPaid ? (
-								<Button
-									variant="outline"
-									onClick={ () => setDialog( 'unpay' ) }
-									data-testid="flyaffiliate-payment-unpay"
-								>
-									<RotateCcw className="size-4" />
-									{ __( 'Mark as unpaid', 'flyaffiliate' ) }
-								</Button>
-							) : (
+							{ ! isPaid && (
 								<Button
 									onClick={ () => setDialog( 'pay' ) }
 									data-testid="flyaffiliate-payment-pay"
@@ -380,8 +355,13 @@ export default function PaymentPage() {
 										to={ `/affiliates/${ payment.affiliate_id }` }
 										className="block truncate text-primary hover:underline"
 									>
-										{ payment.affiliate_name ||
-											`#${ payment.affiliate_id }` }
+										<Truncated
+											text={
+												payment.affiliate_name ||
+												`#${ payment.affiliate_id }`
+											}
+											max={ 24 }
+										/>
 									</Link>
 								) : (
 									<span className="text-muted-foreground">
@@ -428,11 +408,17 @@ export default function PaymentPage() {
 									to={ `/payouts/batch/${ payment.batch_key }` }
 									className="block truncate text-primary hover:underline"
 								>
-									{ payment.note ||
-										__(
-											'Untitled payout',
-											'flyaffiliate'
-										) }
+									{ /* The whole name on hover when the tile cuts it, as the lists do. */ }
+									<Truncated
+										text={
+											payment.note ||
+											__(
+												'Untitled payout',
+												'flyaffiliate'
+											)
+										}
+										max={ 24 }
+									/>
 								</Link>
 							}
 							tooltip={ sprintf(
@@ -506,19 +492,7 @@ export default function PaymentPage() {
 					'flyaffiliate'
 				) }
 				confirmLabel={ __( 'Mark as paid', 'flyaffiliate' ) }
-				onConfirm={ () => setStatus( 'paid' ) }
-				busy={ busy }
-			/>
-			<ConfirmDialog
-				open={ dialog === 'unpay' }
-				onOpenChange={ ( open ) => ! open && setDialog( null ) }
-				title={ __( 'Mark as unpaid', 'flyaffiliate' ) }
-				description={ __(
-					'Marked paid by mistake? The commissions go back to unpaid. They stay in this payment, so they are not paid twice.',
-					'flyaffiliate'
-				) }
-				confirmLabel={ __( 'Mark as unpaid', 'flyaffiliate' ) }
-				onConfirm={ () => setStatus( 'unpaid' ) }
+				onConfirm={ markPaid }
 				busy={ busy }
 			/>
 			<ConfirmDialog

@@ -232,12 +232,8 @@ class CommissionsController extends AdminBaseController {
 			return $this->not_found();
 		}
 
-		if ( $commission->is_in_payout() ) {
-			return new WP_Error( 'flyaffiliate_rest_in_payout', __( 'This commission belongs to a payment. Take it out of the payment first, or delete the payment.', 'flyaffiliate' ), [ 'status' => 409 ] );
-		}
-
 		if ( $commission->is_locked() ) {
-			return new WP_Error( 'flyaffiliate_rest_locked', __( 'A paid commission cannot be deleted.', 'flyaffiliate' ), [ 'status' => 409 ] );
+			return new WP_Error( 'flyaffiliate_rest_in_payout', __( 'This commission belongs to a payment. Take it out of the payment first, or delete the payment.', 'flyaffiliate' ), [ 'status' => 409 ] );
 		}
 
 		$previous = $this->prepare_item_for_response( $commission, $request );
@@ -268,6 +264,7 @@ class CommissionsController extends AdminBaseController {
 			'affiliate_id'  => (int) $item->get( 'affiliate_id' ),
 			'affiliate_name' => $this->get_affiliate_name( (int) $item->get( 'affiliate_id' ) ),
 			'order_id'      => (int) $item->get( 'order_id', 0 ),
+			'order_url'     => $this->get_order_url( $item ),
 			'order_item_id' => null === $item->get( 'order_item_id' ) ? null : (int) $item->get( 'order_item_id' ),
 			'product_id'    => (int) $item->get( 'product_id', 0 ),
 			'vendor_id'     => (int) $item->get( 'vendor_id', 0 ),
@@ -288,6 +285,24 @@ class CommissionsController extends AdminBaseController {
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );
 
 		return $this->add_links( $response, $this->prepare_links( $item ) );
+	}
+
+	/**
+	 * The admin URL of the commission's order, when that order exists.
+	 *
+	 * A reference that points at nothing — a manual commission's free-form
+	 * reference, or an order deleted since — is shown as a number, not a link.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Commission $item The commission.
+	 *
+	 * @return string|null
+	 */
+	protected function get_order_url( Commission $item ): ?string {
+		$order = (int) $item->get( 'order_id', 0 ) > 0 ? $item->get_order() : null;
+
+		return null === $order ? null : $order->get_edit_order_url();
 	}
 
 	/**
@@ -357,10 +372,16 @@ class CommissionsController extends AdminBaseController {
 					'required' => true,
 				],
 				'order_id'      => [
-					'description' => __( 'The order it came from, if any.', 'flyaffiliate' ),
+					'description' => __( 'The order it came from, if any. Under the WooCommerce origin it must be an existing order.', 'flyaffiliate' ),
 					'type' => 'integer',
 					'context' => [ 'view', 'edit' ],
 				],
+				'order_url'     => $ro(
+					[
+						'description' => __( 'The admin URL of that order, when it exists.', 'flyaffiliate' ),
+						'type' => [ 'string', 'null' ],
+					]
+				),
 				'order_item_id' => $ro(
 					[
 						'description' => __( 'The order item it came from. Null for a manual commission.', 'flyaffiliate' ),

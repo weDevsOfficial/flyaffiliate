@@ -16,7 +16,6 @@ import {
 import {
 	Button,
 	Card,
-	Skeleton,
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -25,7 +24,13 @@ import {
 } from '@wedevs/plugin-ui';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
-import StatCard, { StatCardSkeleton } from '@/components/StatCard';
+import {
+	FormCardSkeleton,
+	HeaderSkeleton,
+	StatGridSkeleton,
+	TableSkeleton,
+} from '@/components/PageSkeleton';
+import StatCard from '@/components/StatCard';
 import CopyField from '@/components/CopyField';
 import EmptyState from '@/components/EmptyState';
 import { errorMessage, fetchOne } from '@/lib/api';
@@ -79,19 +84,10 @@ export default function AffiliatePage() {
 	if ( loading ) {
 		return (
 			<div data-testid="flyaffiliate-affiliate-loading">
-				<Skeleton className="mb-3 h-4 w-24" />
-				<div className="mb-6 flex items-center justify-between">
-					<Skeleton className="h-8 w-64" />
-					<Skeleton className="h-9 w-40" />
-				</div>
-				<Skeleton className="mb-6 h-20 w-full rounded-md" />
-				<div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					<StatCardSkeleton />
-					<StatCardSkeleton />
-					<StatCardSkeleton />
-					<StatCardSkeleton />
-				</div>
-				<Skeleton className="h-11 w-72 rounded-lg" />
+				<HeaderSkeleton actions={ 2 } />
+				<FormCardSkeleton rows={ 1 } title={ false } className="mb-6" />
+				<StatGridSkeleton />
+				<TableSkeleton tabs={ 4 } rows={ 4 } columns={ 7 } />
 			</div>
 		);
 	}
@@ -244,7 +240,8 @@ export default function AffiliatePage() {
 			</div>
 
 			<Tabs defaultValue="commissions" className="gap-6">
-				<TabsList className="h-11 gap-2 bg-muted p-1">
+				{ /* The strip is a shade darker than wp-admin's grey ground, so it reads as a control. */ }
+				<TabsList className="h-11 gap-2 bg-foreground/8 p-1">
 					<TabsTrigger value="commissions" className={ TAB_TRIGGER }>
 						{ __( 'Commissions', 'flyaffiliate' ) }
 					</TabsTrigger>

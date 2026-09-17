@@ -83,7 +83,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 	 */
 	public function test_it_edits_the_fields_of_slicewps_form(): void {
 		$affiliate  = $this->factory()->affiliate->create_and_get_model();
-		$commission = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 10, 'base_amount' => 100, 'status' => Commission::STATUS_PENDING ] );
+		$commission = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 10, 'base_amount' => 100, 'source' => Commission::SOURCE_MANUAL, 'status' => Commission::STATUS_PENDING ] );
 
 		$edited = flyaffiliate()->commission->update(
 			$commission->get_id(),
@@ -102,9 +102,48 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$this->assertSame( 4242, $edited->get( 'order_id' ) );
 		$this->assertSame( Commission::STATUS_UNPAID, $edited->get( 'status' ) );
 
-		$this->assertWPError( flyaffiliate()->commission->update( $commission->get_id(), [ 'status' => Commission::STATUS_PAID ] ), 'paid is set by a payout, never by an edit' );
 		$this->assertWPError( flyaffiliate()->commission->update( $commission->get_id(), [ 'amount' => 0 ] ) );
 		$this->assertWPError( flyaffiliate()->commission->update( 999999, [ 'amount' => 1 ] ) );
+
+		$paid = flyaffiliate()->commission->update( $commission->get_id(), [ 'status' => Commission::STATUS_PAID ] );
+
+		$this->assertInstanceOf( Commission::class, $paid, 'outside a payment an admin can record a commission as paid, as in SliceWP' );
+		$this->assertSame( Commission::STATUS_PAID, $paid->get( 'status' ) );
+		$this->assertInstanceOf( Commission::class, flyaffiliate()->commission->update( $commission->get_id(), [ 'amount' => 26, 'status' => Commission::STATUS_UNPAID ] ), 'and correct it again: the lock is the payment, not the status' );
+	}
+
+	/**
+	 * A WooCommerce-origin commission refers to an order that exists; a manual one refers to anything.
+	 *
+	 * @return void
+	 */
+	public function test_a_woocommerce_reference_must_be_an_existing_order(): void {
+		$affiliate = $this->factory()->affiliate->create();
+		$product   = $this->factory()->product->create();
+		$order     = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'completed' ] );
+		$manager   = flyaffiliate()->commission;
+
+		$missing = $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5, 'order_id' => 987654 ] );
+
+		$this->assertWPError( $missing );
+		$this->assertSame( 'flyaffiliate_invalid_reference', $missing->get_error_code() );
+
+		$real = $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5, 'order_id' => $order ] );
+
+		$this->assertInstanceOf( Commission::class, $real );
+		$this->assertSame( $order, $real->get( 'order_id' ) );
+
+		$none = $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5 ] );
+
+		$this->assertInstanceOf( Commission::class, $none, 'no reference at all is fine' );
+
+		$manual = $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5, 'source' => Commission::SOURCE_MANUAL, 'order_id' => 987654 ] );
+
+		$this->assertInstanceOf( Commission::class, $manual, 'the manual origin refers to nothing the plugin can check' );
+
+		$this->assertWPError( $manager->update( $real->get_id(), [ 'order_id' => 987655 ] ), 'the check holds on edit too' );
+		$this->assertSame( $order, $manager->get( $real->get_id() )->get( 'order_id' ) );
+		$this->assertInstanceOf( Commission::class, $manager->update( $manual->get_id(), [ 'order_id' => 987655 ] ) );
 	}
 
 	/**
@@ -151,7 +190,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * Pending can become unpaid or rejected; unpaid can go back to pending or be rejected.
+	 * Outside a payment, any status can become any other, as in SliceWP.
 	 *
 	 * @return void
 	 */
@@ -162,22 +201,30 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$this->assertTrue( $manager->can_transition( Commission::STATUS_PENDING, Commission::STATUS_REJECTED ) );
 		$this->assertTrue( $manager->can_transition( Commission::STATUS_UNPAID, Commission::STATUS_REJECTED ) );
 		$this->assertTrue( $manager->can_transition( Commission::STATUS_UNPAID, Commission::STATUS_PENDING ) );
-		$this->assertFalse( $manager->can_transition( Commission::STATUS_PENDING, Commission::STATUS_PAID ), 'paid is set by a payout, never by a status edit' );
+		$this->assertTrue( $manager->can_transition( Commission::STATUS_PENDING, Commission::STATUS_PAID ), 'an admin can record a commission as paid by hand' );
 		$this->assertTrue( $manager->can_transition( Commission::STATUS_REJECTED, Commission::STATUS_PENDING ), 'a rejected commission can come back, as in SliceWP' );
 		$this->assertTrue( $manager->can_transition( Commission::STATUS_REJECTED, Commission::STATUS_UNPAID ) );
-		$this->assertFalse( $manager->can_transition( Commission::STATUS_REJECTED, Commission::STATUS_PAID ), 'paid is set by a payout, never by a status edit' );
-		$this->assertFalse( $manager->can_transition( Commission::STATUS_PAID, Commission::STATUS_UNPAID ), 'paid is terminal' );
+		$this->assertTrue( $manager->can_transition( Commission::STATUS_PAID, Commission::STATUS_UNPAID ), 'and take that back: the lock is the payment, not the status' );
+		$this->assertFalse( $manager->can_transition( Commission::STATUS_PAID, Commission::STATUS_PAID ), 'no move at all' );
+		$this->assertFalse( $manager->can_transition( Commission::STATUS_UNPAID, 'approved' ), 'only the four statuses' );
 	}
 
 	/**
-	 * A paid commission cannot be changed, by status or by amount.
+	 * A commission inside a payment cannot be changed, by status, by amount or by deletion.
+	 *
+	 * That covers every commission the plugin paid: `mark_paid()` only ever pays
+	 * the rows inside the payment it marks.
 	 *
 	 * @return void
 	 */
-	public function test_a_paid_commission_is_locked(): void {
-		$commission = $this->factory()->commission->create_and_get_model( [ 'status' => Commission::STATUS_PAID, 'source' => Commission::SOURCE_MANUAL, 'amount' => 20 ] );
+	public function test_a_commission_inside_a_payment_is_locked(): void {
+		$payout     = $this->factory()->payout->create();
+		$commission = $this->factory()->commission->create_and_get_model( [ 'status' => Commission::STATUS_PAID, 'source' => Commission::SOURCE_MANUAL, 'amount' => 20, 'payout_id' => $payout ] );
 
-		$this->assertWPError( flyaffiliate()->commission->set_status( $commission->get_id(), Commission::STATUS_REJECTED ) );
+		$rejected = flyaffiliate()->commission->set_status( $commission->get_id(), Commission::STATUS_REJECTED );
+
+		$this->assertWPError( $rejected );
+		$this->assertSame( 'flyaffiliate_commission_in_payout', $rejected->get_error_code() );
 		$this->assertWPError( flyaffiliate()->commission->update( $commission->get_id(), [ 'amount' => 1 ] ) );
 		$this->assertFalse( flyaffiliate()->commission->delete( $commission->get_id() ) );
 
@@ -185,6 +232,31 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$this->assertSame( Commission::STATUS_PAID, $reloaded->get( 'status' ) );
 		$this->assertCentsEquals( 2000, $reloaded->get( 'amount' ) );
+
+		$by_hand = $this->factory()->commission->create_and_get_model( [ 'status' => Commission::STATUS_PAID, 'source' => Commission::SOURCE_MANUAL, 'amount' => 20 ] );
+
+		$this->assertFalse( $by_hand->is_locked(), 'a paid row recorded outside any payment is a record like any other' );
+		$this->assertInstanceOf( Commission::class, flyaffiliate()->commission->update( $by_hand->get_id(), [ 'amount' => 21, 'status' => Commission::STATUS_UNPAID ] ) );
+		$this->assertTrue( flyaffiliate()->commission->delete( $by_hand->get_id() ) );
+	}
+
+	/**
+	 * Rows that tie on the sort column keep a stable order: by id, in the same direction.
+	 *
+	 * @return void
+	 */
+	public function test_query_breaks_ties_by_id(): void {
+		$affiliate = $this->factory()->affiliate->create();
+		$ids       = [];
+
+		foreach ( [ 1, 2, 3 ] as $i ) {
+			$ids[] = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'created_at' => '2026-03-01 12:00:00', 'amount' => $i ] );
+		}
+
+		$pluck = static fn( array $rows ): array => array_map( static fn( Commission $row ): int => $row->get_id(), $rows );
+
+		$this->assertSame( array_reverse( $ids ), $pluck( Commission::query( [ 'where' => [ 'affiliate_id' => $affiliate ], 'orderby' => 'created_at', 'order' => 'DESC' ] ) ) );
+		$this->assertSame( $ids, $pluck( Commission::query( [ 'where' => [ 'affiliate_id' => $affiliate ], 'orderby' => 'created_at', 'order' => 'ASC' ] ) ) );
 	}
 
 	/**

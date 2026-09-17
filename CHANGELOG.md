@@ -27,9 +27,9 @@ The first release.
 - **Order sync** — commissions follow the order: failed, cancelled and
   (optionally) refunded orders reject them, a recovered order restores them,
   a paid one is never reversed.
-- **Hand-entered commissions** — affiliate, amount, reference order, reference
-  amount, origin, date, type and status, on their own page, with the same
-  fields on edit.
+- **Hand-entered commissions** — affiliate, amount, reference order (checked
+  against WooCommerce), reference amount, origin, date, type and status, on
+  their own page, with the same fields on edit.
 - **Payouts** — preview, create one payment per affiliate, mark paid or
   unpaid, take a commission out, delete an unpaid payment, export CSV.
 - **Admin** — a React admin on weDevs' plugin UI: dashboard, affiliates,

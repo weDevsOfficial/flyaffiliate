@@ -21,8 +21,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * cannot collide on the constraint.
  *
  * The lifecycle is `pending` -> `unpaid` -> `paid`, with either of the first two
- * able to become `rejected`. `paid` is terminal and is never edited, rescaled or
- * deleted.
+ * able to become `rejected`. The lock is the payment, not the status: a
+ * commission inside a payment holds still until the payment lets it go, and a
+ * commission the plugin paid is always inside its payment. A `paid` row an admin
+ * recorded by hand, outside any payment, is a record like any other (SliceWP
+ * parity) and stays editable.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -169,17 +172,21 @@ class Commission extends BaseModel {
 	}
 
 	/**
-	 * Whether this commission is terminal and must not be touched.
+	 * Whether this commission must not be touched.
 	 *
-	 * A paid commission is never edited, rescaled or deleted — not by a refund,
-	 * not by an admin, not by a recalculation (CONTEXT.md money rule 5).
+	 * The lock is the payment (CONTEXT.md money rule 7): while `payout_id`
+	 * points at one, nothing edits, rescales, moves or deletes the commission —
+	 * not a refund, not an admin, not the maturation job. Every commission the
+	 * plugin paid is inside its payment, so a paid commission is locked for as
+	 * long as that payment stands; a paid row recorded by hand, outside any
+	 * payment, is not.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @return bool
 	 */
 	public function is_locked(): bool {
-		return self::STATUS_PAID === $this->get( 'status' ) || $this->is_in_payout();
+		return $this->is_in_payout();
 	}
 
 	/**

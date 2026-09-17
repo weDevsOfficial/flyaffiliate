@@ -44,6 +44,7 @@ import { withIconLabels } from '@/lib/actions';
 import { buildTabs } from '@/lib/tabs';
 import type { Commission } from '@/lib/types';
 import Truncated from '@/components/Truncated';
+import Reference from '@/components/Reference';
 
 const DEFAULT_VIEW: DataViewState = {
 	type: 'table',
@@ -97,7 +98,7 @@ export function CommissionsTable( {
 	extraFilters = {},
 	onChanged,
 }: TableProps ) {
-	const { statuses, urls, sources, types } = getGlobals();
+	const { statuses, sources, types } = getGlobals();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [ status, setStatus ] = useState( 'all' );
@@ -204,19 +205,7 @@ export function CommissionsTable( {
 			id: 'order',
 			label: __( 'Reference', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) =>
-				item.order_id ? (
-					<a
-						href={ `${ urls.orders }${ item.order_id }` }
-						className="font-medium text-primary hover:underline"
-					>
-						#{ item.order_id }
-					</a>
-				) : (
-					<span className="text-muted-foreground">
-						{ sources[ item.source ] ?? item.source }
-					</span>
-				),
+			render: ( { item } ) => <Reference commission={ item } />,
 		},
 		{
 			id: 'base_amount',
@@ -300,7 +289,15 @@ export function CommissionsTable( {
 		},
 	];
 
+	// Edit first, as on Dokan's row menus; the destructive ones last.
 	const actions: DataViewAction< Commission >[] = [
+		{
+			id: 'edit',
+			label: __( 'Edit', 'flyaffiliate' ),
+			icon: <Pencil size={ 16 } />,
+			callback: ( [ item ] ) =>
+				navigate( `/commissions/${ item.id }/edit`, { state: here } ),
+		},
 		{
 			id: 'view-affiliate',
 			label: __( 'View affiliate', 'flyaffiliate' ),
@@ -312,9 +309,9 @@ export function CommissionsTable( {
 			id: 'view-order',
 			label: __( 'View order', 'flyaffiliate' ),
 			icon: <ExternalLink size={ 16 } />,
-			isEligible: ( item ) => item.order_id > 0,
+			isEligible: ( item ) => Boolean( item.order_url ),
 			callback: ( [ item ] ) => {
-				window.location.assign( `${ urls.orders }${ item.order_id }` );
+				window.location.assign( item.order_url ?? '' );
 			},
 		},
 		{
@@ -343,19 +340,12 @@ export function CommissionsTable( {
 			isDestructive: true,
 			confirmTitle: __( 'Reject commission', 'flyaffiliate' ),
 			confirmMessage: __(
-				'A rejected commission is never paid. This cannot be undone.',
+				'A rejected commission is not paid. It comes back if its order recovers, or if you mark it pending or unpaid again.',
 				'flyaffiliate'
 			),
 			isEligible: ( item ) =>
 				item.status === 'pending' || item.status === 'unpaid',
 			callback: ( items ) => setStatuses( items, 'rejected' ),
-		},
-		{
-			id: 'edit',
-			label: __( 'Edit', 'flyaffiliate' ),
-			icon: <Pencil size={ 16 } />,
-			callback: ( [ item ] ) =>
-				navigate( `/commissions/${ item.id }/edit`, { state: here } ),
 		},
 		{
 			id: 'delete',
@@ -365,10 +355,11 @@ export function CommissionsTable( {
 			supportsBulk: true,
 			confirmTitle: __( 'Delete commission', 'flyaffiliate' ),
 			confirmMessage: __(
-				'The commission is removed from the ledger. Paid commissions cannot be deleted.',
+				'The commission is removed from the ledger. A commission inside a payment cannot be deleted.',
 				'flyaffiliate'
 			),
-			isEligible: ( item ) => item.status !== 'paid',
+			// The lock is the payment, not the status (CONTEXT.md rule 7).
+			isEligible: ( item ) => ! item.payout_id,
 			callback: async ( items ) => {
 				try {
 					await Promise.all(

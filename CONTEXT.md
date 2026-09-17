@@ -23,11 +23,11 @@ Sources: `docs/MVP_PRD.md` and `docs/PRD.md`. FlyAffiliate replaces SliceWP: it 
 
 ## Commission statuses
 
-`pending` → `unpaid` → `paid`. Either of the first two → `rejected`, and `rejected` → `pending` or `unpaid` again (SliceWP parity). None of it applies while the commission is attached to a payment: see rule 7.
+`pending` → `unpaid` → `paid`. Either of the first two → `rejected`, and `rejected` → `pending` or `unpaid` again (SliceWP parity); an admin may move a commission between any of the four by hand. None of it applies while the commission is attached to a payment: see rule 7.
 
 Order status drives the WooCommerce commissions, as in SliceWP: an order that fails, is cancelled or is trashed rejects its pending and unpaid commissions; a refunded order does the same only when the `reject_commissions_on_refund` switch is on (off by default); an order reaching processing or completed (cash on delivery: completed) restores its rejected commissions to pending, whoever rejected them, and the hold period then matures them; an order leaving failed, cancelled or refunded for any other status restores them too. A commission already inside a payment is the exception: the order changing status leaves it alone (rule 7), and the refusal is reported rather than silently skipped.
 
-`paid` is reached only through a payment being marked paid, and is terminal for everything but that payment: never edit, rescale, or delete a paid commission (PRD: "paid state locked"); the one way it changes status is its payment being marked unpaid again, with the commission still attached.
+The plugin itself reaches `paid` only through a payment being marked paid, and every commission it paid stays inside that payment, so it is locked for as long as the payment stands (rule 7): never edited, rescaled or deleted (PRD: "paid state locked"), and the one way it changes status is its payment being marked unpaid again, with the commission still attached. The lock is the payment, not the status: an admin can record a commission as `paid` by hand — money that went outside the plugin, SliceWP's default for a commission added on the admin screen — and such a row, outside any payment, stays editable and deletable like any other. The order and the maturation job only ever move `pending`, `unpaid` and `rejected` rows.
 
 ## Money rules (non-negotiable)
 

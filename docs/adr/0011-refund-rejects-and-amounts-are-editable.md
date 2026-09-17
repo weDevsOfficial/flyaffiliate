@@ -58,8 +58,9 @@ handler nor SliceWP's. Rescaling by the unrefunded fraction (`CONTEXT.md` rule
 refuses a `woocommerce` row. The old refusal existed because a future rescaler
 would have overwritten the edit; with rejection instead of rescaling there is
 nothing that recalculates an amount after checkout, so an edit sticks. The stored
-`rate` is re-derived from `base_amount` so the row stays self-consistent. `paid`
-is still terminal, for amount as for status.
+`rate` is re-derived from `base_amount` so the row stays self-consistent. A
+commission inside a payment is still untouchable, for amount as for status
+(ADR-0012).
 
 When Phase 2 rescaling lands it must scale from the **current** amount, never
 recompute from the rate, or it will undo these edits.

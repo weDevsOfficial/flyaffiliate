@@ -1,13 +1,17 @@
 /**
  * Add or edit one commission, on its own page — the fields SliceWP's
- * commission form has, in its order: ID, affiliate, amount, reference,
- * reference amount, origin, date, type, status.
+ * commission form has: ID, affiliate, amount, reference, reference amount,
+ * origin, date, type, status — laid out the way Dokan's edit screens are: the
+ * details in a card of rows, the status and the origin in a sidebar, the
+ * buttons top right, and every explanation behind an info icon beside its
+ * label.
  *
  * On edit the ID, the affiliate, the origin and the date are fixed, as in
- * SliceWP. A paid commission, or one inside a payment, is shown but cannot
- * change at all (CONTEXT.md money rule 7); the page says which lock holds it.
+ * SliceWP. A commission inside a payment is shown but cannot change at all
+ * (CONTEXT.md money rule 7); the page says so and links to the payment.
  */
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
+import { dateI18n, getDate, gmdate } from '@wordpress/date';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Link,
@@ -16,7 +20,7 @@ import {
 	useParams,
 	useSearchParams,
 } from 'react-router-dom';
-import { ArrowLeft, Lock, ReceiptText } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Lock, ReceiptText } from 'lucide-react';
 import {
 	Alert,
 	AlertDescription,
@@ -24,40 +28,41 @@ import {
 	Button,
 	Card,
 	CardContent,
-	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
+	DatePicker,
 	Field,
-	FieldDescription,
 	FieldLabel,
 	Input,
+	InputGroup,
+	InputGroupAddon,
+	InputGroupInput,
+	InputGroupText,
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-	Skeleton,
 	Spinner,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+	cn,
 	toast,
 } from '@wedevs/plugin-ui';
 import AffiliatePicker from '@/components/AffiliatePicker';
 import EmptyState from '@/components/EmptyState';
+import Hint from '@/components/Hint';
 import PageHeader from '@/components/PageHeader';
+import { FormCardSkeleton, HeaderSkeleton } from '@/components/PageSkeleton';
 import StatusBadge from '@/components/StatusBadge';
 import { errorMessage, fetchOne, send } from '@/lib/api';
-import { formatDate } from '@/lib/format';
+import { formatDate, toYmd } from '@/lib/format';
 import { getGlobals } from '@/lib/globals';
 import { BRAND_OUTLINE } from '@/lib/ui';
 import type { Commission } from '@/lib/types';
 
-/** Where a status edit may go, mirroring `Commission\Manager::can_transition()`. */
-const TRANSITIONS: Record< string, string[] > = {
-	pending: [ 'unpaid', 'rejected' ],
-	unpaid: [ 'pending', 'rejected' ],
-	rejected: [ 'pending', 'unpaid' ],
-	paid: [],
-};
+const FORM_ID = 'flyaffiliate-commission-form';
 
 type Values = {
 	affiliate_id: number | null;
@@ -65,32 +70,46 @@ type Values = {
 	base_amount: string;
 	order_id: string;
 	source: string;
-	created_at: string;
+	/** The calendar day, `Y-m-d`, in the site's timezone. */
+	date: string;
+	/** The time of day, `H:i`, in the site's timezone. */
+	time: string;
 	type: string;
 	status: string;
 };
 
-/** A `datetime-local` value for now, in the browser's own timezone. */
-function nowLocal(): string {
-	const now = new Date();
-	now.setSeconds( 0, 0 );
-	const pad = ( n: number ) => String( n ).padStart( 2, '0' );
-
-	return `${ now.getFullYear() }-${ pad( now.getMonth() + 1 ) }-${ pad(
-		now.getDate()
-	) }T${ pad( now.getHours() ) }:${ pad( now.getMinutes() ) }`;
+/**
+ * A site-timezone day and time as `Y-m-d H:i:s` in GMT, what the API stores.
+ *
+ * `getDate()` reads the string in the WordPress timezone (Settings → General),
+ * not the browser's, so an admin in another zone still records the date the
+ * site shows.
+ *
+ * @param {string} day  `Y-m-d`.
+ * @param {string} time `H:i`.
+ * @return {string} The GMT date-time, or '' when the input is not a date.
+ */
+function toGmt( day: string, time: string ): string {
+	try {
+		return gmdate(
+			'Y-m-d H:i:s',
+			getDate( `${ day } ${ time || '00:00' }:00` )
+		);
+	} catch {
+		return '';
+	}
 }
 
 /**
- * A `datetime-local` value as `Y-m-d H:i:s` in GMT, what the API stores.
- * @param local
+ * The `Date` whose local calendar day is the `Y-m-d` given, for the picker.
+ *
+ * @param {string} day `Y-m-d`.
+ * @return {Date|undefined} Noon on that day, or nothing for a bad value.
  */
-function toGmt( local: string ): string {
-	const date = new Date( local );
+function dayToDate( day: string ): Date | undefined {
+	const [ y, m, d ] = day.split( '-' ).map( Number );
 
-	return Number.isNaN( date.getTime() )
-		? ''
-		: date.toISOString().slice( 0, 19 ).replace( 'T', ' ' );
+	return y && m && d ? new Date( y, m - 1, d, 12 ) : undefined;
 }
 
 function Required() {
@@ -101,25 +120,152 @@ function Required() {
 	);
 }
 
+/**
+ * One row of a card: the label with its hint, then the control.
+ * @param root0
+ * @param root0.id
+ * @param root0.label
+ * @param root0.hint
+ * @param root0.required
+ * @param root0.children
+ */
+function Row( {
+	id,
+	label,
+	hint,
+	required = false,
+	children,
+}: {
+	/** The control the label points at; none for a control that is not labelable, like the date picker's trigger. */
+	id?: string;
+	label: string;
+	hint?: string;
+	required?: boolean;
+	children: React.ReactNode;
+} ) {
+	return (
+		<Field className="gap-2.5 px-5 py-4">
+			<div className="flex items-center gap-1.5">
+				<FieldLabel
+					htmlFor={ id }
+					className="text-sm font-medium text-foreground"
+				>
+					{ label }
+					{ required && (
+						<>
+							{ ' ' }
+							<Required />
+						</>
+					) }
+				</FieldLabel>
+				{ hint && <Hint text={ hint } /> }
+			</div>
+			{ children }
+		</Field>
+	);
+}
+
+/**
+ * A card with a title bar and bordered rows, as on Dokan's edit screens.
+ * @param root0
+ * @param root0.title
+ * @param root0.children
+ * @param root0.className
+ */
+function Section( {
+	title,
+	children,
+	className,
+}: {
+	title: string;
+	children: React.ReactNode;
+	className?: string;
+} ) {
+	return (
+		<Card
+			className={ cn( 'gap-0 rounded-md py-0 shadow ring-0', className ) }
+		>
+			<CardHeader className="border-b border-border px-5 py-4">
+				<CardTitle className="text-base font-semibold">
+					{ title }
+				</CardTitle>
+			</CardHeader>
+			<CardContent className="p-0 divide-y divide-border">
+				{ children }
+			</CardContent>
+		</Card>
+	);
+}
+
+/**
+ * A link icon at the end of a field, with its purpose on hover.
+ * @param root0
+ * @param root0.label
+ * @param root0.to
+ * @param root0.href
+ * @param root0.testId
+ */
+function SuffixLink( {
+	label,
+	to,
+	href,
+	testId,
+}: {
+	label: string;
+	to?: string;
+	href?: string;
+	testId?: string;
+} ) {
+	// The anchor is the tooltip's trigger itself: a component in between
+	// would drop the ref the tooltip positions itself by (React 18 passes a
+	// ref only through forwardRef).
+	const anchor = cn(
+		'inline-flex size-6 items-center justify-center rounded-sm text-muted-foreground',
+		'hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50'
+	);
+
+	return (
+		<InputGroupAddon align="inline-end">
+			<Tooltip>
+				<TooltipTrigger
+					render={
+						to ? (
+							<Link
+								to={ to }
+								className={ anchor }
+								aria-label={ label }
+								data-testid={ testId }
+							/>
+						) : (
+							// eslint-disable-next-line jsx-a11y/anchor-has-content
+							<a
+								href={ href }
+								className={ anchor }
+								aria-label={ label }
+								data-testid={ testId }
+							/>
+						)
+					}
+				>
+					<ExternalLink className="size-4" aria-hidden="true" />
+				</TooltipTrigger>
+				<TooltipContent>{ label }</TooltipContent>
+			</Tooltip>
+		</InputGroupAddon>
+	);
+}
+
 function FormSkeleton() {
 	return (
 		<div data-testid="flyaffiliate-commission-loading">
-			<Skeleton className="mb-3 h-4 w-28" />
-			<Skeleton className="mb-6 h-8 w-64" />
-			<Card className="gap-0 rounded-md shadow ring-0">
-				<CardHeader className="border-b border-border pb-5">
-					<Skeleton className="h-5 w-40" />
-					<Skeleton className="h-4 w-80" />
-				</CardHeader>
-				<CardContent className="grid gap-5 pt-5 sm:grid-cols-2">
-					{ Array.from( { length: 8 } ).map( ( _, i ) => (
-						<div key={ i } className="flex flex-col gap-2">
-							<Skeleton className="h-4 w-24" />
-							<Skeleton className="h-9 w-full" />
-						</div>
-					) ) }
-				</CardContent>
-			</Card>
+			<HeaderSkeleton actions={ 2 } />
+			<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_22rem]">
+				<FormCardSkeleton rows={ 5 } />
+				<div className="grid content-start gap-6">
+					<FormCardSkeleton rows={ 1 } />
+					<FormCardSkeleton rows={ 3 } />
+				</div>
+			</div>
 		</div>
 	);
 }
@@ -146,11 +292,13 @@ export default function CommissionFormPage() {
 		base_amount: '',
 		order_id: '',
 		source: 'woocommerce',
-		created_at: nowLocal(),
+		// Now, in the site's timezone.
+		date: dateI18n( 'Y-m-d' ),
+		time: dateI18n( 'H:i' ),
 		type: 'sale',
-		// SliceWP's form starts on Paid; ours on Unpaid, so a slip does not
-		// create a row nothing can change (a paid commission is terminal).
-		status: 'unpaid',
+		// Paid, as SliceWP's form starts: a commission added by hand is most
+		// often money that already went outside the plugin.
+		status: 'paid',
 	} );
 
 	useEffect( () => {
@@ -164,7 +312,8 @@ export default function CommissionFormPage() {
 		} )
 			.then( ( item ) => {
 				setCommission( item );
-				setValues( {
+				setValues( ( current ) => ( {
+					...current,
 					affiliate_id: item.affiliate_id,
 					amount: String( item.amount ),
 					base_amount:
@@ -173,10 +322,9 @@ export default function CommissionFormPage() {
 							: '',
 					order_id: item.order_id > 0 ? String( item.order_id ) : '',
 					source: item.source,
-					created_at: item.created_at ?? '',
 					type: item.type,
 					status: item.status,
-				} );
+				} ) );
 			} )
 			.catch( ( error ) => {
 				setCommission( null );
@@ -193,34 +341,19 @@ export default function CommissionFormPage() {
 			.finally( () => setLoading( false ) );
 	}, [ editing, commissionId ] );
 
-	const inPayout = Boolean( commission?.payout_id );
-	const locked = editing && ( commission?.status === 'paid' || inPayout );
+	// The lock is the payment, not the status (CONTEXT.md money rule 7).
+	const locked = editing && Boolean( commission?.payout_id );
 	// The reference of a commission that came from checkout is its order item's.
 	const referenceFixed = editing && commission?.order_item_id !== null;
+	// The saved reference points at an order that exists.
+	const orderUrl =
+		commission?.order_url &&
+		values.order_id === String( commission.order_id )
+			? commission.order_url
+			: null;
 
 	const set = < K extends keyof Values >( key: K, value: Values[ K ] ) =>
 		setValues( ( current ) => ( { ...current, [ key ]: value } ) );
-
-	const statusOptions = useMemo( () => {
-		const all = Object.entries( statuses.commission );
-
-		if ( ! editing || ! commission ) {
-			return all.map( ( [ value, label ] ) => ( {
-				value,
-				label,
-				disabled: false,
-			} ) );
-		}
-
-		const allowed = TRANSITIONS[ commission.status ] ?? [];
-
-		return all.map( ( [ value, label ] ) => ( {
-			value,
-			label,
-			disabled:
-				value !== commission.status && ! allowed.includes( value ),
-		} ) );
-	}, [ editing, commission, statuses.commission ] );
 
 	const statusHint: Record< string, string > = {
 		pending: __(
@@ -229,10 +362,13 @@ export default function CommissionFormPage() {
 		),
 		unpaid: __( 'Ready to go out in the next payout.', 'flyaffiliate' ),
 		paid: __(
-			'Already paid outside FlyAffiliate. A paid commission cannot be changed afterwards.',
+			'Money that already went outside FlyAffiliate. Recorded as paid, with no payment behind it, so it can still be corrected here.',
 			'flyaffiliate'
 		),
-		rejected: __( 'Never paid.', 'flyaffiliate' ),
+		rejected: __(
+			'Not paid. It comes back if its order recovers, or if you set it pending or unpaid again.',
+			'flyaffiliate'
+		),
 	};
 
 	const submit = async ( event: React.FormEvent ) => {
@@ -273,9 +409,18 @@ export default function CommissionFormPage() {
 		}
 
 		if ( ! editing ) {
+			const createdAt = toGmt( values.date, values.time );
+
+			if ( createdAt === '' ) {
+				toast.error(
+					__( 'Pick the date of the commission.', 'flyaffiliate' )
+				);
+				return;
+			}
+
 			payload.affiliate_id = values.affiliate_id;
 			payload.source = values.source;
-			payload.created_at = toGmt( values.created_at );
+			payload.created_at = createdAt;
 		}
 
 		setSaving( true );
@@ -333,21 +478,23 @@ export default function CommissionFormPage() {
 	const disabled = locked || saving;
 
 	let description: string = __(
-		'For a commission WooCommerce did not work out itself, such as a bonus, a correction or an offline sale.',
+		'For a commission WooCommerce did not work out itself: a bonus, a correction, an offline sale.',
 		'flyaffiliate'
 	);
 
 	if ( locked ) {
 		description = __(
-			'Shown for the record: nothing on a locked commission can change.',
+			'Shown for the record: a commission inside a payment does not change.',
 			'flyaffiliate'
 		);
 	} else if ( editing ) {
 		description = __(
-			'The affiliate, the origin and the date are fixed; the rest can change until the commission is paid.',
+			'The affiliate, the origin and the date are fixed; the rest can change until the commission goes into a payment.',
 			'flyaffiliate'
 		);
 	}
+
+	const selectClass = 'w-full';
 
 	return (
 		<>
@@ -377,96 +524,111 @@ export default function CommissionFormPage() {
 					)
 				}
 				description={ description }
+				actions={
+					<>
+						<Button
+							type="button"
+							variant="outline"
+							className={ BRAND_OUTLINE }
+							onClick={ () => navigate( from ) }
+						>
+							{ locked
+								? __( 'Back', 'flyaffiliate' )
+								: __( 'Cancel', 'flyaffiliate' ) }
+						</Button>
+						{ ! locked && (
+							<Button
+								type="submit"
+								form={ FORM_ID }
+								disabled={ saving }
+								data-testid="flyaffiliate-commission-save"
+							>
+								{ saving && <Spinner className="size-4" /> }
+								{ editing
+									? __( 'Save', 'flyaffiliate' )
+									: __( 'Add commission', 'flyaffiliate' ) }
+							</Button>
+						) }
+					</>
+				}
 			/>
 
 			<form
+				id={ FORM_ID }
 				onSubmit={ submit }
 				data-testid="flyaffiliate-commission-form"
+				className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_22rem]"
 			>
-				<Card className="gap-0 rounded-md shadow ring-0">
-					<CardHeader className="border-b border-border pb-5">
-						<CardTitle className="text-base font-semibold">
-							{ __( 'Commission details', 'flyaffiliate' ) }
-						</CardTitle>
-						<CardDescription>
-							{ __(
-								'A WooCommerce commission with an order follows that order: it becomes unpaid when the order is paid, and is rejected when the order fails or is refunded. A manual commission only follows the hold period.',
-								'flyaffiliate'
-							) }
-						</CardDescription>
-					</CardHeader>
+				<div className="grid content-start gap-6">
+					{ locked && commission && (
+						<Alert data-testid="flyaffiliate-commission-locked">
+							<Lock className="size-4" />
+							<AlertTitle>
+								{ __(
+									'This commission belongs to a payment',
+									'flyaffiliate'
+								) }
+							</AlertTitle>
+							<AlertDescription>
+								<span>
+									{ __(
+										'Take it out of the payment first, or delete the payment.',
+										'flyaffiliate'
+									) }{ ' ' }
+									<Link
+										to={ `/payouts/payment/${ commission.payout_id }` }
+										className="font-medium text-primary hover:underline"
+									>
+										{ sprintf(
+											/* translators: %d: payment id */
+											__(
+												'Open payment #%d',
+												'flyaffiliate'
+											),
+											commission.payout_id ?? 0
+										) }
+									</Link>
+								</span>
+							</AlertDescription>
+						</Alert>
+					) }
 
-					<CardContent className="grid gap-5 pt-5 sm:grid-cols-2">
-						{ locked && commission && (
-							<Alert
-								className="sm:col-span-2"
-								data-testid="flyaffiliate-commission-locked"
-							>
-								<Lock className="size-4" />
-								<AlertTitle>
-									{ inPayout
-										? __(
-												'This commission belongs to a payment',
-												'flyaffiliate'
-										  )
-										: __(
-												'This commission has been paid',
-												'flyaffiliate'
-										  ) }
-								</AlertTitle>
-								<AlertDescription>
-									{ inPayout ? (
-										<span>
-											{ __(
-												'Take it out of the payment first, or delete the payment.',
-												'flyaffiliate'
-											) }{ ' ' }
-											<Link
-												to={ `/payouts/payment/${ commission.payout_id }` }
-												className="font-medium text-primary hover:underline"
-											>
-												{ sprintf(
-													/* translators: %d: payment id */
-													__(
-														'Open payment #%d',
-														'flyaffiliate'
-													),
-													commission.payout_id ?? 0
-												) }
-											</Link>
-										</span>
-									) : (
-										__(
-											'A paid commission is never edited, rescaled or deleted.',
-											'flyaffiliate'
-										)
-									) }
-								</AlertDescription>
-							</Alert>
-						) }
-
+					<Section
+						title={ __( 'Commission details', 'flyaffiliate' ) }
+					>
 						{ editing && (
-							<Field>
-								<FieldLabel htmlFor="flyaffiliate-commission-id">
-									{ __( 'Commission ID', 'flyaffiliate' ) }
-								</FieldLabel>
+							<Row
+								id="flyaffiliate-commission-id"
+								label={ __( 'Commission ID', 'flyaffiliate' ) }
+							>
 								<Input
 									id="flyaffiliate-commission-id"
 									value={ `#${ commissionId }` }
 									readOnly
 									disabled
 								/>
-							</Field>
+							</Row>
 						) }
 
-						<Field>
-							<FieldLabel htmlFor="flyaffiliate-commission-affiliate">
-								{ __( 'Affiliate', 'flyaffiliate' ) }{ ' ' }
-								{ ! editing && <Required /> }
-							</FieldLabel>
+						<Row
+							id="flyaffiliate-commission-affiliate"
+							label={ __( 'Affiliate', 'flyaffiliate' ) }
+							hint={
+								editing
+									? __(
+											'Who earns this commission. Fixed for the life of the commission.',
+											'flyaffiliate'
+									  )
+									: __(
+											'Who earns this commission.',
+											'flyaffiliate'
+									  )
+							}
+							required={ ! editing }
+						>
 							{ editing && commission ? (
-								<>
-									<Input
+								<InputGroup>
+									<InputGroupInput
 										id="flyaffiliate-commission-affiliate"
 										value={
 											commission.affiliate_name ||
@@ -475,18 +637,15 @@ export default function CommissionFormPage() {
 										readOnly
 										disabled
 									/>
-									<FieldDescription>
-										<Link
-											to={ `/affiliates/${ commission.affiliate_id }` }
-											className="text-primary hover:underline"
-										>
-											{ __(
-												'View affiliate',
-												'flyaffiliate'
-											) }
-										</Link>
-									</FieldDescription>
-								</>
+									<SuffixLink
+										label={ __(
+											'View affiliate',
+											'flyaffiliate'
+										) }
+										to={ `/affiliates/${ commission.affiliate_id }` }
+										testId="flyaffiliate-commission-view-affiliate"
+									/>
+								</InputGroup>
 							) : (
 								<AffiliatePicker
 									value={ values.affiliate_id }
@@ -495,94 +654,208 @@ export default function CommissionFormPage() {
 									}
 								/>
 							) }
-						</Field>
+						</Row>
 
-						<Field>
-							<FieldLabel htmlFor="flyaffiliate-commission-amount">
-								{ __( 'Amount', 'flyaffiliate' ) } (
-								{ currency.code }) <Required />
-							</FieldLabel>
-							<Input
-								id="flyaffiliate-commission-amount"
-								type="number"
-								min={ 0 }
-								step="0.01"
-								value={ values.amount }
-								onChange={ ( e ) =>
-									set( 'amount', e.target.value )
-								}
-								placeholder="0.00"
-								disabled={ disabled }
-								required
-							/>
-							<FieldDescription>
-								{ __(
-									'What the affiliate earns.',
-									'flyaffiliate'
-								) }
-							</FieldDescription>
-						</Field>
+						<Row
+							id="flyaffiliate-commission-amount"
+							label={ __( 'Amount', 'flyaffiliate' ) }
+							hint={ __(
+								'What the affiliate earns.',
+								'flyaffiliate'
+							) }
+							required
+						>
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupText>
+										{ currency.symbol || currency.code }
+									</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput
+									id="flyaffiliate-commission-amount"
+									type="number"
+									min={ 0 }
+									step="0.01"
+									value={ values.amount }
+									onChange={ ( e ) =>
+										set( 'amount', e.target.value )
+									}
+									placeholder="0.00"
+									disabled={ disabled }
+									required
+								/>
+							</InputGroup>
+						</Row>
 
-						<Field>
-							<FieldLabel htmlFor="flyaffiliate-commission-order">
-								{ __( 'Reference', 'flyaffiliate' ) }
-							</FieldLabel>
-							<Input
-								id="flyaffiliate-commission-order"
-								type="number"
-								min={ 0 }
-								value={ values.order_id }
-								onChange={ ( e ) =>
-									set( 'order_id', e.target.value )
-								}
-								placeholder={ __(
-									'e.g. 1400',
-									'flyaffiliate'
-								) }
-								disabled={ disabled || referenceFixed }
-							/>
-							<FieldDescription>
-								{ referenceFixed
+						<Row
+							id="flyaffiliate-commission-base"
+							label={ __( 'Reference amount', 'flyaffiliate' ) }
+							hint={ __(
+								'The sale amount the commission is on. Leave it empty when there is no sale behind it.',
+								'flyaffiliate'
+							) }
+						>
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupText>
+										{ currency.symbol || currency.code }
+									</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput
+									id="flyaffiliate-commission-base"
+									type="number"
+									min={ 0 }
+									step="0.01"
+									value={ values.base_amount }
+									onChange={ ( e ) =>
+										set( 'base_amount', e.target.value )
+									}
+									placeholder="0.00"
+									disabled={ disabled }
+								/>
+							</InputGroup>
+						</Row>
+
+						<Row
+							id="flyaffiliate-commission-order"
+							label={ __( 'Reference', 'flyaffiliate' ) }
+							hint={
+								referenceFixed
 									? __(
-											'The order item this commission came from. It cannot change.',
+											'The order this commission came from. It cannot change.',
 											'flyaffiliate'
 									  )
 									: __(
-											'The WooCommerce order ID this commission belongs to, if there is one.',
+											'The ID of the external reference that led to this commission — usually the referred order in WooCommerce. Under the WooCommerce origin it has to be an order that exists.',
 											'flyaffiliate'
-									  ) }
-							</FieldDescription>
-						</Field>
-
-						<Field>
-							<FieldLabel htmlFor="flyaffiliate-commission-base">
-								{ __( 'Reference amount', 'flyaffiliate' ) } (
-								{ currency.code })
-							</FieldLabel>
-							<Input
-								id="flyaffiliate-commission-base"
-								type="number"
-								min={ 0 }
-								step="0.01"
-								value={ values.base_amount }
-								onChange={ ( e ) =>
-									set( 'base_amount', e.target.value )
-								}
-								placeholder="0.00"
-								disabled={ disabled }
-							/>
-							<FieldDescription>
-								{ __(
-									'The sale amount the commission is on. Leave it empty when there is no sale behind it.',
-									'flyaffiliate'
+									  )
+							}
+						>
+							<InputGroup>
+								<InputGroupInput
+									id="flyaffiliate-commission-order"
+									type="number"
+									min={ 0 }
+									value={ values.order_id }
+									onChange={ ( e ) =>
+										set( 'order_id', e.target.value )
+									}
+									placeholder={ __(
+										'e.g. 1400',
+										'flyaffiliate'
+									) }
+									disabled={ disabled || referenceFixed }
+								/>
+								{ orderUrl && (
+									<SuffixLink
+										label={ __(
+											'View order',
+											'flyaffiliate'
+										) }
+										href={ orderUrl }
+										testId="flyaffiliate-commission-view-order"
+									/>
 								) }
-							</FieldDescription>
-						</Field>
+							</InputGroup>
+						</Row>
 
-						<Field>
-							<FieldLabel htmlFor="flyaffiliate-commission-source">
-								{ __( 'Origin', 'flyaffiliate' ) }
-							</FieldLabel>
+						<Row
+							id="flyaffiliate-commission-type"
+							label={ __( 'Type', 'flyaffiliate' ) }
+							hint={ __(
+								'What the commission is for.',
+								'flyaffiliate'
+							) }
+						>
+							<Select
+								value={ values.type }
+								onValueChange={ ( v ) =>
+									set( 'type', String( v ) )
+								}
+								disabled={ disabled }
+							>
+								<SelectTrigger
+									id="flyaffiliate-commission-type"
+									className={ selectClass }
+								>
+									<SelectValue>
+										{ types[ values.type ] ?? values.type }
+									</SelectValue>
+								</SelectTrigger>
+								<SelectContent>
+									{ Object.entries( types ).map(
+										( [ value, label ] ) => (
+											<SelectItem
+												key={ value }
+												value={ value }
+											>
+												{ label }
+											</SelectItem>
+										)
+									) }
+								</SelectContent>
+							</Select>
+						</Row>
+					</Section>
+				</div>
+
+				<div className="grid content-start gap-6">
+					<Section title={ __( 'Status', 'flyaffiliate' ) }>
+						<Row
+							id="flyaffiliate-commission-status"
+							label={ __( 'Status', 'flyaffiliate' ) }
+							hint={ statusHint[ values.status ] }
+							required
+						>
+							<Select
+								value={ values.status }
+								onValueChange={ ( v ) =>
+									set( 'status', String( v ) )
+								}
+								disabled={ disabled }
+							>
+								<SelectTrigger
+									id="flyaffiliate-commission-status"
+									className={ selectClass }
+								>
+									<SelectValue>
+										{ statuses.commission[
+											values.status
+										] ?? values.status }
+									</SelectValue>
+								</SelectTrigger>
+								<SelectContent>
+									{ Object.entries( statuses.commission ).map(
+										( [ value, label ] ) => (
+											<SelectItem
+												key={ value }
+												value={ value }
+											>
+												{ label }
+											</SelectItem>
+										)
+									) }
+								</SelectContent>
+							</Select>
+						</Row>
+					</Section>
+
+					<Section title={ __( 'Origin', 'flyaffiliate' ) }>
+						<Row
+							id="flyaffiliate-commission-source"
+							label={ __( 'Origin', 'flyaffiliate' ) }
+							hint={
+								editing
+									? __(
+											'Set when the commission was created.',
+											'flyaffiliate'
+									  )
+									: __(
+											'A WooCommerce commission with an order follows that order: it becomes unpaid when the order is paid and is rejected when the order fails. A manual commission only follows the hold period and you.',
+											'flyaffiliate'
+									  )
+							}
+						>
 							<Select
 								value={ values.source }
 								onValueChange={ ( v ) =>
@@ -592,7 +865,7 @@ export default function CommissionFormPage() {
 							>
 								<SelectTrigger
 									id="flyaffiliate-commission-source"
-									className="w-full"
+									className={ selectClass }
 								>
 									<SelectValue>
 										{ sources[ values.source ] ??
@@ -612,158 +885,70 @@ export default function CommissionFormPage() {
 									) }
 								</SelectContent>
 							</Select>
-							<FieldDescription>
-								{ editing
+						</Row>
+
+						<Row
+							id={
+								editing
+									? 'flyaffiliate-commission-date'
+									: undefined
+							}
+							label={ __( 'Date', 'flyaffiliate' ) }
+							hint={
+								editing
 									? __(
-											'Set when the commission was created.',
+											'When the commission was earned, in the site’s timezone.',
 											'flyaffiliate'
 									  )
 									: __(
-											'Where the commission comes from. More platforms can be added later.',
+											'When the commission was earned, in the site’s timezone. A pending commission matures the hold period after this date.',
 											'flyaffiliate'
-									  ) }
-							</FieldDescription>
-						</Field>
-
-						<Field>
-							<FieldLabel htmlFor="flyaffiliate-commission-date">
-								{ __( 'Date', 'flyaffiliate' ) }{ ' ' }
-								{ ! editing && <Required /> }
-							</FieldLabel>
-							{ editing ? (
+									  )
+							}
+							required={ ! editing }
+						>
+							{ editing && commission ? (
 								<Input
 									id="flyaffiliate-commission-date"
 									value={ formatDate(
-										values.created_at,
+										commission.created_at,
 										true
 									) }
 									readOnly
 									disabled
 								/>
 							) : (
-								<Input
-									id="flyaffiliate-commission-date"
-									type="datetime-local"
-									value={ values.created_at }
-									onChange={ ( e ) =>
-										set( 'created_at', e.target.value )
-									}
-									disabled={ disabled }
-									required
-								/>
+								<div className="grid grid-cols-[minmax(0,1fr)_7.5rem] gap-2">
+									<DatePicker
+										value={ dayToDate( values.date ) }
+										onChange={ ( next ) =>
+											next && set( 'date', toYmd( next ) )
+										}
+										placeholder={ __(
+											'Pick a date',
+											'flyaffiliate'
+										) }
+										className="min-w-0"
+									/>
+									<Input
+										id="flyaffiliate-commission-time"
+										type="time"
+										value={ values.time }
+										onChange={ ( e ) =>
+											set( 'time', e.target.value )
+										}
+										disabled={ disabled }
+										aria-label={ __(
+											'Time of day',
+											'flyaffiliate'
+										) }
+										required
+									/>
+								</div>
 							) }
-							<FieldDescription>
-								{ editing
-									? __(
-											'When the commission was created.',
-											'flyaffiliate'
-									  )
-									: __(
-											'A pending commission matures the hold period after this date.',
-											'flyaffiliate'
-									  ) }
-							</FieldDescription>
-						</Field>
-
-						<Field>
-							<FieldLabel htmlFor="flyaffiliate-commission-type">
-								{ __( 'Type', 'flyaffiliate' ) }
-							</FieldLabel>
-							<Select
-								value={ values.type }
-								onValueChange={ ( v ) =>
-									set( 'type', String( v ) )
-								}
-								disabled={ disabled }
-							>
-								<SelectTrigger
-									id="flyaffiliate-commission-type"
-									className="w-full"
-								>
-									<SelectValue>
-										{ types[ values.type ] ?? values.type }
-									</SelectValue>
-								</SelectTrigger>
-								<SelectContent>
-									{ Object.entries( types ).map(
-										( [ value, label ] ) => (
-											<SelectItem
-												key={ value }
-												value={ value }
-											>
-												{ label }
-											</SelectItem>
-										)
-									) }
-								</SelectContent>
-							</Select>
-						</Field>
-
-						<Field>
-							<FieldLabel htmlFor="flyaffiliate-commission-status">
-								{ __( 'Status', 'flyaffiliate' ) } <Required />
-							</FieldLabel>
-							<Select
-								value={ values.status }
-								onValueChange={ ( v ) =>
-									set( 'status', String( v ) )
-								}
-								disabled={ disabled }
-							>
-								<SelectTrigger
-									id="flyaffiliate-commission-status"
-									className="w-full"
-								>
-									<SelectValue>
-										{ statuses.commission[
-											values.status
-										] ?? values.status }
-									</SelectValue>
-								</SelectTrigger>
-								<SelectContent>
-									{ statusOptions.map( ( option ) => (
-										<SelectItem
-											key={ option.value }
-											value={ option.value }
-											disabled={ option.disabled }
-										>
-											{ option.label }
-										</SelectItem>
-									) ) }
-								</SelectContent>
-							</Select>
-							<FieldDescription>
-								{ editing && values.status !== 'paid'
-									? __(
-											'Paid is set by a payout, never here.',
-											'flyaffiliate'
-									  )
-									: statusHint[ values.status ] ?? '' }
-							</FieldDescription>
-						</Field>
-					</CardContent>
-
-					<CardFooter className="justify-end gap-3 border-t border-border pt-5">
-						<Button
-							type="button"
-							variant="outline"
-							className={ BRAND_OUTLINE }
-							onClick={ () => navigate( from ) }
-						>
-							{ locked
-								? __( 'Back', 'flyaffiliate' )
-								: __( 'Cancel', 'flyaffiliate' ) }
-						</Button>
-						{ ! locked && (
-							<Button type="submit" disabled={ saving }>
-								{ saving && <Spinner className="size-4" /> }
-								{ editing
-									? __( 'Save', 'flyaffiliate' )
-									: __( 'Add commission', 'flyaffiliate' ) }
-							</Button>
-						) }
-					</CardFooter>
-				</Card>
+						</Row>
+					</Section>
+				</div>
 			</form>
 		</>
 	);

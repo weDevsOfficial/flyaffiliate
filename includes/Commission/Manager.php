@@ -18,12 +18,14 @@ use WP_Error;
 /**
  * The one way to read and change commission rows from a screen or a controller.
  *
- * The status rules from CONTEXT.md are enforced here, not in the callers:
- * `paid` is terminal and never changes, `rejected` is terminal, and the only
- * moves are `pending` -> `unpaid`, `pending`/`unpaid` -> `rejected`, and a
- * manual `unpaid` -> `pending` for an admin undoing an early maturation.
- * Marking `paid` is not a status edit at all — it happens only through a payout
- * batch (`Payout\Manager`), which is what sets `payout_id`.
+ * The rules from CONTEXT.md are enforced here, not in the callers. The lock is
+ * the payment: a commission inside one (`payout_id` set) is not edited, moved
+ * or deleted until the payment lets it go, and that covers every commission the
+ * plugin paid. Outside a payment an admin can move a commission between the
+ * four statuses the way SliceWP allows — recording one as paid by hand, or
+ * correcting a row that was — while the order and the maturation job only ever
+ * move `pending`, `unpaid` and `rejected` rows. A WooCommerce-origin commission
+ * refers to an order that exists; the reference is checked on create and edit.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -113,7 +115,7 @@ class Manager {
 	 *     @type int    $affiliate_id Required.
 	 *     @type float  $amount       Required. What the affiliate earns.
 	 *     @type float  $base_amount  The sale amount the commission is on. Default equal to `amount`.
-	 *     @type int    $order_id     Optional reference order.
+	 *     @type int    $order_id     Optional reference order. Under the WooCommerce origin it must be an existing order.
 	 *     @type string $source       `woocommerce` or `manual`. Default `woocommerce`.
 	 *     @type string $type         A key of `Commission::get_types()`. Default `sale`.
 	 *     @type string $status       Any commission status. Default `unpaid`.
@@ -148,13 +150,20 @@ class Manager {
 			}
 		}
 
+		$order_id  = absint( $args['order_id'] ?? 0 );
+		$reference = $this->check_reference( $source, $order_id );
+
+		if ( is_wp_error( $reference ) ) {
+			return $reference;
+		}
+
 		$created_at = $this->sanitize_datetime( (string) ( $args['created_at'] ?? '' ) );
 		$commission = new Commission();
 
 		$commission->fill(
 			[
 				'affiliate_id'  => $affiliate_id,
-				'order_id'      => absint( $args['order_id'] ?? 0 ),
+				'order_id'      => $order_id,
 				'order_item_id' => null,
 				'product_id'    => 0,
 				'vendor_id'     => 0,
@@ -198,9 +207,9 @@ class Manager {
 	 * order item. The rate is re-derived from the base amount so the row stays
 	 * self-consistent.
 	 *
-	 * A paid commission, or one inside a payment, does not change at all
-	 * (CONTEXT.md money rule 7). A status change goes through `set_status()`,
-	 * so the transition rules and the status-change hook hold.
+	 * A commission inside a payment does not change at all (CONTEXT.md money
+	 * rule 7). A status change goes through `set_status()`, so the transition
+	 * rules and the status-change hook hold.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -210,9 +219,9 @@ class Manager {
 	 *
 	 *     @type float  $amount      What the affiliate earns.
 	 *     @type float  $base_amount The sale amount the commission is on.
-	 *     @type int    $order_id    The reference order, on an admin-created commission.
+	 *     @type int    $order_id    The reference order, on an admin-created commission. Under the WooCommerce origin it must be an existing order.
 	 *     @type string $type        A key of `Commission::get_types()`.
-	 *     @type string $status      `pending`, `unpaid` or `rejected`.
+	 *     @type string $status      Any commission status.
 	 * }
 	 *
 	 * @return Commission|WP_Error
@@ -251,6 +260,12 @@ class Manager {
 		if ( isset( $args['order_id'] ) && absint( $args['order_id'] ) !== (int) $commission->get( 'order_id', 0 ) ) {
 			if ( null !== $commission->get( 'order_item_id' ) ) {
 				return new WP_Error( 'flyaffiliate_reference_locked', __( 'This commission came from an order item, so its reference cannot change.', 'flyaffiliate' ), [ 'status' => 409 ] );
+			}
+
+			$reference = $this->check_reference( (string) $commission->get( 'source' ), absint( $args['order_id'] ) );
+
+			if ( is_wp_error( $reference ) ) {
+				return $reference;
 			}
 
 			$commission->set( 'order_id', absint( $args['order_id'] ) );
@@ -317,6 +332,38 @@ class Manager {
 	}
 
 	/**
+	 * Whether a reference is acceptable for the origin.
+	 *
+	 * A commission under the WooCommerce origin follows its order — the order
+	 * status moves it, and the screens link to it — so the order has to exist.
+	 * A refund is not an order. The manual origin refers to nothing the plugin
+	 * can check, so any reference is kept as given.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param string $source   The commission's origin.
+	 * @param int    $order_id The reference given; 0 for none.
+	 *
+	 * @return true|WP_Error
+	 */
+	protected function check_reference( string $source, int $order_id ) {
+		if ( Commission::SOURCE_WOOCOMMERCE !== $source || 0 === $order_id || ! function_exists( 'wc_get_order' ) ) {
+			return true;
+		}
+
+		if ( wc_get_order( $order_id ) instanceof \WC_Order ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'flyaffiliate_invalid_reference',
+			/* translators: %d: the order id given */
+			sprintf( __( 'There is no WooCommerce order #%d. Enter the number of an existing order, or change the origin.', 'flyaffiliate' ), $order_id ),
+			[ 'status' => 400 ]
+		);
+	}
+
+	/**
 	 * A `Y-m-d H:i:s` GMT date from what was given, or now.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -337,7 +384,7 @@ class Manager {
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @param int    $commission_id Commission id.
-	 * @param string $status        The status to move to: `pending`, `unpaid` or `rejected`.
+	 * @param string $status        The status to move to.
 	 *
 	 * @return Commission|WP_Error
 	 */
@@ -364,13 +411,7 @@ class Manager {
 		}
 
 		if ( ! $this->can_transition( $from, $status ) ) {
-			return new WP_Error(
-				'flyaffiliate_locked_commission',
-				Commission::STATUS_PAID === $from
-					? __( 'A paid commission cannot be changed.', 'flyaffiliate' )
-					: __( 'That status change is not allowed.', 'flyaffiliate' ),
-				[ 'status' => 409 ]
-			);
+			return new WP_Error( 'flyaffiliate_locked_commission', __( 'That status change is not allowed.', 'flyaffiliate' ), [ 'status' => 409 ] );
 		}
 
 		$commission->set( 'status', $status );
@@ -394,7 +435,7 @@ class Manager {
 	}
 
 	/**
-	 * The error for a commission that must not change, saying which lock holds it.
+	 * The error for a commission a payment holds.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -403,19 +444,23 @@ class Manager {
 	 * @return WP_Error
 	 */
 	protected function locked_error( Commission $commission ): WP_Error {
-		if ( $commission->is_in_payout() ) {
-			return new WP_Error(
-				'flyaffiliate_commission_in_payout',
-				__( 'This commission belongs to a payment. Take it out of the payment first, or delete the payment.', 'flyaffiliate' ),
-				[ 'status' => 409 ]
-			);
-		}
-
-		return new WP_Error( 'flyaffiliate_locked_commission', __( 'A paid commission cannot be changed.', 'flyaffiliate' ), [ 'status' => 409 ] );
+		return new WP_Error(
+			'flyaffiliate_commission_in_payout',
+			/* translators: %d: the payment id */
+			sprintf( __( 'This commission belongs to payment #%d. Take it out of the payment first, or delete the payment.', 'flyaffiliate' ), (int) $commission->get( 'payout_id', 0 ) ),
+			[ 'status' => 409 ]
+		);
 	}
 
 	/**
-	 * Whether a status change is allowed.
+	 * Whether a status change is allowed for a commission outside a payment.
+	 *
+	 * Any of the four statuses can become any other, as in SliceWP: a rejected
+	 * commission comes back when its order recovers or an admin changes their
+	 * mind, and an admin can record a commission as paid by hand or take that
+	 * back. A commission inside a payment never gets this far — `set_status()`
+	 * refuses it first — which is what keeps the money a payment promised
+	 * still.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -425,18 +470,13 @@ class Manager {
 	 * @return bool
 	 */
 	public function can_transition( string $from, string $to ): bool {
-		// A rejected commission can come back, as in SliceWP: its order recovered, or an admin changed their mind.
-		$allowed = [
-			Commission::STATUS_PENDING  => [ Commission::STATUS_UNPAID, Commission::STATUS_REJECTED ],
-			Commission::STATUS_UNPAID   => [ Commission::STATUS_PENDING, Commission::STATUS_REJECTED ],
-			Commission::STATUS_REJECTED => [ Commission::STATUS_PENDING, Commission::STATUS_UNPAID ],
-		];
+		$statuses = Commission::get_statuses();
 
-		return in_array( $to, $allowed[ $from ] ?? [], true );
+		return $from !== $to && isset( $statuses[ $from ], $statuses[ $to ] );
 	}
 
 	/**
-	 * Delete a commission that is not paid.
+	 * Delete a commission that no payment holds.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *

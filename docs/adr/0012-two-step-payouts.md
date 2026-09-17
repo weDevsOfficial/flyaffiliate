@@ -39,9 +39,12 @@ unpaid again if it was marked by mistake. The product asked for the same.
   not the maturation job. `remove_commission()` and `delete()` are the two ways
   out, and both leave the commission as it was. `mark_paid()` pays only the
   commissions still `unpaid`; `mark_unpaid()` returns only the ones it paid.
-- `paid` remains terminal for everything except its own payment: nothing edits,
-  rescales or deletes a paid commission, and the only way it changes status is
-  its payment being marked unpaid again.
+- A commission the plugin paid is always inside its payment, so it is locked
+  for as long as the payment stands: nothing edits, rescales or deletes it, and
+  the only way it changes status is its payment being marked unpaid again. The
+  lock is `payout_id`, not the `paid` status: a commission an admin records as
+  paid by hand (SliceWP's default on its add form) has no payment and stays a
+  record like any other — editable, movable, deletable.
 - The admin screens call a batch a *payout* and a row a *payment*, as SliceWP
   does: Payouts (batches) → a payout (its payments, "Mark all as paid") → a
   payment (its commissions, "Remove from payment"); plus one list of every

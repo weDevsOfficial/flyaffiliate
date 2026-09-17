@@ -48,10 +48,18 @@ test.describe( 'Commissions', () => {
 		await form.locator( '#flyaffiliate-commission-amount' ).fill( '12.5' );
 		await form.locator( '#flyaffiliate-commission-order' ).fill( '1400' );
 
-		// The form starts on Unpaid; this one goes through the hold period.
+		// The form starts on Paid, as SliceWP's does; this one goes through
+		// the hold period.
 		await form.locator( '#flyaffiliate-commission-status' ).click();
 		await page.getByRole( 'option', { name: 'Pending' } ).click();
-		await form.getByRole( 'button', { name: 'Add commission' } ).click();
+
+		// A WooCommerce-origin commission needs an order that exists.
+		await page.getByRole( 'button', { name: 'Add commission' } ).click();
+		await list.expectToast( /no WooCommerce order #1400/ );
+
+		await form.locator( '#flyaffiliate-commission-source' ).click();
+		await page.getByRole( 'option', { name: 'Manual' } ).click();
+		await page.getByRole( 'button', { name: 'Add commission' } ).click();
 
 		await list.expectToast( 'Commission added.' );
 		await expect( page ).toHaveURL( /#\/commissions$/ );
@@ -94,7 +102,7 @@ test.describe( 'Commissions', () => {
 		).toBeDisabled();
 
 		await form.locator( '#flyaffiliate-commission-amount' ).fill( '3.21' );
-		await form.getByRole( 'button', { name: 'Save' } ).click();
+		await page.getByRole( 'button', { name: 'Save' } ).click();
 
 		await list.expectToast( 'Commission updated.' );
 		await expect( page ).toHaveURL( /#\/commissions$/ );
@@ -130,15 +138,17 @@ test.describe( 'Commissions', () => {
 		await expect( toolbar ).toHaveCount( 0 );
 	} );
 
-	test( 'never offers to delete a paid commission', async ( { page } ) => {
+	test( 'never offers to delete a commission inside a payment', async ( {
+		page,
+	} ) => {
 		const paid = await list.tabCount( 'Paid' );
 		test.skip( paid === 0, 'needs a paid commission' );
 
 		await list.selectTab( 'Paid' );
 
-		// A paid commission is terminal: with no eligible action left,
-		// DataViews renders no actions button at all. If one is there, it must
-		// not offer Delete.
+		// Here every paid commission was paid through a payment (the seeder
+		// records none by hand), and a commission inside a payment holds
+		// still: the row menu must not offer Delete.
 		const actions = list.rows
 			.first()
 			.getByRole( 'button', { name: /actions/i } );

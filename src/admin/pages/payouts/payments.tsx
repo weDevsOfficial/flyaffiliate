@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Download, Eye, Layers, RotateCcw, Trash2 } from 'lucide-react';
+import { Check, Download, Eye, Layers, Trash2 } from 'lucide-react';
 import {
 	Button,
 	DataViews,
@@ -123,35 +123,27 @@ export function PaymentsTable( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ refreshKey ] );
 
-	const setStatuses = async ( items: Payout[], next: 'paid' | 'unpaid' ) => {
+	// Paid is the end of a payment's life, as in SliceWP: the row menu offers
+	// "Mark as paid" and nothing to take it back. `PUT { status: 'unpaid' }`
+	// still exists for the API.
+	const markPaid = async ( items: Payout[] ) => {
 		try {
 			await Promise.all(
 				items.map( ( item ) =>
-					send( `/payouts/${ item.id }`, 'PUT', { status: next } )
+					send( `/payouts/${ item.id }`, 'PUT', { status: 'paid' } )
 				)
 			);
 			toast.success(
-				next === 'paid'
-					? sprintf(
-							/* translators: %d: number of payments */
-							_n(
-								'%d payment marked paid.',
-								'%d payments marked paid.',
-								items.length,
-								'flyaffiliate'
-							),
-							items.length
-					  )
-					: sprintf(
-							/* translators: %d: number of payments */
-							_n(
-								'%d payment marked unpaid.',
-								'%d payments marked unpaid.',
-								items.length,
-								'flyaffiliate'
-							),
-							items.length
-					  )
+				sprintf(
+					/* translators: %d: number of payments */
+					_n(
+						'%d payment marked paid.',
+						'%d payments marked paid.',
+						items.length,
+						'flyaffiliate'
+					),
+					items.length
+				)
 			);
 			refresh();
 		} catch ( error ) {
@@ -173,7 +165,7 @@ export function PaymentsTable( {
 			render: ( { item } ) => (
 				<Link
 					to={ `/payouts/payment/${ item.id }` }
-					className="font-medium text-foreground hover:text-primary hover:underline"
+					className="font-medium text-primary hover:underline"
 				>
 					#{ item.id }
 				</Link>
@@ -316,20 +308,7 @@ export function PaymentsTable( {
 				'flyaffiliate'
 			),
 			isEligible: ( item ) => item.status === 'unpaid',
-			callback: ( items ) => setStatuses( items, 'paid' ),
-		},
-		{
-			id: 'unpay',
-			label: __( 'Mark as unpaid', 'flyaffiliate' ),
-			icon: <RotateCcw size={ 16 } />,
-			supportsBulk: true,
-			confirmTitle: __( 'Mark as unpaid', 'flyaffiliate' ),
-			confirmMessage: __(
-				'Marked paid by mistake? The commissions go back to unpaid. They stay in this payment, so they are not paid twice.',
-				'flyaffiliate'
-			),
-			isEligible: ( item ) => item.status === 'paid',
-			callback: ( items ) => setStatuses( items, 'unpaid' ),
+			callback: markPaid,
 		},
 		{
 			id: 'batch',

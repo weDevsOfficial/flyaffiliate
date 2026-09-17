@@ -260,7 +260,7 @@ export default function AffiliateForm( {
 					type="url"
 					value={ website }
 					onChange={ ( e ) => setWebsite( e.target.value ) }
-					placeholder="https://"
+					placeholder="example.com"
 				/>
 			</Field>
 

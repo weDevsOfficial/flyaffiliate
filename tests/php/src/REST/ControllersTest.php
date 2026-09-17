@@ -157,11 +157,31 @@ class ControllersTest extends FlyAffiliateTestCase {
 		$this->assertSame( 6.0, $edited->get_data()['amount'] );
 		$this->assertSame( 1401, $edited->get_data()['order_id'] );
 
-		$paid = $this->factory()->commission->create( [ 'status' => Commission::STATUS_PAID ] );
+		$payout = $this->factory()->payout->create();
+		$paid   = $this->factory()->commission->create( [ 'status' => Commission::STATUS_PAID, 'payout_id' => $payout ] );
 
-		$this->assertSame( 409, $this->put_request( '/commissions/' . $paid, [ 'status' => 'rejected' ] )->get_status() );
+		$this->assertSame( 409, $this->put_request( '/commissions/' . $paid, [ 'status' => 'rejected' ] )->get_status(), 'a commission inside a payment holds still' );
+		$this->assertSame( 409, $this->put_request( '/commissions/' . $paid, [ 'amount' => 1 ] )->get_status() );
 		$this->assertSame( 409, $this->delete_request( '/commissions/' . $paid )->get_status() );
-		$this->assertSame( 409, $this->put_request( '/commissions/' . $created->get_data()['id'], [ 'status' => 'paid' ] )->get_status(), 'paid is never set through the API' );
+
+		$by_hand = $this->put_request( '/commissions/' . $created->get_data()['id'], [ 'status' => 'paid' ] );
+
+		$this->assertSame( 200, $by_hand->get_status(), 'outside a payment, paid is a status like any other (SliceWP parity)' );
+		$this->assertSame( Commission::STATUS_PAID, $by_hand->get_data()['status'] );
+		$this->assertNull( $by_hand->get_data()['payout_id'] );
+
+		$product = $this->factory()->product->create();
+		$order   = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'completed' ] );
+		$missing = $this->post_request( '/commissions', [ 'affiliate_id' => $affiliate, 'amount' => 3, 'order_id' => 987654 ] );
+
+		$this->assertSame( 400, $missing->get_status(), 'a WooCommerce-origin commission needs an order that exists' );
+		$this->assertSame( 'flyaffiliate_invalid_reference', $missing->get_data()['code'] );
+
+		$linked = $this->post_request( '/commissions', [ 'affiliate_id' => $affiliate, 'amount' => 3, 'order_id' => $order ] );
+
+		$this->assertSame( 201, $linked->get_status() );
+		$this->assertSame( wc_get_order( $order )->get_edit_order_url(), $linked->get_data()['order_url'] );
+		$this->assertNull( $full->get_data()['order_url'], 'a reference that is not an order is a number, not a link' );
 	}
 
 	/**
@@ -177,6 +197,8 @@ class ControllersTest extends FlyAffiliateTestCase {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertTrue( $response->get_data()['converted'] );
+		$this->assertArrayHasKey( 'order_url', $response->get_data() );
+		$this->assertNull( $response->get_data()['order_url'], 'a visit whose order does not exist links to nothing' );
 		$this->assertArrayNotHasKey( 'ip_hash', $response->get_data() );
 		$this->assertArrayNotHasKey( 'user_agent_hash', $response->get_data() );
 

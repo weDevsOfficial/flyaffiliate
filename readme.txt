@@ -34,7 +34,7 @@ Everything happens on your own site. FlyAffiliate makes no external requests, se
 * **A rate hierarchy**: product → default, clamped to a maximum, with shipping and tax excluded unless you say otherwise.
 * **A hold period** that keeps a commission pending until the order has settled, matured by a daily background job.
 * **Commission statuses that follow the order**, as in the affiliate tools you may already know: pending, unpaid, paid, rejected.
-* **Two-step payouts**: create a payout, send the money, mark it paid. A paid commission is never edited, rescaled or deleted.
+* **Two-step payouts**: create a payout, send the money, mark it paid. A commission inside a payment is never edited, rescaled or deleted.
 * **Hand-entered commissions** for bonuses, corrections and offline sales, with the same fields you would expect: affiliate, amount, reference, origin, date, type and status.
 * **Admin screens** for affiliates, commissions, visits, payouts and settings, plus a dashboard with the figures that matter and a notice when an application is waiting.
 * **A setup wizard** that asks for the three numbers a programme needs: default rate, maximum rate, hold period.
@@ -127,7 +127,7 @@ A. FlyAffiliate works on any WooCommerce store. A Dokan integration, where each 
 * **new:** Commissions — one commission per order item at checkout (classic and block), a product → default rate hierarchy clamped to a maximum, shipping and tax excluded by choice, and self-referral blocked by default
 * **new:** Hold period — a commission matures when the hold has passed and the order is paid, from the order status change or the daily background job; changing the hold reschedules every pending commission
 * **new:** Order sync — commissions follow the order: failed, cancelled and (optionally) refunded orders reject them, a recovered order restores them, a paid one is never reversed
-* **new:** Hand-entered commissions — affiliate, amount, reference order, reference amount, origin, date, type and status, on their own page, with the same fields on edit
+* **new:** Hand-entered commissions — affiliate, amount, reference order (checked against WooCommerce), reference amount, origin, date, type and status, on their own page, with the same fields on edit
 * **new:** Payouts — preview, create one payment per affiliate, mark paid or unpaid, take a commission out, delete an unpaid payment, export CSV
 * **new:** Admin — a React admin on weDevs' plugin UI: dashboard, affiliates, commissions, visits, payouts, settings and a setup wizard
 * **new:** Affiliate dashboard — `[flyaffiliate_dashboard]` with the referral link, balance, commissions, visits and payouts; `[flyaffiliate_register]` for signup

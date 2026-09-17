@@ -88,9 +88,23 @@
 	/* stylelint-disable selector-class-pattern -- plugin-ui's own classes. */
 	.pui-root-dataviews {
 
-		/* Header (49px) plus five rows of 65px. */
-		max-height: 374px;
-		overflow-y: auto;
+		/*
+		 * The layout container is the element that scrolls — it is the
+		 * header's nearest scrolling ancestor, so a sticky header sticks to
+		 * it. Header (49px) plus five rows of 65px.
+		 */
+		.dataviews-layout__container {
+			max-height: 374px;
+			overflow-y: auto;
+		}
+
+		/* The header stays put while the rows scroll under it. */
+		thead th {
+			position: sticky;
+			top: 0;
+			z-index: 1;
+			background: var(--background);
+		}
 	}
 
 	thead th {
