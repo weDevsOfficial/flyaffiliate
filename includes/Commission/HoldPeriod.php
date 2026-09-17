@@ -282,7 +282,7 @@ class HoldPeriod implements Hookable {
 					continue;
 				}
 
-				$result = flyaffiliate()->commission->set_status( $commission->get_id(), Commission::STATUS_UNPAID );
+				$result = flyaffiliate()->commission->set_status( $commission->get_id(), Commission::STATUS_UNPAID, true );
 
 				if ( ! is_wp_error( $result ) ) {
 					++$matured;

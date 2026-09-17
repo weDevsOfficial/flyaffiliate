@@ -34,7 +34,7 @@ Everything happens on your own site. FlyAffiliate makes no external requests, se
 * **A rate hierarchy**: product → default, clamped to a maximum, with shipping and tax excluded unless you say otherwise.
 * **A hold period** that keeps a commission pending until the order has settled, matured by a daily background job.
 * **Commission statuses that follow the order**, as in the affiliate tools you may already know: pending, unpaid, paid, rejected.
-* **Two-step payouts**: create a payout, send the money, mark it paid. A commission inside a payment is never edited, rescaled or deleted.
+* **Two-step payouts**: create a payout, send the money, mark it paid. A commission inside a payment is never deleted or moved by an order; you can still correct it, and an unpaid payment follows.
 * **Hand-entered commissions** for bonuses, corrections and offline sales, with the same fields you would expect: affiliate, amount, reference, origin, date, type and status.
 * **Admin screens** for affiliates, commissions, visits, payouts and settings, plus a dashboard with the figures that matter and a notice when an application is waiting.
 * **A setup wizard** that asks for the three numbers a programme needs: default rate, maximum rate, hold period.

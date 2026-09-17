@@ -233,7 +233,7 @@ export default function VisitsPage() {
 			<PageHeader
 				title={ __( 'Visits', 'flyaffiliate' ) }
 				description={ __(
-					'IP addresses and user agents are stored as hashes. Only the pages visited are kept as they are.',
+					'IP addresses and user agents are stored as hashes. Only the visited pages are kept as they are.',
 					'flyaffiliate'
 				) }
 			/>

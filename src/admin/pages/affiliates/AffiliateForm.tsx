@@ -166,11 +166,11 @@ export default function AffiliateForm( {
 			description={
 				editing
 					? __(
-							'The account behind the affiliate is fixed; the payment details and the status can change.',
+							'The user account can’t be changed. The payment details and the status can.',
 							'flyaffiliate'
 					  )
 					: __(
-							'Any WordPress user can be an affiliate. Their referral link is created immediately.',
+							'Any WordPress user can become an affiliate. Their referral link is ready right away.',
 							'flyaffiliate'
 					  )
 			}
@@ -320,7 +320,7 @@ export default function AffiliateForm( {
 					id="flyaffiliate-affiliate-welcome"
 					label={ __( 'Send welcome email', 'flyaffiliate' ) }
 					description={ __(
-						'Email the new affiliate their referral link and where their dashboard is.',
+						'Email the new affiliate their referral link and dashboard address.',
 						'flyaffiliate'
 					) }
 					checked={ welcomeEmail }

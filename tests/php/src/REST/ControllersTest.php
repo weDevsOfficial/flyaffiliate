@@ -160,9 +160,9 @@ class ControllersTest extends FlyAffiliateTestCase {
 		$payout = $this->factory()->payout->create();
 		$paid   = $this->factory()->commission->create( [ 'status' => Commission::STATUS_PAID, 'payout_id' => $payout ] );
 
-		$this->assertSame( 409, $this->put_request( '/commissions/' . $paid, [ 'status' => 'rejected' ] )->get_status(), 'a commission inside a payment holds still' );
-		$this->assertSame( 409, $this->put_request( '/commissions/' . $paid, [ 'amount' => 1 ] )->get_status() );
-		$this->assertSame( 409, $this->delete_request( '/commissions/' . $paid )->get_status() );
+		$this->assertSame( 200, $this->put_request( '/commissions/' . $paid, [ 'amount' => 1 ] )->get_status(), 'a commission inside a payment is edited like any other, as in SliceWP' );
+		$this->assertSame( 200, $this->put_request( '/commissions/' . $paid, [ 'status' => 'rejected' ] )->get_status() );
+		$this->assertSame( 409, $this->delete_request( '/commissions/' . $paid )->get_status(), 'but the payment keeps it from being deleted' );
 
 		$by_hand = $this->put_request( '/commissions/' . $created->get_data()['id'], [ 'status' => 'paid' ] );
 

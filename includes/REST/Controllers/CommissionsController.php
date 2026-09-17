@@ -233,7 +233,7 @@ class CommissionsController extends AdminBaseController {
 		}
 
 		if ( $commission->is_locked() ) {
-			return new WP_Error( 'flyaffiliate_rest_in_payout', __( 'This commission belongs to a payment. Take it out of the payment first, or delete the payment.', 'flyaffiliate' ), [ 'status' => 409 ] );
+			return flyaffiliate()->commission->in_payment_error( $commission );
 		}
 
 		$previous = $this->prepare_item_for_response( $commission, $request );

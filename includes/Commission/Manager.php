@@ -18,14 +18,14 @@ use WP_Error;
 /**
  * The one way to read and change commission rows from a screen or a controller.
  *
- * The rules from CONTEXT.md are enforced here, not in the callers. The lock is
- * the payment: a commission inside one (`payout_id` set) is not edited, moved
- * or deleted until the payment lets it go, and that covers every commission the
- * plugin paid. Outside a payment an admin can move a commission between the
- * four statuses the way SliceWP allows — recording one as paid by hand, or
- * correcting a row that was — while the order and the maturation job only ever
- * move `pending`, `unpaid` and `rejected` rows. A WooCommerce-origin commission
- * refers to an order that exists; the reference is checked on create and edit.
+ * The rules from CONTEXT.md are enforced here, not in the callers. An admin
+ * edits a commission the way SliceWP allows — amount, reference, type, any of
+ * the four statuses — whether or not a payment holds it; an unpaid payment
+ * re-sums to follow, a paid one keeps the amount it was paid with. A payment
+ * does keep its commission away from the automatic movers (the order status
+ * sync and the maturation job pass `$automatic`) and from deletion. A
+ * WooCommerce-origin commission refers to an order that exists; the reference
+ * is checked on create and edit.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -207,9 +207,10 @@ class Manager {
 	 * order item. The rate is re-derived from the base amount so the row stays
 	 * self-consistent.
 	 *
-	 * A commission inside a payment does not change at all (CONTEXT.md money
-	 * rule 7). A status change goes through `set_status()`, so the transition
-	 * rules and the status-change hook hold.
+	 * A commission inside a payment is edited like any other, as in SliceWP;
+	 * the payment follows (`Payout\Manager::resync()`) while it is unpaid and
+	 * keeps its amount once paid. A status change goes through `set_status()`,
+	 * so the transition rules and the status-change hook hold.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -231,10 +232,6 @@ class Manager {
 
 		if ( null === $commission ) {
 			return new WP_Error( 'flyaffiliate_commission_not_found', __( 'No commission with that ID.', 'flyaffiliate' ), [ 'status' => 404 ] );
-		}
-
-		if ( $commission->is_locked() ) {
-			return $this->locked_error( $commission );
 		}
 
 		$changed = false;
@@ -304,6 +301,8 @@ class Manager {
 			 * @param Commission $commission The commission, saved.
 			 */
 			do_action( 'flyaffiliate_commission_updated', $commission );
+
+			$this->follow_payment( $commission );
 		}
 
 		if ( isset( $args['status'] ) && (string) $args['status'] !== (string) $commission->get( 'status' ) ) {
@@ -311,6 +310,25 @@ class Manager {
 		}
 
 		return $commission;
+	}
+
+	/**
+	 * Let the payment holding a commission follow an edit.
+	 *
+	 * An unpaid payment is a promise still being counted, so it re-sums to its
+	 * unpaid commissions; a paid one keeps the amount it was paid with, as in
+	 * SliceWP, and the edit corrects the commission's own record only.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Commission $commission The commission, saved.
+	 *
+	 * @return void
+	 */
+	protected function follow_payment( Commission $commission ): void {
+		if ( $commission->is_in_payout() ) {
+			flyaffiliate()->payout->resync( (int) $commission->get( 'payout_id' ) );
+		}
 	}
 
 	/**
@@ -385,10 +403,14 @@ class Manager {
 	 *
 	 * @param int    $commission_id Commission id.
 	 * @param string $status        The status to move to.
+	 * @param bool   $automatic     True when an order status change or the
+	 *                              maturation job asks, not an admin: a
+	 *                              commission inside a payment is then left
+	 *                              alone (CONTEXT.md money rule 7).
 	 *
 	 * @return Commission|WP_Error
 	 */
-	public function set_status( int $commission_id, string $status ) {
+	public function set_status( int $commission_id, string $status, bool $automatic = false ) {
 		$commission = $this->get( $commission_id );
 
 		if ( null === $commission ) {
@@ -403,11 +425,12 @@ class Manager {
 
 		/*
 		 * A commission inside a payment does not move on its own: a refunded
-		 * order, an admin, or the maturation job would otherwise change a row
-		 * whose amount a payment is already promising.
+		 * order or the maturation job would otherwise change a row whose amount
+		 * a payment is already promising. An admin may, as in SliceWP, and the
+		 * payment follows.
 		 */
-		if ( $commission->is_in_payout() ) {
-			return $this->locked_error( $commission );
+		if ( $automatic && $commission->is_in_payout() ) {
+			return $this->in_payment_error( $commission );
 		}
 
 		if ( ! $this->can_transition( $from, $status ) ) {
@@ -431,11 +454,14 @@ class Manager {
 		 */
 		do_action( 'flyaffiliate_commission_status_changed', $commission, $status, $from );
 
+		$this->follow_payment( $commission );
+
 		return $commission;
 	}
 
 	/**
-	 * The error for a commission a payment holds.
+	 * The error for something a payment does not let happen to its commission:
+	 * an automatic status change, or deletion.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -443,16 +469,16 @@ class Manager {
 	 *
 	 * @return WP_Error
 	 */
-	protected function locked_error( Commission $commission ): WP_Error {
+	public function in_payment_error( Commission $commission ): WP_Error {
 		$payout_id = (int) $commission->get( 'payout_id', 0 );
 		$payout    = flyaffiliate()->payout->get( $payout_id );
 
 		if ( null !== $payout && $payout->is_paid() ) {
 			/* translators: %d: the payment id */
-			$message = sprintf( __( 'This commission was paid in payment #%d and is kept as it was paid.', 'flyaffiliate' ), $payout_id );
+			$message = sprintf( __( 'This commission was paid in payment #%d, which keeps it.', 'flyaffiliate' ), $payout_id );
 		} else {
 			/* translators: %d: the payment id */
-			$message = sprintf( __( 'This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, to change it.', 'flyaffiliate' ), $payout_id );
+			$message = sprintf( __( 'This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, first.', 'flyaffiliate' ), $payout_id );
 		}
 
 		return new WP_Error( 'flyaffiliate_commission_in_payout', $message, [ 'status' => 409 ] );
@@ -464,9 +490,9 @@ class Manager {
 	 * Any of the four statuses can become any other, as in SliceWP: a rejected
 	 * commission comes back when its order recovers or an admin changes their
 	 * mind, and an admin can record a commission as paid by hand or take that
-	 * back. A commission inside a payment never gets this far — `set_status()`
-	 * refuses it first — which is what keeps the money a payment promised
-	 * still.
+	 * back. The automatic movers never get this far for a commission inside a
+	 * payment — `set_status()` refuses them first — which is what keeps the
+	 * money a payment promised still; an admin's change re-sums the payment.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *

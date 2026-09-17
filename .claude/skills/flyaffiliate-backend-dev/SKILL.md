@@ -377,8 +377,10 @@ Every write that touches money is keyed so a hook firing twice changes nothing:
 | Vendor charge | order meta `_flyaffiliate_vendor_charged` |
 | Paid marking | `payout_id` on the commission, set when the payment is created; the payment's `status` says whether the money went |
 
-A commission inside a payment (`payout_id > 0`) is never edited, rescaled,
-moved or deleted; that covers every commission the plugin paid. A `paid` row an
-admin recorded by hand has no payment and is a record like any other. A
+A commission inside a payment (`payout_id > 0`) is never moved by the order
+sync or the maturation job (they call `set_status( …, true )`) and never
+deleted; an admin still edits it, and an unpaid payment re-sums
+(`Payout\Manager::resync()`) while a paid one keeps its amount. A `paid` row
+an admin recorded by hand has no payment and is a record like any other. A
 WooCommerce-origin commission's `order_id` must be an existing order;
 `Commission\Manager::check_reference()` enforces it on create and edit.

@@ -32,19 +32,19 @@ unpaid again if it was marked by mistake. The product asked for the same.
   in it is paid.
 - `preview()` keeps excluding any commission whose `payout_id` is set, so a
   commission waiting in an unpaid payment is never put into a second one.
-- **A commission inside a payment holds still.** `Commission::is_locked()`
-  covers `payout_id > 0`, so while a payment counts a commission towards money
-  an admin is about to send, nothing changes it: not a refunded, cancelled,
-  failed or trashed order, not an admin editing the amount or deleting the row,
-  not the maturation job. `remove_commission()` and `delete()` are the two ways
-  out, and both leave the commission as it was. `mark_paid()` pays only the
+- **A payment holds its commissions, the admin still edits them.**
+  `Commission::is_locked()` covers `payout_id > 0`: while a payment counts a
+  commission towards money an admin is about to send, no refunded, cancelled,
+  failed or trashed order and no maturation job moves it (`set_status()`
+  refuses the automatic callers), and it is not deleted. The admin keeps
+  SliceWP's freedom — amount, reference, type and status stay open on the edit
+  page — and the payment follows: unpaid, it re-sums to its unpaid commissions
+  (`resync()`); paid, it keeps the amount it was paid with, so an edit after
+  payment corrects the commission's own record only. `remove_commission()` and
+  `delete()` are the ways out of a payment. `mark_paid()` pays only the
   commissions still `unpaid`; `mark_unpaid()` returns only the ones it paid.
-- A commission the plugin paid is always inside its payment, so it is locked
-  for as long as the payment stands: nothing edits, rescales or deletes it, and
-  the only way it changes status is its payment being marked unpaid again. The
-  lock is `payout_id`, not the `paid` status: a commission an admin records as
-  paid by hand (SliceWP's default on its add form) has no payment and stays a
-  record like any other — editable, movable, deletable.
+- A commission an admin records as paid by hand (SliceWP's default on its add
+  form) has no payment and is held by nothing — editable, movable, deletable.
 - The admin screens call a batch a *payout* and a row a *payment*, as SliceWP
   does: Payouts (batches) → a payout (its payments, "Mark all as paid") → a
   payment (its commissions, "Remove from payment"); plus one list of every

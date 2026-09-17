@@ -231,7 +231,7 @@ export default function PayoutBatchPage() {
 				onOpenChange={ ( open ) => ! open && setDialog( null ) }
 				title={ __( 'Mark all as paid', 'flyaffiliate' ) }
 				description={ __(
-					'Every unpaid payment in this payout is marked paid, and every commission in them with it. Do this once the money has been sent.',
+					'Marks every unpaid payment in this payout as paid, along with their commissions. Do this once the money has been sent.',
 					'flyaffiliate'
 				) }
 				confirmLabel={ __( 'Mark as paid', 'flyaffiliate' ) }
@@ -243,7 +243,7 @@ export default function PayoutBatchPage() {
 				onOpenChange={ ( open ) => ! open && setDialog( null ) }
 				title={ __( 'Delete payout', 'flyaffiliate' ) }
 				description={ __(
-					'Its payments are deleted and their commissions go back to unpaid, ready for the next payout.',
+					'Deletes its payments. Their commissions go back to unpaid and into the next payout.',
 					'flyaffiliate'
 				) }
 				confirmLabel={ __( 'Delete payout', 'flyaffiliate' ) }

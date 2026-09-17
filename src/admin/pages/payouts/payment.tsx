@@ -246,7 +246,7 @@ export default function PaymentPage() {
 			isDestructive: true,
 			confirmTitle: __( 'Remove from payment', 'flyaffiliate' ),
 			confirmMessage: __(
-				'The commission stays unpaid and goes into the next payout; this payment gets smaller by its amount.',
+				'The commission stays unpaid and goes into the next payout. This payment’s amount is reduced by it.',
 				'flyaffiliate'
 			),
 			isEligible: () => ! isPaid,
@@ -424,7 +424,7 @@ export default function PaymentPage() {
 							tooltip={ sprintf(
 								/* translators: %s: payout batch key */
 								__(
-									'Payout %s — the batch this payment was created in.',
+									'Payout %s, the batch this payment belongs to.',
 									'flyaffiliate'
 								),
 								payment.batch_key.slice( 0, 8 )
@@ -488,7 +488,7 @@ export default function PaymentPage() {
 				onOpenChange={ ( open ) => ! open && setDialog( null ) }
 				title={ __( 'Mark as paid', 'flyaffiliate' ) }
 				description={ __(
-					'The money has been sent: every commission in this payment is marked paid.',
+					'Marks every commission in this payment as paid. Do this once the money has been sent.',
 					'flyaffiliate'
 				) }
 				confirmLabel={ __( 'Mark as paid', 'flyaffiliate' ) }

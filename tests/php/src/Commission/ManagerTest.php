@@ -8,6 +8,7 @@
 namespace FlyAffiliate\Test\Commission;
 
 use FlyAffiliate\Models\Commission;
+use FlyAffiliate\Models\Payout;
 use FlyAffiliate\Test\FlyAffiliateTestCase;
 
 /**
@@ -210,34 +211,42 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * A commission inside a payment cannot be changed, by status, by amount or by deletion.
-	 *
-	 * That covers every commission the plugin paid: `mark_paid()` only ever pays
-	 * the rows inside the payment it marks.
+	 * A commission inside a payment is edited like any other, as in SliceWP; the
+	 * payment follows while unpaid, keeps its amount once paid, and keeps the
+	 * automatic movers and deletion off the commission.
 	 *
 	 * @return void
 	 */
-	public function test_a_commission_inside_a_payment_is_locked(): void {
-		$payout     = $this->factory()->payout->create();
-		$commission = $this->factory()->commission->create_and_get_model( [ 'status' => Commission::STATUS_PAID, 'source' => Commission::SOURCE_MANUAL, 'amount' => 20, 'payout_id' => $payout ] );
+	public function test_a_commission_inside_a_payment_is_edited_by_the_admin_only(): void {
+		$manager   = flyaffiliate()->commission;
+		$affiliate = $this->factory()->affiliate->create();
+		$payout    = $this->factory()->payout->create( [ 'affiliate_id' => $affiliate, 'status' => Payout::STATUS_UNPAID, 'amount' => 50 ] );
+		$first     = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'status' => Commission::STATUS_UNPAID, 'source' => Commission::SOURCE_MANUAL, 'amount' => 20, 'payout_id' => $payout ] );
+		$second    = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'status' => Commission::STATUS_UNPAID, 'source' => Commission::SOURCE_MANUAL, 'amount' => 30, 'payout_id' => $payout ] );
 
-		$rejected = flyaffiliate()->commission->set_status( $commission->get_id(), Commission::STATUS_REJECTED );
+		$this->assertInstanceOf( Commission::class, $manager->update( $first, [ 'amount' => 25 ] ), 'the amount is open to the admin' );
+		$this->assertCentsEquals( 5500, flyaffiliate()->payout->get( $payout )->get( 'amount' ), 'an unpaid payment re-sums to follow' );
 
-		$this->assertWPError( $rejected );
-		$this->assertSame( 'flyaffiliate_commission_in_payout', $rejected->get_error_code() );
-		$this->assertWPError( flyaffiliate()->commission->update( $commission->get_id(), [ 'amount' => 1 ] ) );
-		$this->assertFalse( flyaffiliate()->commission->delete( $commission->get_id() ) );
+		$this->assertInstanceOf( Commission::class, $manager->set_status( $second, Commission::STATUS_REJECTED ), 'and so is the status' );
+		$this->assertCentsEquals( 2500, flyaffiliate()->payout->get( $payout )->get( 'amount' ), 'a rejected commission no longer counts' );
 
-		$reloaded = flyaffiliate()->commission->get( $commission->get_id() );
+		$automatic = $manager->set_status( $first, Commission::STATUS_REJECTED, true );
 
-		$this->assertSame( Commission::STATUS_PAID, $reloaded->get( 'status' ) );
-		$this->assertCentsEquals( 2000, $reloaded->get( 'amount' ) );
+		$this->assertWPError( $automatic, 'an order status change or the maturation job leaves it alone' );
+		$this->assertSame( 'flyaffiliate_commission_in_payout', $automatic->get_error_code() );
+		$this->assertSame( Commission::STATUS_UNPAID, $manager->get( $first )->get( 'status' ) );
+
+		$this->assertFalse( $manager->delete( $first ), 'a held commission is not deleted' );
+
+		flyaffiliate()->payout->mark_paid( $payout );
+
+		$this->assertInstanceOf( Commission::class, $manager->update( $first, [ 'amount' => 1 ] ), 'a paid payment keeps the commission editable, as in SliceWP' );
+		$this->assertCentsEquals( 2500, flyaffiliate()->payout->get( $payout )->get( 'amount' ), 'but keeps the amount it was paid with' );
 
 		$by_hand = $this->factory()->commission->create_and_get_model( [ 'status' => Commission::STATUS_PAID, 'source' => Commission::SOURCE_MANUAL, 'amount' => 20 ] );
 
-		$this->assertFalse( $by_hand->is_locked(), 'a paid row recorded outside any payment is a record like any other' );
-		$this->assertInstanceOf( Commission::class, flyaffiliate()->commission->update( $by_hand->get_id(), [ 'amount' => 21, 'status' => Commission::STATUS_UNPAID ] ) );
-		$this->assertTrue( flyaffiliate()->commission->delete( $by_hand->get_id() ) );
+		$this->assertFalse( $by_hand->is_locked(), 'a paid row recorded outside any payment is held by nothing' );
+		$this->assertTrue( $manager->delete( $by_hand->get_id() ) );
 	}
 
 	/**

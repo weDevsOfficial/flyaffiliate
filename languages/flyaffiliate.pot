@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-17T09:27:43+00:00\n"
+"POT-Creation-Date: 2026-09-17T09:44:10+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -231,7 +231,7 @@ msgid "Currency"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:300
-msgid "How commission and payout amounts are written. This is FlyAffiliate's own setting: changing the WooCommerce currency does not change it."
+msgid "How commission and payout amounts are shown. This is separate from the WooCommerce currency setting."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:307
@@ -239,7 +239,7 @@ msgid "Currency settings"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:308
-msgid "The currency amounts are shown in, and the characters they are written with, in the admin and on the affiliate dashboard."
+msgid "The currency and number format used in the admin and on the affiliate dashboard."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:316
@@ -303,7 +303,7 @@ msgid "Affiliate area"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:385
-msgid "The affiliate-facing pages were created on activation. Paste a shortcode into any other page to move them."
+msgid "These pages were created when the plugin was activated. To move one, paste its shortcode into another page."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:394
@@ -336,7 +336,7 @@ msgid "Data"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:424
-msgid "What happens to the ledger when the plugin is removed."
+msgid "What happens to your data when the plugin is removed."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:431
@@ -352,11 +352,11 @@ msgid "Remove all data on uninstall"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:440
-msgid "Delete every affiliate, commission, visit, payout and setting when the plugin is deleted. Off by default so a reinstall finds the ledger intact."
+msgid "Delete all affiliates, commissions, visits, payouts and settings when the plugin is deleted. Leave this off to keep the data for a reinstall."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:463
-msgid "Commissions are calculated per order item. The rate comes from the product, then the default — and is always clamped to the maximum."
+msgid "Commissions are calculated per order item. The rate comes from the product, or the default rate, and never goes above the maximum."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:472
@@ -365,7 +365,7 @@ msgid "Rates"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:473
-msgid "The fallback rate and the ceiling every rate is clamped to."
+msgid "The default rate, and the highest rate allowed."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:481
@@ -377,7 +377,7 @@ msgid "Default rate"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:488
-msgid "Used when neither the product nor the vendor sets a rate."
+msgid "Used when the product doesn’t set its own rate."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:498
@@ -385,7 +385,7 @@ msgid "Maximum rate"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:499
-msgid "No commission is ever calculated above this, whatever a product or vendor rate says."
+msgid "No commission is calculated above this rate, even if a product sets a higher one."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:507
@@ -393,7 +393,7 @@ msgid "Rate type"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:508
-msgid "Percentages only for now. Fixed amounts come with product-level rates."
+msgid "Percentage rates only, for now."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:513
@@ -420,11 +420,11 @@ msgid "Hold period"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:535
-msgid "How long a commission waits before it can be paid out, which leaves time to reject it if the order is returned."
+msgid "How long a commission waits before it can be paid out. This leaves time to reject it if the order is returned."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:541
-msgid "A commission stays pending this long after the sale before it becomes unpaid and can be paid out. With 0, a commission becomes unpaid as soon as its order is processing or completed. Changing this moves every pending commission."
+msgid "How many days a commission waits after the sale before it can be paid out. 0 means as soon as the order is paid."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:548
@@ -440,7 +440,7 @@ msgid "Exclude shipping"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:555
-msgid "Shipping is left out of the amount a commission is calculated on."
+msgid "Shipping is not counted when calculating a commission."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:561
@@ -448,7 +448,7 @@ msgid "Exclude tax"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:562
-msgid "Tax is left out of the amount a commission is calculated on."
+msgid "Tax is not counted when calculating a commission."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:569
@@ -456,7 +456,7 @@ msgid "Eligibility"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:570
-msgid "Which referred orders can earn a commission at all."
+msgid "Which referred orders can earn a commission."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:575
@@ -472,7 +472,7 @@ msgid "Refunds"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:584
-msgid "What happens to a commission when its order is refunded. A failed or cancelled order always rejects its commissions, and a commission that has been paid is never changed."
+msgid "What happens when an order is refunded. Failed and cancelled orders always reject their commissions. Paid commissions are never changed."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:589
@@ -480,11 +480,11 @@ msgid "Reject commissions on refund"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:590
-msgid "Mark unpaid commissions as rejected if the originating purchase is refunded."
+msgid "Reject unpaid commissions when their order is refunded."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:610
-msgid "Payouts are recorded by hand in this version: FlyAffiliate tells you who is owed what, you pay them, and it marks the commissions paid."
+msgid "Payouts are recorded by hand. FlyAffiliate shows who is owed what, you send the money, then mark the payment paid."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:620
@@ -505,7 +505,7 @@ msgid "Minimum payout"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:636
-msgid "The default minimum when creating a payout. An affiliate below it is carried over to the next run."
+msgid "The default minimum for a payout. Affiliates below it wait for the next one."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:642
@@ -517,11 +517,11 @@ msgid "Payout method"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:652
-msgid "How affiliates are paid. Automatic methods arrive in a later version."
+msgid "How affiliates are paid. Automatic methods are coming in a later version."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:657
-msgid "Manual — pay outside WordPress and record it here"
+msgid "Manual: pay outside WordPress and record it here"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:661
@@ -733,7 +733,7 @@ msgid "Choose an affiliate."
 msgstr ""
 
 #: includes/Commission/Manager.php:137
-#: includes/Commission/Manager.php:246
+#: includes/Commission/Manager.php:243
 msgid "The commission amount must be more than zero."
 msgstr ""
 
@@ -742,7 +742,7 @@ msgid "Choose where the commission comes from."
 msgstr ""
 
 #: includes/Commission/Manager.php:144
-#: includes/Commission/Manager.php:276
+#: includes/Commission/Manager.php:273
 msgid "Choose a commission type."
 msgstr ""
 
@@ -751,40 +751,40 @@ msgid "Choose a commission status."
 msgstr ""
 
 #: includes/Commission/Manager.php:184
-#: includes/Commission/Manager.php:293
-#: includes/Commission/Manager.php:420
+#: includes/Commission/Manager.php:290
+#: includes/Commission/Manager.php:443
 #: assets/js/admin.js:289
 msgid "The commission could not be saved."
 msgstr ""
 
-#: includes/Commission/Manager.php:233
-#: includes/Commission/Manager.php:395
+#: includes/Commission/Manager.php:234
+#: includes/Commission/Manager.php:417
 #: includes/REST/Controllers/CommissionsController.php:547
 #: includes/REST/Controllers/MeController.php:163
 msgid "No commission with that ID."
 msgstr ""
 
-#: includes/Commission/Manager.php:262
+#: includes/Commission/Manager.php:259
 msgid "This commission came from an order item, so its reference cannot change."
 msgstr ""
 
 #. translators: %d: the order id given
-#: includes/Commission/Manager.php:361
+#: includes/Commission/Manager.php:379
 msgid "There is no WooCommerce order #%d. Enter the number of an existing order, or change the origin."
 msgstr ""
 
-#: includes/Commission/Manager.php:414
+#: includes/Commission/Manager.php:437
 msgid "That status change is not allowed."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:452
-msgid "This commission was paid in payment #%d and is kept as it was paid."
+#: includes/Commission/Manager.php:478
+msgid "This commission was paid in payment #%d, which keeps it."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:455
-msgid "This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, to change it."
+#: includes/Commission/Manager.php:481
+msgid "This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, first."
 msgstr ""
 
 #: includes/Frontend/AffiliateDashboard.php:46
@@ -909,28 +909,28 @@ msgstr ""
 msgid "The payout could not be recorded: a commission would not attach to its payment. Nothing was saved."
 msgstr ""
 
-#: includes/Payout/Manager.php:492
+#: includes/Payout/Manager.php:531
 msgid "A commission cannot be removed from a payment that has been paid."
 msgstr ""
 
-#: includes/Payout/Manager.php:498
+#: includes/Payout/Manager.php:537
 msgid "That commission is not part of this payment."
 msgstr ""
 
-#: includes/Payout/Manager.php:540
+#: includes/Payout/Manager.php:579
 msgid "A payment that has been paid cannot be deleted."
 msgstr ""
 
-#: includes/Payout/Manager.php:585
+#: includes/Payout/Manager.php:624
 msgid "A payout with a paid payment cannot be deleted."
 msgstr ""
 
-#: includes/Payout/Manager.php:662
+#: includes/Payout/Manager.php:701
 #: includes/REST/Controllers/PayoutsController.php:331
 msgid "No payment with that ID."
 msgstr ""
 
-#: includes/Payout/Manager.php:673
+#: includes/Payout/Manager.php:712
 msgid "The payment could not be saved."
 msgstr ""
 
@@ -1052,10 +1052,6 @@ msgstr ""
 #: includes/REST/Controllers/CommissionsController.php:71
 #: includes/REST/Controllers/CommissionsController.php:363
 msgid "Unique identifier for the commission."
-msgstr ""
-
-#: includes/REST/Controllers/CommissionsController.php:236
-msgid "This commission belongs to a payment. Take it out of the payment first, or delete the payment."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:369
@@ -1607,15 +1603,14 @@ msgid "Add affiliate"
 msgstr ""
 
 #: assets/js/admin.js:276
-msgid "The account behind the affiliate is fixed; the payment details and the status can change."
+msgid "The user account can’t be changed. The payment details and the status can."
 msgstr ""
 
 #: assets/js/admin.js:276
-msgid "Any WordPress user can be an affiliate. Their referral link is created immediately."
+msgid "Any WordPress user can become an affiliate. Their referral link is ready right away."
 msgstr ""
 
 #: assets/js/admin.js:276
-#: assets/js/admin.js:289
 #: assets/js/admin.js:290
 #: assets/js/admin.js:298
 #: assets/js/dashboard.js:281
@@ -1673,7 +1668,7 @@ msgid "Send welcome email"
 msgstr ""
 
 #: assets/js/admin.js:276
-msgid "Email the new affiliate their referral link and where their dashboard is."
+msgid "Email the new affiliate their referral link and dashboard address."
 msgstr ""
 
 #: assets/js/admin.js:276
@@ -1768,7 +1763,7 @@ msgid "Delete affiliate"
 msgstr ""
 
 #: assets/js/admin.js:278
-msgid "The affiliate record is removed. Their commissions, visits and payouts are financial records and are kept."
+msgid "This removes the affiliate. Their commissions, visits and payouts are kept as records."
 msgstr ""
 
 #: assets/js/admin.js:278
@@ -1879,7 +1874,7 @@ msgid "Reject commission"
 msgstr ""
 
 #: assets/js/admin.js:279
-msgid "A rejected commission is not paid. It comes back if its order recovers, or if you mark it pending or unpaid again."
+msgid "A rejected commission will not be paid. You can set it back to pending or unpaid later."
 msgstr ""
 
 #: assets/js/admin.js:279
@@ -1887,7 +1882,7 @@ msgid "Delete commission"
 msgstr ""
 
 #: assets/js/admin.js:279
-msgid "The commission is removed from the ledger. A commission inside a payment cannot be deleted."
+msgid "This removes the commission for good. Commissions in a payment can’t be deleted."
 msgstr ""
 
 #: assets/js/admin.js:279
@@ -1913,7 +1908,7 @@ msgid "Add commission"
 msgstr ""
 
 #: assets/js/admin.js:279
-msgid "Pending commissions become unpaid once the hold period ends. Unpaid commissions are what the next payout covers."
+msgid "Pending commissions become unpaid when the hold period ends. Unpaid commissions go into the next payout."
 msgstr ""
 
 #: assets/js/admin.js:279
@@ -1983,7 +1978,7 @@ msgid "A visit is recorded every time a referral link is followed."
 msgstr ""
 
 #: assets/js/admin.js:279
-msgid "IP addresses and user agents are stored as hashes. Only the pages visited are kept as they are."
+msgid "IP addresses and user agents are stored as hashes. Only the visited pages are kept as they are."
 msgstr ""
 
 #: assets/js/admin.js:279
@@ -2036,7 +2031,7 @@ msgid "Mark all as paid"
 msgstr ""
 
 #: assets/js/admin.js:281
-msgid "Every unpaid payment in this payout is marked paid, and every commission in them with it."
+msgid "Marks every unpaid payment in this payout as paid, along with their commissions."
 msgstr ""
 
 #. translators: %d: number of payments
@@ -2066,7 +2061,7 @@ msgid "Delete payout"
 msgstr ""
 
 #: assets/js/admin.js:282
-msgid "Its payments are deleted and their commissions go back to unpaid, ready for the next payout. A payout with a paid payment cannot be deleted."
+msgid "Deletes its payments. Their commissions go back to unpaid and into the next payout. A payout with a paid payment can’t be deleted."
 msgstr ""
 
 #: assets/js/admin.js:282
@@ -2080,7 +2075,7 @@ msgid "The payout could not be deleted."
 msgstr ""
 
 #: assets/js/admin.js:282
-msgid "A payout turns unpaid commissions into one payment per affiliate. Pay them the way you normally would, then mark each payment paid."
+msgid "A payout groups unpaid commissions into one payment per affiliate. Send the money your usual way, then mark each payment paid."
 msgstr ""
 
 #: assets/js/admin.js:282
@@ -2124,7 +2119,7 @@ msgid "Mark as paid"
 msgstr ""
 
 #: assets/js/admin.js:282
-msgid "The money has been sent: every commission in the payment is marked paid."
+msgid "Marks every commission in the payment as paid. Do this once the money has been sent."
 msgstr ""
 
 #: assets/js/admin.js:283
@@ -2138,7 +2133,7 @@ msgid "Delete payment"
 msgstr ""
 
 #: assets/js/admin.js:283
-msgid "The commissions in it go back to unpaid and into the next payout. A paid payment cannot be deleted."
+msgid "The commissions in it go back to unpaid and into the next payout. A paid payment can’t be deleted."
 msgstr ""
 
 #. translators: %d: number of payments
@@ -2177,7 +2172,7 @@ msgid "All payouts"
 msgstr ""
 
 #: assets/js/admin.js:284
-msgid "Every payment across every payout. Mark one paid once the money has been sent; that is what marks its commissions paid."
+msgid "Every payment across all payouts. Mark a payment paid once the money has been sent. That also marks its commissions paid."
 msgstr ""
 
 #: assets/js/admin.js:284
@@ -2236,11 +2231,7 @@ msgstr ""
 
 #. translators: %d: payment id
 #: assets/js/admin.js:286
-msgid "Held by payment #%d"
-msgstr ""
-
-#: assets/js/admin.js:286
-msgid "Nothing here changes while the payment holds it."
+msgid "In payment #%d"
 msgstr ""
 
 #. translators: %d: payment id
@@ -2249,7 +2240,7 @@ msgid "Paid in payment #%d"
 msgstr ""
 
 #: assets/js/admin.js:287
-msgid "The money went out with that payment, so the commission is kept exactly as it was paid."
+msgid "The payment was already sent, so its amount stays as it was. Changes here only update this commission."
 msgstr ""
 
 #. translators: %d: payment id
@@ -2258,7 +2249,7 @@ msgid "Waiting in payment #%d"
 msgstr ""
 
 #: assets/js/admin.js:288
-msgid "The payment has not been marked paid yet. Take the commission out of it, or delete the payment, to change anything here."
+msgid "The payment has not been sent yet, so its amount updates with your changes."
 msgstr ""
 
 #: assets/js/admin.js:288
@@ -2266,7 +2257,7 @@ msgid "That commission could not be loaded."
 msgstr ""
 
 #: assets/js/admin.js:288
-msgid "Goes through the hold period first, and waits for its order to be paid."
+msgid "Waits for the hold period to end and for the order to be paid."
 msgstr ""
 
 #: assets/js/admin.js:288
@@ -2274,11 +2265,11 @@ msgid "Ready to go out in the next payout."
 msgstr ""
 
 #: assets/js/admin.js:288
-msgid "Money that already went outside FlyAffiliate. Recorded as paid, with no payment behind it, so it can still be corrected here."
+msgid "Already paid outside FlyAffiliate. You can still edit it here."
 msgstr ""
 
 #: assets/js/admin.js:288
-msgid "Not paid. It comes back if its order recovers, or if you set it pending or unpaid again."
+msgid "Will not be paid. You can set it back to pending or unpaid at any time."
 msgstr ""
 
 #: assets/js/admin.js:288
@@ -2290,19 +2281,11 @@ msgid "Back to commissions"
 msgstr ""
 
 #: assets/js/admin.js:288
-msgid "For a commission WooCommerce did not work out itself: a bonus, a correction, an offline sale."
+msgid "Add a commission by hand, for a bonus, a correction or an offline sale."
 msgstr ""
 
 #: assets/js/admin.js:288
-msgid "Shown for the record: it was paid, and stays as it was paid."
-msgstr ""
-
-#: assets/js/admin.js:288
-msgid "Shown for the record: nothing changes while a payment holds it."
-msgstr ""
-
-#: assets/js/admin.js:288
-msgid "The affiliate, the origin and the date are fixed; the rest can change until the commission goes into a payment."
+msgid "Edit the amount, reference, type or status. The affiliate, origin and date can’t be changed."
 msgstr ""
 
 #: assets/js/admin.js:288
@@ -2310,7 +2293,6 @@ msgid "All commissions"
 msgstr ""
 
 #: assets/js/admin.js:288
-#: assets/js/admin.js:289
 msgid "Back"
 msgstr ""
 
@@ -2344,7 +2326,7 @@ msgid "Commission details"
 msgstr ""
 
 #: assets/js/admin.js:289
-msgid "Who earns this commission. Fixed for the life of the commission."
+msgid "Who earns this commission. This can’t be changed."
 msgstr ""
 
 #: assets/js/admin.js:289
@@ -2360,15 +2342,15 @@ msgid "Reference amount"
 msgstr ""
 
 #: assets/js/admin.js:289
-msgid "The sale amount the commission is on. Leave it empty when there is no sale behind it."
+msgid "The sale amount this commission is based on. Leave it empty if there is no sale."
 msgstr ""
 
 #: assets/js/admin.js:289
-msgid "The order this commission came from. It cannot change."
+msgid "The order this commission came from. This can’t be changed."
 msgstr ""
 
 #: assets/js/admin.js:289
-msgid "The ID of the external reference that led to this commission — usually the referred order in WooCommerce. Under the WooCommerce origin it has to be an order that exists."
+msgid "The order this commission is for, usually a WooCommerce order ID. With the WooCommerce origin, the order must exist."
 msgstr ""
 
 #: assets/js/admin.js:289
@@ -2388,15 +2370,15 @@ msgid "Set when the commission was created."
 msgstr ""
 
 #: assets/js/admin.js:289
-msgid "A WooCommerce commission with an order follows that order: it becomes unpaid when the order is paid and is rejected when the order fails. A manual commission only follows the hold period and you."
+msgid "Where the commission comes from. A WooCommerce commission follows its order: unpaid once the order is paid, rejected if the order fails. A manual commission only follows the hold period."
 msgstr ""
 
 #: assets/js/admin.js:289
-msgid "When the commission was earned, in the site’s timezone."
+msgid "When the commission was earned, in your site’s timezone."
 msgstr ""
 
 #: assets/js/admin.js:289
-msgid "When the commission was earned, in the site’s timezone. A pending commission matures the hold period after this date."
+msgid "When the commission was earned, in your site’s timezone. The hold period counts from this date."
 msgstr ""
 
 #: assets/js/admin.js:289
@@ -2492,7 +2474,7 @@ msgid "Earnings & payouts"
 msgstr ""
 
 #: assets/js/admin.js:291
-msgid "Money in the selected dates: what the referred sales were worth and what the commissions on them cost."
+msgid "Referred sales and the commissions on them, for the selected dates."
 msgstr ""
 
 #: assets/js/admin.js:291
@@ -2500,7 +2482,7 @@ msgid "Referral revenue"
 msgstr ""
 
 #: assets/js/admin.js:291
-msgid "What the referred order items were worth before commissions, in the selected dates."
+msgid "The value of referred order items in the selected dates, before commissions."
 msgstr ""
 
 #: assets/js/admin.js:291
@@ -2516,7 +2498,7 @@ msgid "Total paid"
 msgstr ""
 
 #: assets/js/admin.js:291
-msgid "Commissions whose payment has been marked paid."
+msgid "Commissions that have been paid out."
 msgstr ""
 
 #: assets/js/admin.js:291
@@ -2525,7 +2507,7 @@ msgstr ""
 
 #. translators: %s: amount still pending
 #: assets/js/admin.js:292
-msgid "Approved commissions waiting for a payout. Another %s is still inside its hold period."
+msgid "Approved commissions waiting to be paid out. Another %s is still in the hold period."
 msgstr ""
 
 #: assets/js/admin.js:292
@@ -2559,7 +2541,7 @@ msgstr ""
 
 #. translators: %d: number of active affiliates
 #: assets/js/admin.js:294
-msgid "Everyone with an affiliate account, whatever their status. %d of them are active."
+msgid "All affiliates, whatever their status. %d are active."
 msgstr ""
 
 #: assets/js/admin.js:294
@@ -2674,11 +2656,11 @@ msgid "One payment per affiliate in this payout."
 msgstr ""
 
 #: assets/js/admin.js:299
-msgid "Every unpaid payment in this payout is marked paid, and every commission in them with it. Do this once the money has been sent."
+msgid "Marks every unpaid payment in this payout as paid, along with their commissions. Do this once the money has been sent."
 msgstr ""
 
 #: assets/js/admin.js:300
-msgid "Its payments are deleted and their commissions go back to unpaid, ready for the next payout."
+msgid "Deletes its payments. Their commissions go back to unpaid and into the next payout."
 msgstr ""
 
 #: assets/js/admin.js:300
@@ -2690,7 +2672,7 @@ msgid "Remove from payment"
 msgstr ""
 
 #: assets/js/admin.js:300
-msgid "The commission stays unpaid and goes into the next payout; this payment gets smaller by its amount."
+msgid "The commission stays unpaid and goes into the next payout. This payment’s amount is reduced by it."
 msgstr ""
 
 #: assets/js/admin.js:300
@@ -2733,7 +2715,7 @@ msgstr[1] ""
 
 #. translators: %s: payout batch key
 #: assets/js/admin.js:305
-msgid "Payout %s — the batch this payment was created in."
+msgid "Payout %s, the batch this payment belongs to."
 msgstr ""
 
 #: assets/js/admin.js:305
@@ -2749,7 +2731,7 @@ msgid "Every commission was removed. Delete the payment, or leave it as a record
 msgstr ""
 
 #: assets/js/admin.js:305
-msgid "The money has been sent: every commission in this payment is marked paid."
+msgid "Marks every commission in this payment as paid. Do this once the money has been sent."
 msgstr ""
 
 #: assets/js/admin.js:305
@@ -2765,7 +2747,7 @@ msgid "Payment deleted."
 msgstr ""
 
 #: assets/js/admin.js:305
-msgid "Only unpaid commissions are included. Each affiliate gets a payment; pay them outside WordPress, then mark the payment paid."
+msgid "Only unpaid commissions are included. Each affiliate gets one payment. Send the money outside WordPress, then mark the payment paid."
 msgstr ""
 
 #: assets/js/admin.js:305
@@ -2813,7 +2795,7 @@ msgid "Minimum amount"
 msgstr ""
 
 #: assets/js/admin.js:305
-msgid "An affiliate below this is carried over to the next run."
+msgid "Affiliates below this amount wait for the next payout."
 msgstr ""
 
 #: assets/js/admin.js:305
@@ -2825,7 +2807,7 @@ msgid "Any time"
 msgstr ""
 
 #: assets/js/admin.js:305
-msgid "Only commissions created inside the period are paid."
+msgid "Only commissions from this period are included."
 msgstr ""
 
 #: assets/js/admin.js:305
@@ -2873,7 +2855,7 @@ msgid "Set the filters on the left and click Preview."
 msgstr ""
 
 #: assets/js/admin.js:308
-msgid "Nobody matches: no unpaid commissions above the minimum."
+msgid "No affiliate has unpaid commissions above the minimum."
 msgstr ""
 
 #. translators: 1: number of commissions, 2: their total
@@ -2911,7 +2893,7 @@ msgid "Could not load the settings."
 msgstr ""
 
 #: assets/js/admin.js:310
-msgid "Rates, the hold period, payouts and the affiliate area. A change applies from the next order on. Commissions already recorded keep the numbers they were created with."
+msgid "Rates, the hold period, payouts and the affiliate area. Changes apply to new orders only. Existing commissions keep their numbers."
 msgstr ""
 
 #: assets/js/admin.js:310

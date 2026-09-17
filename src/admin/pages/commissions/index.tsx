@@ -342,7 +342,7 @@ export function CommissionsTable( {
 			isDestructive: true,
 			confirmTitle: __( 'Reject commission', 'flyaffiliate' ),
 			confirmMessage: __(
-				'A rejected commission is not paid. It comes back if its order recovers, or if you mark it pending or unpaid again.',
+				'A rejected commission will not be paid. You can set it back to pending or unpaid later.',
 				'flyaffiliate'
 			),
 			isEligible: ( item ) =>
@@ -357,7 +357,7 @@ export function CommissionsTable( {
 			supportsBulk: true,
 			confirmTitle: __( 'Delete commission', 'flyaffiliate' ),
 			confirmMessage: __(
-				'The commission is removed from the ledger. A commission inside a payment cannot be deleted.',
+				'This removes the commission for good. Commissions in a payment can’t be deleted.',
 				'flyaffiliate'
 			),
 			// The lock is the payment, not the status (CONTEXT.md rule 7).
@@ -463,7 +463,7 @@ export default function CommissionsPage() {
 			<PageHeader
 				title={ __( 'Commissions', 'flyaffiliate' ) }
 				description={ __(
-					'Pending commissions become unpaid once the hold period ends. Unpaid commissions are what the next payout covers.',
+					'Pending commissions become unpaid when the hold period ends. Unpaid commissions go into the next payout.',
 					'flyaffiliate'
 				) }
 			/>

@@ -612,7 +612,7 @@ export default function DashboardPage() {
 					<Section
 						title={ __( 'Earnings & payouts', 'flyaffiliate' ) }
 						tooltip={ __(
-							'Money in the selected dates: what the referred sales were worth and what the commissions on them cost.',
+							'Referred sales and the commissions on them, for the selected dates.',
 							'flyaffiliate'
 						) }
 						action={
@@ -635,7 +635,7 @@ export default function DashboardPage() {
 											stats.earnings.referral_revenue
 										) }
 										tooltip={ __(
-											'What the referred order items were worth before commissions, in the selected dates.',
+											'The value of referred order items in the selected dates, before commissions.',
 											'flyaffiliate'
 										) }
 									/>
@@ -663,7 +663,7 @@ export default function DashboardPage() {
 											stats.earnings.paid
 										) }
 										tooltip={ __(
-											'Commissions whose payment has been marked paid.',
+											'Commissions that have been paid out.',
 											'flyaffiliate'
 										) }
 									/>
@@ -679,7 +679,7 @@ export default function DashboardPage() {
 										tooltip={ sprintf(
 											/* translators: %s: amount still pending */
 											__(
-												'Approved commissions waiting for a payout. Another %s is still inside its hold period.',
+												'Approved commissions waiting to be paid out. Another %s is still in the hold period.',
 												'flyaffiliate'
 											),
 											formatMoney(
@@ -759,7 +759,7 @@ export default function DashboardPage() {
 										tooltip={ sprintf(
 											/* translators: %d: number of active affiliates */
 											__(
-												'Everyone with an affiliate account, whatever their status. %d of them are active.',
+												'All affiliates, whatever their status. %d are active.',
 												'flyaffiliate'
 											),
 											stats.affiliates.active

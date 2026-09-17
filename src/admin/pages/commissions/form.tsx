@@ -7,8 +7,8 @@
  * label.
  *
  * On edit the ID, the affiliate, the origin and the date are fixed, as in
- * SliceWP. A commission inside a payment is shown but cannot change at all
- * (CONTEXT.md money rule 7); the page says so and links to the payment.
+ * SliceWP; the rest stays open even inside a payment, which follows the edit
+ * while unpaid and keeps its amount once paid (CONTEXT.md money rule 7).
  */
 import { useEffect, useState } from '@wordpress/element';
 import { dateI18n, getDate, gmdate } from '@wordpress/date';
@@ -20,7 +20,7 @@ import {
 	useParams,
 	useSearchParams,
 } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, Lock, ReceiptText } from 'lucide-react';
+import { ArrowLeft, ExternalLink, ReceiptText, Wallet } from 'lucide-react';
 import {
 	Alert,
 	AlertDescription,
@@ -256,40 +256,36 @@ function SuffixLink( {
 }
 
 /**
- * Why the page is read-only: the payment that holds the commission, and what
- * its state means. A paid payment keeps the commission as it was paid; an
- * unpaid one can still let it go.
+ * The payment holding the commission, and what an edit means for it. An
+ * unpaid payment re-sums to follow the edit; a paid one keeps the amount it
+ * was paid with, so the edit corrects the commission's own record only.
  *
  * @param {Object}      props           Props.
  * @param {number}      props.paymentId The payment's id.
  * @param {Payout|null} props.payment   The payment, once loaded.
  */
-function LockNotice( {
+function PaymentNotice( {
 	paymentId,
 	payment,
 }: {
 	paymentId: number;
 	payment: Payout | null;
 } ) {
-	const paid = payment?.status === 'paid';
 	let title: string = sprintf(
 		/* translators: %d: payment id */
-		__( 'Held by payment #%d', 'flyaffiliate' ),
+		__( 'In payment #%d', 'flyaffiliate' ),
 		paymentId
 	);
-	let text: string = __(
-		'Nothing here changes while the payment holds it.',
-		'flyaffiliate'
-	);
+	let text = '';
 
-	if ( payment && paid ) {
+	if ( payment?.status === 'paid' ) {
 		title = sprintf(
 			/* translators: %d: payment id */
 			__( 'Paid in payment #%d', 'flyaffiliate' ),
 			paymentId
 		);
 		text = __(
-			'The money went out with that payment, so the commission is kept exactly as it was paid.',
+			'The payment was already sent, so its amount stays as it was. Changes here only update this commission.',
 			'flyaffiliate'
 		);
 	} else if ( payment ) {
@@ -299,18 +295,19 @@ function LockNotice( {
 			paymentId
 		);
 		text = __(
-			'The payment has not been marked paid yet. Take the commission out of it, or delete the payment, to change anything here.',
+			'The payment has not been sent yet, so its amount updates with your changes.',
 			'flyaffiliate'
 		);
 	}
 
 	return (
-		<Alert data-testid="flyaffiliate-commission-locked">
-			<Lock className="size-4" />
+		<Alert data-testid="flyaffiliate-commission-payment">
+			<Wallet className="size-4" />
 			<AlertTitle>{ title }</AlertTitle>
 			<AlertDescription>
 				<span>
-					{ text }{ ' ' }
+					{ text }
+					{ text && ' ' }
 					<Link
 						to={ `/payouts/payment/${ paymentId }` }
 						className="font-medium text-primary hover:underline"
@@ -418,8 +415,8 @@ export default function CommissionFormPage() {
 			.finally( () => setLoading( false ) );
 	}, [ editing, commissionId ] );
 
-	// The lock is the payment, not the status (CONTEXT.md money rule 7).
-	const locked = editing && Boolean( commission?.payout_id );
+	// A payment holding the commission follows the edit; it does not block it.
+	const inPayment = editing && Boolean( commission?.payout_id );
 	// The reference of a commission that came from checkout is its order item's.
 	const referenceFixed = editing && commission?.order_item_id !== null;
 	// The saved reference points at an order that exists.
@@ -434,26 +431,22 @@ export default function CommissionFormPage() {
 
 	const statusHint: Record< string, string > = {
 		pending: __(
-			'Goes through the hold period first, and waits for its order to be paid.',
+			'Waits for the hold period to end and for the order to be paid.',
 			'flyaffiliate'
 		),
 		unpaid: __( 'Ready to go out in the next payout.', 'flyaffiliate' ),
 		paid: __(
-			'Money that already went outside FlyAffiliate. Recorded as paid, with no payment behind it, so it can still be corrected here.',
+			'Already paid outside FlyAffiliate. You can still edit it here.',
 			'flyaffiliate'
 		),
 		rejected: __(
-			'Not paid. It comes back if its order recovers, or if you set it pending or unpaid again.',
+			'Will not be paid. You can set it back to pending or unpaid at any time.',
 			'flyaffiliate'
 		),
 	};
 
 	const submit = async ( event: React.FormEvent ) => {
 		event.preventDefault();
-
-		if ( locked ) {
-			return;
-		}
 
 		if ( ! editing && ! values.affiliate_id ) {
 			toast.error(
@@ -552,27 +545,16 @@ export default function CommissionFormPage() {
 		);
 	}
 
-	const disabled = locked || saving;
+	const disabled = saving;
 
 	let description: string = __(
-		'For a commission WooCommerce did not work out itself: a bonus, a correction, an offline sale.',
+		'Add a commission by hand, for a bonus, a correction or an offline sale.',
 		'flyaffiliate'
 	);
 
-	if ( locked ) {
-		description =
-			payment?.status === 'paid'
-				? __(
-						'Shown for the record: it was paid, and stays as it was paid.',
-						'flyaffiliate'
-				  )
-				: __(
-						'Shown for the record: nothing changes while a payment holds it.',
-						'flyaffiliate'
-				  );
-	} else if ( editing ) {
+	if ( editing ) {
 		description = __(
-			'The affiliate, the origin and the date are fixed; the rest can change until the commission goes into a payment.',
+			'Edit the amount, reference, type or status. The affiliate, origin and date can’t be changed.',
 			'flyaffiliate'
 		);
 	}
@@ -610,28 +592,16 @@ export default function CommissionFormPage() {
 				actions={
 					<>
 						<Button
-							type="button"
-							variant="outline"
-							className={ BRAND_OUTLINE }
-							onClick={ () => navigate( from ) }
+							type="submit"
+							form={ FORM_ID }
+							disabled={ saving }
+							data-testid="flyaffiliate-commission-save"
 						>
-							{ locked
-								? __( 'Back', 'flyaffiliate' )
-								: __( 'Cancel', 'flyaffiliate' ) }
+							{ saving && <Spinner className="size-4" /> }
+							{ editing
+								? __( 'Save', 'flyaffiliate' )
+								: __( 'Add commission', 'flyaffiliate' ) }
 						</Button>
-						{ ! locked && (
-							<Button
-								type="submit"
-								form={ FORM_ID }
-								disabled={ saving }
-								data-testid="flyaffiliate-commission-save"
-							>
-								{ saving && <Spinner className="size-4" /> }
-								{ editing
-									? __( 'Save', 'flyaffiliate' )
-									: __( 'Add commission', 'flyaffiliate' ) }
-							</Button>
-						) }
 					</>
 				}
 			/>
@@ -643,8 +613,8 @@ export default function CommissionFormPage() {
 				className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_22rem]"
 			>
 				<div className="grid content-start gap-6">
-					{ locked && commission && (
-						<LockNotice
+					{ inPayment && commission && (
+						<PaymentNotice
 							paymentId={ commission.payout_id ?? 0 }
 							payment={ payment }
 						/>
@@ -673,7 +643,7 @@ export default function CommissionFormPage() {
 							hint={
 								editing
 									? __(
-											'Who earns this commission. Fixed for the life of the commission.',
+											'Who earns this commission. This can’t be changed.',
 											'flyaffiliate'
 									  )
 									: __(
@@ -748,7 +718,7 @@ export default function CommissionFormPage() {
 							id="flyaffiliate-commission-base"
 							label={ __( 'Reference amount', 'flyaffiliate' ) }
 							hint={ __(
-								'The sale amount the commission is on. Leave it empty when there is no sale behind it.',
+								'The sale amount this commission is based on. Leave it empty if there is no sale.',
 								'flyaffiliate'
 							) }
 						>
@@ -779,11 +749,11 @@ export default function CommissionFormPage() {
 							hint={
 								referenceFixed
 									? __(
-											'The order this commission came from. It cannot change.',
+											'The order this commission came from. This can’t be changed.',
 											'flyaffiliate'
 									  )
 									: __(
-											'The ID of the external reference that led to this commission — usually the referred order in WooCommerce. Under the WooCommerce origin it has to be an order that exists.',
+											'The order this commission is for, usually a WooCommerce order ID. With the WooCommerce origin, the order must exist.',
 											'flyaffiliate'
 									  )
 							}
@@ -908,7 +878,7 @@ export default function CommissionFormPage() {
 											'flyaffiliate'
 									  )
 									: __(
-											'A WooCommerce commission with an order follows that order: it becomes unpaid when the order is paid and is rejected when the order fails. A manual commission only follows the hold period and you.',
+											'Where the commission comes from. A WooCommerce commission follows its order: unpaid once the order is paid, rejected if the order fails. A manual commission only follows the hold period.',
 											'flyaffiliate'
 									  )
 							}
@@ -954,11 +924,11 @@ export default function CommissionFormPage() {
 							hint={
 								editing
 									? __(
-											'When the commission was earned, in the site’s timezone.',
+											'When the commission was earned, in your site’s timezone.',
 											'flyaffiliate'
 									  )
 									: __(
-											'When the commission was earned, in the site’s timezone. A pending commission matures the hold period after this date.',
+											'When the commission was earned, in your site’s timezone. The hold period counts from this date.',
 											'flyaffiliate'
 									  )
 							}

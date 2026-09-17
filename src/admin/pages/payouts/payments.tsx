@@ -304,7 +304,7 @@ export function PaymentsTable( {
 			supportsBulk: true,
 			confirmTitle: __( 'Mark as paid', 'flyaffiliate' ),
 			confirmMessage: __(
-				'The money has been sent: every commission in the payment is marked paid.',
+				'Marks every commission in the payment as paid. Do this once the money has been sent.',
 				'flyaffiliate'
 			),
 			isEligible: ( item ) => item.status === 'unpaid',
@@ -334,7 +334,7 @@ export function PaymentsTable( {
 			supportsBulk: true,
 			confirmTitle: __( 'Delete payment', 'flyaffiliate' ),
 			confirmMessage: __(
-				'The commissions in it go back to unpaid and into the next payout. A paid payment cannot be deleted.',
+				'The commissions in it go back to unpaid and into the next payout. A paid payment can’t be deleted.',
 				'flyaffiliate'
 			),
 			isEligible: ( item ) => item.status === 'unpaid',
@@ -434,7 +434,7 @@ export default function PaymentsPage() {
 				} }
 				title={ __( 'Payments', 'flyaffiliate' ) }
 				description={ __(
-					'Every payment across every payout. Mark one paid once the money has been sent; that is what marks its commissions paid.',
+					'Every payment across all payouts. Mark a payment paid once the money has been sent. That also marks its commissions paid.',
 					'flyaffiliate'
 				) }
 				actions={
