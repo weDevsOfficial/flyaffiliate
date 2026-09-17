@@ -60,7 +60,7 @@ import { errorMessage, fetchOne, send } from '@/lib/api';
 import { formatDate, toYmd } from '@/lib/format';
 import { getGlobals } from '@/lib/globals';
 import { BRAND_OUTLINE } from '@/lib/ui';
-import type { Commission } from '@/lib/types';
+import type { Commission, Payout } from '@/lib/types';
 
 const FORM_ID = 'flyaffiliate-commission-form';
 
@@ -255,6 +255,74 @@ function SuffixLink( {
 	);
 }
 
+/**
+ * Why the page is read-only: the payment that holds the commission, and what
+ * its state means. A paid payment keeps the commission as it was paid; an
+ * unpaid one can still let it go.
+ *
+ * @param {Object}      props           Props.
+ * @param {number}      props.paymentId The payment's id.
+ * @param {Payout|null} props.payment   The payment, once loaded.
+ */
+function LockNotice( {
+	paymentId,
+	payment,
+}: {
+	paymentId: number;
+	payment: Payout | null;
+} ) {
+	const paid = payment?.status === 'paid';
+	let title: string = sprintf(
+		/* translators: %d: payment id */
+		__( 'Held by payment #%d', 'flyaffiliate' ),
+		paymentId
+	);
+	let text: string = __(
+		'Nothing here changes while the payment holds it.',
+		'flyaffiliate'
+	);
+
+	if ( payment && paid ) {
+		title = sprintf(
+			/* translators: %d: payment id */
+			__( 'Paid in payment #%d', 'flyaffiliate' ),
+			paymentId
+		);
+		text = __(
+			'The money went out with that payment, so the commission is kept exactly as it was paid.',
+			'flyaffiliate'
+		);
+	} else if ( payment ) {
+		title = sprintf(
+			/* translators: %d: payment id */
+			__( 'Waiting in payment #%d', 'flyaffiliate' ),
+			paymentId
+		);
+		text = __(
+			'The payment has not been marked paid yet. Take the commission out of it, or delete the payment, to change anything here.',
+			'flyaffiliate'
+		);
+	}
+
+	return (
+		<Alert data-testid="flyaffiliate-commission-locked">
+			<Lock className="size-4" />
+			<AlertTitle>{ title }</AlertTitle>
+			<AlertDescription>
+				<span>
+					{ text }{ ' ' }
+					<Link
+						to={ `/payouts/payment/${ paymentId }` }
+						className="font-medium text-primary hover:underline"
+					>
+						{ __( 'View payment', 'flyaffiliate' ) }
+					</Link>
+				</span>
+			</AlertDescription>
+		</Alert>
+	);
+}
+
 function FormSkeleton() {
 	return (
 		<div data-testid="flyaffiliate-commission-loading">
@@ -284,6 +352,8 @@ export default function CommissionFormPage() {
 	const presetAffiliate = Number( searchParams.get( 'affiliate' ) ) || null;
 
 	const [ commission, setCommission ] = useState< Commission | null >( null );
+	// The payment holding the commission, when one does: paid or still waiting.
+	const [ payment, setPayment ] = useState< Payout | null >( null );
 	const [ loading, setLoading ] = useState( editing );
 	const [ saving, setSaving ] = useState( false );
 	const [ values, setValues ] = useState< Values >( {
@@ -312,6 +382,13 @@ export default function CommissionFormPage() {
 		} )
 			.then( ( item ) => {
 				setCommission( item );
+
+				if ( item.payout_id ) {
+					fetchOne< Payout >( `/payouts/${ item.payout_id }` )
+						.then( setPayment )
+						.catch( () => setPayment( null ) );
+				}
+
 				setValues( ( current ) => ( {
 					...current,
 					affiliate_id: item.affiliate_id,
@@ -483,10 +560,16 @@ export default function CommissionFormPage() {
 	);
 
 	if ( locked ) {
-		description = __(
-			'Shown for the record: a commission inside a payment does not change.',
-			'flyaffiliate'
-		);
+		description =
+			payment?.status === 'paid'
+				? __(
+						'Shown for the record: it was paid, and stays as it was paid.',
+						'flyaffiliate'
+				  )
+				: __(
+						'Shown for the record: nothing changes while a payment holds it.',
+						'flyaffiliate'
+				  );
 	} else if ( editing ) {
 		description = __(
 			'The affiliate, the origin and the date are fixed; the rest can change until the commission goes into a payment.',
@@ -561,36 +644,10 @@ export default function CommissionFormPage() {
 			>
 				<div className="grid content-start gap-6">
 					{ locked && commission && (
-						<Alert data-testid="flyaffiliate-commission-locked">
-							<Lock className="size-4" />
-							<AlertTitle>
-								{ __(
-									'This commission belongs to a payment',
-									'flyaffiliate'
-								) }
-							</AlertTitle>
-							<AlertDescription>
-								<span>
-									{ __(
-										'Take it out of the payment first, or delete the payment.',
-										'flyaffiliate'
-									) }{ ' ' }
-									<Link
-										to={ `/payouts/payment/${ commission.payout_id }` }
-										className="font-medium text-primary hover:underline"
-									>
-										{ sprintf(
-											/* translators: %d: payment id */
-											__(
-												'Open payment #%d',
-												'flyaffiliate'
-											),
-											commission.payout_id ?? 0
-										) }
-									</Link>
-								</span>
-							</AlertDescription>
-						</Alert>
+						<LockNotice
+							paymentId={ commission.payout_id ?? 0 }
+							payment={ payment }
+						/>
 					) }
 
 					<Section

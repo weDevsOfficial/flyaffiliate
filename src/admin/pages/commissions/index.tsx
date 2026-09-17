@@ -51,7 +51,9 @@ const DEFAULT_VIEW: DataViewState = {
 	page: 1,
 	perPage: 20,
 	search: '',
-	sort: { field: 'created_at', direction: 'desc' },
+	// Newest first by id, as SliceWP's list opens: a hand-entered date can sit
+	// anywhere, so sorting by date would shuffle the ids.
+	sort: { field: 'id', direction: 'desc' },
 	// Column order follows the prototype: affiliate, amount, reference, type,
 	// platform, date, status last.
 	fields: [

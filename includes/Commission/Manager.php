@@ -444,12 +444,18 @@ class Manager {
 	 * @return WP_Error
 	 */
 	protected function locked_error( Commission $commission ): WP_Error {
-		return new WP_Error(
-			'flyaffiliate_commission_in_payout',
+		$payout_id = (int) $commission->get( 'payout_id', 0 );
+		$payout    = flyaffiliate()->payout->get( $payout_id );
+
+		if ( null !== $payout && $payout->is_paid() ) {
 			/* translators: %d: the payment id */
-			sprintf( __( 'This commission belongs to payment #%d. Take it out of the payment first, or delete the payment.', 'flyaffiliate' ), (int) $commission->get( 'payout_id', 0 ) ),
-			[ 'status' => 409 ]
-		);
+			$message = sprintf( __( 'This commission was paid in payment #%d and is kept as it was paid.', 'flyaffiliate' ), $payout_id );
+		} else {
+			/* translators: %d: the payment id */
+			$message = sprintf( __( 'This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, to change it.', 'flyaffiliate' ), $payout_id );
+		}
+
+		return new WP_Error( 'flyaffiliate_commission_in_payout', $message, [ 'status' => 409 ] );
 	}
 
 	/**

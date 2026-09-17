@@ -51,7 +51,7 @@ const COMMISSIONS_VIEW: DataViewState = {
 	page: 1,
 	perPage: 20,
 	search: '',
-	sort: { field: 'created_at', direction: 'desc' },
+	sort: { field: 'id', direction: 'desc' },
 	// Same order as the Commissions list: amount, reference, date, status.
 	fields: [
 		'base_amount',
