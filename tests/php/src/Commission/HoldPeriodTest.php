@@ -154,45 +154,65 @@ class HoldPeriodTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * A commission that is due the moment it is created does not wait for the job.
+	 * A pending commission added by hand keeps its status, as in SliceWP: the
+	 * order reaching a paid status, or the job, is what matures it.
 	 *
 	 * @return void
 	 */
-	public function test_a_commission_created_without_a_hold_matures_at_once(): void {
+	public function test_a_pending_commission_added_by_hand_stays_pending_until_its_order_is_paid(): void {
 		flyaffiliate()->settings->save( [ 'hold_days' => 0 ] );
 
-		$affiliate  = $this->factory()->affiliate->create();
-		$commission = flyaffiliate()->commission->create_manual(
+		$affiliate = $this->factory()->affiliate->create();
+		$product   = $this->factory()->product->create();
+		$completed = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'completed' ] );
+		$on_hold   = $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => 'on-hold' ] );
+
+		// Bug 1: the order is already complete and the hold is zero, yet the
+		// commission is created pending and shows up pending.
+		$settled = flyaffiliate()->commission->create(
 			[
 				'affiliate_id' => $affiliate,
 				'amount'       => 25,
+				'order_id'     => $completed,
+				'source'       => Commission::SOURCE_WOOCOMMERCE,
 				'status'       => Commission::STATUS_PENDING,
 			]
 		);
 
-		$this->assertNotWPError( $commission );
-		$this->assertSame(
-			Commission::STATUS_UNPAID,
-			flyaffiliate()->commission->get( $commission->get_id() )->get( 'status' ),
-			'with no hold period a manual commission is payable at once'
-		);
+		$this->assertNotWPError( $settled );
+		$this->assertSame( Commission::STATUS_PENDING, flyaffiliate()->commission->get( $settled->get_id() )->get( 'status' ) );
 
-		// A hold period still holds.
-		flyaffiliate()->settings->save( [ 'hold_days' => 30 ] );
-
-		$held = flyaffiliate()->commission->create_manual(
+		// Bug 2: a pending commission on an order that is not paid yet becomes
+		// unpaid when the order completes.
+		$waiting = flyaffiliate()->commission->create(
 			[
 				'affiliate_id' => $affiliate,
 				'amount'       => 25,
+				'order_id'     => $on_hold,
+				'source'       => Commission::SOURCE_WOOCOMMERCE,
+				'status'       => Commission::STATUS_PENDING,
+			]
+		);
+		$manual  = flyaffiliate()->commission->create(
+			[
+				'affiliate_id' => $affiliate,
+				'amount'       => 25,
+				'order_id'     => $on_hold,
+				'source'       => Commission::SOURCE_MANUAL,
 				'status'       => Commission::STATUS_PENDING,
 			]
 		);
 
-		$this->assertNotWPError( $held );
-		$this->assertSame(
-			Commission::STATUS_PENDING,
-			flyaffiliate()->commission->get( $held->get_id() )->get( 'status' )
-		);
+		wc_get_order( $on_hold )->update_status( 'completed' );
+
+		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $waiting->get_id() )->get( 'status' ) );
+		$this->assertSame( Commission::STATUS_PENDING, flyaffiliate()->commission->get( $manual->get_id() )->get( 'status' ), 'a manual-origin commission does not follow the order' );
+
+		// The job matures what is due once the hold is over (money rule 4).
+		( new HoldPeriod() )->run();
+
+		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $settled->get_id() )->get( 'status' ) );
+		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $manual->get_id() )->get( 'status' ) );
 	}
 
 	/**

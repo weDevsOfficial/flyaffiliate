@@ -627,7 +627,7 @@ export default function SetupPage() {
 											'flyaffiliate'
 										),
 										current + 1,
-										STEPS.length - 1
+										STEPS.length
 									) }
 								</span>
 								<Button

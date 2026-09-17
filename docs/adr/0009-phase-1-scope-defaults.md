@@ -18,7 +18,10 @@ not a separate welcome message. Turning it off means an admin activates
 affiliates by hand.
 
 No other email is sent in Phase 1: no payout notification, no commission
-notification, no summary.
+notification, no summary. The one addition (2026-09-17) is SliceWP's "send
+welcome email" switch on the admin's add-affiliate form — off by default, one
+message with the referral link and the dashboard address, sent only when the
+admin ticks it (`Registration::send_welcome_email()`).
 
 ## 2. Minimum WordPress version is 6.4
 

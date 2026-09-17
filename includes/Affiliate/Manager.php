@@ -98,6 +98,8 @@ class Manager {
 	 *     @type string $status         Default `pending`.
 	 *     @type string $payment_email  Default the user's own email.
 	 *     @type string $promo_method   How the affiliate plans to promote the store.
+	 *     @type string $website        The affiliate's website; stored on the user, as SliceWP does.
+	 *     @type bool   $send_welcome_email Email the new affiliate a welcome with their referral link. Default false.
 	 *     @type string $activation_key Set by the registration flow.
 	 * }
 	 *
@@ -142,6 +144,10 @@ class Manager {
 			);
 		}
 
+		if ( isset( $args['website'] ) ) {
+			$this->set_website( $user_id, (string) $args['website'] );
+		}
+
 		/**
 		 * Fires after an affiliate is created.
 		 *
@@ -150,6 +156,10 @@ class Manager {
 		 * @param Affiliate $affiliate The affiliate.
 		 */
 		do_action( 'flyaffiliate_affiliate_created', $affiliate );
+
+		if ( ! empty( $args['send_welcome_email'] ) ) {
+			flyaffiliate()->registration->send_welcome_email( $affiliate );
+		}
 
 		return $affiliate;
 	}
@@ -196,6 +206,10 @@ class Manager {
 			$affiliate->set( 'activation_key', sanitize_text_field( (string) $args['activation_key'] ) );
 		}
 
+		if ( isset( $args['website'] ) ) {
+			$this->set_website( (int) $affiliate->get( 'user_id' ), (string) $args['website'] );
+		}
+
 		if ( 0 === $affiliate->save() ) {
 			return new WP_Error(
 				'flyaffiliate_update_failed',
@@ -229,6 +243,25 @@ class Manager {
 		do_action( 'flyaffiliate_affiliate_updated', $affiliate );
 
 		return $affiliate;
+	}
+
+	/**
+	 * Store the affiliate's website on their user, where SliceWP keeps it too.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int    $user_id The user.
+	 * @param string $website The URL; empty clears it.
+	 *
+	 * @return void
+	 */
+	protected function set_website( int $user_id, string $website ): void {
+		wp_update_user(
+			[
+				'ID'       => $user_id,
+				'user_url' => esc_url_raw( trim( $website ) ),
+			]
+		);
 	}
 
 	/**

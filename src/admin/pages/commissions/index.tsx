@@ -6,7 +6,7 @@
  */
 import { useMemo, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
 	Check,
 	Clock,
@@ -44,14 +44,16 @@ import { withIconLabels } from '@/lib/actions';
 import { buildTabs } from '@/lib/tabs';
 import type { Commission } from '@/lib/types';
 import Truncated from '@/components/Truncated';
-import CommissionForm from './CommissionForm';
+import Reference from '@/components/Reference';
 
 const DEFAULT_VIEW: DataViewState = {
 	type: 'table',
 	page: 1,
 	perPage: 20,
 	search: '',
-	sort: { field: 'created_at', direction: 'desc' },
+	// Newest first by id, as SliceWP's list opens: a hand-entered date can sit
+	// anywhere, so sorting by date would shuffle the ids.
+	sort: { field: 'id', direction: 'desc' },
 	// Column order follows the prototype: affiliate, amount, reference, type,
 	// platform, date, status last.
 	fields: [
@@ -98,11 +100,12 @@ export function CommissionsTable( {
 	extraFilters = {},
 	onChanged,
 }: TableProps ) {
-	const { statuses, urls, sources, types } = getGlobals();
+	const { statuses, sources, types } = getGlobals();
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [ status, setStatus ] = useState( 'all' );
-	const [ formOpen, setFormOpen ] = useState( false );
-	const [ editing, setEditing ] = useState< Commission | null >( null );
+	// The form page comes back here when it is done.
+	const here = { from: location.pathname };
 	// Controlled, or plugin-ui never shows the bulk toolbar (as in Dokan).
 	const [ selection, setSelection ] = useState< string[] >( [] );
 
@@ -173,7 +176,13 @@ export function CommissionsTable( {
 			id: 'id',
 			label: __( 'Commission ID', 'flyaffiliate' ),
 			render: ( { item } ) => (
-				<span className="font-medium">#{ item.id }</span>
+				<Link
+					to={ `/commissions/${ item.id }/edit` }
+					state={ here }
+					className="font-medium text-primary hover:underline"
+				>
+					#{ item.id }
+				</Link>
 			),
 		},
 		{
@@ -198,19 +207,7 @@ export function CommissionsTable( {
 			id: 'order',
 			label: __( 'Reference', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) =>
-				item.order_id ? (
-					<a
-						href={ `${ urls.orders }${ item.order_id }` }
-						className="font-medium text-primary hover:underline"
-					>
-						#{ item.order_id }
-					</a>
-				) : (
-					<span className="text-muted-foreground">
-						{ sources[ item.source ] ?? item.source }
-					</span>
-				),
+			render: ( { item } ) => <Reference commission={ item } />,
 		},
 		{
 			id: 'base_amount',
@@ -294,7 +291,15 @@ export function CommissionsTable( {
 		},
 	];
 
+	// Edit first, as on Dokan's row menus; the destructive ones last.
 	const actions: DataViewAction< Commission >[] = [
+		{
+			id: 'edit',
+			label: __( 'Edit', 'flyaffiliate' ),
+			icon: <Pencil size={ 16 } />,
+			callback: ( [ item ] ) =>
+				navigate( `/commissions/${ item.id }/edit`, { state: here } ),
+		},
 		{
 			id: 'view-affiliate',
 			label: __( 'View affiliate', 'flyaffiliate' ),
@@ -306,9 +311,9 @@ export function CommissionsTable( {
 			id: 'view-order',
 			label: __( 'View order', 'flyaffiliate' ),
 			icon: <ExternalLink size={ 16 } />,
-			isEligible: ( item ) => item.order_id > 0,
+			isEligible: ( item ) => Boolean( item.order_url ),
 			callback: ( [ item ] ) => {
-				window.location.assign( `${ urls.orders }${ item.order_id }` );
+				window.location.assign( item.order_url ?? '' );
 			},
 		},
 		{
@@ -337,23 +342,12 @@ export function CommissionsTable( {
 			isDestructive: true,
 			confirmTitle: __( 'Reject commission', 'flyaffiliate' ),
 			confirmMessage: __(
-				'A rejected commission is never paid. This cannot be undone.',
+				'A rejected commission will not be paid. You can set it back to pending or unpaid later.',
 				'flyaffiliate'
 			),
 			isEligible: ( item ) =>
 				item.status === 'pending' || item.status === 'unpaid',
 			callback: ( items ) => setStatuses( items, 'rejected' ),
-		},
-		{
-			id: 'edit',
-			label: __( 'Edit amount', 'flyaffiliate' ),
-			icon: <Pencil size={ 16 } />,
-			isEligible: ( item ) =>
-				item.source === 'manual' && item.status !== 'paid',
-			callback: ( [ item ] ) => {
-				setEditing( item );
-				setFormOpen( true );
-			},
 		},
 		{
 			id: 'delete',
@@ -363,10 +357,11 @@ export function CommissionsTable( {
 			supportsBulk: true,
 			confirmTitle: __( 'Delete commission', 'flyaffiliate' ),
 			confirmMessage: __(
-				'The commission is removed from the ledger. Paid commissions cannot be deleted.',
+				'This removes the commission for good. Commissions in a payment can’t be deleted.',
 				'flyaffiliate'
 			),
-			isEligible: ( item ) => item.status !== 'paid',
+			// The lock is the payment, not the status (CONTEXT.md rule 7).
+			isEligible: ( item ) => ! item.payout_id,
 			callback: async ( items ) => {
 				try {
 					await Promise.all(
@@ -433,10 +428,14 @@ export function CommissionsTable( {
 						...headerContent,
 						<Button
 							key="add"
-							onClick={ () => {
-								setEditing( null );
-								setFormOpen( true );
-							} }
+							onClick={ () =>
+								navigate(
+									affiliateId
+										? `/commissions/new?affiliate=${ affiliateId }`
+										: '/commissions/new',
+									{ state: here }
+								)
+							}
 							data-testid="flyaffiliate-add-commission"
 						>
 							<Plus className="size-4 mr-1" />
@@ -444,14 +443,6 @@ export function CommissionsTable( {
 						</Button>,
 					],
 				} }
-			/>
-
-			<CommissionForm
-				open={ formOpen }
-				onOpenChange={ setFormOpen }
-				commission={ editing }
-				affiliateId={ affiliateId }
-				onSaved={ refresh }
 			/>
 		</>
 	);
@@ -472,7 +463,7 @@ export default function CommissionsPage() {
 			<PageHeader
 				title={ __( 'Commissions', 'flyaffiliate' ) }
 				description={ __(
-					'Pending commissions become unpaid once the hold period ends. Unpaid commissions are what the next payout covers.',
+					'Pending commissions become unpaid when the hold period ends. Unpaid commissions go into the next payout.',
 					'flyaffiliate'
 				) }
 			/>

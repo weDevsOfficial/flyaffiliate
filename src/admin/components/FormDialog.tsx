@@ -53,7 +53,10 @@ export default function FormDialog( {
 						) }
 					</DialogHeader>
 
-					<div className="grid gap-5 px-6 py-5">{ children }</div>
+					{ /* The fields scroll on a short window; the title bar and the buttons stay put. */ }
+					<div className="grid max-h-[calc(100vh-14rem)] gap-5 overflow-y-auto px-6 py-5">
+						{ children }
+					</div>
 
 					<DialogFooter className="border-t border-border px-6 py-4 sm:gap-3">
 						{ footer }

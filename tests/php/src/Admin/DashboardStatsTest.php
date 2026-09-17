@@ -68,8 +68,10 @@ class DashboardStatsTest extends FlyAffiliateTestCase {
 		$this->assertSame( 3, $march['performance']['commissions'] );
 		$this->assertSame( 2, $march['performance']['visits'] );
 		$this->assertSame( 50.0, $march['performance']['conversion_rate'] );
-		$this->assertCount( 1, $march['trend'] );
-		$this->assertSame( [ 'date' => '2026-03-10', 'visits' => 2, 'converted' => 1 ], $march['trend'][0] );
+		$this->assertCount( 31, $march['trend'], 'one point per day of the range, so the chart spans the dates asked for' );
+		$this->assertSame( [ 'date' => '2026-03-01', 'visits' => 0, 'converted' => 0 ], $march['trend'][0] );
+		$this->assertSame( [ 'date' => '2026-03-10', 'visits' => 2, 'converted' => 1 ], $march['trend'][9] );
+		$this->assertSame( '2026-03-31', $march['trend'][30]['date'] );
 	}
 
 	/**

@@ -67,7 +67,7 @@ The `ABSPATH` guard is required in **every** file, templates included.
 - Methods and properties: `snake_case`. The **one** exception is the DI
   container, which mirrors `league/container`'s camelCase public API
   (`addShared`, `addServiceProvider`, `setShared`, `addTag`) — ADR-0002.
-- Type hints on parameters and returns wherever PHP 7.4 allows. Typed properties
+- Type hints on parameters and returns wherever PHP 8.1 allows. Typed properties
   are encouraged: `protected int $affiliate_id = 0;`.
 - Strict comparisons (`===`, `!==`), `in_array( $needle, $haystack, true )`.
 - Yoda conditions are not enforced.
@@ -227,9 +227,14 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
   pending whoever rejected them, and so does an order leaving
   failed/cancelled/refunded (priority 10, before `HoldPeriod` matures them at
   20). Paid and manual commissions are never touched.
-- Partial refunds are not rescaled (ADR-0011 was reverted): an admin handles
-  them by hand. `Manager::set_manual_amount()` edits only a manual commission;
-  a WooCommerce amount is owned by its order item.
+- Partial refunds are not rescaled (ADR-0011's rescaler was reverted): an
+  admin handles them by hand through `Manager::update()`, which edits the
+  amount, reference (only on an admin-created row), reference amount, type
+  and status of any commission that is not paid and not inside a payment.
+  `Manager::create()` is the admin's add form: origin (`source`), type, any
+  status (default `unpaid`) and date; a pending commission created by hand
+  keeps its status until its order is paid or the job matures it — nothing
+  matures it on the spot.
 
 ## Payouts
 
@@ -304,7 +309,9 @@ contain no queries — the caller prepares the data.
   `layout.styles`, no `isPrimary` (inline) actions, `Truncated` with a tooltip
   for long text, `StatusBadge` pills, `buildTabs()` so counts show a
   placeholder while they load, `isLoading` covering the counts too. Forms open
-  in `FormDialog` (bordered title bar and footer). Figures use `StatCard`,
+  in `FormDialog` (bordered title bar and footer); the commission form is a
+  page instead (`#/commissions/new`, `#/commissions/:id/edit`), as SliceWP's is,
+  and lists link to it from the commission ID and an Edit action. Figures use `StatCard`,
   nothing-yet states use `EmptyState`, detail pages pass `backTo` and `badge`
   to `PageHeader`. Icons are lucide only; the wp-admin menu icon is the one
   SVG, because WordPress requires a data URI there.
@@ -370,4 +377,10 @@ Every write that touches money is keyed so a hook firing twice changes nothing:
 | Vendor charge | order meta `_flyaffiliate_vendor_charged` |
 | Paid marking | `payout_id` on the commission, set when the payment is created; the payment's `status` says whether the money went |
 
-A `paid` commission is terminal: never edited, rescaled, or deleted.
+A commission inside a payment (`payout_id > 0`) is never moved by the order
+sync or the maturation job (they call `set_status( …, true )`) and never
+deleted; an admin still edits it, and an unpaid payment re-sums
+(`Payout\Manager::resync()`) while a paid one keeps its amount. A `paid` row
+an admin recorded by hand has no payment and is a record like any other. A
+WooCommerce-origin commission's `order_id` must be an existing order;
+`Commission\Manager::check_reference()` enforces it on create and edit.

@@ -214,7 +214,7 @@ class InstallerTest extends FlyAffiliateTestCase {
 		// phpcs:enable
 
 		$affiliate = self::factory()->affiliate->create_and_get_model();
-		$result    = flyaffiliate()->commission->create_manual(
+		$result    = flyaffiliate()->commission->create(
 			[
 				'affiliate_id' => $affiliate->get_id(),
 				'amount'       => 5,

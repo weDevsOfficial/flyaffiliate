@@ -14,6 +14,7 @@ import Layout from './components/Layout';
 import AffiliatesPage from './pages/affiliates';
 import AffiliatePage from './pages/affiliates/single';
 import CommissionsPage from './pages/commissions';
+import CommissionFormPage from './pages/commissions/form';
 import VisitsPage from './pages/visits';
 import DashboardPage from './pages/dashboard';
 import PayoutsPage from './pages/payouts';
@@ -55,6 +56,16 @@ function getRoutes(): AdminRoute[] {
 			id: 'commissions',
 			path: '/commissions',
 			element: <CommissionsPage />,
+		},
+		{
+			id: 'commission-new',
+			path: '/commissions/new',
+			element: <CommissionFormPage />,
+		},
+		{
+			id: 'commission-edit',
+			path: '/commissions/:id/edit',
+			element: <CommissionFormPage />,
 		},
 		{ id: 'visits', path: '/visits', element: <VisitsPage /> },
 		{ id: 'payouts', path: '/payouts', element: <PayoutsPage /> },

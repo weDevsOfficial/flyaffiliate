@@ -18,10 +18,12 @@ export type Affiliate = {
 	user_id: number;
 	name: string;
 	user_login: string;
+	email: string;
 	totals?: CommissionTotals;
 	status: string;
 	payment_email: string;
 	promo_method: string;
+	website: string;
 	referral_url: string;
 	created_at: string | null;
 	updated_at: string | null;
@@ -32,6 +34,7 @@ export type Commission = {
 	affiliate_id: number;
 	affiliate_name: string;
 	order_id: number;
+	order_url: string | null;
 	order_item_id: number | null;
 	product_id: number;
 	vendor_id: number;
@@ -57,6 +60,7 @@ export type Visit = {
 	referrer: string;
 	converted: boolean;
 	order_id: number | null;
+	order_url: string | null;
 	created_at: string | null;
 };
 
@@ -125,6 +129,7 @@ export type DashboardStats = {
 		affiliate_id: number;
 		affiliate_name: string;
 		order_id: number;
+		order_url: string | null;
 		amount: number;
 		status: string;
 		created_at: string;

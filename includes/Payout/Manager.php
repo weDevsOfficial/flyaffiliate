@@ -472,6 +472,45 @@ class Manager {
 	}
 
 	/**
+	 * Re-sum an unpaid payment from the commissions it holds.
+	 *
+	 * An admin edited or moved a commission inside the payment (SliceWP lets
+	 * them), so the promise is recounted: the amount is the sum of the unpaid
+	 * commissions still in it — the ones `mark_paid()` would pay. A paid
+	 * payment is left as it was paid.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int $payout_id The payment.
+	 *
+	 * @return Payout|null The payment, or null when there is none.
+	 */
+	public function resync( int $payout_id ): ?Payout {
+		global $wpdb;
+
+		$payout = $this->get( $payout_id );
+
+		if ( null === $payout || $payout->is_paid() ) {
+			return $payout;
+		}
+
+		$table = Commission::get_table();
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- FlyAffiliate's own table; the interpolation is its name, the values go through prepare().
+		$sum = (float) $wpdb->get_var(
+			$wpdb->prepare( "SELECT COALESCE( SUM( amount ), 0 ) FROM {$table} WHERE payout_id = %d AND status = %s", $payout_id, Commission::STATUS_UNPAID )
+		);
+		// phpcs:enable
+
+		if ( Money::to_cents( $sum ) !== Money::to_cents( (float) $payout->get( 'amount', 0 ) ) ) {
+			$payout->set( 'amount', Money::round( $sum ) );
+			$payout->save();
+		}
+
+		return $payout;
+	}
+
+	/**
 	 * Take a commission out of an unpaid payment, so the next batch picks it up.
 	 *
 	 * @since FLYAFFILIATE_SINCE

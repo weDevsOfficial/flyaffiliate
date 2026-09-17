@@ -209,7 +209,7 @@ class OrderStatusSync implements Hookable {
 		$moved = 0;
 
 		foreach ( $commissions as $commission ) {
-			$result = flyaffiliate()->commission->set_status( $commission->get_id(), $to );
+			$result = flyaffiliate()->commission->set_status( $commission->get_id(), $to, true );
 
 			if ( ! is_wp_error( $result ) ) {
 				++$moved;

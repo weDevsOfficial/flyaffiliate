@@ -198,6 +198,8 @@ class AffiliatesController extends AdminBaseController {
 				'status'        => $request['status'] ?? Affiliate::STATUS_PENDING,
 				'payment_email' => $request['payment_email'] ?? '',
 				'promo_method'  => $request['promo_method'] ?? '',
+				'website'       => $request['website'] ?? '',
+				'send_welcome_email' => ! empty( $request['send_welcome_email'] ),
 			]
 		);
 
@@ -224,7 +226,7 @@ class AffiliatesController extends AdminBaseController {
 	public function update_item( $request ) {
 		$changes = [];
 
-		foreach ( [ 'status', 'payment_email', 'promo_method' ] as $field ) {
+		foreach ( [ 'status', 'payment_email', 'promo_method', 'website' ] as $field ) {
 			if ( isset( $request[ $field ] ) ) {
 				$changes[ $field ] = $request[ $field ];
 			}
@@ -298,15 +300,32 @@ class AffiliatesController extends AdminBaseController {
 		return $user instanceof \WP_User ? $user->user_login : '';
 	}
 
+	/**
+	 * The account email behind an affiliate.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int $user_id The user.
+	 *
+	 * @return string The email, or an empty string when the user is gone.
+	 */
+	protected function get_user_email( int $user_id ): string {
+		$user = $user_id > 0 ? get_userdata( $user_id ) : false;
+
+		return $user instanceof \WP_User ? $user->user_email : '';
+	}
+
 	public function prepare_item_for_response( $item, $request ) {
 		$data = [
 			'id'            => $item->get_id(),
 			'user_id'       => (int) $item->get( 'user_id' ),
 			'name'          => $item->get_display_name(),
 			'user_login'    => $this->get_user_login( (int) $item->get( 'user_id' ) ),
+			'email'         => $this->get_user_email( (int) $item->get( 'user_id' ) ),
 			'status'        => (string) $item->get( 'status' ),
 			'payment_email' => $item->get_payment_email(),
 			'promo_method'  => (string) $item->get( 'promo_method', '' ),
+			'website'       => $item->get_website(),
 			'referral_url'  => $item->get_referral_url(),
 			'created_at'    => $this->prepare_date( $item->get( 'created_at' ) ),
 			'updated_at'    => $this->prepare_date( $item->get( 'updated_at' ) ),
@@ -422,6 +441,12 @@ class AffiliatesController extends AdminBaseController {
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
+				'email'         => [
+					'description' => __( 'The account email of the user behind the affiliate.', 'flyaffiliate' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
 				'status'        => [
 					'description' => __( 'Affiliate status.', 'flyaffiliate' ),
 					'type'        => 'string',
@@ -442,6 +467,20 @@ class AffiliatesController extends AdminBaseController {
 					'description' => __( 'How the affiliate plans to promote the store.', 'flyaffiliate' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
+				],
+				'website'       => [
+					'description' => __( 'The affiliate\'s website. Kept on their WordPress user.', 'flyaffiliate' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'arg_options' => [
+						'sanitize_callback' => 'esc_url_raw',
+					],
+				],
+				'send_welcome_email' => [
+					'description' => __( 'When creating: email the affiliate a welcome with their referral link.', 'flyaffiliate' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => [],
 				],
 				'referral_url'  => [
 					'description' => __( 'The affiliate\'s referral link.', 'flyaffiliate' ),

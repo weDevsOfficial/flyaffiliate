@@ -25,7 +25,8 @@ use WP_Error;
  * signup for an address that is already an affiliate is told so rather than
  * duplicated.
  *
- * The activation email is the only email Phase 1 sends (ADR-0009). When the
+ * The activation email and the optional welcome email an admin can send when
+ * adding an affiliate are the only emails Phase 1 sends (ADR-0009). When the
  * setting turns it off, affiliates stay pending until an admin activates them.
  *
  * @since FLYAFFILIATE_SINCE
@@ -285,6 +286,60 @@ class Registration implements Hookable {
 		 */
 		$email = apply_filters(
 			'flyaffiliate_activation_email',
+			[
+				'to'      => $user->user_email,
+				'subject' => $subject,
+				'message' => $message,
+				'headers' => [],
+			],
+			$affiliate
+		);
+
+		return wp_mail( $email['to'], $email['subject'], $email['message'], $email['headers'] );
+	}
+
+	/**
+	 * Send a welcome email to an affiliate an admin just added.
+	 *
+	 * SliceWP's "add affiliate" form has the same switch. The email carries the
+	 * referral link and the dashboard address, so the affiliate can start
+	 * without anyone telling them where to go.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Affiliate $affiliate The affiliate.
+	 *
+	 * @return bool
+	 */
+	public function send_welcome_email( Affiliate $affiliate ): bool {
+		$user = $affiliate->get_user();
+
+		if ( null === $user ) {
+			return false;
+		}
+
+		$site_name = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+		$dashboard = flyaffiliate_get_page_url( 'affiliate_dashboard' );
+		// translators: %s: site name.
+		$subject = sprintf( __( 'Welcome to the %s affiliate programme', 'flyaffiliate' ), $site_name );
+		$message = sprintf(
+			// translators: 1: site name, 2: referral URL, 3: dashboard URL.
+			__( "You are now an affiliate of %1\$s.\n\nYour referral link:\n%2\$s\n\nShare it, and you earn a commission on every order it brings in. Your dashboard shows your visits, commissions and payouts:\n%3\$s", 'flyaffiliate' ),
+			$site_name,
+			$affiliate->get_referral_url(),
+			'' !== $dashboard ? $dashboard : home_url( '/' )
+		);
+
+		/**
+		 * Filters the welcome email before it is sent.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param array     $email     `[ 'to' => string, 'subject' => string, 'message' => string, 'headers' => array ]`.
+		 * @param Affiliate $affiliate The affiliate.
+		 */
+		$email = apply_filters(
+			'flyaffiliate_welcome_email',
 			[
 				'to'      => $user->user_email,
 				'subject' => $subject,

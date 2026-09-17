@@ -148,7 +148,7 @@ class CommissionsController extends AdminBaseController {
 	}
 
 	/**
-	 * Add a manual commission.
+	 * Add a commission by hand.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -157,15 +157,20 @@ class CommissionsController extends AdminBaseController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( $request ) {
-		$result = flyaffiliate()->commission->create_manual(
-			[
-				'affiliate_id' => (int) $request['affiliate_id'],
-				'amount'       => (float) $request['amount'],
-				'base_amount'  => (float) ( $request['base_amount'] ?? 0 ),
-				'order_id'     => (int) ( $request['order_id'] ?? 0 ),
-				'status'       => (string) ( $request['status'] ?? Commission::STATUS_PENDING ),
-			]
-		);
+		$args = [
+			'affiliate_id' => (int) $request['affiliate_id'],
+			'amount'       => (float) $request['amount'],
+			'base_amount'  => (float) ( $request['base_amount'] ?? 0 ),
+			'order_id'     => (int) ( $request['order_id'] ?? 0 ),
+		];
+
+		foreach ( [ 'source', 'type', 'status', 'created_at' ] as $field ) {
+			if ( isset( $request[ $field ] ) && '' !== $request[ $field ] ) {
+				$args[ $field ] = (string) $request[ $field ];
+			}
+		}
+
+		$result = flyaffiliate()->commission->create( $args );
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
@@ -179,7 +184,7 @@ class CommissionsController extends AdminBaseController {
 	}
 
 	/**
-	 * Change a commission's status, or a manual commission's amount.
+	 * Edit a commission: its amount, reference, reference amount, type or status.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -188,27 +193,24 @@ class CommissionsController extends AdminBaseController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		$id         = (int) $request['id'];
-		$commission = flyaffiliate()->commission->get( $id );
+		$id = (int) $request['id'];
 
-		if ( null === $commission ) {
+		if ( null === flyaffiliate()->commission->get( $id ) ) {
 			return $this->not_found();
 		}
 
-		if ( isset( $request['amount'] ) ) {
-			$result = flyaffiliate()->commission->set_manual_amount( $id, (float) $request['amount'] );
+		$changes = [];
 
-			if ( is_wp_error( $result ) ) {
-				return $result;
+		foreach ( [ 'amount', 'base_amount', 'order_id', 'type', 'status' ] as $field ) {
+			if ( isset( $request[ $field ] ) ) {
+				$changes[ $field ] = $request[ $field ];
 			}
 		}
 
-		if ( isset( $request['status'] ) ) {
-			$result = flyaffiliate()->commission->set_status( $id, (string) $request['status'] );
+		$result = flyaffiliate()->commission->update( $id, $changes );
 
-			if ( is_wp_error( $result ) ) {
-				return $result;
-			}
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
 
 		return $this->prepare_item_for_response( flyaffiliate()->commission->get( $id ), $request );
@@ -230,12 +232,8 @@ class CommissionsController extends AdminBaseController {
 			return $this->not_found();
 		}
 
-		if ( $commission->is_in_payout() ) {
-			return new WP_Error( 'flyaffiliate_rest_in_payout', __( 'This commission belongs to a payment. Take it out of the payment first, or delete the payment.', 'flyaffiliate' ), [ 'status' => 409 ] );
-		}
-
 		if ( $commission->is_locked() ) {
-			return new WP_Error( 'flyaffiliate_rest_locked', __( 'A paid commission cannot be deleted.', 'flyaffiliate' ), [ 'status' => 409 ] );
+			return flyaffiliate()->commission->in_payment_error( $commission );
 		}
 
 		$previous = $this->prepare_item_for_response( $commission, $request );
@@ -266,6 +264,7 @@ class CommissionsController extends AdminBaseController {
 			'affiliate_id'  => (int) $item->get( 'affiliate_id' ),
 			'affiliate_name' => $this->get_affiliate_name( (int) $item->get( 'affiliate_id' ) ),
 			'order_id'      => (int) $item->get( 'order_id', 0 ),
+			'order_url'     => $this->get_order_url( $item ),
 			'order_item_id' => null === $item->get( 'order_item_id' ) ? null : (int) $item->get( 'order_item_id' ),
 			'product_id'    => (int) $item->get( 'product_id', 0 ),
 			'vendor_id'     => (int) $item->get( 'vendor_id', 0 ),
@@ -286,6 +285,24 @@ class CommissionsController extends AdminBaseController {
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );
 
 		return $this->add_links( $response, $this->prepare_links( $item ) );
+	}
+
+	/**
+	 * The admin URL of the commission's order, when that order exists.
+	 *
+	 * A reference that points at nothing — a manual commission's free-form
+	 * reference, or an order deleted since — is shown as a number, not a link.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Commission $item The commission.
+	 *
+	 * @return string|null
+	 */
+	protected function get_order_url( Commission $item ): ?string {
+		$order = (int) $item->get( 'order_id', 0 ) > 0 ? $item->get_order() : null;
+
+		return null === $order ? null : $order->get_edit_order_url();
 	}
 
 	/**
@@ -355,10 +372,16 @@ class CommissionsController extends AdminBaseController {
 					'required' => true,
 				],
 				'order_id'      => [
-					'description' => __( 'The order it came from, if any.', 'flyaffiliate' ),
+					'description' => __( 'The order it came from, if any. Under the WooCommerce origin it must be an existing order.', 'flyaffiliate' ),
 					'type' => 'integer',
 					'context' => [ 'view', 'edit' ],
 				],
+				'order_url'     => $ro(
+					[
+						'description' => __( 'The admin URL of that order, when it exists.', 'flyaffiliate' ),
+						'type' => [ 'string', 'null' ],
+					]
+				),
 				'order_item_id' => $ro(
 					[
 						'description' => __( 'The order item it came from. Null for a manual commission.', 'flyaffiliate' ),
@@ -390,7 +413,7 @@ class CommissionsController extends AdminBaseController {
 						'context' => [ 'view', 'edit' ],
 					]
 				),
-				'amount'        => $money( __( 'What the affiliate earns. Editable only on a manual commission.', 'flyaffiliate' ) ),
+				'amount'        => $money( __( 'What the affiliate earns. Editable until the commission is paid or inside a payment.', 'flyaffiliate' ) ),
 				'currency'      => $ro(
 					[
 						'description' => __( 'Currency code.', 'flyaffiliate' ),
@@ -398,23 +421,20 @@ class CommissionsController extends AdminBaseController {
 						'context' => [ 'view', 'edit' ],
 					]
 				),
-				'source'        => $ro(
-					[
-						'description' => __( 'Where the commission came from.', 'flyaffiliate' ),
-						'type' => 'string',
-						'enum' => array_keys( Commission::get_sources() ),
-						'context' => [ 'view', 'edit' ],
-					]
-				),
-				'type'          => $ro(
-					[
-						'description' => __( 'Commission type.', 'flyaffiliate' ),
-						'type' => 'string',
-						'context' => [ 'view', 'edit' ],
-					]
-				),
+				'source'        => [
+					'description' => __( 'Where the commission came from: its origin. Set when it is created; a WooCommerce commission with an order follows that order.', 'flyaffiliate' ),
+					'type' => 'string',
+					'enum' => array_keys( Commission::get_sources() ),
+					'context' => [ 'view', 'edit' ],
+				],
+				'type'          => [
+					'description' => __( 'Commission type.', 'flyaffiliate' ),
+					'type' => 'string',
+					'enum' => array_keys( Commission::get_types() ),
+					'context' => [ 'view', 'edit' ],
+				],
 				'status'        => [
-					'description' => __( 'Status. Paid is set by a payout, never here.', 'flyaffiliate' ),
+					'description' => __( 'Status. Any status can be given when the commission is created; afterwards paid is set by a payout, never here.', 'flyaffiliate' ),
 					'type' => 'string',
 					'enum' => [ Commission::STATUS_PENDING, Commission::STATUS_UNPAID, Commission::STATUS_REJECTED, Commission::STATUS_PAID ],
 					'context' => [ 'view', 'edit' ],
@@ -434,14 +454,12 @@ class CommissionsController extends AdminBaseController {
 						'context' => [ 'view', 'edit' ],
 					]
 				),
-				'created_at'    => $ro(
-					[
-						'description' => __( 'When it was created, in GMT.', 'flyaffiliate' ),
-						'type' => [ 'string', 'null' ],
-						'format' => 'date-time',
-						'context' => [ 'view', 'edit' ],
-					]
-				),
+				'created_at'    => [
+					'description' => __( 'When it was created, in GMT. Can be given when the commission is created; fixed afterwards.', 'flyaffiliate' ),
+					'type' => [ 'string', 'null' ],
+					'format' => 'date-time',
+					'context' => [ 'view', 'edit' ],
+				],
 				'updated_at'    => $ro(
 					[
 						'description' => __( 'When it last changed, in GMT.', 'flyaffiliate' ),
