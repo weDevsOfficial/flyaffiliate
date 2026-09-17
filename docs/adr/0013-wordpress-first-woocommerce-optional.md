@@ -37,14 +37,14 @@ dashboard do not need a shop plugin at all.
   PSR-4 from `composer.json`), as Dokan does; the in-house
   `includes/Autoloader.php` is gone. The release zip carries a production
   `vendor/` that holds nothing but that loader: `bin/build-zip.php` runs
-  `composer install --no-dev --optimize-autoloader` inside the stage, keeps
-  `composer.json` beside it (Plugin Check expects one wherever `vendor/`
-  ships) and drops the lock file. The local `vendor/` with the development
+  `composer install --no-dev --optimize-autoloader` inside the stage and keeps
+  `composer.json` and `composer.lock` beside it (Plugin Check expects the
+  manifest wherever `vendor/` ships). The local `vendor/` with the development
   tools never ships, and no runtime package is ever added (ADR-0002).
 - The zip is laid out and named as Dokan's: `build/flyaffiliate-v{version}.zip`
   holding `assets/`, `includes/`, `languages/`, `templates/`, `vendor/`, the
-  two plugin files, `uninstall.php`, `readme.txt`, `CHANGELOG.md` and
-  `composer.json`.
+  two plugin files, `uninstall.php`, `readme.txt`, `CHANGELOG.md`,
+  `composer.json`, `composer.lock` and `package.json`.
 
 ## Consequences
 

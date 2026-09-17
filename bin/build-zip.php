@@ -235,11 +235,9 @@ if ( 0 !== $composer_status || ! file_exists( $stage_dir . '/vendor/autoload.php
 	exit( 1 );
 }
 
-// Plugin Check expects composer.json wherever a vendor/ directory ships; the
-// lock file is a development artefact and stays out.
-if ( file_exists( $stage_dir . '/composer.lock' ) ) {
-	unlink( $stage_dir . '/composer.lock' );
-}
+// composer.json and composer.lock stay in the zip beside vendor/: Plugin Check
+// expects the manifest wherever a vendor/ directory ships, and the lock file
+// records exactly what the loader was built from.
 
 printf( "Staged %d files (%s) in %s\n", $file_count, flyaffiliate_format_bytes( $byte_count ), $stage_dir );
 
