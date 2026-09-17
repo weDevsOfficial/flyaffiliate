@@ -14,12 +14,13 @@
 /CLAUDE.md
 /CONTEXT.md
 /README.md
-/CHANGELOG.md
 /CONTRIBUTING.md
 /RELEASE.md
 /docs
 
-# Dependencies and build tooling (nothing from vendor/ ships)
+# Dependencies and build tooling. The local vendor/ (dev tools) never ships;
+# bin/build-zip.php installs a production vendor/ — Composer's autoloader only —
+# into the stage and keeps composer.json beside it, as Plugin Check expects.
 /node_modules
 /vendor
 /composer.json

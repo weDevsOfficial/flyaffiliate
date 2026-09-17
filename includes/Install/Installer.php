@@ -393,7 +393,13 @@ class Installer {
 	 * @return void
 	 */
 	public function schedule_events(): void {
+		// Action Scheduler ships with WooCommerce. Without it, WP-Cron runs the
+		// daily job; the hook is the same, so `HoldPeriod` does not care which.
 		if ( ! function_exists( 'as_has_scheduled_action' ) || ! function_exists( 'as_schedule_recurring_action' ) ) {
+			if ( ! wp_next_scheduled( self::MATURATION_HOOK ) ) {
+				wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::MATURATION_HOOK );
+			}
+
 			return;
 		}
 
@@ -424,6 +430,8 @@ class Installer {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( self::MATURATION_HOOK );
 		}
+
+		wp_clear_scheduled_hook( self::MATURATION_HOOK );
 	}
 
 	/**

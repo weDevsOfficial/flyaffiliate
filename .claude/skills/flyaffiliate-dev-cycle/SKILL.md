@@ -109,7 +109,7 @@ is the canary; if it fails, stop and fix it before anything else.
 ## Release
 
 ```bash
-npm run release         # build → makepot → build/flyaffiliate.zip
+npm run release         # build → makepot → build/flyaffiliate-v<version>.zip
 npm run plugin-check    # Plugin Check against build/flyaffiliate
 ```
 

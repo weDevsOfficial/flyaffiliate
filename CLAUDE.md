@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-FlyAffiliate is an affiliate-marketing plugin for WordPress + WooCommerce, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+, WordPress 6.4+, WooCommerce 8.5+. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
+FlyAffiliate is an affiliate-marketing plugin for WordPress, with WooCommerce support built in, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.4+; the WooCommerce integration needs WooCommerce 8.5+ and loads only when WooCommerce is active (ADR-0013). This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
 
 The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service providers, `Hookable` classes, `Manager` facades, overridable templates, an `Installer`/`Upgrade` pair, `FlyAffiliateTestCase`-based PHPUnit tests. Anyone who knows the Dokan codebase should feel at home here.
 
@@ -69,7 +69,7 @@ npm run phpunit             # PHPUnit inside wp-env's tests environment
 npm run test:phpunit        # env:start → phpunit → env:stop
 
 # WordPress.org gate
-npm run release             # Builds build/flyaffiliate.zip honouring .distignore
+npm run release             # Builds build/flyaffiliate-v<version>.zip honouring .distignore
 npm run plugin-check        # Runs Plugin Check against the built zip (wp-env)
 ```
 
@@ -81,11 +81,11 @@ npm run plugin-check        # Runs Plugin Check against the built zip (wp-env)
 - `uninstall.php` — data removal, gated by the "clear data on uninstall" setting
 
 ### Initialization Flow
-1. `flyaffiliate.php` registers the PSR-4 autoloader (`FlyAffiliate\` → `includes/`)
+1. `flyaffiliate.php` requires Composer's autoloader (`vendor/autoload.php`, PSR-4 `FlyAffiliate\` → `includes/`)
 2. Creates the `Container` instance
 3. Registers `Providers\ServiceProvider`
 4. Calls `FlyAffiliate_Plugin::init()`
-5. On `woocommerce_loaded`, `init_plugin()` includes function files and registers hooks
+5. On `plugins_loaded`, `init_plugin()` includes function files, adds the WooCommerce integration provider when WooCommerce is active, and registers hooks
 6. On `init` (priority 4), `init_classes()` resolves the tagged service groups; every `Hookable` gets `register_hooks()` called
 
 ### Directory Structure
@@ -114,7 +114,6 @@ flyaffiliate/
 │   ├── Upgrade/                   # Manager + Upgrades/ versioned upgraders
 │   ├── Utilities/
 │   ├── Assets.php
-│   ├── Autoloader.php
 │   └── functions.php              # flyaffiliate_get_option(), flyaffiliate_get_template_part(), helpers
 ├── templates/                     # Overridable templates: admin/ (app mount, profile), affiliate-dashboard/, registration/
 ├── assets/                        # css/, js/, images/ (built output only; plain sources in assets/src/)

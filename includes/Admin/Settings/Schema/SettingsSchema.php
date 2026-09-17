@@ -758,12 +758,16 @@ class SettingsSchema {
 	 */
 	private static function currency_options(): array {
 		if ( ! function_exists( 'get_woocommerce_currencies' ) ) {
-			return [
-				[
-					'value' => 'USD',
-					'label' => 'USD',
-				],
-			];
+			$options = [];
+
+			foreach ( self::builtin_currencies() as $code => $currency ) {
+				$options[] = [
+					'value' => $code,
+					'label' => sprintf( '%1$s (%2$s)', $currency[0], $currency[1] ),
+				];
+			}
+
+			return $options;
 		}
 
 		$options = [];
@@ -792,9 +796,31 @@ class SettingsSchema {
 	private static function stored_currency_symbol(): string {
 		$stored = (array) get_option( 'flyaffiliate_settings', [] );
 		$code   = ! empty( $stored['currency'] ) ? (string) $stored['currency'] : ( function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'USD' );
-		$symbol = function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol( $code ) : '';
+		$symbol = function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol( $code ) : ( self::builtin_currencies()[ $code ][1] ?? '' );
 
 		return html_entity_decode( $symbol, ENT_QUOTES, 'UTF-8' );
+	}
+
+	/**
+	 * The currencies offered when WooCommerce is not there to list them.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return array<string, array{0: string, 1: string}> Code => [ name, symbol ].
+	 */
+	public static function builtin_currencies(): array {
+		return [
+			'USD' => [ __( 'United States (US) dollar', 'flyaffiliate' ), '$' ],
+			'EUR' => [ __( 'Euro', 'flyaffiliate' ), '€' ],
+			'GBP' => [ __( 'Pound sterling', 'flyaffiliate' ), '£' ],
+			'AUD' => [ __( 'Australian dollar', 'flyaffiliate' ), '$' ],
+			'CAD' => [ __( 'Canadian dollar', 'flyaffiliate' ), '$' ],
+			'INR' => [ __( 'Indian rupee', 'flyaffiliate' ), '₹' ],
+			'BDT' => [ __( 'Bangladeshi taka', 'flyaffiliate' ), '৳' ],
+			'JPY' => [ __( 'Japanese yen', 'flyaffiliate' ), '¥' ],
+			'BRL' => [ __( 'Brazilian real', 'flyaffiliate' ), 'R$' ],
+			'ZAR' => [ __( 'South African rand', 'flyaffiliate' ), 'R' ],
+		];
 	}
 
 	/**

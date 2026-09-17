@@ -1,6 +1,6 @@
 {
     "name": "wedevs/flyaffiliate",
-    "description": "Affiliate marketing for WordPress and WooCommerce.",
+    "description": "Affiliate marketing for WordPress, with WooCommerce support built in.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [
@@ -67,6 +67,6 @@
         "phpcs": "Run PHP CodeSniffer against the plugin (WordPress-Extra + PHPCompatibilityWP).",
         "phpcbf": "Auto-fix the code style violations PHPCS can fix.",
         "test": "Run the PHPUnit suite (requires a provisioned WP test install or wp-env).",
-        "release": "Build build/flyaffiliate.zip honouring .distignore."
+        "release": "Build build/flyaffiliate-v<version>.zip honouring .distignore."
     }
 }

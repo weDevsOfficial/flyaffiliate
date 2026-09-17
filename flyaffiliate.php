@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FlyAffiliate
  * Plugin URI: https://flyaffiliate.co/
- * Description: Affiliate marketing for WooCommerce. Referral tracking, per-item commissions, hold periods, refund handling and manual payouts.
+ * Description: Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts, with WooCommerce support built in.
  * Version: 1.0.0
  * Author: weDevs
  * Author URI: https://wedevs.com/
@@ -12,9 +12,6 @@
  * Domain Path: /languages
  * Requires at least: 6.4
  * Requires PHP: 8.1
- * Requires Plugins: woocommerce
- * WC requires at least: 8.5
- * WC tested up to: 11.1
  *
  * @package FlyAffiliate
  */
@@ -40,10 +37,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 defined( 'FLYAFFILIATE_FILE' ) || define( 'FLYAFFILIATE_FILE', __FILE__ );
 
-require_once __DIR__ . '/includes/Autoloader.php';
-require_once __DIR__ . '/flyaffiliate-class.php';
+// Composer's autoloader. The release zip carries a production `vendor/` that
+// holds nothing but this loader; a checkout needs `composer install` first.
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	add_action(
+		'admin_notices',
+		static function () {
+			if ( ! current_user_can( 'activate_plugins' ) ) {
+				return;
+			}
 
-FlyAffiliate\Autoloader::register( __DIR__ . '/includes' );
+			printf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				esc_html__( 'FlyAffiliate is missing its autoloader. Run "composer install" in the plugin directory, or install the release build.', 'flyaffiliate' )
+			);
+		}
+	);
+
+	return;
+}
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/flyaffiliate-class.php';
 
 /**
  * The container, created before anything asks for a service.

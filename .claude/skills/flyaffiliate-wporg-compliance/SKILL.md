@@ -64,7 +64,8 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 - No `load_plugin_textdomain()` — WordPress.org loads translations. The text
   domain is `flyaffiliate` and must equal the slug in every `__()` call.
 - Plugin header carries: `Plugin Name`, `Plugin URI`, `Description`, `Version`,
-  `Requires at least`, `Requires PHP`, `Requires Plugins: woocommerce`,
+  `Requires at least`, `Requires PHP` (no `Requires Plugins`: WooCommerce is
+  optional, ADR-0013),
   `Author`, `Author URI`, `License: GPLv2 or later`, `License URI`,
   `Text Domain: flyaffiliate`, `Domain Path: /languages`.
 - `readme.txt` `Stable tag` **equals** the header `Version` equals

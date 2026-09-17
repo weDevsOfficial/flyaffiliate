@@ -307,7 +307,9 @@ if ( ! function_exists( 'flyaffiliate_get_currency_symbol' ) ) {
 	 */
 	function flyaffiliate_get_currency_symbol( string $code = '' ): string {
 		$code   = '' !== $code ? $code : flyaffiliate_get_currency();
-		$symbol = function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol( $code ) : '';
+		$symbol = function_exists( 'get_woocommerce_currency_symbol' )
+			? get_woocommerce_currency_symbol( $code )
+			: ( \FlyAffiliate\Admin\Settings\Schema\SettingsSchema::builtin_currencies()[ $code ][1] ?? '' );
 
 		return '' !== $symbol ? html_entity_decode( $symbol, ENT_QUOTES, 'UTF-8' ) : $code;
 	}

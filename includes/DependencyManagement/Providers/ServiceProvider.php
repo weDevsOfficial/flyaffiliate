@@ -90,7 +90,8 @@ class ServiceProvider extends BootableServiceProvider {
 		$container->addServiceProvider( new AdminServiceProvider() );
 		$container->addServiceProvider( new FrontendServiceProvider() );
 		$container->addServiceProvider( new AjaxServiceProvider() );
-		$container->addServiceProvider( new IntegrationServiceProvider() );
+		// IntegrationServiceProvider is added by FlyAffiliate_Plugin::init_plugin()
+		// on `plugins_loaded`, once it is known whether WooCommerce is active.
 		$container->addServiceProvider( new CliServiceProvider() );
 	}
 }

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-17T09:44:10+00:00\n"
+"POT-Creation-Date: 2026-09-17T11:03:34+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -26,12 +26,12 @@ msgstr ""
 
 #. Plugin URI of the plugin
 #: flyaffiliate.php
-msgid "https://wedevs.com/flyaffiliate/"
+msgid "https://flyaffiliate.co/"
 msgstr ""
 
 #. Description of the plugin
 #: flyaffiliate.php
-msgid "Affiliate marketing for WooCommerce. Referral tracking, per-item commissions, hold periods, refund handling and manual payouts."
+msgid "Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts, with WooCommerce support built in."
 msgstr ""
 
 #. Author of the plugin
@@ -44,7 +44,7 @@ msgstr ""
 msgid "https://wedevs.com/"
 msgstr ""
 
-#: flyaffiliate-class.php:279
+#: flyaffiliate-class.php:287
 #: includes/Admin/Menu.php:135
 #: includes/Frontend/AffiliateDashboard.php:50
 #: assets/js/admin.js:310
@@ -53,16 +53,16 @@ msgid "Settings"
 msgstr ""
 
 #. translators: 1: required PHP version, 2: the PHP version running.
-#: flyaffiliate-class.php:301
+#: flyaffiliate-class.php:309
 msgid "FlyAffiliate needs PHP %1$s or newer. This site runs PHP %2$s."
 msgstr ""
 
-#: flyaffiliate-class.php:306
+#: flyaffiliate-class.php:314
 msgid "Plugin activation failed"
 msgstr ""
 
-#: flyaffiliate-class.php:382
-msgid "FlyAffiliate needs WooCommerce to be installed and active."
+#: flyaffiliate.php:52
+msgid "FlyAffiliate is missing its autoloader. Run \"composer install\" in the plugin directory, or install the release build."
 msgstr ""
 
 #: includes/Admin/Menu.php:130
@@ -593,7 +593,47 @@ msgstr ""
 msgid "When off, new affiliates stay pending until you activate them."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:923
+#: includes/Admin/Settings/Schema/SettingsSchema.php:813
+msgid "United States (US) dollar"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:814
+msgid "Euro"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:815
+msgid "Pound sterling"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:816
+msgid "Australian dollar"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:817
+msgid "Canadian dollar"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:818
+msgid "Indian rupee"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:819
+msgid "Bangladeshi taka"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:820
+msgid "Japanese yen"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:821
+msgid "Brazilian real"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:822
+msgid "South African rand"
+msgstr ""
+
+#: includes/Admin/Settings/Schema/SettingsSchema.php:949
 msgid "The default rate cannot be higher than the maximum rate."
 msgstr ""
 
@@ -752,13 +792,13 @@ msgstr ""
 
 #: includes/Commission/Manager.php:184
 #: includes/Commission/Manager.php:290
-#: includes/Commission/Manager.php:443
+#: includes/Commission/Manager.php:451
 #: assets/js/admin.js:289
 msgid "The commission could not be saved."
 msgstr ""
 
 #: includes/Commission/Manager.php:234
-#: includes/Commission/Manager.php:417
+#: includes/Commission/Manager.php:425
 #: includes/REST/Controllers/CommissionsController.php:547
 #: includes/REST/Controllers/MeController.php:163
 msgid "No commission with that ID."
@@ -768,22 +808,26 @@ msgstr ""
 msgid "This commission came from an order item, so its reference cannot change."
 msgstr ""
 
+#: includes/Commission/Manager.php:375
+msgid "WooCommerce is not active, so the order cannot be checked. Activate WooCommerce, or use the manual origin."
+msgstr ""
+
 #. translators: %d: the order id given
-#: includes/Commission/Manager.php:379
+#: includes/Commission/Manager.php:387
 msgid "There is no WooCommerce order #%d. Enter the number of an existing order, or change the origin."
 msgstr ""
 
-#: includes/Commission/Manager.php:437
+#: includes/Commission/Manager.php:445
 msgid "That status change is not allowed."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:478
+#: includes/Commission/Manager.php:486
 msgid "This commission was paid in payment #%d, which keeps it."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:481
+#: includes/Commission/Manager.php:489
 msgid "This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, first."
 msgstr ""
 
