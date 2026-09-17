@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: FlyAffiliate
- * Plugin URI: https://wedevs.com/flyaffiliate/
+ * Plugin URI: https://github.com/weDevsOfficial/flyaffiliate
  * Description: Affiliate marketing for WooCommerce. Referral tracking, per-item commissions, hold periods, refund handling and manual payouts.
  * Version: 1.0.0
  * Author: weDevs
