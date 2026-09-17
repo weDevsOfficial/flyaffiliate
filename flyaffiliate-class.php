@@ -46,7 +46,7 @@ final class FlyAffiliate_Plugin {
 	 *
 	 * @var string
 	 */
-	private string $min_php = '7.4';
+	private string $min_php = '8.1';
 
 	/**
 	 * The single instance.

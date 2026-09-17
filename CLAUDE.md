@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-FlyAffiliate is an affiliate-marketing plugin for WordPress + WooCommerce, built by weDevs for distribution on WordPress.org. Requires PHP 7.4+, WordPress 6.4+, WooCommerce 8.5+. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
+FlyAffiliate is an affiliate-marketing plugin for WordPress + WooCommerce, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+, WordPress 6.4+, WooCommerce 8.5+. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
 
 The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service providers, `Hookable` classes, `Manager` facades, overridable templates, an `Installer`/`Upgrade` pair, `FlyAffiliateTestCase`-based PHPUnit tests. Anyone who knows the Dokan codebase should feel at home here.
 
@@ -30,7 +30,7 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 > `@wedevs/plugin-ui` (ADR-0010): one page, hash routes, DataViews lists for
 > Affiliates, Commissions, Visits and Payouts (preview → create → mark paid, ADR-0012), the
 > plugin-ui `<Settings>` screen driven by a flat-array schema stored in one
-> option, dialogs for add/edit, and Playwright coverage under `tests/pw`. The
+> option, dialogs for add/edit (the commission form is a page), and Playwright coverage under `tests/pw`. The
 > setup wizard is the `#/setup` route of the same app; only the user-profile
 > section stays PHP-rendered. The affiliate dashboard (`[flyaffiliate_dashboard]`)
 > is a second React app (`src/dashboard`) on the same components, reading the
@@ -137,7 +137,7 @@ Services are accessed via `flyaffiliate()->service_name` (magic getter) or `flya
 
 Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Add a name here in the same commit that registers it.
 
-The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs; the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
+The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
 
 Tagged groups resolved at boot: `common-service`, `admin-service`, `frontend-service`, `ajax-service`, `integration-service`, `container-service`, `cli-service`. A group with nothing in it yet is normal — read groups with `get_tagged()`, which returns an empty array, rather than `get()`, which throws for an unknown identifier.
 
