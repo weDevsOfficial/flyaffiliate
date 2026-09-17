@@ -127,6 +127,35 @@ class ControllersTest extends FlyAffiliateTestCase {
 		$this->assertSame( 201, $created->get_status() );
 		$this->assertSame( 12.5, $created->get_data()['amount'] );
 		$this->assertNull( $created->get_data()['order_item_id'] );
+		$this->assertSame( Commission::SOURCE_WOOCOMMERCE, $created->get_data()['source'] );
+		$this->assertSame( Commission::STATUS_UNPAID, $created->get_data()['status'] );
+
+		$full = $this->post_request(
+			'/commissions',
+			[
+				'affiliate_id' => $affiliate,
+				'amount'       => 3,
+				'base_amount'  => 30,
+				'order_id'     => 1400,
+				'source'       => Commission::SOURCE_MANUAL,
+				'type'         => Commission::TYPE_SALE,
+				'status'       => Commission::STATUS_PENDING,
+				'created_at'   => '2026-02-03 04:05:06',
+			]
+		);
+
+		$this->assertSame( 201, $full->get_status() );
+		$this->assertSame( Commission::SOURCE_MANUAL, $full->get_data()['source'] );
+		$this->assertSame( Commission::STATUS_PENDING, $full->get_data()['status'] );
+		$this->assertSame( 1400, $full->get_data()['order_id'] );
+		$this->assertStringStartsWith( '2026-02-03T04:05:06', $full->get_data()['created_at'] );
+		$this->assertSame( 400, $this->post_request( '/commissions', [ 'affiliate_id' => $affiliate, 'amount' => 3, 'source' => 'shopify' ] )->get_status() );
+
+		$edited = $this->put_request( '/commissions/' . $full->get_data()['id'], [ 'amount' => 6, 'base_amount' => 60, 'order_id' => 1401 ] );
+
+		$this->assertSame( 200, $edited->get_status() );
+		$this->assertSame( 6.0, $edited->get_data()['amount'] );
+		$this->assertSame( 1401, $edited->get_data()['order_id'] );
 
 		$paid = $this->factory()->commission->create( [ 'status' => Commission::STATUS_PAID ] );
 

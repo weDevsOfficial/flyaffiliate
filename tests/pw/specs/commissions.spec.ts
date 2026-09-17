@@ -22,16 +22,23 @@ test.describe( 'Commissions', () => {
 		const row = list.rows.first();
 		await expect( row ).toBeVisible();
 		await expect( row.locator( '[data-status]' ) ).toBeVisible();
-		await expect( row.getByRole( 'link' ).first() ).toHaveAttribute(
-			'href',
-			/#\/affiliates\/\d+/
-		);
+		// The ID links to the commission's page; the affiliate to theirs.
+		await expect(
+			row.locator( 'a[href*="#/commissions/"]' ).first()
+		).toHaveAttribute( 'href', /#\/commissions\/\d+\/edit/ );
+		await expect(
+			row.locator( 'a[href*="#/affiliates/"]' ).first()
+		).toHaveAttribute( 'href', /#\/affiliates\/\d+/ );
 	} );
 
-	test( 'adds a manual commission and approves it', async ( { page } ) => {
+	test( 'adds a commission on its own page and approves it', async ( {
+		page,
+	} ) => {
 		const pendingBefore = await list.tabCount( 'Pending' );
 
 		await page.getByTestId( 'flyaffiliate-add-commission' ).click();
+		await expect( page ).toHaveURL( /#\/commissions\/new/ );
+
 		const form = page.getByTestId( 'flyaffiliate-commission-form' );
 		await expect( form ).toBeVisible();
 
@@ -39,9 +46,16 @@ test.describe( 'Commissions', () => {
 		await form.getByRole( 'combobox' ).first().click();
 		await page.getByRole( 'option' ).first().click();
 		await form.locator( '#flyaffiliate-commission-amount' ).fill( '12.5' );
+		await form.locator( '#flyaffiliate-commission-order' ).fill( '1400' );
+
+		// The form starts on Unpaid; this one goes through the hold period.
+		await form.locator( '#flyaffiliate-commission-status' ).click();
+		await page.getByRole( 'option', { name: 'Pending' } ).click();
 		await form.getByRole( 'button', { name: 'Add commission' } ).click();
 
 		await list.expectToast( 'Commission added.' );
+		await expect( page ).toHaveURL( /#\/commissions$/ );
+		await waitForListReady( list.app );
 		await expect
 			.poll( () => list.tabCount( 'Pending' ) )
 			.toBe( pendingBefore + 1 );
@@ -56,20 +70,35 @@ test.describe( 'Commissions', () => {
 			.toBe( pendingBefore );
 	} );
 
-	test( 'edits the amount of an unpaid commission', async ( { page } ) => {
-		// Only a manual commission's amount is editable; the seeded rows are manual.
+	test( 'opens a commission from its ID and edits the amount', async ( {
+		page,
+	} ) => {
 		await list.selectTab( 'Pending' );
 		await waitForListReady( list.app );
 		const row = list.rows.first();
-		await openRowActions( row );
-		await rowActionItem( page, 'Edit amount' ).click();
+
+		await row.locator( 'a[href*="#/commissions/"]' ).first().click();
+		await expect( page ).toHaveURL( /#\/commissions\/\d+\/edit/ );
 
 		const form = page.getByTestId( 'flyaffiliate-commission-form' );
 		await expect( form ).toBeVisible();
+		// SliceWP's locks: the ID, the affiliate, the origin and the date are fixed.
+		await expect(
+			form.locator( '#flyaffiliate-commission-affiliate' )
+		).toBeDisabled();
+		await expect(
+			form.locator( '#flyaffiliate-commission-source' )
+		).toBeDisabled();
+		await expect(
+			form.locator( '#flyaffiliate-commission-date' )
+		).toBeDisabled();
+
 		await form.locator( '#flyaffiliate-commission-amount' ).fill( '3.21' );
 		await form.getByRole( 'button', { name: 'Save' } ).click();
 
 		await list.expectToast( 'Commission updated.' );
+		await expect( page ).toHaveURL( /#\/commissions$/ );
+		await list.selectTab( 'Pending' );
 		await waitForListReady( list.app );
 		await expect( list.rows.first() ).toContainText( '3.21' );
 	} );

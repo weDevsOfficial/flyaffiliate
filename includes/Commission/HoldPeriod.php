@@ -29,6 +29,10 @@ use WC_Order;
  * daily Action Scheduler job for holds that end later. Changing the hold
  * period moves every pending commission's maturity date with it.
  *
+ * A commission an admin adds by hand is left with the status it was given,
+ * as in SliceWP: a pending one waits for its order to reach a paid status,
+ * or for the job once its hold is over, rather than maturing on the spot.
+ *
  * @since FLYAFFILIATE_SINCE
  */
 class HoldPeriod implements Hookable {
@@ -58,39 +62,7 @@ class HoldPeriod implements Hookable {
 		add_action( Installer::MATURATION_HOOK, [ $this, 'run' ] );
 		add_action( 'woocommerce_order_status_changed', [ $this, 'handle_order_status_change' ], 20, 4 );
 		add_action( 'flyaffiliate_order_attributed', [ $this, 'mature_for_order' ], 20 );
-		add_action( 'flyaffiliate_commission_created', [ $this, 'mature_new_commission' ], 20 );
 		add_action( 'flyaffiliate_after_save_settings', [ $this, 'handle_settings_saved' ] );
-	}
-
-	/**
-	 * Mature a commission that is already due the moment it is created.
-	 *
-	 * With the hold period at zero a new commission is due at once. Leaving it
-	 * to the nightly job would keep it out of a payout for up to a day, and an
-	 * admin who adds a commission by hand expects to be able to pay it.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param Commission $commission The commission just created.
-	 *
-	 * @return void
-	 */
-	public function mature_new_commission( Commission $commission ): void {
-		if ( Commission::STATUS_PENDING !== $commission->get( 'status' ) ) {
-			return;
-		}
-
-		$matures_at = (string) $commission->get( 'matures_at', '' );
-
-		if ( '' === $matures_at || $matures_at > current_time( 'mysql', true ) ) {
-			return;
-		}
-
-		if ( ! $this->can_mature( $commission ) ) {
-			return;
-		}
-
-		flyaffiliate()->commission->set_status( $commission->get_id(), Commission::STATUS_UNPAID );
 	}
 
 	/**

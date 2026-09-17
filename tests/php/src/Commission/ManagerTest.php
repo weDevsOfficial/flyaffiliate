@@ -20,20 +20,106 @@ use FlyAffiliate\Test\FlyAffiliateTestCase;
 class ManagerTest extends FlyAffiliateTestCase {
 
 	/**
-	 * A manual commission records the effective rate and a NULL order item.
+	 * An admin-created commission records the effective rate and a NULL order item.
+	 *
+	 * The defaults are SliceWP's add form: WooCommerce origin, sale, payable now.
 	 *
 	 * @return void
 	 */
 	public function test_it_creates_a_manual_commission(): void {
 		$affiliate  = $this->factory()->affiliate->create_and_get_model();
-		$commission = flyaffiliate()->commission->create_manual( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 15, 'base_amount' => 100 ] );
+		$commission = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 15, 'base_amount' => 100 ] );
 
 		$this->assertInstanceOf( Commission::class, $commission );
 		$this->assertCentsEquals( 1500, $commission->get( 'amount' ) );
 		$this->assertSame( 15.0, $commission->get( 'rate' ) );
 		$this->assertNull( $commission->get( 'order_item_id' ) );
+		$this->assertSame( Commission::SOURCE_WOOCOMMERCE, $commission->get( 'source' ) );
+		$this->assertSame( Commission::TYPE_SALE, $commission->get( 'type' ) );
+		$this->assertSame( Commission::STATUS_UNPAID, $commission->get( 'status' ) );
+	}
+
+	/**
+	 * Every field of SliceWP's add form is honoured: origin, type, status and date.
+	 *
+	 * @return void
+	 */
+	public function test_it_records_the_origin_status_and_date_it_is_given(): void {
+		flyaffiliate()->settings->save( [ 'hold_days' => 10 ] );
+
+		$affiliate  = $this->factory()->affiliate->create_and_get_model();
+		$commission = flyaffiliate()->commission->create(
+			[
+				'affiliate_id' => $affiliate->get_id(),
+				'amount'       => 4,
+				'base_amount'  => 40,
+				'order_id'     => 777,
+				'source'       => Commission::SOURCE_MANUAL,
+				'status'       => Commission::STATUS_PENDING,
+				'created_at'   => '2026-01-05 10:00:00',
+			]
+		);
+
+		$this->assertInstanceOf( Commission::class, $commission );
 		$this->assertSame( Commission::SOURCE_MANUAL, $commission->get( 'source' ) );
 		$this->assertSame( Commission::STATUS_PENDING, $commission->get( 'status' ) );
+		$this->assertSame( 777, $commission->get( 'order_id' ) );
+		$this->assertSame( '2026-01-05 10:00:00', $commission->get( 'created_at' ) );
+		$this->assertSame( '2026-01-15 10:00:00', $commission->get( 'matures_at' ), 'a pending commission matures hold_days after the date it was given' );
+
+		$paid = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 4, 'status' => Commission::STATUS_PAID ] );
+
+		$this->assertSame( Commission::STATUS_PAID, $paid->get( 'status' ), 'a commission already paid outside the plugin can be recorded as paid' );
+		$this->assertWPError( flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 4, 'source' => 'shopify' ] ) );
+		$this->assertWPError( flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 4, 'status' => 'approved' ] ) );
+	}
+
+	/**
+	 * Editing changes the amount, the reference, the reference amount and the
+	 * type, re-derives the rate, and routes a status change through the
+	 * transition rules.
+	 *
+	 * @return void
+	 */
+	public function test_it_edits_the_fields_of_slicewps_form(): void {
+		$affiliate  = $this->factory()->affiliate->create_and_get_model();
+		$commission = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 10, 'base_amount' => 100, 'status' => Commission::STATUS_PENDING ] );
+
+		$edited = flyaffiliate()->commission->update(
+			$commission->get_id(),
+			[
+				'amount'      => 25,
+				'base_amount' => 200,
+				'order_id'    => 4242,
+				'status'      => Commission::STATUS_UNPAID,
+			]
+		);
+
+		$this->assertInstanceOf( Commission::class, $edited );
+		$this->assertCentsEquals( 2500, $edited->get( 'amount' ) );
+		$this->assertCentsEquals( 20000, $edited->get( 'base_amount' ) );
+		$this->assertSame( 12.5, $edited->get( 'rate' ) );
+		$this->assertSame( 4242, $edited->get( 'order_id' ) );
+		$this->assertSame( Commission::STATUS_UNPAID, $edited->get( 'status' ) );
+
+		$this->assertWPError( flyaffiliate()->commission->update( $commission->get_id(), [ 'status' => Commission::STATUS_PAID ] ), 'paid is set by a payout, never by an edit' );
+		$this->assertWPError( flyaffiliate()->commission->update( $commission->get_id(), [ 'amount' => 0 ] ) );
+		$this->assertWPError( flyaffiliate()->commission->update( 999999, [ 'amount' => 1 ] ) );
+	}
+
+	/**
+	 * A commission that came from checkout keeps the order item's reference.
+	 *
+	 * @return void
+	 */
+	public function test_the_reference_of_an_attributed_commission_is_fixed(): void {
+		$commission = $this->factory()->commission->create_and_get_model( [ 'source' => Commission::SOURCE_WOOCOMMERCE, 'order_id' => 55, 'order_item_id' => 9001 ] );
+
+		$this->assertWPError( flyaffiliate()->commission->update( $commission->get_id(), [ 'order_id' => 56 ] ) );
+		$this->assertSame( 55, flyaffiliate()->commission->get( $commission->get_id() )->get( 'order_id' ) );
+
+		// The same reference is not a change.
+		$this->assertInstanceOf( Commission::class, flyaffiliate()->commission->update( $commission->get_id(), [ 'order_id' => 55, 'amount' => 3 ] ) );
 	}
 
 	/**
@@ -44,8 +130,8 @@ class ManagerTest extends FlyAffiliateTestCase {
 	public function test_two_manual_commissions_can_coexist(): void {
 		$affiliate = $this->factory()->affiliate->create_and_get_model();
 
-		$first  = flyaffiliate()->commission->create_manual( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 5 ] );
-		$second = flyaffiliate()->commission->create_manual( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 7 ] );
+		$first  = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 5 ] );
+		$second = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 7 ] );
 
 		$this->assertInstanceOf( Commission::class, $first );
 		$this->assertInstanceOf( Commission::class, $second );
@@ -60,8 +146,8 @@ class ManagerTest extends FlyAffiliateTestCase {
 	public function test_it_refuses_a_non_positive_amount(): void {
 		$affiliate = $this->factory()->affiliate->create_and_get_model();
 
-		$this->assertWPError( flyaffiliate()->commission->create_manual( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 0 ] ) );
-		$this->assertWPError( flyaffiliate()->commission->create_manual( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => -3 ] ) );
+		$this->assertWPError( flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 0 ] ) );
+		$this->assertWPError( flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => -3 ] ) );
 	}
 
 	/**
@@ -92,7 +178,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$commission = $this->factory()->commission->create_and_get_model( [ 'status' => Commission::STATUS_PAID, 'source' => Commission::SOURCE_MANUAL, 'amount' => 20 ] );
 
 		$this->assertWPError( flyaffiliate()->commission->set_status( $commission->get_id(), Commission::STATUS_REJECTED ) );
-		$this->assertWPError( flyaffiliate()->commission->set_manual_amount( $commission->get_id(), 1 ) );
+		$this->assertWPError( flyaffiliate()->commission->update( $commission->get_id(), [ 'amount' => 1 ] ) );
 		$this->assertFalse( flyaffiliate()->commission->delete( $commission->get_id() ) );
 
 		$reloaded = flyaffiliate()->commission->get( $commission->get_id() );
@@ -102,14 +188,18 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * A WooCommerce commission's amount is owned by the calculator.
+	 * The amount of a WooCommerce commission is editable too, as in SliceWP (ADR-0011).
 	 *
 	 * @return void
 	 */
-	public function test_a_calculated_commission_amount_cannot_be_edited(): void {
-		$commission = $this->factory()->commission->create_and_get_model( [ 'source' => Commission::SOURCE_WOOCOMMERCE ] );
+	public function test_a_calculated_commission_amount_can_be_edited(): void {
+		$commission = $this->factory()->commission->create_and_get_model( [ 'source' => Commission::SOURCE_WOOCOMMERCE, 'base_amount' => 200, 'status' => Commission::STATUS_UNPAID ] );
 
-		$this->assertWPError( flyaffiliate()->commission->set_manual_amount( $commission->get_id(), 99 ) );
+		$edited = flyaffiliate()->commission->update( $commission->get_id(), [ 'amount' => 99 ] );
+
+		$this->assertInstanceOf( Commission::class, $edited );
+		$this->assertCentsEquals( 9900, $edited->get( 'amount' ) );
+		$this->assertSame( 49.5, $edited->get( 'rate' ) );
 	}
 
 	/**

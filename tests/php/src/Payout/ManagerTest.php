@@ -370,7 +370,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$payout = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0];
 
-		$this->assertWPError( flyaffiliate()->commission->set_manual_amount( $commission, 5 ) );
+		$this->assertWPError( flyaffiliate()->commission->update( $commission, [ 'amount' => 5 ] ) );
 		$this->assertFalse( flyaffiliate()->commission->delete( $commission ) );
 		$this->assertCentsEquals( 2500, flyaffiliate()->commission->get( $commission )->get( 'amount' ) );
 

@@ -6,7 +6,7 @@
  */
 import { useMemo, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
 	Check,
 	Clock,
@@ -44,7 +44,6 @@ import { withIconLabels } from '@/lib/actions';
 import { buildTabs } from '@/lib/tabs';
 import type { Commission } from '@/lib/types';
 import Truncated from '@/components/Truncated';
-import CommissionForm from './CommissionForm';
 
 const DEFAULT_VIEW: DataViewState = {
 	type: 'table',
@@ -100,9 +99,10 @@ export function CommissionsTable( {
 }: TableProps ) {
 	const { statuses, urls, sources, types } = getGlobals();
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [ status, setStatus ] = useState( 'all' );
-	const [ formOpen, setFormOpen ] = useState( false );
-	const [ editing, setEditing ] = useState< Commission | null >( null );
+	// The form page comes back here when it is done.
+	const here = { from: location.pathname };
 	// Controlled, or plugin-ui never shows the bulk toolbar (as in Dokan).
 	const [ selection, setSelection ] = useState< string[] >( [] );
 
@@ -173,7 +173,13 @@ export function CommissionsTable( {
 			id: 'id',
 			label: __( 'Commission ID', 'flyaffiliate' ),
 			render: ( { item } ) => (
-				<span className="font-medium">#{ item.id }</span>
+				<Link
+					to={ `/commissions/${ item.id }/edit` }
+					state={ here }
+					className="font-medium text-primary hover:underline"
+				>
+					#{ item.id }
+				</Link>
 			),
 		},
 		{
@@ -346,14 +352,10 @@ export function CommissionsTable( {
 		},
 		{
 			id: 'edit',
-			label: __( 'Edit amount', 'flyaffiliate' ),
+			label: __( 'Edit', 'flyaffiliate' ),
 			icon: <Pencil size={ 16 } />,
-			isEligible: ( item ) =>
-				item.source === 'manual' && item.status !== 'paid',
-			callback: ( [ item ] ) => {
-				setEditing( item );
-				setFormOpen( true );
-			},
+			callback: ( [ item ] ) =>
+				navigate( `/commissions/${ item.id }/edit`, { state: here } ),
 		},
 		{
 			id: 'delete',
@@ -433,10 +435,14 @@ export function CommissionsTable( {
 						...headerContent,
 						<Button
 							key="add"
-							onClick={ () => {
-								setEditing( null );
-								setFormOpen( true );
-							} }
+							onClick={ () =>
+								navigate(
+									affiliateId
+										? `/commissions/new?affiliate=${ affiliateId }`
+										: '/commissions/new',
+									{ state: here }
+								)
+							}
 							data-testid="flyaffiliate-add-commission"
 						>
 							<Plus className="size-4 mr-1" />
@@ -444,14 +450,6 @@ export function CommissionsTable( {
 						</Button>,
 					],
 				} }
-			/>
-
-			<CommissionForm
-				open={ formOpen }
-				onOpenChange={ setFormOpen }
-				commission={ editing }
-				affiliateId={ affiliateId }
-				onSaved={ refresh }
 			/>
 		</>
 	);
