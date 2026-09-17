@@ -67,8 +67,7 @@ final class FlyAffiliate_Plugin {
 		register_deactivation_hook( FLYAFFILIATE_FILE, [ $this, 'deactivate' ] );
 
 		add_action( 'before_woocommerce_init', [ $this, 'declare_woocommerce_feature_compatibility' ] );
-		add_action( 'woocommerce_loaded', [ $this, 'init_plugin' ] );
-		add_action( 'plugins_loaded', [ $this, 'woocommerce_not_loaded' ], 11 );
+		add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
 	}
 
 	/**
@@ -173,6 +172,15 @@ final class FlyAffiliate_Plugin {
 	 */
 	public function init_plugin(): void {
 		$this->includes();
+
+		// The WooCommerce integration (checkout attribution, order status sync)
+		// is registered only when WooCommerce is there. Everything else —
+		// affiliates, referral links, hand-entered commissions, payouts, the
+		// admin and the affiliate dashboard — runs on WordPress alone.
+		if ( $this->has_woocommerce() ) {
+			$this->get_container()->addServiceProvider( new \FlyAffiliate\DependencyManagement\Providers\IntegrationServiceProvider() );
+		}
+
 		$this->init_hooks();
 
 		/**
@@ -352,37 +360,6 @@ final class FlyAffiliate_Plugin {
 	 */
 	public function has_woocommerce(): bool {
 		return class_exists( 'WooCommerce' );
-	}
-
-	/**
-	 * Say so, when WooCommerce is not there.
-	 *
-	 * `Requires Plugins: woocommerce` stops this from happening on WordPress 6.5
-	 * and later, but the header is inert on 6.4 (ADR-0009), and WooCommerce can
-	 * be deactivated after FlyAffiliate is installed on any version.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return void
-	 */
-	public function woocommerce_not_loaded(): void {
-		if ( $this->has_woocommerce() || ! is_admin() ) {
-			return;
-		}
-
-		add_action(
-			'admin_notices',
-			static function () {
-				if ( ! current_user_can( 'activate_plugins' ) ) {
-					return;
-				}
-
-				printf(
-					'<div class="notice notice-error"><p>%s</p></div>',
-					esc_html__( 'FlyAffiliate needs WooCommerce to be installed and active.', 'flyaffiliate' )
-				);
-			}
-		);
 	}
 
 	/**

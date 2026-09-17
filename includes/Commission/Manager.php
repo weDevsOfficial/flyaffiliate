@@ -365,8 +365,16 @@ class Manager {
 	 * @return true|WP_Error
 	 */
 	protected function check_reference( string $source, int $order_id ) {
-		if ( Commission::SOURCE_WOOCOMMERCE !== $source || 0 === $order_id || ! function_exists( 'wc_get_order' ) ) {
+		if ( Commission::SOURCE_WOOCOMMERCE !== $source || 0 === $order_id ) {
 			return true;
+		}
+
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			return new WP_Error(
+				'flyaffiliate_invalid_reference',
+				__( 'WooCommerce is not active, so the order cannot be checked. Activate WooCommerce, or use the manual origin.', 'flyaffiliate' ),
+				[ 'status' => 400 ]
+			);
 		}
 
 		if ( wc_get_order( $order_id ) instanceof \WC_Order ) {

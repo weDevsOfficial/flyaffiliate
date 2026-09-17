@@ -23,8 +23,9 @@ here.
 
 - Root namespace `FlyAffiliate\`, PSR-4 onto `includes/`.
   `FlyAffiliate\Commission\Manager` → `includes/Commission/Manager.php`.
-- Autoloading is `includes/Autoloader.php`, not Composer. **Nothing from
-  `vendor/` ships** (ADR-0002). Do not add a runtime Composer package.
+- Autoloading is Composer's (`vendor/autoload.php`, PSR-4 in `composer.json`).
+  The zip carries a production `vendor/` with that loader and nothing else
+  (ADR-0002). Do not add a runtime Composer package.
 - Procedural helpers live in `includes/functions.php` and are prefixed
   `flyaffiliate_`.
 
@@ -354,9 +355,12 @@ sends `X-WP-Total` / `X-WP-TotalPages` on collection responses.
 
 ## Integration guardrails
 
-Third-party code lives under `includes/Integrations/{Plugin}/` and loads only
-once that plugin has confirmed it is loaded (`woocommerce_loaded` for
-WooCommerce). No other directory may reference the plugin's symbols.
+Third-party code lives under `includes/Integrations/{Plugin}/` and is
+registered only when that plugin is active: `FlyAffiliate_Plugin::init_plugin()`
+adds `IntegrationServiceProvider` on `plugins_loaded` when
+`class_exists( 'WooCommerce' )` (ADR-0013). Elsewhere, a WooCommerce function is
+called only behind `function_exists()`. No other directory may reference the
+plugin's symbols.
 
 The marketplace (Dokan) integration is not on this branch. It lives on
 `feature/dokan-integration`, which is this branch plus that work; keep the

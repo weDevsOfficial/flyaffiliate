@@ -32,6 +32,9 @@ The first release.
   their own page, with the same fields on edit.
 - **Payouts** — preview, create one payment per affiliate, mark paid or
   unpaid, take a commission out, delete an unpaid payment, export CSV.
+- **WordPress first** — the plugin runs without WooCommerce; the WooCommerce
+  integration loads only when WooCommerce is active, and the daily job falls
+  back to WP-Cron without Action Scheduler.
 - **Admin** — a React admin on weDevs' plugin UI: dashboard, affiliates,
   commissions, visits, payouts, settings and a setup wizard.
 - **Affiliate dashboard** — `[flyaffiliate_dashboard]` with the referral link,

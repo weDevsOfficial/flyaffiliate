@@ -8,7 +8,7 @@ Welcome to the **FlyAffiliate** repository on **GitHub**!
 
 Here you can find the **source code**, **open issues**, and **contribute** to the development of the plugin.
 
-- **Requires:** PHP 8.1+, WordPress 6.4+, WooCommerce 8.5+
+- **Requires:** PHP 8.1+, WordPress 6.4+. WooCommerce 8.5+ for the order integration, which loads only when WooCommerce is active.
 - **Licence:** GPL-2.0-or-later
 - **Reference behaviour:** commission and payout semantics match SliceWP where the two overlap, so anyone coming from there feels at home. The differences that exist are deliberate and recorded in [`docs/adr/`](docs/adr/).
 
@@ -104,7 +104,7 @@ npm run typecheck           # tsc over src/
 npm run phpunit             # PHPUnit inside wp-env (env:start first)
 npm run test:e2e            # Playwright against the wp-env site
 npm run plugin-check        # WordPress.org Plugin Check against the built zip
-npm run release             # Builds build/flyaffiliate.zip honouring .distignore
+npm run release             # Builds build/flyaffiliate-v<version>.zip honouring .distignore
 ```
 
 Every change must pass Plugin Check with zero errors and zero warnings before it ships: the plugin is distributed on WordPress.org.

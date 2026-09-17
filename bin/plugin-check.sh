@@ -3,7 +3,7 @@
 # Run WordPress.org's Plugin Check against the built release directory.
 #
 # The check runs on build/flyaffiliate — the exact tree that goes into
-# build/flyaffiliate.zip — inside the wp-env `tests` environment, where the
+# build/flyaffiliate-v<version>.zip — inside the wp-env `tests` environment, where the
 # plugin directory name is the real slug so the slug-dependent checks
 # (text domain, readme, headers) see what wp.org will see.
 #

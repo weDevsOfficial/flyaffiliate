@@ -3,7 +3,7 @@
  * Build the WordPress.org release archive.
  *
  * Stages the shipping files into build/flyaffiliate/ honouring .distignore, then
- * zips that directory to build/flyaffiliate.zip with `flyaffiliate/` as the single
+ * zips that directory to build/flyaffiliate-v{version}.zip with `flyaffiliate/` as the single
  * top-level entry — the layout the wp.org SVN trunk expects.
  *
  * The staged directory is left in place on purpose: `npm run plugin-check` runs
@@ -26,7 +26,7 @@ const FLYAFFILIATE_SLUG = 'flyaffiliate';
 $root       = dirname( __DIR__ );
 $build_dir  = $root . '/build';
 $stage_dir  = $build_dir . '/' . FLYAFFILIATE_SLUG;
-$zip_path   = $build_dir . '/' . FLYAFFILIATE_SLUG . '.zip';
+$zip_path   = ''; // Set once the version is known: build/flyaffiliate-v{version}.zip, as Dokan names its zip.
 $entry_file = $root . '/' . FLYAFFILIATE_SLUG . '.php';
 $no_zip     = in_array( '--no-zip', $argv, true );
 
@@ -47,6 +47,8 @@ if ( '' === $version ) {
 	fwrite( STDERR, "error: no Version header in {$entry_file}.\n" );
 	exit( 1 );
 }
+
+$zip_path = $build_dir . '/' . FLYAFFILIATE_SLUG . '-v' . $version . '.zip';
 
 /**
  * Read .distignore into a list of patterns.
@@ -208,6 +210,34 @@ foreach ( $iterator as $file ) {
 }
 
 flyaffiliate_prune_empty_dirs( $stage_dir );
+
+/*
+ * A production vendor/ for the zip: Composer's autoloader and nothing else,
+ * since the plugin has no runtime packages. The local vendor/ (with the dev
+ * tools) is never copied; Composer builds a fresh one inside the stage, the
+ * way Dokan's bin/zip.js does.
+ */
+foreach ( [ 'composer.json', 'composer.lock' ] as $composer_file ) {
+	if ( file_exists( $root . '/' . $composer_file ) ) {
+		copy( $root . '/' . $composer_file, $stage_dir . '/' . $composer_file );
+	}
+}
+
+$composer_command = sprintf(
+	'composer install --no-dev --optimize-autoloader --no-interaction --no-progress --quiet --working-dir=%s 2>&1',
+	escapeshellarg( $stage_dir )
+);
+// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec -- a build script on a developer's or CI machine, running Composer.
+exec( $composer_command, $composer_output, $composer_status );
+
+if ( 0 !== $composer_status || ! file_exists( $stage_dir . '/vendor/autoload.php' ) ) {
+	fwrite( STDERR, "error: composer could not build the production autoloader:\n" . implode( "\n", $composer_output ) . "\n" );
+	exit( 1 );
+}
+
+// composer.json and composer.lock stay in the zip beside vendor/: Plugin Check
+// expects the manifest wherever a vendor/ directory ships, and the lock file
+// records exactly what the loader was built from.
 
 printf( "Staged %d files (%s) in %s\n", $file_count, flyaffiliate_format_bytes( $byte_count ), $stage_dir );
 

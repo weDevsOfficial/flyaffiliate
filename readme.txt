@@ -3,20 +3,18 @@ Contributors: wedevs, tareq1988
 Tags: affiliate, affiliate marketing, woocommerce, referral, commission
 Requires at least: 6.4
 Tested up to: 7.1
-WC requires at least: 8.5
-WC tested up to: 11.1
 Requires PHP: 8.1
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Affiliate marketing for WooCommerce: referral links, per-item commissions, hold periods and payouts, with nothing leaving your site.
+Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. WooCommerce support built in; nothing leaves your site.
 
 == Description ==
 
 = Want more sales without a bigger ad budget? FlyAffiliate gives every affiliate a referral link and a dashboard, and gives you a commission ledger that knows the difference between money earned, money owed and money paid. =
 
-[FlyAffiliate](https://github.com/weDevsOfficial/flyaffiliate) is an affiliate-marketing plugin for WordPress and WooCommerce, built by [weDevs](https://wedevs.com/) — the team behind Dokan, WP User Frontend and weMail. It runs an affiliate programme the way a store owner actually runs one: someone applies, you approve them, they share a link, orders come in, commissions mature once the order has settled, and you pay people in batches through whatever channel you already use.
+[FlyAffiliate](https://github.com/weDevsOfficial/flyaffiliate) is an affiliate-marketing plugin for WordPress, with WooCommerce support built in, made by [weDevs](https://wedevs.com/) — the team behind Dokan, WP User Frontend and weMail. It runs an affiliate programme the way a store owner actually runs one: someone applies, you approve them, they share a link, orders come in, commissions mature once the order has settled, and you pay people in batches through whatever channel you already use.
 
 Everything happens on your own site. FlyAffiliate makes no external requests, sends no analytics anywhere, and stores no personal data about your visitors.
 
@@ -63,8 +61,8 @@ FlyAffiliate is developed in the open on [GitHub](https://github.com/weDevsOffic
 
 == Installation ==
 
-1. Install and activate WooCommerce.
-2. Upload the plugin to `/wp-content/plugins/flyaffiliate`, or install it through **Plugins → Add New**.
+1. Upload the plugin to `/wp-content/plugins/flyaffiliate`, or install it through **Plugins → Add New**.
+2. If you sell with WooCommerce, have it active: FlyAffiliate creates commissions from its orders.
 3. Activate the plugin. The Affiliate Dashboard and Affiliate Registration pages are created for you.
 4. Follow the setup wizard, or go to **FlyAffiliate → Settings** and set your default commission rate, your maximum rate and the hold period.
 
@@ -72,7 +70,7 @@ FlyAffiliate is developed in the open on [GitHub](https://github.com/weDevsOffic
 
 = Q. Do I need WooCommerce? =
 
-A. Yes. FlyAffiliate calculates commissions from WooCommerce orders and does not work without it.
+A. No. Affiliates, referral links, visits, commissions you record by hand and payouts all work on WordPress alone. Commissions from orders come from WooCommerce today, and its integration switches on by itself when WooCommerce is active. More platforms are planned.
 
 = Q. Do affiliates get a user role? =
 
@@ -112,7 +110,7 @@ A. Yes. Copy a file from the plugin's `templates` directory into a `flyaffiliate
 
 = Q. Does it work with Dokan? =
 
-A. FlyAffiliate works on any WooCommerce store. A Dokan integration, where each vendor funds the commissions on their own products, is in development.
+A. FlyAffiliate works on any WordPress site, with or without WooCommerce. A Dokan integration, where each vendor funds the commissions on their own products, is in development.
 
 == Screenshots ==
 
@@ -129,6 +127,7 @@ A. FlyAffiliate works on any WooCommerce store. A Dokan integration, where each 
 * **new:** Order sync — commissions follow the order: failed, cancelled and (optionally) refunded orders reject them, a recovered order restores them, a paid one is never reversed
 * **new:** Hand-entered commissions — affiliate, amount, reference order (checked against WooCommerce), reference amount, origin, date, type and status, on their own page, with the same fields on edit
 * **new:** Payouts — preview, create one payment per affiliate, mark paid or unpaid, take a commission out, delete an unpaid payment, export CSV
+* **new:** WordPress first — runs without WooCommerce; the WooCommerce integration loads only when WooCommerce is active
 * **new:** Admin — a React admin on weDevs' plugin UI: dashboard, affiliates, commissions, visits, payouts, settings and a setup wizard
 * **new:** Affiliate dashboard — `[flyaffiliate_dashboard]` with the referral link, balance, commissions, visits and payouts; `[flyaffiliate_register]` for signup
 * **new:** REST API under `flyaffiliate/v1` for affiliates, commissions, visits, payouts, settings and the affiliate's own data
