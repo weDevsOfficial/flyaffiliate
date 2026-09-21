@@ -39,11 +39,19 @@ defined( 'FLYAFFILIATE_FILE' ) || define( 'FLYAFFILIATE_FILE', __FILE__ );
 
 // Composer's autoloader. The release zip carries a production `vendor/` that
 // holds nothing but this loader; a checkout needs `composer install` first.
+// A checkout without it is told so on the Plugins screen, nowhere else.
 if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	add_action(
 		'admin_notices',
 		static function () {
 			if ( ! current_user_can( 'activate_plugins' ) ) {
+				return;
+			}
+
+			// The one screen where the person who can run Composer is looking.
+			$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+			if ( ! $screen || ! in_array( $screen->id, [ 'plugins', 'plugins-network' ], true ) ) {
 				return;
 			}
 
