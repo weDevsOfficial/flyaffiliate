@@ -22,10 +22,12 @@ others follow, and none of them is special to the core.
 
 - The plugin bootstraps on `plugins_loaded`. There is no dependency header and
   no "needs WooCommerce" notice.
-- `Integrations\WooCommerce` (checkout attribution, order status sync) is
-  registered by `FlyAffiliate_Plugin::init_plugin()` only when
-  `class_exists( 'WooCommerce' )` is true at `plugins_loaded`. Every other
-  reference to a WooCommerce function is behind `function_exists()`.
+- `IntegrationServiceProvider` is registered by
+  `FlyAffiliate_Plugin::init_plugin()` on `plugins_loaded`. It always registers
+  the integration's announcement (`Integrations\WooCommerce\Integration`) and
+  registers the services that act on the platform (checkout attribution, order
+  status sync) only when `class_exists( 'WooCommerce' )`. Every other reference
+  to a WooCommerce function is behind `function_exists()`.
 - The daily maturation job uses Action Scheduler when WooCommerce provides it
   and WP-Cron otherwise; the hook is the same, so `Commission\HoldPeriod` does
   not care which.
@@ -48,12 +50,19 @@ others follow, and none of them is special to the core.
 - An integration announces itself on the plugin's own screens; the core
   shows nothing platform-specific by itself. `Integrations\WooCommerce\Integration`
   adds the WooCommerce origin through `flyaffiliate_available_commission_sources`
-  (so the add-commission form and `Commission\Manager::create()` offer it only
-  while WooCommerce is active) and the Integrations → WooCommerce settings
-  subpage through `flyaffiliate_settings_schema`. With no integration active
-  the Integrations page shows an overview saying so, and new commissions are
-  manual. `Commission::get_sources()` keeps every label for rows already
-  recorded.
+  and the Integrations → WooCommerce settings subpage through
+  `flyaffiliate_settings_schema`. Both are there whether or not WooCommerce is
+  installed — SliceWP lists every integration and its switch the same way, and
+  only the hooks wait for the platform — and the subpage says so when
+  WooCommerce is not active. A reference is checked against the order only
+  while WooCommerce can answer; without it the reference is kept as given, as
+  SliceWP keeps every reference.
+- Data recorded through an integration is untouched when its platform goes
+  away: affiliates, their links and balances stay; WooCommerce-origin
+  commissions keep their rows, labels, amounts and statuses, are still edited
+  and paid out, show their reference as a number rather than a link, and the
+  pending ones wait for their order to be confirmed, which needs WooCommerce
+  back.
 - Public signup is behind an "Open registration" setting (on by default) and
   the form carries a honeypot field.
 - Classes are autoloaded by Composer's own loader (`vendor/autoload.php`,
@@ -73,10 +82,8 @@ others follow, and none of them is special to the core.
 
 - A site with no integration active gets a working affiliate programme:
   signups, links, visits, commissions the admin records by hand, payouts.
-- A commission with the WooCommerce origin still needs an existing order
-  (`Commission\Manager::check_reference()`). Without WooCommerce the order
-  cannot be checked, so a WooCommerce-origin commission with a reference is
-  refused; the manual origin is the one to use.
+- A commission with the WooCommerce origin needs an existing order
+  (`Commission\Manager::check_reference()`) while WooCommerce is there to ask.
 - `Requires Plugins` is gone, so WordPress no longer blocks activation when
   WooCommerce is missing. That is the point.
 - A future platform integration gets its own provider under

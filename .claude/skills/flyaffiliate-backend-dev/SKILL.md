@@ -358,15 +358,18 @@ sends `X-WP-Total` / `X-WP-TotalPages` on collection responses.
 
 Third-party code lives under `includes/Integrations/{Plugin}/` and is
 registered only when that plugin is active: `FlyAffiliate_Plugin::init_plugin()`
-adds `IntegrationServiceProvider` on `plugins_loaded` when
-`class_exists( 'WooCommerce' )` (ADR-0013). Elsewhere, a WooCommerce function is
-called only behind `function_exists()`. No other directory may reference the
-plugin's symbols.
+adds `IntegrationServiceProvider` on `plugins_loaded`; the provider registers
+the integration's announcement always and its platform services only when
+`class_exists( 'WooCommerce' )` (ADR-0013). Elsewhere, a WooCommerce function
+is called only behind `function_exists()`. No other directory may reference
+the plugin's symbols.
 
 An integration announces itself; the core shows nothing platform-specific on
 its own. Its `Integration` Hookable adds the platform's commission origin with
 `flyaffiliate_available_commission_sources` and its settings subpage with
-`flyaffiliate_settings_schema` (see `Integrations\WooCommerce\Integration`).
+`flyaffiliate_settings_schema` (see `Integrations\WooCommerce\Integration`),
+whether or not the platform plugin is active — SliceWP lists every integration
+the same way; only the hooks wait for the platform.
 A new platform gets its own `Integrations\{Platform}\Integration`, its own
 `SOURCE_*` label in `Commission::get_sources()`, and its own guard in
 `init_plugin()`.

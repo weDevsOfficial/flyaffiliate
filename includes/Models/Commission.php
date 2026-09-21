@@ -162,9 +162,10 @@ class Commission extends BaseModel {
 	 * The origins a new commission can be given right now.
 	 *
 	 * The manual origin is always there. A platform's origin is added by its
-	 * integration while that platform is active (ADR-0013), so a commission is
-	 * never recorded against an origin nothing can check or follow. Rows that
-	 * already carry an origin keep their label from `get_sources()`.
+	 * integration (ADR-0013), listed whether or not the platform's plugin is
+	 * active, as SliceWP lists its integrations; a third party can take one
+	 * out through the filter. Rows that already carry an origin keep their
+	 * label from `get_sources()`.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -176,7 +177,7 @@ class Commission extends BaseModel {
 		 *
 		 * @since FLYAFFILIATE_SINCE
 		 *
-		 * @param array<string, string> $sources Origin => label. Manual only, until an integration adds its own.
+		 * @param array<string, string> $sources Origin => label. Manual, plus what each integration adds.
 		 */
 		$sources = (array) apply_filters( 'flyaffiliate_available_commission_sources', [ self::SOURCE_MANUAL => self::get_sources()[ self::SOURCE_MANUAL ] ] );
 

@@ -173,14 +173,14 @@ final class FlyAffiliate_Plugin {
 	public function init_plugin(): void {
 		$this->includes();
 
-		// Integrations are optional and each is registered only when its plugin
-		// is there — WooCommerce (checkout attribution, order status sync) today,
-		// others the same way. Everything else — affiliates, referral links,
+		// Integrations are optional, as in SliceWP: each one is always listed
+		// (as a commission origin and under Settings → Integrations) and its
+		// hooks run only while its plugin is active — WooCommerce today, others
+		// the same way. Everything else — affiliates, referral links,
 		// hand-entered commissions, payouts, the admin and the affiliate
-		// dashboard — runs on WordPress alone (ADR-0013).
-		if ( $this->has_woocommerce() ) {
-			$this->get_container()->addServiceProvider( new \FlyAffiliate\DependencyManagement\Providers\IntegrationServiceProvider() );
-		}
+		// dashboard — runs on WordPress alone (ADR-0013). Registered here, on
+		// `plugins_loaded`, once it is known which plugins are active.
+		$this->get_container()->addServiceProvider( new \FlyAffiliate\DependencyManagement\Providers\IntegrationServiceProvider() );
 
 		$this->init_hooks();
 

@@ -64,18 +64,7 @@ class SettingsSchema {
 		 *
 		 * @param array<int, array<string, mixed>> $elements Flat schema elements.
 		 */
-		$elements = (array) apply_filters( 'flyaffiliate_settings_schema', $elements );
-
-		$has_integration = false;
-
-		foreach ( $elements as $element ) {
-			if ( 'subpage' === ( $element['type'] ?? '' ) && 'integrations' === ( $element['page_id'] ?? '' ) ) {
-				$has_integration = true;
-				break;
-			}
-		}
-
-		return $has_integration ? $elements : array_merge( $elements, self::no_integrations_subpage() );
+		return (array) apply_filters( 'flyaffiliate_settings_schema', $elements );
 	}
 
 	/**
@@ -703,37 +692,6 @@ class SettingsSchema {
 				'icon'        => 'Plug',
 				'description' => __( 'Which platforms create commissions.', 'flyaffiliate' ),
 				'priority'    => 40,
-			],
-		];
-	}
-
-	/**
-	 * A subpage saying no integration is active, for an Integrations page nothing filled.
-	 *
-	 * Each integration adds its own subpage through `flyaffiliate_settings_schema`
-	 * while its platform is active (ADR-0013).
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return array<int, array<string, mixed>>
-	 */
-	private static function no_integrations_subpage(): array {
-		return [
-			[
-				'id'          => 'integrations_none',
-				'type'        => 'subpage',
-				'page_id'     => 'integrations',
-				'title'       => __( 'Overview', 'flyaffiliate' ),
-				'description' => __( 'No platform integration is active.', 'flyaffiliate' ),
-				'priority'    => 10,
-				'hide_save'   => true,
-			],
-			[
-				'id'          => 'integrations_none_section',
-				'type'        => 'section',
-				'subpage_id'  => 'integrations_none',
-				'title'       => __( 'Nothing to configure yet', 'flyaffiliate' ),
-				'description' => __( 'Activate WooCommerce and its settings appear here. Until then, commissions are recorded by hand under Commissions.', 'flyaffiliate' ),
 			],
 		];
 	}

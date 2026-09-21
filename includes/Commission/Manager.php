@@ -354,9 +354,10 @@ class Manager {
 	 * Whether a reference is acceptable for the origin.
 	 *
 	 * A commission under the WooCommerce origin follows its order — the order
-	 * status moves it, and the screens link to it — so the order has to exist.
-	 * A refund is not an order. The manual origin refers to nothing the plugin
-	 * can check, so any reference is kept as given.
+	 * status moves it, and the screens link to it — so the order has to exist
+	 * while WooCommerce is there to ask. A refund is not an order. The manual
+	 * origin, and any origin whose platform is not active, refers to nothing
+	 * the plugin can check, so the reference is kept as given.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -370,12 +371,10 @@ class Manager {
 			return true;
 		}
 
+		// Without WooCommerce there is nothing to ask; the reference is kept as
+		// given, the way SliceWP keeps every reference.
 		if ( ! function_exists( 'wc_get_order' ) ) {
-			return new WP_Error(
-				'flyaffiliate_invalid_reference',
-				__( 'WooCommerce is not active, so the order cannot be checked. Activate WooCommerce, or use the manual origin.', 'flyaffiliate' ),
-				[ 'status' => 400 ]
-			);
+			return true;
 		}
 
 		if ( wc_get_order( $order_id ) instanceof \WC_Order ) {

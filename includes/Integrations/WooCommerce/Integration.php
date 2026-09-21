@@ -19,9 +19,10 @@ use FlyAffiliate\Models\Commission;
  * The integration announces itself: its commission origin, and its settings.
  *
  * The plugin is standalone (ADR-0013). Nothing in the core lists WooCommerce
- * as an origin or shows its settings; this class does, and it is registered
- * only while WooCommerce is active. A future platform integration adds its
- * own origin and subpage the same way.
+ * as an origin or shows its settings; this class does. It is registered
+ * whether or not WooCommerce is active — SliceWP lists every integration the
+ * same way — while the hooks that act on orders wait for WooCommerce. A
+ * future platform integration adds its own origin and subpage the same way.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -73,7 +74,9 @@ class Integration implements Hookable {
 			'type'        => 'section',
 			'subpage_id'  => 'woocommerce',
 			'title'       => __( 'Orders', 'flyaffiliate' ),
-			'description' => __( 'Whether orders placed through a referral link create commissions.', 'flyaffiliate' ),
+			'description' => class_exists( 'WooCommerce' )
+				? __( 'Whether orders placed through a referral link create commissions.', 'flyaffiliate' )
+				: __( 'Whether orders placed through a referral link create commissions. WooCommerce is not active on this site; this takes effect once it is.', 'flyaffiliate' ),
 		];
 		$elements[] = SettingsSchema::switch_field(
 			'woocommerce_enabled',

@@ -114,34 +114,32 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * An origin is open only while its integration is active; the manual origin always is.
+	 * Every registered integration offers its origin, as SliceWP lists them; the filter can take one out.
 	 *
 	 * @return void
 	 */
-	public function test_an_origin_is_open_only_while_its_integration_is_active(): void {
+	public function test_the_open_origins_are_the_integrations_plus_manual(): void {
 		$affiliate = $this->factory()->affiliate->create();
 		$manager   = flyaffiliate()->commission;
 
-		$this->assertSame( [ Commission::SOURCE_WOOCOMMERCE, Commission::SOURCE_MANUAL ], array_keys( Commission::get_available_sources() ), 'WooCommerce is active in the test site, so its integration offers its origin first' );
+		$this->assertSame( [ Commission::SOURCE_WOOCOMMERCE, Commission::SOURCE_MANUAL ], array_keys( Commission::get_available_sources() ), 'the WooCommerce integration announces its origin first' );
 
-		// What a site without the integration sees.
-		remove_all_filters( 'flyaffiliate_available_commission_sources' );
+		$default = $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5 ] );
 
-		$this->assertSame( [ Commission::SOURCE_MANUAL ], array_keys( Commission::get_available_sources() ) );
+		$this->assertSame( Commission::SOURCE_WOOCOMMERCE, $default->get( 'source' ), 'the default origin is the first open one' );
+
+		$without = static fn( array $sources ): array => array_diff_key( $sources, [ Commission::SOURCE_WOOCOMMERCE => true ] );
+		add_filter( 'flyaffiliate_available_commission_sources', $without, 20 );
+
+		$this->assertSame( [ Commission::SOURCE_MANUAL ], array_keys( Commission::get_available_sources() ), 'a site can take an origin out' );
 
 		$refused = $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5, 'source' => Commission::SOURCE_WOOCOMMERCE ] );
 
 		$this->assertWPError( $refused );
 		$this->assertSame( 'flyaffiliate_invalid_source', $refused->get_error_code() );
+		$this->assertSame( Commission::SOURCE_MANUAL, $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5 ] )->get( 'source' ) );
 
-		$default = $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5 ] );
-
-		$this->assertInstanceOf( Commission::class, $default );
-		$this->assertSame( Commission::SOURCE_MANUAL, $default->get( 'source' ), 'the default origin is the first open one' );
-
-		flyaffiliate()->get_container()->get( \FlyAffiliate\Integrations\WooCommerce\Integration::class )->register_hooks();
-
-		$this->assertSame( Commission::SOURCE_WOOCOMMERCE, array_key_first( Commission::get_available_sources() ) );
+		remove_filter( 'flyaffiliate_available_commission_sources', $without, 20 );
 	}
 
 	/**

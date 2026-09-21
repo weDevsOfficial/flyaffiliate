@@ -37,6 +37,20 @@ class IntegrationServiceProvider extends BaseServiceProvider {
 	 */
 	protected array $services = [
 		\FlyAffiliate\Integrations\WooCommerce\Integration::class,
+	];
+
+	/**
+	 * The services that act on the platform, registered only while it is active.
+	 *
+	 * The integration itself (`Integration`) is always there, so the platform
+	 * is listed as an origin and under Settings → Integrations whether or not
+	 * its plugin is installed, as SliceWP lists its integrations. Its hooks —
+	 * checkout attribution and order status sync — are what wait for the
+	 * platform (ADR-0013).
+	 *
+	 * @var class-string[]
+	 */
+	protected array $platform_services = [
 		\FlyAffiliate\Integrations\WooCommerce\OrderAttribution::class,
 		\FlyAffiliate\Integrations\WooCommerce\OrderStatusSync::class,
 	];
@@ -49,6 +63,10 @@ class IntegrationServiceProvider extends BaseServiceProvider {
 	 * @return void
 	 */
 	public function register(): void {
+		if ( class_exists( 'WooCommerce' ) ) {
+			$this->services = array_merge( $this->services, $this->platform_services );
+		}
+
 		$this->register_services();
 	}
 }

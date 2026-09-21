@@ -85,7 +85,7 @@ npm run plugin-check        # Runs Plugin Check against the built zip (wp-env)
 2. Creates the `Container` instance
 3. Registers `Providers\ServiceProvider`
 4. Calls `FlyAffiliate_Plugin::init()`
-5. On `plugins_loaded`, `init_plugin()` includes function files, adds the WooCommerce integration provider when WooCommerce is active, and registers hooks
+5. On `plugins_loaded`, `init_plugin()` includes function files, adds the integration provider (whose platform services register only when WooCommerce is active), and registers hooks
 6. On `init` (priority 4), `init_classes()` resolves the tagged service groups; every `Hookable` gets `register_hooks()` called
 
 ### Directory Structure
