@@ -130,13 +130,16 @@ class MoveStylesToCssDirPlugin {
  * plugin-ui carries a Google logo for a sign-in button this plugin never
  * renders.
  *
- * The SVG namespace is percent-encoded rather than removed, in the scripts as
- * well as the stylesheets. It reaches the page two ways, and the encoding is
- * inert in both: inside a `data:image/svg+xml` URI the browser decodes it back
- * before parsing the icon, and as the `xmlns` attribute of a React element it
- * is never read — an inline `<svg>` takes its namespace from
- * `createElementNS()`, which lives in react-dom, a WordPress-provided external
- * that no bundle here contains.
+ * The one stylesheet rule that carries the SVG namespace — wp-components'
+ * colour-picker checkerboard, a component no FlyAffiliate screen renders — is
+ * dropped, so the stylesheets name no host at all. The scripts lose it the
+ * same way: the `xmlns` prop of a React SVG element is never read, because an
+ * inline `<svg>` takes its namespace from `createElementNS()` in react-dom (a
+ * WordPress-provided external that no bundle here contains); the HTML parser
+ * ignores the same attribute in the two SVG markup strings; and
+ * react-colorful's alpha-slider checkerboard is an SVG data URI inside a
+ * stylesheet string, in a colour picker no FlyAffiliate screen renders.
+ * Anything that still slips through is percent-encoded, which is inert.
  *
  * The documentation URLs that libraries put in their own error messages
  * (redux, radix, base-ui, uuid, date-fns, prop-types) lose their scheme. They
@@ -169,16 +172,38 @@ class RemoveRemoteUrlsPlugin {
 							const before = assets[ name ].source().toString();
 							let after = before;
 
+							if ( isJs ) {
+								after = after
+									.replace(
+										/;background-image:url\(\\'data:image\/svg\+xml;charset=utf-8,<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"[^)]*\)/g,
+										''
+									)
+									.replace(
+										/xmlns:"http:\/\/www\.w3\.org\/2000\/svg",/g,
+										''
+									)
+									.replace(
+										/,xmlns:"http:\/\/www\.w3\.org\/2000\/svg"/g,
+										''
+									)
+									.replace(
+										/ xmlns="http:\/\/www\.w3\.org\/2000\/svg"/g,
+										''
+									);
+							}
+
 							after = after.replace(
 								/http:\/\/www\.w3\.org\/2000\/svg/g,
 								'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'
 							);
 
 							if ( isCss ) {
-								after = after.replace(
-									/\/\*![\s\S]*?\*\//g,
-									''
-								);
+								after = after
+									.replace( /\/\*![\s\S]*?\*\//g, '' )
+									.replace(
+										/\.components-circular-option-picker__option-wrapper:before\{[^}]*\}/g,
+										''
+									);
 							}
 
 							if ( isJs ) {
