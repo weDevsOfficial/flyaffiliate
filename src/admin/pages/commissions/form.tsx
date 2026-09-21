@@ -359,11 +359,10 @@ export default function CommissionFormPage() {
 		amount: '',
 		base_amount: '',
 		order_id: '',
-		// The platform's origin when its integration is active, otherwise manual.
-		source:
-			'woocommerce' in availableSources
-				? 'woocommerce'
-				: Object.keys( availableSources )[ 0 ] ?? 'manual',
+		// The first open origin. Each integration puts its own first while its
+		// platform is active and last while it is not, so this is the platform
+		// being sold on, or manual — never a platform that is not installed.
+		source: Object.keys( availableSources )[ 0 ] ?? 'manual',
 		// Now, in the site's timezone.
 		date: dateI18n( 'Y-m-d' ),
 		time: dateI18n( 'H:i' ),

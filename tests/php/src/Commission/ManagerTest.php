@@ -7,6 +7,7 @@
 
 namespace FlyAffiliate\Test\Commission;
 
+use FlyAffiliate\Integrations\WooCommerce\Integration;
 use FlyAffiliate\Models\Commission;
 use FlyAffiliate\Models\Payout;
 use FlyAffiliate\Test\FlyAffiliateTestCase;
@@ -140,6 +141,58 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$this->assertSame( Commission::SOURCE_MANUAL, $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5 ] )->get( 'source' ) );
 
 		remove_filter( 'flyaffiliate_available_commission_sources', $without, 20 );
+	}
+
+	/**
+	 * An active platform offers its origin first, so it is what a new commission defaults to.
+	 *
+	 * The inactive half of `Integration::add_source()` cannot be exercised here:
+	 * this suite runs with WooCommerce installed, and `class_exists()` is not
+	 * something a test can take away. Its consequence is covered by
+	 * {@see self::test_the_default_origin_follows_the_order_the_integrations_set()}.
+	 *
+	 * @return void
+	 */
+	public function test_an_active_platform_offers_its_origin_first(): void {
+		$this->assertTrue( class_exists( 'WooCommerce' ), 'this suite runs with WooCommerce active' );
+
+		$integration = new Integration();
+
+		$this->assertSame(
+			[ Commission::SOURCE_WOOCOMMERCE, Commission::SOURCE_MANUAL ],
+			array_keys( $integration->add_source( [ Commission::SOURCE_MANUAL => 'Manual' ] ) ),
+			'the platform being sold on comes first'
+		);
+	}
+
+	/**
+	 * The default origin is whichever is offered first, never WooCommerce by name.
+	 *
+	 * An integration puts its origin first while its platform is active and last
+	 * while it is not, so on a site without the platform a new commission
+	 * defaults to manual. It matters because nothing on such a site can ever
+	 * confirm the order behind a platform commission, so a `pending` row under
+	 * that origin would never mature.
+	 *
+	 * @return void
+	 */
+	public function test_the_default_origin_follows_the_order_the_integrations_set(): void {
+		$affiliate = $this->factory()->affiliate->create();
+
+		// What Integration::add_source() produces when WooCommerce is not
+		// active: still listed, but last.
+		$inactive = static fn( array $sources ): array => array_diff_key( $sources, [ Commission::SOURCE_WOOCOMMERCE => true ] ) + [ Commission::SOURCE_WOOCOMMERCE => 'WooCommerce' ];
+
+		add_filter( 'flyaffiliate_available_commission_sources', $inactive, 20 );
+
+		$this->assertSame( [ Commission::SOURCE_MANUAL, Commission::SOURCE_WOOCOMMERCE ], array_keys( Commission::get_available_sources() ), 'an inactive platform is listed last' );
+
+		$created = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 5 ] );
+
+		$this->assertNotWPError( $created );
+		$this->assertSame( Commission::SOURCE_MANUAL, $created->get( 'source' ), 'a new commission never defaults to a platform that is not there' );
+
+		remove_filter( 'flyaffiliate_available_commission_sources', $inactive, 20 );
 	}
 
 	/**

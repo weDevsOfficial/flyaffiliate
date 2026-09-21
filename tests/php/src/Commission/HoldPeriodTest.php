@@ -216,6 +216,37 @@ class HoldPeriodTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * A pending commission whose order cannot be found never matures.
+	 *
+	 * The same branch answers for a site with no WooCommerce at all, where
+	 * `wc_get_order()` does not exist: `can_mature()` cannot confirm the order,
+	 * so it holds. That is deliberate — a store that deactivates WooCommerce for
+	 * an hour must not have unverified commissions mature — and it is why
+	 * `Integration::add_source()` keeps an inactive platform out of first place,
+	 * so nobody creates a row that can never move without meaning to.
+	 *
+	 * @return void
+	 */
+	public function test_a_pending_commission_whose_order_cannot_be_found_never_matures(): void {
+		flyaffiliate()->settings->save( [ 'hold_days' => 0 ] );
+
+		$affiliate  = $this->factory()->affiliate->create();
+		$commission = $this->factory()->commission->create(
+			[
+				'affiliate_id' => $affiliate,
+				'order_id'     => 999999,
+				'source'       => Commission::SOURCE_WOOCOMMERCE,
+				'status'       => Commission::STATUS_PENDING,
+				'matures_at'   => gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ),
+			]
+		);
+
+		( new HoldPeriod() )->run();
+
+		$this->assertSame( Commission::STATUS_PENDING, flyaffiliate()->commission->get( $commission )->get( 'status' ), 'no order to confirm, so the commission holds' );
+	}
+
+	/**
 	 * Changing the hold period moves pending maturity dates and matures what is now due.
 	 *
 	 * @return void

@@ -41,6 +41,12 @@ class Integration implements Hookable {
 	/**
 	 * Offer WooCommerce as an origin for new commissions.
 	 *
+	 * Listed either way, as SliceWP lists every integration — but first only
+	 * while WooCommerce is active, because the caller reads the first origin as
+	 * the preferred one. A new commission must not default to a platform that
+	 * is not installed: nothing would ever confirm its order, so a `pending`
+	 * row under that origin could never mature (`HoldPeriod::can_mature()`).
+	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @param array<string, string> $sources Origin => label.
@@ -48,7 +54,9 @@ class Integration implements Hookable {
 	 * @return array<string, string>
 	 */
 	public function add_source( array $sources ): array {
-		return [ Commission::SOURCE_WOOCOMMERCE => Commission::get_sources()[ Commission::SOURCE_WOOCOMMERCE ] ] + $sources;
+		$source = [ Commission::SOURCE_WOOCOMMERCE => Commission::get_sources()[ Commission::SOURCE_WOOCOMMERCE ] ];
+
+		return class_exists( 'WooCommerce' ) ? $source + $sources : $sources + $source;
 	}
 
 	/**
