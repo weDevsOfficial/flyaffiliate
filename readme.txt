@@ -1,7 +1,7 @@
 === FlyAffiliate ===
 Contributors: wedevs, tareq1988
 Tags: affiliate, affiliate marketing, woocommerce, referral, commission
-Requires at least: 6.4
+Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
 Stable tag: 1.0.0

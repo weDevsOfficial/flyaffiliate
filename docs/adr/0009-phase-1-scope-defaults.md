@@ -23,10 +23,15 @@ welcome email" switch on the admin's add-affiliate form — off by default, one
 message with the referral link and the dashboard address, sent only when the
 admin ticks it (`Registration::send_welcome_email()`).
 
-## 2. Minimum WordPress version is 6.4
+## 2. Minimum WordPress version is 6.6
 
-`Requires at least: 6.4`, and `minimum_supported_wp_version` in
-`phpcs.xml.dist` is 6.4.
+> Amended 2026-09-21: raised from 6.4 to 6.6. Both React apps are built
+> against the `react-jsx-runtime` script handle, which WordPress registers
+> from 6.6; on 6.4 and 6.5 neither app would print. The original reasoning
+> for 6.4 follows.
+
+`Requires at least: 6.6`, and `minimum_supported_wp_version` in
+`phpcs.xml.dist` is 6.6.
 
 The `Requires Plugins: woocommerce` header is only *enforced* by WordPress 6.5
 and later. On 6.4 it is inert but harmless, and the plugin still detects a
