@@ -123,11 +123,23 @@ class MoveStylesToCssDirPlugin {
  *
  * WordPress.org's review scanner flags any `http://` inside a stylesheet as a
  * remote file, and its reviewers ask for external hosts to be gone from the
- * scripts. None of these load anything: the Tailwind licence comment names
- * its website, `@wordpress/components` inlines SVG icons whose `xmlns` is a
- * URL (percent-encoding it inside the data URI changes nothing for the
- * browser), and plugin-ui carries a Google logo for a sign-in button this
- * plugin never renders.
+ * scripts. None of these load anything: the Tailwind licence comment names its
+ * website, the SVG namespace is a namespace rather than an address, and
+ * plugin-ui carries a Google logo for a sign-in button this plugin never
+ * renders.
+ *
+ * The SVG namespace is percent-encoded rather than removed, in the scripts as
+ * well as the stylesheets. It reaches the page two ways, and the encoding is
+ * inert in both: inside a `data:image/svg+xml` URI the browser decodes it back
+ * before parsing the icon, and as the `xmlns` attribute of a React element it
+ * is never read — an inline `<svg>` takes its namespace from
+ * `createElementNS()`, which lives in react-dom, a WordPress-provided external
+ * that no bundle here contains.
+ *
+ * What is left in the scripts after this is the handful of documentation URLs
+ * that libraries put in their own error messages. Those are error text, not
+ * resources, and rewriting a third-party error message to satisfy a grep costs
+ * more than it buys.
  */
 class StripRemoteReferencesPlugin {
 	apply( compiler ) {
@@ -154,13 +166,16 @@ class StripRemoteReferencesPlugin {
 							const before = assets[ name ].source().toString();
 							let after = before;
 
+							after = after.replace(
+								/http:\/\/www\.w3\.org\/2000\/svg/g,
+								'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'
+							);
+
 							if ( isCss ) {
-								after = after
-									.replace( /\/\*![\s\S]*?\*\//g, '' )
-									.replace(
-										/http:\/\/www\.w3\.org\/2000\/svg/g,
-										'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'
-									);
+								after = after.replace(
+									/\/\*![\s\S]*?\*\//g,
+									''
+								);
 							}
 
 							if ( isJs ) {
