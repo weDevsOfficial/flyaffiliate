@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T05:14:16+00:00\n"
+"POT-Creation-Date: 2026-09-21T06:00:12+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -636,13 +636,13 @@ msgstr ""
 msgid "That user is already an affiliate."
 msgstr ""
 
-#: includes/Affiliate/Manager.php:142
-#: includes/Affiliate/Manager.php:216
+#: includes/Affiliate/Manager.php:143
+#: includes/Affiliate/Manager.php:221
 #: assets/js/admin.js:276
 msgid "The affiliate could not be saved."
 msgstr ""
 
-#: includes/Affiliate/Manager.php:186
+#: includes/Affiliate/Manager.php:187
 #: includes/REST/Controllers/AffiliatesController.php:577
 msgid "No affiliate with that ID."
 msgstr ""
@@ -666,18 +666,22 @@ msgstr ""
 msgid "The account could not be created. Try again, or contact the site owner."
 msgstr ""
 
-#: includes/Affiliate/Registration.php:205
+#: includes/Affiliate/Registration.php:213
 #: templates/affiliate-dashboard/not-affiliate.php:18
 msgid "That activation link is not valid, or has already been used."
 msgstr ""
 
+#: includes/Affiliate/Registration.php:217
+msgid "That activation link has expired. Ask the site owner for a new one."
+msgstr ""
+
 #. translators: %s: site name.
-#: includes/Affiliate/Registration.php:278
+#: includes/Affiliate/Registration.php:295
 msgid "Activate your affiliate account at %s"
 msgstr ""
 
 #. translators: 1: site name, 2: activation URL.
-#: includes/Affiliate/Registration.php:281
+#: includes/Affiliate/Registration.php:298
 msgid ""
 "Thanks for joining the %1$s affiliate programme.\n"
 "\n"
@@ -688,12 +692,12 @@ msgid ""
 msgstr ""
 
 #. translators: %s: site name.
-#: includes/Affiliate/Registration.php:331
+#: includes/Affiliate/Registration.php:348
 msgid "Welcome to the %s affiliate programme"
 msgstr ""
 
 #. translators: 1: site name, 2: referral URL, 3: dashboard URL.
-#: includes/Affiliate/Registration.php:334
+#: includes/Affiliate/Registration.php:351
 msgid ""
 "You are now an affiliate of %1$s.\n"
 "\n"
@@ -718,7 +722,7 @@ msgstr ""
 
 #: includes/Assets.php:283
 #: includes/Assets.php:289
-#: includes/Models/Affiliate.php:84
+#: includes/Models/Affiliate.php:85
 #: includes/Models/Commission.php:140
 #: assets/js/admin.js:284
 #: assets/js/dashboard.js:278
@@ -726,17 +730,17 @@ msgid "Pending"
 msgstr ""
 
 #: includes/Assets.php:284
-#: includes/Models/Affiliate.php:85
+#: includes/Models/Affiliate.php:86
 msgid "Active"
 msgstr ""
 
 #: includes/Assets.php:285
-#: includes/Models/Affiliate.php:86
+#: includes/Models/Affiliate.php:87
 msgid "Inactive"
 msgstr ""
 
 #: includes/Assets.php:286
-#: includes/Models/Affiliate.php:87
+#: includes/Models/Affiliate.php:88
 msgid "Suspended"
 msgstr ""
 
@@ -831,11 +835,11 @@ msgstr ""
 msgid "Something went wrong. Try again."
 msgstr ""
 
-#: includes/Install/Installer.php:335
+#: includes/Install/Installer.php:339
 msgid "Affiliate Dashboard"
 msgstr ""
 
-#: includes/Install/Installer.php:339
+#: includes/Install/Installer.php:343
 msgid "Affiliate Registration"
 msgstr ""
 
@@ -869,7 +873,7 @@ msgid "Create commissions for referred WooCommerce orders."
 msgstr ""
 
 #. translators: %d: affiliate ID.
-#: includes/Models/Affiliate.php:143
+#: includes/Models/Affiliate.php:144
 msgid "Affiliate #%d"
 msgstr ""
 
@@ -969,28 +973,28 @@ msgstr ""
 msgid "The payout could not be recorded: a commission would not attach to its payment. Nothing was saved."
 msgstr ""
 
-#: includes/Payout/Manager.php:531
+#: includes/Payout/Manager.php:536
 msgid "A commission cannot be removed from a payment that has been paid."
 msgstr ""
 
-#: includes/Payout/Manager.php:537
+#: includes/Payout/Manager.php:542
 msgid "That commission is not part of this payment."
 msgstr ""
 
-#: includes/Payout/Manager.php:579
+#: includes/Payout/Manager.php:584
 msgid "A payment that has been paid cannot be deleted."
 msgstr ""
 
-#: includes/Payout/Manager.php:624
+#: includes/Payout/Manager.php:629
 msgid "A payout with a paid payment cannot be deleted."
 msgstr ""
 
-#: includes/Payout/Manager.php:701
+#: includes/Payout/Manager.php:706
 #: includes/REST/Controllers/PayoutsController.php:331
 msgid "No payment with that ID."
 msgstr ""
 
-#: includes/Payout/Manager.php:712
+#: includes/Payout/Manager.php:717
 msgid "The payment could not be saved."
 msgstr ""
 

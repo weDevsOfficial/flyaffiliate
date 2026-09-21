@@ -49,6 +49,26 @@ class RegistrationTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * The activation key out of the email that carried it.
+	 *
+	 * The row only holds the key's hash, so the email is the only place the key
+	 * itself exists — which is the point of hashing it.
+	 *
+	 * @param int $index Which sent email to read.
+	 *
+	 * @return string
+	 */
+	protected function key_from_email( int $index = 0 ): string {
+		$matched = preg_match(
+			'/flyaffiliate_activate=([A-Za-z0-9]+)/',
+			(string) ( $this->sent[ $index ]['message'] ?? '' ),
+			$matches
+		);
+
+		return 1 === $matched ? $matches[1] : '';
+	}
+
+	/**
 	 * A new address gets a user, a pending affiliate and an activation email.
 	 *
 	 * @return void
@@ -68,7 +88,14 @@ class RegistrationTest extends FlyAffiliateTestCase {
 
 		$this->assertCount( 1, $this->sent );
 		$this->assertSame( 'newbie@example.org', $this->sent[0]['to'] );
-		$this->assertStringContainsString( (string) $affiliate->get( 'activation_key' ), $this->sent[0]['message'] );
+
+		$key = $this->key_from_email();
+
+		$this->assertNotSame( '', $key );
+		// The email carries the key; the row carries its hash, and never the key.
+		$this->assertStringNotContainsString( (string) $affiliate->get( 'activation_key' ), $this->sent[0]['message'] );
+		$this->assertSame( wp_hash( $key ), (string) $affiliate->get( 'activation_key' ) );
+		$this->assertNotEmpty( $affiliate->get( 'activation_expires_at' ) );
 	}
 
 	/**
@@ -116,17 +143,64 @@ class RegistrationTest extends FlyAffiliateTestCase {
 	 * @return void
 	 */
 	public function test_activation_is_single_use(): void {
-		$affiliate = flyaffiliate()->registration->register( 'activate@example.org' );
-		$key       = (string) $affiliate->get( 'activation_key' );
+		flyaffiliate()->registration->register( 'activate@example.org' );
 
+		$key       = $this->key_from_email();
 		$activated = flyaffiliate()->registration->activate( $key );
 
 		$this->assertInstanceOf( Affiliate::class, $activated );
 		$this->assertTrue( $activated->is_active() );
 		$this->assertSame( '', $activated->get( 'activation_key' ) );
+		$this->assertNull( $activated->get( 'activation_expires_at' ) );
 
 		$this->assertWPError( flyaffiliate()->registration->activate( $key ) );
 		$this->assertWPError( flyaffiliate()->registration->activate( 'nonsense' ) );
+	}
+
+	/**
+	 * An empty key never matches the rows that carry no key.
+	 *
+	 * @return void
+	 */
+	public function test_an_empty_key_activates_nobody(): void {
+		flyaffiliate_update_option( 'activation_email_enabled', 'off' );
+
+		$affiliate = flyaffiliate()->registration->register( 'keyless@example.org' );
+
+		$this->assertSame( '', $affiliate->get( 'activation_key' ) );
+		$this->assertWPError( flyaffiliate()->registration->activate( '' ) );
+
+		$reloaded = flyaffiliate()->affiliate->get( $affiliate->get_id() );
+
+		$this->assertSame( Affiliate::STATUS_PENDING, $reloaded->get( 'status' ) );
+	}
+
+	/**
+	 * A link past its lifetime is refused, and the affiliate stays pending.
+	 *
+	 * @return void
+	 */
+	public function test_an_expired_key_is_refused(): void {
+		flyaffiliate()->registration->register( 'late@example.org' );
+
+		$key       = $this->key_from_email();
+		$affiliate = flyaffiliate()->affiliate->get_by_activation_key( wp_hash( $key ) );
+
+		$this->assertInstanceOf( Affiliate::class, $affiliate );
+
+		flyaffiliate()->affiliate->update(
+			$affiliate->get_id(),
+			[ 'activation_expires_at' => gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ]
+		);
+
+		$result = flyaffiliate()->registration->activate( $key );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'expired_key', $result->get_error_code() );
+
+		$reloaded = flyaffiliate()->affiliate->get( $affiliate->get_id() );
+
+		$this->assertSame( Affiliate::STATUS_PENDING, $reloaded->get( 'status' ) );
 	}
 
 	/**
