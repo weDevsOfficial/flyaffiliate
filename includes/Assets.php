@@ -31,6 +31,13 @@ use FlyAffiliate\Models\Payout;
  * JavaScript through `wp_add_inline_script()`, attached to a handle that was
  * registered here.
  *
+ * Registration happens on `init`, as in Dokan, not on `wp_enqueue_scripts`: a
+ * block theme renders the page content — and with it a shortcode — before
+ * `wp_head()`, so the dashboard shortcode enqueues its bundle before
+ * `wp_enqueue_scripts` fires. WordPress drops inline data attached to a
+ * handle that is not registered yet, and the app would start without
+ * `window.flyaffiliate`. By `init` every handle exists, whatever renders first.
+ *
  * @since FLYAFFILIATE_SINCE
  */
 class Assets implements Hookable {
@@ -50,13 +57,16 @@ class Assets implements Hookable {
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		add_action( 'admin_enqueue_scripts', [ $this, 'register_assets' ], 5 );
-		add_action( 'wp_enqueue_scripts', [ $this, 'register_assets' ], 5 );
+		add_action( 'init', [ $this, 'register_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 	}
 
 	/**
 	 * Register — but do not enqueue — everything this plugin ships.
+	 *
+	 * Runs on `init`, so a handle is registered before anything — a block
+	 * theme's early content render included — can enqueue it or attach inline
+	 * data to it. Registering a handle twice changes nothing.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
