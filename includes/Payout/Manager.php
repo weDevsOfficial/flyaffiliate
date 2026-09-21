@@ -374,6 +374,9 @@ class Manager {
 		}
 
 		$payout->set( 'status', Payout::STATUS_PAID );
+		// When the money went. A payment row is otherwise only stamped with the
+		// day it was created, which is not the day anyone was paid.
+		$payout->set( 'paid_at', current_time( 'mysql', true ) );
 
 		if ( 0 === $payout->save() ) {
 			return $this->save_failed();
@@ -424,6 +427,8 @@ class Manager {
 		}
 
 		$payout->set( 'status', Payout::STATUS_UNPAID );
+		// The payment did not happen after all, so neither did the date.
+		$payout->set( 'paid_at', null );
 
 		if ( 0 === $payout->save() ) {
 			return $this->save_failed();

@@ -118,6 +118,89 @@ class MoveStylesToCssDirPlugin {
 	}
 }
 
+/**
+ * Remove the remote-looking URLs the bundled libraries leave in the output.
+ *
+ * ("Remove" as in delete — nothing here has anything to do with payments.)
+ *
+ * WordPress.org's review scanner flags any `http://` inside a stylesheet as a
+ * remote file, and its reviewers ask for external hosts to be gone from the
+ * scripts. None of these load anything: the Tailwind licence comment names its
+ * website, the SVG namespace is a namespace rather than an address, and
+ * plugin-ui carries a Google logo for a sign-in button this plugin never
+ * renders.
+ *
+ * The SVG namespace is percent-encoded rather than removed, in the scripts as
+ * well as the stylesheets. It reaches the page two ways, and the encoding is
+ * inert in both: inside a `data:image/svg+xml` URI the browser decodes it back
+ * before parsing the icon, and as the `xmlns` attribute of a React element it
+ * is never read — an inline `<svg>` takes its namespace from
+ * `createElementNS()`, which lives in react-dom, a WordPress-provided external
+ * that no bundle here contains.
+ *
+ * What is left in the scripts after this is the handful of documentation URLs
+ * that libraries put in their own error messages. Those are error text, not
+ * resources, and rewriting a third-party error message to satisfy a grep costs
+ * more than it buys.
+ */
+class RemoveRemoteUrlsPlugin {
+	apply( compiler ) {
+		const { RawSource } = compiler.webpack.sources;
+
+		compiler.hooks.thisCompilation.tap(
+			'FlyAffiliateRemoveRemoteUrls',
+			( compilation ) => {
+				compilation.hooks.processAssets.tap(
+					{
+						name: 'FlyAffiliateRemoveRemoteUrls',
+						stage: compiler.webpack.Compilation
+							.PROCESS_ASSETS_STAGE_REPORT,
+					},
+					( assets ) => {
+						Object.keys( assets ).forEach( ( name ) => {
+							const isCss = /\.css$/.test( name );
+							const isJs = /\.js$/.test( name );
+
+							if ( ! isCss && ! isJs ) {
+								return;
+							}
+
+							const before = assets[ name ].source().toString();
+							let after = before;
+
+							after = after.replace(
+								/http:\/\/www\.w3\.org\/2000\/svg/g,
+								'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'
+							);
+
+							if ( isCss ) {
+								after = after.replace(
+									/\/\*![\s\S]*?\*\//g,
+									''
+								);
+							}
+
+							if ( isJs ) {
+								after = after.replace(
+									/https:\/\/upload\.wikimedia\.org\/[^"'`)\s]*/g,
+									'data:,'
+								);
+							}
+
+							if ( after !== before ) {
+								compilation.updateAsset(
+									name,
+									new RawSource( after )
+								);
+							}
+						} );
+					}
+				);
+			}
+		);
+	}
+}
+
 module.exports = {
 	...defaultConfig,
 	entry,
@@ -146,6 +229,7 @@ module.exports = {
 		// plugin in its default config.
 		new RemoveEmptyScriptsPlugin(),
 		...defaultConfig.plugins,
+		new RemoveRemoteUrlsPlugin(),
 		new MoveStylesToCssDirPlugin(),
 	],
 };

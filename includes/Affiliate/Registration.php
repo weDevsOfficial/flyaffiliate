@@ -75,7 +75,7 @@ class Registration implements Hookable {
 		 *
 		 * @param bool $enabled Default true.
 		 */
-		return (bool) apply_filters( 'flyaffiliate_registration_enabled', true );
+		return (bool) apply_filters( 'flyaffiliate_registration_enabled', flyaffiliate_option_enabled( 'registration_enabled' ) );
 	}
 
 	/**
@@ -91,6 +91,13 @@ class Registration implements Hookable {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.
 		$redirect = isset( $_POST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) : '';
 		$redirect = '' !== $redirect ? $redirect : home_url( '/' );
+		// A field people never see; a bot filling every input trips it.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.
+		if ( ! empty( $_POST['flyaffiliate_website'] ) ) {
+			wp_safe_redirect( add_query_arg( 'flyaffiliate_error', 'spam', $redirect ) );
+			exit;
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.
 		$email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.
@@ -150,12 +157,17 @@ class Registration implements Hookable {
 		}
 
 		$send_email = flyaffiliate_option_enabled( 'activation_email_enabled' );
-		$affiliate  = flyaffiliate()->affiliate->create(
+		// The key itself is only ever in this variable and in the email. What the
+		// row keeps is its hash, so a copy of the database is not a set of
+		// working activation links.
+		$key       = $send_email ? $this->generate_key() : '';
+		$affiliate = flyaffiliate()->affiliate->create(
 			[
-				'user_id'        => $user_id,
-				'status'         => Affiliate::STATUS_PENDING,
-				'promo_method'   => $promo_method,
-				'activation_key' => $send_email ? $this->generate_key() : '',
+				'user_id'               => $user_id,
+				'status'                => Affiliate::STATUS_PENDING,
+				'promo_method'          => $promo_method,
+				'activation_key'        => $this->hash_key( $key ),
+				'activation_expires_at' => '' === $key ? null : gmdate( 'Y-m-d H:i:s', time() + $this->key_lifetime() ),
 			]
 		);
 
@@ -164,7 +176,7 @@ class Registration implements Hookable {
 		}
 
 		if ( $send_email ) {
-			$this->send_activation_email( $affiliate );
+			$this->send_activation_email( $affiliate, $key );
 		}
 
 		/**
@@ -192,17 +204,25 @@ class Registration implements Hookable {
 	 * @return Affiliate|WP_Error
 	 */
 	public function activate( string $key ) {
-		$affiliate = flyaffiliate()->affiliate->get_by_activation_key( $key );
+		// `hash_key()` answers an empty string for an empty key, and
+		// `get_by_activation_key()` refuses that — so a missing key never matches
+		// the rows that carry no key at all.
+		$affiliate = flyaffiliate()->affiliate->get_by_activation_key( $this->hash_key( $key ) );
 
 		if ( null === $affiliate ) {
 			return new WP_Error( 'invalid_key', __( 'That activation link is not valid, or has already been used.', 'flyaffiliate' ) );
 		}
 
+		if ( $this->key_has_expired( $affiliate ) ) {
+			return new WP_Error( 'expired_key', __( 'That activation link has expired. Ask the site owner for a new one.', 'flyaffiliate' ) );
+		}
+
 		return flyaffiliate()->affiliate->update(
 			$affiliate->get_id(),
 			[
-				'status'         => Affiliate::STATUS_ACTIVE,
-				'activation_key' => '',
+				'status'                => Affiliate::STATUS_ACTIVE,
+				'activation_key'        => '',
+				'activation_expires_at' => null,
 			]
 		);
 	}
@@ -236,18 +256,21 @@ class Registration implements Hookable {
 	}
 
 	/**
-	 * The activation URL for an affiliate.
+	 * The activation URL for a key.
+	 *
+	 * The key is the one handed to the caller when the affiliate registered; the
+	 * row only holds its hash, so the URL cannot be rebuilt from the database.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
-	 * @param Affiliate $affiliate The affiliate.
+	 * @param string $key The activation key, unhashed.
 	 *
 	 * @return string
 	 */
-	public function get_activation_url( Affiliate $affiliate ): string {
+	public function get_activation_url( string $key ): string {
 		$dashboard = flyaffiliate_get_page_url( 'affiliate_dashboard' );
 
-		return add_query_arg( self::ACTIVATION_VAR, (string) $affiliate->get( 'activation_key' ), '' !== $dashboard ? $dashboard : home_url( '/' ) );
+		return add_query_arg( self::ACTIVATION_VAR, rawurlencode( $key ), '' !== $dashboard ? $dashboard : home_url( '/' ) );
 	}
 
 	/**
@@ -256,13 +279,14 @@ class Registration implements Hookable {
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @param Affiliate $affiliate The affiliate.
+	 * @param string    $key       The activation key, unhashed.
 	 *
 	 * @return bool
 	 */
-	public function send_activation_email( Affiliate $affiliate ): bool {
+	public function send_activation_email( Affiliate $affiliate, string $key ): bool {
 		$user = $affiliate->get_user();
 
-		if ( null === $user || '' === (string) $affiliate->get( 'activation_key' ) ) {
+		if ( null === $user || '' === $key ) {
 			return false;
 		}
 
@@ -273,7 +297,7 @@ class Registration implements Hookable {
 			// translators: 1: site name, 2: activation URL.
 			__( "Thanks for joining the %1\$s affiliate programme.\n\nClick the link below to activate your account:\n%2\$s\n\nIf you did not sign up, you can ignore this email.", 'flyaffiliate' ),
 			$site_name,
-			$this->get_activation_url( $affiliate )
+			$this->get_activation_url( $key )
 		);
 
 		/**
@@ -361,6 +385,73 @@ class Registration implements Hookable {
 	 */
 	protected function generate_key(): string {
 		return wp_generate_password( 32, false, false );
+	}
+
+	/**
+	 * The stored form of an activation key.
+	 *
+	 * Hashed with the site's salts, which live in `wp-config.php` rather than the
+	 * database, the way core stores `user_activation_key`. The hash is
+	 * deterministic, so the lookup stays one read of the `activation_key` index
+	 * instead of a scan.
+	 *
+	 * Cut to the column's width here, where both the write and the lookup pass
+	 * through: `wp_hash()` is HMAC-MD5 in core, but it is pluggable, and a wider
+	 * digest the column silently truncated on the way in would never match the
+	 * untruncated one on the way out.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param string $key The activation key, unhashed.
+	 *
+	 * @return string The hash, or an empty string for an empty key.
+	 */
+	protected function hash_key( string $key ): string {
+		return '' === $key ? '' : substr( wp_hash( $key ), 0, 64 );
+	}
+
+	/**
+	 * How long an activation link stays usable.
+	 *
+	 * A week, rather than core's day for a password reset: an affiliate signing
+	 * up is not locked out of anything while they wait, and people read a
+	 * marketing email late.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return int Seconds.
+	 */
+	protected function key_lifetime(): int {
+		/**
+		 * Filters how long an activation link stays usable.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param int $lifetime Seconds. Default one week.
+		 */
+		return (int) apply_filters( 'flyaffiliate_activation_key_lifetime', WEEK_IN_SECONDS );
+	}
+
+	/**
+	 * Whether an affiliate's activation link has run out.
+	 *
+	 * A row carrying no expiry never expires: it was written before the column
+	 * existed, or by something that set a key of its own.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Affiliate $affiliate The affiliate.
+	 *
+	 * @return bool
+	 */
+	protected function key_has_expired( Affiliate $affiliate ): bool {
+		$expires = (string) $affiliate->get( 'activation_expires_at', '' );
+
+		if ( '' === $expires ) {
+			return false;
+		}
+
+		return strtotime( $expires . ' UTC' ) < time();
 	}
 
 	/**

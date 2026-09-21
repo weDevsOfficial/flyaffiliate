@@ -62,14 +62,15 @@ class Affiliate extends BaseModel {
 	 * @var array<string, string>
 	 */
 	protected static array $columns = [
-		'id'             => 'int',
-		'user_id'        => 'int',
-		'status'         => 'string',
-		'payment_email'  => 'string',
-		'promo_method'   => 'string',
-		'activation_key' => 'string',
-		'created_at'     => 'datetime',
-		'updated_at'     => 'datetime',
+		'id'                    => 'int',
+		'user_id'               => 'int',
+		'status'                => 'string',
+		'payment_email'         => 'string',
+		'promo_method'          => 'string',
+		'activation_key'        => 'string',
+		'activation_expires_at' => 'datetime',
+		'created_at'            => 'datetime',
+		'updated_at'            => 'datetime',
 	];
 
 	/**

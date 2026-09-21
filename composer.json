@@ -1,6 +1,6 @@
 {
     "name": "wedevs/flyaffiliate",
-    "description": "Affiliate marketing for WordPress, with WooCommerce support built in.",
+    "description": "Standalone affiliate marketing for WordPress, with optional platform integrations.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [
@@ -31,6 +31,7 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
         },
+        "platform-check": false,
         "sort-packages": true
     },
     "autoload": {

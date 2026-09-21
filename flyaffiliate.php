@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FlyAffiliate
  * Plugin URI: https://flyaffiliate.co/
- * Description: Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts, with WooCommerce support built in.
+ * Description: Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. Integrates with WooCommerce and more.
  * Version: 1.0.0
  * Author: weDevs
  * Author URI: https://wedevs.com/

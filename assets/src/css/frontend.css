@@ -123,3 +123,12 @@
 	background: #fee2e2;
 	color: #991b1b;
 }
+
+/* The registration form's honeypot: off-screen for people, present for bots. */
+.flyaffiliate-trap {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}

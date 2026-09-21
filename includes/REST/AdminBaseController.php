@@ -15,7 +15,7 @@ use WP_Error;
 use WP_REST_Request;
 
 /**
- * Every route on a subclass requires `manage_woocommerce` (ADR-0008).
+ * Every route on a subclass requires `flyaffiliate_admin_capability()` — `manage_options` unless filtered (ADR-0008, ADR-0013).
  *
  * @since FLYAFFILIATE_SINCE
  */

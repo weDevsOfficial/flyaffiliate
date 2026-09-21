@@ -173,13 +173,14 @@ final class FlyAffiliate_Plugin {
 	public function init_plugin(): void {
 		$this->includes();
 
-		// The WooCommerce integration (checkout attribution, order status sync)
-		// is registered only when WooCommerce is there. Everything else —
-		// affiliates, referral links, hand-entered commissions, payouts, the
-		// admin and the affiliate dashboard — runs on WordPress alone.
-		if ( $this->has_woocommerce() ) {
-			$this->get_container()->addServiceProvider( new \FlyAffiliate\DependencyManagement\Providers\IntegrationServiceProvider() );
-		}
+		// Integrations are optional, as in SliceWP: each one is always listed
+		// (as a commission origin and under Settings → Integrations) and its
+		// hooks run only while its plugin is active — WooCommerce today, others
+		// the same way. Everything else — affiliates, referral links,
+		// hand-entered commissions, payouts, the admin and the affiliate
+		// dashboard — runs on WordPress alone (ADR-0013). Registered here, on
+		// `plugins_loaded`, once it is known which plugins are active.
+		$this->get_container()->addServiceProvider( new \FlyAffiliate\DependencyManagement\Providers\IntegrationServiceProvider() );
 
 		$this->init_hooks();
 
@@ -316,12 +317,8 @@ final class FlyAffiliate_Plugin {
 			);
 		}
 
-		if ( ! $this->has_woocommerce() ) {
-			set_transient( 'flyaffiliate_woocommerce_missing', true, HOUR_IN_SECONDS );
-
-			return;
-		}
-
+		// The plugin is standalone (ADR-0013): the tables, options, role, pages
+		// and the daily job are created on any WordPress site, integrations or not.
 		require_once FLYAFFILIATE_INC_DIR . '/functions.php';
 
 		( new Installer() )->do_install();
@@ -336,8 +333,6 @@ final class FlyAffiliate_Plugin {
 	 */
 	public function deactivate(): void {
 		Installer::clear_scheduled_events();
-
-		delete_transient( 'flyaffiliate_woocommerce_missing' );
 	}
 
 	/**

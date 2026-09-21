@@ -64,7 +64,7 @@ class SettingsSchema {
 		 *
 		 * @param array<int, array<string, mixed>> $elements Flat schema elements.
 		 */
-		return apply_filters( 'flyaffiliate_settings_schema', $elements );
+		return (array) apply_filters( 'flyaffiliate_settings_schema', $elements );
 	}
 
 	/**
@@ -220,7 +220,7 @@ class SettingsSchema {
 	 *
 	 * @return array<string, mixed>
 	 */
-	private static function switch_field( string $id, string $section_id, string $title, string $description, bool $default_value ): array {
+	public static function switch_field( string $id, string $section_id, string $title, string $description, bool $default_value ): array {
 		return [
 			'id'            => $id,
 			'type'          => 'field',
@@ -297,7 +297,7 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'general',
 				'title'       => __( 'Currency', 'flyaffiliate' ),
-				'description' => __( 'How commission and payout amounts are shown. This is separate from the WooCommerce currency setting.', 'flyaffiliate' ),
+				'description' => __( 'How commission and payout amounts are shown. This is separate from your shop’s own currency setting.', 'flyaffiliate' ),
 				'priority'    => 15,
 			],
 			[
@@ -382,11 +382,23 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'general',
 				'title'       => __( 'Affiliate area', 'flyaffiliate' ),
-				'description' => __( 'These pages were created when the plugin was activated. To move one, paste its shortcode into another page.', 'flyaffiliate' ),
+				'description' => __( 'Who can join, and the pages affiliates use. The pages were created when the plugin was activated; to move one, paste its shortcode into another page.', 'flyaffiliate' ),
 				'priority'    => 20,
-				// Nothing on this subpage is editable, so a save button would only confuse.
-				'hide_save'   => true,
 			],
+			[
+				'id'          => 'affiliate_area_signup',
+				'type'        => 'section',
+				'subpage_id'  => 'affiliate_area',
+				'title'       => __( 'Signup', 'flyaffiliate' ),
+				'description' => __( 'Whether the registration form takes new affiliates.', 'flyaffiliate' ),
+			],
+			self::switch_field(
+				'registration_enabled',
+				'affiliate_area_signup',
+				__( 'Open registration', 'flyaffiliate' ),
+				__( 'When off, the registration form says the programme is not taking new members. You can still add affiliates from the admin.', 'flyaffiliate' ),
+				true
+			),
 			[
 				'id'         => 'affiliate_area_pages',
 				'type'       => 'section',
@@ -681,28 +693,6 @@ class SettingsSchema {
 				'description' => __( 'Which platforms create commissions.', 'flyaffiliate' ),
 				'priority'    => 40,
 			],
-			[
-				'id'          => 'woocommerce',
-				'type'        => 'subpage',
-				'page_id'     => 'integrations',
-				'title'       => __( 'WooCommerce', 'flyaffiliate' ),
-				'description' => __( 'Referred orders become commissions.', 'flyaffiliate' ),
-				'priority'    => 10,
-			],
-			[
-				'id'         => 'woocommerce_settings',
-				'type'       => 'section',
-				'subpage_id' => 'woocommerce',
-				'title'      => __( 'Orders', 'flyaffiliate' ),
-				'description' => __( 'Whether orders placed through a referral link create commissions.', 'flyaffiliate' ),
-			],
-			self::switch_field(
-				'woocommerce_enabled',
-				'woocommerce_settings',
-				__( 'Track WooCommerce orders', 'flyaffiliate' ),
-				__( 'Create commissions for referred WooCommerce orders.', 'flyaffiliate' ),
-				true
-			),
 		];
 	}
 

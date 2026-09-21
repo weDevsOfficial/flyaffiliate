@@ -247,8 +247,10 @@ if ( ! function_exists( 'flyaffiliate_admin_capability' ) ) {
 	/**
 	 * The capability required to administer FlyAffiliate.
 	 *
-	 * `manage_woocommerce`, so administrators and shop managers both reach the
-	 * plugin without any role plumbing (ADR-0008). `manage_options` is not used.
+	 * `manage_options`: every administrator has it on every WordPress site, and
+	 * nothing is written to roles on activation (ADR-0008, amended by ADR-0013).
+	 * A store that wants shop managers in returns `manage_woocommerce` from the
+	 * filter.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -260,9 +262,9 @@ if ( ! function_exists( 'flyaffiliate_admin_capability' ) ) {
 		 *
 		 * @since FLYAFFILIATE_SINCE
 		 *
-		 * @param string $capability Capability name. Default `manage_woocommerce`.
+		 * @param string $capability Capability name. Default `manage_options`.
 		 */
-		return (string) apply_filters( 'flyaffiliate_admin_capability', 'manage_woocommerce' );
+		return (string) apply_filters( 'flyaffiliate_admin_capability', 'manage_options' );
 	}
 }
 

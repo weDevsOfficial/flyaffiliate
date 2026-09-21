@@ -293,6 +293,8 @@ class Assets implements Hookable {
 				],
 			],
 			'sources'    => Commission::get_sources(),
+			// The origins open to a new commission: manual, plus whatever integration is active.
+			'availableSources' => Commission::get_available_sources(),
 			'types'      => Commission::get_types(),
 			'methods'    => Payout::get_methods(),
 		];

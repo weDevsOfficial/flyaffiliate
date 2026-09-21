@@ -135,6 +135,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$this->assertInstanceOf( Payout::class, $paid );
 		$this->assertTrue( $paid->is_paid() );
+		$this->assertNotEmpty( $paid->get( 'paid_at' ), 'the day the money went is recorded' );
 		$this->assertSame( Commission::STATUS_PAID, flyaffiliate()->commission->get( $c1 )->get( 'status' ) );
 
 		flyaffiliate()->payout->mark_paid( $payout_id );
@@ -143,6 +144,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$unpaid = flyaffiliate()->payout->mark_unpaid( $payout_id );
 
 		$this->assertFalse( $unpaid->is_paid() );
+		$this->assertNull( $unpaid->get( 'paid_at' ), 'the payment did not happen, so neither did the date' );
 		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $c1 )->get( 'status' ) );
 		$this->assertSame( $payout_id, (int) flyaffiliate()->commission->get( $c1 )->get( 'payout_id' ), 'still attached, so never paid twice' );
 		$this->assertSame( 0, flyaffiliate()->payout->preview( [ 'minimum_amount' => 0 ] )['count'] );

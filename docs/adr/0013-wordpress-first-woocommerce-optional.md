@@ -1,4 +1,4 @@
-# ADR-0013 — WordPress first: WooCommerce is an integration, not a requirement
+# ADR-0013 — Standalone: every platform is an optional integration
 
 **Status:** Accepted
 **Date:** 2026-09-17
@@ -12,27 +12,59 @@ Until now the plugin declared `Requires Plugins: woocommerce`, carried the
 made FlyAffiliate a WooCommerce add-on in the eyes of WordPress.org and of
 the code.
 
-FlyAffiliate is meant to serve more than one platform. WooCommerce is the
-first source of order-based commissions; others follow. Affiliates, referral
-links, visits, hand-entered commissions, payouts, the admin and the affiliate
-dashboard do not need a shop plugin at all.
+FlyAffiliate is a standalone plugin. Affiliates, referral links, visits,
+hand-entered commissions, payouts, the admin and the affiliate dashboard need
+no other plugin at all. Platforms plug in as integrations, every one of them
+optional: WooCommerce is the first source of order-based commissions, Dokan and
+others follow, and none of them is special to the core.
 
 ## Decision
 
 - The plugin bootstraps on `plugins_loaded`. There is no dependency header and
   no "needs WooCommerce" notice.
-- `Integrations\WooCommerce` (checkout attribution, order status sync) is
-  registered by `FlyAffiliate_Plugin::init_plugin()` only when
-  `class_exists( 'WooCommerce' )` is true at `plugins_loaded`. Every other
-  reference to a WooCommerce function is behind `function_exists()`.
+- `IntegrationServiceProvider` is registered by
+  `FlyAffiliate_Plugin::init_plugin()` on `plugins_loaded`. It always registers
+  the integration's announcement (`Integrations\WooCommerce\Integration`) and
+  registers the services that act on the platform (checkout attribution, order
+  status sync) only when `class_exists( 'WooCommerce' )`. Every other reference
+  to a WooCommerce function is behind `function_exists()`.
 - The daily maturation job uses Action Scheduler when WooCommerce provides it
   and WP-Cron otherwise; the hook is the same, so `Commission\HoldPeriod` does
   not care which.
 - The currency setting lists WooCommerce's currencies when WooCommerce is
   there and a built-in set of common ones otherwise.
 - The plugin header and the readme describe FlyAffiliate as affiliate marketing
-  for WordPress with WooCommerce support built in. WooCommerce stays the
-  reference platform for the tests, the seeder and the money rules.
+  for WordPress that integrates with WooCommerce and more. WooCommerce stays the
+  reference platform for the tests, the seeder and the money rules until a
+  second integration exists.
+- Activation runs the installer on any WordPress site; it no longer returns
+  early without WooCommerce. The admin capability is `manage_options`,
+  filterable to `manage_woocommerce` for stores that want shop managers in
+  (ADR-0008, amended); nothing about access depends on WooCommerce.
+- The build strips the remote-looking strings the bundled libraries leave
+  behind (the Tailwind licence comment, the `xmlns` URL inside inlined SVG
+  icons, plugin-ui's Google logo), so the shipped CSS and JS name no external
+  host. WordPress.org's scanner reads any such string as a remote file.
+- Other plugins' admin notices are left alone on FlyAffiliate's screens; the
+  plugin adds no notices of its own outside them.
+- An integration announces itself on the plugin's own screens; the core
+  shows nothing platform-specific by itself. `Integrations\WooCommerce\Integration`
+  adds the WooCommerce origin through `flyaffiliate_available_commission_sources`
+  and the Integrations → WooCommerce settings subpage through
+  `flyaffiliate_settings_schema`. Both are there whether or not WooCommerce is
+  installed — SliceWP lists every integration and its switch the same way, and
+  only the hooks wait for the platform — and the subpage says so when
+  WooCommerce is not active. A reference is checked against the order only
+  while WooCommerce can answer; without it the reference is kept as given, as
+  SliceWP keeps every reference.
+- Data recorded through an integration is untouched when its platform goes
+  away: affiliates, their links and balances stay; WooCommerce-origin
+  commissions keep their rows, labels, amounts and statuses, are still edited
+  and paid out, show their reference as a number rather than a link, and the
+  pending ones wait for their order to be confirmed, which needs WooCommerce
+  back.
+- Public signup is behind an "Open registration" setting (on by default) and
+  the form carries a honeypot field.
 - Classes are autoloaded by Composer's own loader (`vendor/autoload.php`,
   PSR-4 from `composer.json`), as Dokan does; the in-house
   `includes/Autoloader.php` is gone. The release zip carries a production
@@ -48,12 +80,10 @@ dashboard do not need a shop plugin at all.
 
 ## Consequences
 
-- A site without WooCommerce gets a working affiliate programme: signups,
-  links, visits, commissions the admin records by hand, payouts.
-- A commission with the WooCommerce origin still needs an existing order
-  (`Commission\Manager::check_reference()`). Without WooCommerce the order
-  cannot be checked, so a WooCommerce-origin commission with a reference is
-  refused; the manual origin is the one to use.
+- A site with no integration active gets a working affiliate programme:
+  signups, links, visits, commissions the admin records by hand, payouts.
+- A commission with the WooCommerce origin needs an existing order
+  (`Commission\Manager::check_reference()`) while WooCommerce is there to ask.
 - `Requires Plugins` is gone, so WordPress no longer blocks activation when
   WooCommerce is missing. That is the point.
 - A future platform integration gets its own provider under

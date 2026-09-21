@@ -19,7 +19,7 @@ use FlyAffiliate\Contracts\Hookable;
  * There is one admin page. Every entry under it is a hash route of the React
  * application (`admin.php?page=flyaffiliate#/commissions`), the way Dokan's
  * admin dashboard works, so the list screens and settings share one bundle
- * and navigate without a page load. Everything is gated on `manage_woocommerce`
+ * and navigate without a page load. Everything is gated on `flyaffiliate_admin_capability()`
  * (ADR-0008).
  *
  * @since FLYAFFILIATE_SINCE
@@ -45,32 +45,6 @@ class Menu implements Hookable {
 		// wp-admin/menu.php rejects an unknown page before admin_init ever fires;
 		// this action runs just before that rejection.
 		add_action( 'admin_page_access_denied', [ $this, 'redirect_legacy_slugs' ] );
-		add_action( 'admin_head', [ $this, 'hide_foreign_notices' ] );
-	}
-
-	/**
-	 * Keep other plugins' notices off the app page.
-	 *
-	 * The app renders its own header and every notice above it belongs to a
-	 * different plugin. FlyAffiliate's own notices are put back so they still
-	 * show.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return void
-	 */
-	public function hide_foreign_notices(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the page slug to decide what to render.
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-
-		if ( self::PARENT_SLUG !== $page ) {
-			return;
-		}
-
-		remove_all_actions( 'admin_notices' );
-		remove_all_actions( 'all_admin_notices' );
-
-		add_action( 'admin_notices', [ flyaffiliate()->admin_notices, 'render' ] );
 	}
 
 	/**

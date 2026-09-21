@@ -8,13 +8,13 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. WooCommerce support built in; nothing leaves your site.
+Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. Integrates with WooCommerce; nothing leaves your site.
 
 == Description ==
 
 = Want more sales without a bigger ad budget? FlyAffiliate gives every affiliate a referral link and a dashboard, and gives you a commission ledger that knows the difference between money earned, money owed and money paid. =
 
-[FlyAffiliate](https://github.com/weDevsOfficial/flyaffiliate) is an affiliate-marketing plugin for WordPress, with WooCommerce support built in, made by [weDevs](https://wedevs.com/) — the team behind Dokan, WP User Frontend and weMail. It runs an affiliate programme the way a store owner actually runs one: someone applies, you approve them, they share a link, orders come in, commissions mature once the order has settled, and you pay people in batches through whatever channel you already use.
+[FlyAffiliate](https://github.com/weDevsOfficial/flyaffiliate) is a standalone affiliate-marketing plugin for WordPress that integrates with the platforms you sell on, WooCommerce first, made by [weDevs](https://wedevs.com/) — the team behind Dokan, WP User Frontend and weMail. It runs an affiliate programme the way a store owner actually runs one: someone applies, you approve them, they share a link, orders come in, commissions mature once the order has settled, and you pay people in batches through whatever channel you already use.
 
 Everything happens on your own site. FlyAffiliate makes no external requests, sends no analytics anywhere, and stores no personal data about your visitors.
 
@@ -110,7 +110,7 @@ A. Yes. Copy a file from the plugin's `templates` directory into a `flyaffiliate
 
 = Q. Does it work with Dokan? =
 
-A. FlyAffiliate works on any WordPress site, with or without WooCommerce. A Dokan integration, where each vendor funds the commissions on their own products, is in development.
+A. FlyAffiliate works on any WordPress site. Integrations are optional and switch on when their plugin is active: WooCommerce today. A Dokan integration, where each vendor funds the commissions on their own products, is in development.
 
 == Screenshots ==
 
@@ -127,7 +127,6 @@ A. FlyAffiliate works on any WordPress site, with or without WooCommerce. A Doka
 * **new:** Order sync — commissions follow the order: failed, cancelled and (optionally) refunded orders reject them, a recovered order restores them, a paid one is never reversed
 * **new:** Hand-entered commissions — affiliate, amount, reference order (checked against WooCommerce), reference amount, origin, date, type and status, on their own page, with the same fields on edit
 * **new:** Payouts — preview, create one payment per affiliate, mark paid or unpaid, take a commission out, delete an unpaid payment, export CSV
-* **new:** WordPress first — runs without WooCommerce; the WooCommerce integration loads only when WooCommerce is active
 * **new:** Admin — a React admin on weDevs' plugin UI: dashboard, affiliates, commissions, visits, payouts, settings and a setup wizard
 * **new:** Affiliate dashboard — `[flyaffiliate_dashboard]` with the referral link, balance, commissions, visits and payouts; `[flyaffiliate_register]` for signup
 * **new:** REST API under `flyaffiliate/v1` for affiliates, commissions, visits, payouts, settings and the affiliate's own data

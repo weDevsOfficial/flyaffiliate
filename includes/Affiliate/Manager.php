@@ -100,7 +100,10 @@ class Manager {
 	 *     @type string $promo_method   How the affiliate plans to promote the store.
 	 *     @type string $website        The affiliate's website; stored on the user, as SliceWP does.
 	 *     @type bool   $send_welcome_email Email the new affiliate a welcome with their referral link. Default false.
-	 *     @type string $activation_key Set by the registration flow.
+	 *     @type string $activation_key The **stored** form of the key — its hash, not the key.
+	 *                                  `Affiliate\Registration` is the only thing that writes one,
+	 *                                  and it hashes before it gets here.
+	 *     @type string $activation_expires_at When that key stops working, UTC. Null for never.
 	 * }
 	 *
 	 * @return Affiliate|WP_Error
@@ -128,11 +131,12 @@ class Manager {
 
 		$affiliate->fill(
 			[
-				'user_id'        => $user_id,
-				'status'         => $this->sanitize_status( $args['status'] ?? Affiliate::STATUS_PENDING ),
-				'payment_email'  => $this->sanitize_email( $args['payment_email'] ?? '', $user_id ),
-				'promo_method'   => sanitize_textarea_field( (string) ( $args['promo_method'] ?? '' ) ),
-				'activation_key' => sanitize_text_field( (string) ( $args['activation_key'] ?? '' ) ),
+				'user_id'               => $user_id,
+				'status'                => $this->sanitize_status( $args['status'] ?? Affiliate::STATUS_PENDING ),
+				'payment_email'         => $this->sanitize_email( $args['payment_email'] ?? '', $user_id ),
+				'promo_method'          => sanitize_textarea_field( (string) ( $args['promo_method'] ?? '' ) ),
+				'activation_key'        => sanitize_text_field( (string) ( $args['activation_key'] ?? '' ) ),
+				'activation_expires_at' => $this->sanitize_expiry( $args['activation_expires_at'] ?? null ),
 			]
 		);
 
@@ -204,6 +208,10 @@ class Manager {
 
 		if ( array_key_exists( 'activation_key', $args ) ) {
 			$affiliate->set( 'activation_key', sanitize_text_field( (string) $args['activation_key'] ) );
+		}
+
+		if ( array_key_exists( 'activation_expires_at', $args ) ) {
+			$affiliate->set( 'activation_expires_at', $this->sanitize_expiry( $args['activation_expires_at'] ) );
 		}
 
 		if ( isset( $args['website'] ) ) {
@@ -363,6 +371,25 @@ class Manager {
 			'columns' => [ 'payment_email' ],
 			'in'      => [ 'user_id' => array_map( 'intval', $user_ids ) ],
 		];
+	}
+
+	/**
+	 * A UTC datetime the column accepts, or null for no expiry.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param mixed $value Candidate datetime.
+	 *
+	 * @return string|null
+	 */
+	protected function sanitize_expiry( $value ): ?string {
+		if ( empty( $value ) ) {
+			return null;
+		}
+
+		$time = strtotime( (string) $value );
+
+		return false === $time ? null : gmdate( 'Y-m-d H:i:s', $time );
 	}
 
 	/**

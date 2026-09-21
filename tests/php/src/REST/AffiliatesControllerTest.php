@@ -80,14 +80,21 @@ class AffiliatesControllerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * A shop manager is allowed, because they are who processes these orders.
+	 * Administrators only by default; a site lets shop managers in through the filter.
 	 *
 	 * @return void
 	 */
-	public function test_it_allows_a_shop_manager(): void {
+	public function test_the_admin_capability_is_manage_options_unless_filtered(): void {
 		$this->acting_as( $this->factory()->user->create( [ 'role' => 'shop_manager' ] ) );
 
-		$this->assertSame( 200, $this->get_request( '/affiliates' )->get_status() );
+		$this->assertSame( 403, $this->get_request( '/affiliates' )->get_status(), 'manage_options by default: nothing tied to WooCommerce' );
+
+		$filter = static fn(): string => 'manage_woocommerce';
+		add_filter( 'flyaffiliate_admin_capability', $filter );
+
+		$this->assertSame( 200, $this->get_request( '/affiliates' )->get_status(), 'the filter opens the admin to shop managers' );
+
+		remove_filter( 'flyaffiliate_admin_capability', $filter );
 	}
 
 	/**

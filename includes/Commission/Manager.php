@@ -116,7 +116,7 @@ class Manager {
 	 *     @type float  $amount       Required. What the affiliate earns.
 	 *     @type float  $base_amount  The sale amount the commission is on. Default equal to `amount`.
 	 *     @type int    $order_id     Optional reference order. Under the WooCommerce origin it must be an existing order.
-	 *     @type string $source       `woocommerce` or `manual`. Default `woocommerce`.
+	 *     @type string $source       One of `Commission::get_available_sources()`. Default the first of them.
 	 *     @type string $type         A key of `Commission::get_types()`. Default `sale`.
 	 *     @type string $status       Any commission status. Default `unpaid`.
 	 *     @type string $created_at   Optional `Y-m-d H:i:s` in GMT. Default now.
@@ -140,7 +140,8 @@ class Manager {
 		$base = Money::round( (float) ( $args['base_amount'] ?? $amount ) );
 		$base = Money::to_cents( $base ) > 0 ? $base : $amount;
 
-		$source = $this->choice( $args['source'] ?? Commission::SOURCE_WOOCOMMERCE, Commission::get_sources(), 'flyaffiliate_invalid_source', __( 'Choose where the commission comes from.', 'flyaffiliate' ) );
+		$available = Commission::get_available_sources();
+		$source    = $this->choice( $args['source'] ?? (string) array_key_first( $available ), $available, 'flyaffiliate_invalid_source', __( 'Choose where the commission comes from. An origin is open only while its platform is active.', 'flyaffiliate' ) );
 		$type   = $this->choice( $args['type'] ?? Commission::TYPE_SALE, Commission::get_types(), 'flyaffiliate_invalid_type', __( 'Choose a commission type.', 'flyaffiliate' ) );
 		$status = $this->choice( $args['status'] ?? Commission::STATUS_UNPAID, Commission::get_statuses(), 'flyaffiliate_invalid_status', __( 'Choose a commission status.', 'flyaffiliate' ) );
 
@@ -353,9 +354,10 @@ class Manager {
 	 * Whether a reference is acceptable for the origin.
 	 *
 	 * A commission under the WooCommerce origin follows its order — the order
-	 * status moves it, and the screens link to it — so the order has to exist.
-	 * A refund is not an order. The manual origin refers to nothing the plugin
-	 * can check, so any reference is kept as given.
+	 * status moves it, and the screens link to it — so the order has to exist
+	 * while WooCommerce is there to ask. A refund is not an order. The manual
+	 * origin, and any origin whose platform is not active, refers to nothing
+	 * the plugin can check, so the reference is kept as given.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -369,12 +371,10 @@ class Manager {
 			return true;
 		}
 
+		// Without WooCommerce there is nothing to ask; the reference is kept as
+		// given, the way SliceWP keeps every reference.
 		if ( ! function_exists( 'wc_get_order' ) ) {
-			return new WP_Error(
-				'flyaffiliate_invalid_reference',
-				__( 'WooCommerce is not active, so the order cannot be checked. Activate WooCommerce, or use the manual origin.', 'flyaffiliate' ),
-				[ 'status' => 400 ]
-			);
+			return true;
 		}
 
 		if ( wc_get_order( $order_id ) instanceof \WC_Order ) {

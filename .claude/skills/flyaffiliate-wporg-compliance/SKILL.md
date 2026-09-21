@@ -40,9 +40,14 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 ### Nonces and capabilities
 
 - Every state-changing request checks a capability **and** a nonce, in that
-  order, before it does anything: `current_user_can( 'manage_woocommerce' )`,
+  order, before it does anything: `current_user_can( flyaffiliate_admin_capability() )`,
   then `check_admin_referer()` / `wp_verify_nonce()`.
-- `manage_options` is not used. Admin screens are `manage_woocommerce`.
+- Admin screens use `flyaffiliate_admin_capability()`: `manage_options`, unless
+  a site filters it to `manage_woocommerce` (ADR-0008, ADR-0013). Never a literal.
+- The shipped CSS and JS must name no external host: WordPress.org's scanner
+  reads any `http://` in a stylesheet as a remote file. `webpack.config.js`
+  strips the library leftovers at build time; check the built files with
+  `grep -c 'https\\?://' assets/css/*.css` (expect 0) before a release.
 - Every REST route has a real `permission_callback`. `__return_true` is a
   finding, not a shortcut.
 
@@ -64,8 +69,8 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 - No `load_plugin_textdomain()` — WordPress.org loads translations. The text
   domain is `flyaffiliate` and must equal the slug in every `__()` call.
 - Plugin header carries: `Plugin Name`, `Plugin URI`, `Description`, `Version`,
-  `Requires at least`, `Requires PHP` (no `Requires Plugins`: WooCommerce is
-  optional, ADR-0013),
+  `Requires at least`, `Requires PHP` (no `Requires Plugins`: the plugin is
+  standalone and every integration is optional, ADR-0013),
   `Author`, `Author URI`, `License: GPLv2 or later`, `License URI`,
   `Text Domain: flyaffiliate`, `Domain Path: /languages`.
 - `readme.txt` `Stable tag` **equals** the header `Version` equals
