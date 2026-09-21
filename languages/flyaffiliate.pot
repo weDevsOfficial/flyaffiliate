@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T06:00:12+00:00\n"
+"POT-Creation-Date: 2026-09-21T08:56:37+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -628,21 +628,21 @@ msgstr ""
 msgid "The default rate cannot be higher than the maximum rate."
 msgstr ""
 
-#: includes/Affiliate/Manager.php:114
+#: includes/Affiliate/Manager.php:117
 msgid "An affiliate needs an existing WordPress user."
 msgstr ""
 
-#: includes/Affiliate/Manager.php:122
+#: includes/Affiliate/Manager.php:125
 msgid "That user is already an affiliate."
 msgstr ""
 
-#: includes/Affiliate/Manager.php:143
-#: includes/Affiliate/Manager.php:221
+#: includes/Affiliate/Manager.php:146
+#: includes/Affiliate/Manager.php:224
 #: assets/js/admin.js:276
 msgid "The affiliate could not be saved."
 msgstr ""
 
-#: includes/Affiliate/Manager.php:187
+#: includes/Affiliate/Manager.php:190
 #: includes/REST/Controllers/AffiliatesController.php:577
 msgid "No affiliate with that ID."
 msgstr ""
@@ -843,32 +843,32 @@ msgstr ""
 msgid "Affiliate Registration"
 msgstr ""
 
-#: includes/Integrations/WooCommerce/Integration.php:68
+#: includes/Integrations/WooCommerce/Integration.php:76
 #: includes/Models/Commission.php:156
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/Integrations/WooCommerce/Integration.php:69
+#: includes/Integrations/WooCommerce/Integration.php:77
 msgid "Referred orders become commissions."
 msgstr ""
 
-#: includes/Integrations/WooCommerce/Integration.php:76
+#: includes/Integrations/WooCommerce/Integration.php:84
 msgid "Orders"
 msgstr ""
 
-#: includes/Integrations/WooCommerce/Integration.php:78
+#: includes/Integrations/WooCommerce/Integration.php:86
 msgid "Whether orders placed through a referral link create commissions."
 msgstr ""
 
-#: includes/Integrations/WooCommerce/Integration.php:79
+#: includes/Integrations/WooCommerce/Integration.php:87
 msgid "Whether orders placed through a referral link create commissions. WooCommerce is not active on this site; this takes effect once it is."
 msgstr ""
 
-#: includes/Integrations/WooCommerce/Integration.php:84
+#: includes/Integrations/WooCommerce/Integration.php:92
 msgid "Track WooCommerce orders"
 msgstr ""
 
-#: includes/Integrations/WooCommerce/Integration.php:85
+#: includes/Integrations/WooCommerce/Integration.php:93
 msgid "Create commissions for referred WooCommerce orders."
 msgstr ""
 
