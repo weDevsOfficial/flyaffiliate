@@ -12,7 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use FlyAffiliate\Admin\Settings\Repository\SettingsRepository;
-use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Admin\Settings\Schema\SettingsSchema;
 use FlyAffiliate\Affiliate\Role;
 use FlyAffiliate\Models\Affiliate;
@@ -74,9 +73,6 @@ class Installer {
 		$this->schedule_events();
 
 		update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
-
-		// The first admin page load after activation opens the setup wizard, as Dokan's does.
-		SetupWizard::schedule_redirect();
 
 		/**
 		 * Fires after FlyAffiliate has finished installing or repairing itself.

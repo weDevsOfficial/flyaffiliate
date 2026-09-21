@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T08:56:37+00:00\n"
+"POT-Creation-Date: 2026-09-21T09:10:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -835,11 +835,11 @@ msgstr ""
 msgid "Something went wrong. Try again."
 msgstr ""
 
-#: includes/Install/Installer.php:339
+#: includes/Install/Installer.php:335
 msgid "Affiliate Dashboard"
 msgstr ""
 
-#: includes/Install/Installer.php:343
+#: includes/Install/Installer.php:339
 msgid "Affiliate Registration"
 msgstr ""
 
