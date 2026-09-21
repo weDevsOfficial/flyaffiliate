@@ -116,7 +116,7 @@ flyaffiliate/
 │   ├── Assets.php
 │   └── functions.php              # flyaffiliate_get_option(), flyaffiliate_get_template_part(), helpers
 ├── templates/                     # Overridable templates: admin/ (app mount, profile), affiliate-dashboard/, registration/
-├── assets/                        # css/, js/, images/ (built output only; plain sources in assets/src/)
+├── assets/                        # css/, js/ (built output only; plain sources in assets/src/)
 ├── src/admin/                     # The React admin app: App.tsx (routes), pages/, components/, hooks/, lib/, tailwind.css + admin.scss
 ├── src/dashboard/                 # The affiliate dashboard app (frontend): App.tsx (tabs), pages/, tables/, tailwind.css + dashboard.scss
 ├── src/styles/tailwind.css        # The Tailwind entry both apps import: plugin-ui tokens, scoped preflight and utilities

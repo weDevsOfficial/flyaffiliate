@@ -56,7 +56,7 @@ the bridge Dokan carries for its legacy options.
   build on the same page. plugin-ui's prebuilt `styles.css` is not imported:
   its layered utilities lose to unlayered admin CSS.
 - **The brand is the logo teal.** `src/admin/theme.ts` sets plugin-ui's
-  `primary` to `#0d7377`, the colour of `logo.svg`, the WordPress.org icon,
+  `primary` to `#0d7377`, the colour of the WordPress.org icon,
   the frontend stylesheet and the setup wizard. WordPress's own components
   inside the app (DataViews checkboxes) read `--wp-components-color-accent`,
   which `admin.css` sets to the same value on the app element; `--primary`

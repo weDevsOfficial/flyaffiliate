@@ -246,8 +246,8 @@ module.exports = {
 		...defaultConfig.output,
 		path: path.resolve( root, 'assets' ),
 		filename: '[name].js',
-		// The output directory also holds hand-maintained files — assets/images
-		// and assets/src — so the default "wipe everything" clean would delete
+		// The output directory also holds hand-maintained files — assets/src —
+		// so the default "wipe everything" clean would delete
 		// the sources it was about to build from. Only the generated
 		// subdirectories are cleared.
 		clean: {

@@ -26,7 +26,6 @@ export type AdminGlobals = {
 	};
 	urls: {
 		app: string;
-		logo: string;
 		wizard: string;
 		docs: string;
 		support: string;
@@ -80,7 +79,6 @@ const fallback: AdminGlobals = {
 	setup: { done: false, pages: { register: '', dashboard: '' } },
 	urls: {
 		app: '',
-		logo: '',
 		wizard: '',
 		docs: '',
 		support: '',

@@ -45,7 +45,7 @@ class Menu implements Hookable {
 	}
 
 	/**
-	 * The menu icon: the paper plane of the logo, as an inline SVG.
+	 * The menu icon: a paper plane, as an inline SVG.
 	 *
 	 * A single fill lets wp-admin recolour it for every admin colour scheme.
 	 *
