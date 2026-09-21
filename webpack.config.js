@@ -119,7 +119,9 @@ class MoveStylesToCssDirPlugin {
 }
 
 /**
- * Strip the remote-looking strings the bundled libraries leave in the output.
+ * Remove the remote-looking URLs the bundled libraries leave in the output.
+ *
+ * ("Remove" as in delete — nothing here has anything to do with payments.)
  *
  * WordPress.org's review scanner flags any `http://` inside a stylesheet as a
  * remote file, and its reviewers ask for external hosts to be gone from the
@@ -141,16 +143,16 @@ class MoveStylesToCssDirPlugin {
  * resources, and rewriting a third-party error message to satisfy a grep costs
  * more than it buys.
  */
-class StripRemoteReferencesPlugin {
+class RemoveRemoteUrlsPlugin {
 	apply( compiler ) {
 		const { RawSource } = compiler.webpack.sources;
 
 		compiler.hooks.thisCompilation.tap(
-			'FlyAffiliateStripRemoteReferences',
+			'FlyAffiliateRemoveRemoteUrls',
 			( compilation ) => {
 				compilation.hooks.processAssets.tap(
 					{
-						name: 'FlyAffiliateStripRemoteReferences',
+						name: 'FlyAffiliateRemoveRemoteUrls',
 						stage: compiler.webpack.Compilation
 							.PROCESS_ASSETS_STAGE_REPORT,
 					},
@@ -227,7 +229,7 @@ module.exports = {
 		// plugin in its default config.
 		new RemoveEmptyScriptsPlugin(),
 		...defaultConfig.plugins,
-		new StripRemoteReferencesPlugin(),
+		new RemoveRemoteUrlsPlugin(),
 		new MoveStylesToCssDirPlugin(),
 	],
 };
