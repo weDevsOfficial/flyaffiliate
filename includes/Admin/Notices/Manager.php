@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use FlyAffiliate\Admin\Menu;
 use FlyAffiliate\Contracts\Hookable;
 
 /**
@@ -78,6 +79,14 @@ class Manager implements Hookable {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( flyaffiliate_admin_capability() ) ) {
+			return;
+		}
+
+		// FlyAffiliate's notices appear on FlyAffiliate's screen only. Notices
+		// on someone else's screen are what WordPress.org's Guideline 11 is about.
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+		if ( ! $screen || 'toplevel_page_' . Menu::PARENT_SLUG !== $screen->id ) {
 			return;
 		}
 

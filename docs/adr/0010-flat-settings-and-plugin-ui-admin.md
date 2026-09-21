@@ -61,11 +61,12 @@ the bridge Dokan carries for its legacy options.
   inside the app (DataViews checkboxes) read `--wp-components-color-accent`,
   which `admin.css` sets to the same value on the app element; `--primary`
   only exists inside `.pui-root`, so a `var()` on `body` would not see it.
-- **A header bar, and no foreign notices.** Every page renders under
+- **A header bar, and notices left alone.** Every page renders under
   plugin-ui's `<TopBar>` (logo, version, Documentation, Get support), like
-  Dokan's admin. `Admin\Menu::hide_foreign_notices()` removes other plugins'
-  `admin_notices` on the app page and puts FlyAffiliate's own back, as the
-  setup wizard already did; the menu icon is the logo's paper plane as an
+  Dokan's admin. Other plugins' `admin_notices` stay where they are —
+  WordPress.org reads removing them as hijacking the dashboard (Guideline
+  11) — and FlyAffiliate's own render only on this page, through
+  `Admin\Notices\Manager`; the menu icon is the logo's paper plane as an
   inline SVG so wp-admin recolours it per colour scheme.
 - **The bundle is not externalised.** plugin-ui and its dependencies compile
   into `assets/js/admin.js`; only the `@wordpress/*` packages WordPress ships
