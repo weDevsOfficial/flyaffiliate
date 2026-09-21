@@ -264,7 +264,7 @@ class Assets implements Hookable {
 				'app'       => Menu::get_route_url(),
 				'logo'      => FLYAFFILIATE_ASSETS_URL . '/images/logo.svg',
 				'wizard'    => SetupWizard::get_url(),
-				'docs'      => 'https://wedevs.com/docs/flyaffiliate/',
+				'docs'      => 'https://flyaffiliate.co/',
 				'support'   => 'https://wedevs.com/support/',
 				'payoutCsv' => PayoutExport::get_url(),
 				'users'     => admin_url( 'user-edit.php?user_id=' ),
