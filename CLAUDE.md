@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.4+. Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) today, Dokan and others later. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
+FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) today, Dokan and others later. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
 
 The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service providers, `Hookable` classes, `Manager` facades, overridable templates, an `Installer`/`Upgrade` pair, `FlyAffiliateTestCase`-based PHPUnit tests. Anyone who knows the Dokan codebase should feel at home here.
 
@@ -116,7 +116,7 @@ flyaffiliate/
 │   ├── Assets.php
 │   └── functions.php              # flyaffiliate_get_option(), flyaffiliate_get_template_part(), helpers
 ├── templates/                     # Overridable templates: admin/ (app mount, profile), affiliate-dashboard/, registration/
-├── assets/                        # css/, js/, images/ (built output only; plain sources in assets/src/)
+├── assets/                        # css/, js/ (built output only; plain sources in assets/src/)
 ├── src/admin/                     # The React admin app: App.tsx (routes), pages/, components/, hooks/, lib/, tailwind.css + admin.scss
 ├── src/dashboard/                 # The affiliate dashboard app (frontend): App.tsx (tabs), pages/, tables/, tailwind.css + dashboard.scss
 ├── src/styles/tailwind.css        # The Tailwind entry both apps import: plugin-ui tokens, scoped preflight and utilities

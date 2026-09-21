@@ -74,7 +74,7 @@ delete_transient( FlyAffiliate\Upgrade\Manager::LOCK_KEY );
 // Per-user notice dismissals and any other user meta this plugin wrote. A meta_key
 // LIKE sweep is the only way to reach them: there is no WordPress API for
 // "delete this meta key for every user".
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- no WordPress API deletes a meta key for every user; the key is a prepared LIKE placeholder.
 $wpdb->query(
 	$wpdb->prepare(
 		"DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE %s",
@@ -83,7 +83,7 @@ $wpdb->query(
 );
 
 // Product-level rate overrides, swept the same way and for the same reason.
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- no WordPress API deletes a meta key for every post; the key is a prepared LIKE placeholder.
 $wpdb->query(
 	$wpdb->prepare(
 		"DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s",

@@ -1,7 +1,7 @@
 === FlyAffiliate ===
 Contributors: wedevs, tareq1988
 Tags: affiliate, affiliate marketing, woocommerce, referral, commission
-Requires at least: 6.4
+Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
 Stable tag: 1.0.0
@@ -16,7 +16,7 @@ Affiliate marketing for WordPress: referral links, commissions, hold periods and
 
 [FlyAffiliate](https://github.com/weDevsOfficial/flyaffiliate) is a standalone affiliate-marketing plugin for WordPress that integrates with the platforms you sell on, WooCommerce first, made by [weDevs](https://wedevs.com/) — the team behind Dokan, WP User Frontend and weMail. It runs an affiliate programme the way a store owner actually runs one: someone applies, you approve them, they share a link, orders come in, commissions mature once the order has settled, and you pay people in batches through whatever channel you already use.
 
-Everything happens on your own site. FlyAffiliate makes no external requests, sends no analytics anywhere, and stores no personal data about your visitors.
+Everything happens on your own site. FlyAffiliate makes no external requests, sends no analytics anywhere, and stores nothing that identifies a visitor: a visit keeps only a salted hash of the IP address and user agent (see Privacy below).
 
 = How it works =
 

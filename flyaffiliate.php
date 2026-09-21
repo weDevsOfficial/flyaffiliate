@@ -10,7 +10,7 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: flyaffiliate
  * Domain Path: /languages
- * Requires at least: 6.4
+ * Requires at least: 6.6
  * Requires PHP: 8.1
  *
  * @package FlyAffiliate

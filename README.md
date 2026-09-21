@@ -8,7 +8,7 @@ Welcome to the **FlyAffiliate** repository on **GitHub**!
 
 Here you can find the **source code**, **open issues**, and **contribute** to the development of the plugin.
 
-- **Requires:** PHP 8.1+, WordPress 6.4+. WooCommerce 8.5+ for the order integration, which loads only when WooCommerce is active.
+- **Requires:** PHP 8.1+, WordPress 6.6+. WooCommerce 8.5+ for the order integration, which loads only when WooCommerce is active.
 - **Licence:** GPL-2.0-or-later
 - **Reference behaviour:** commission and payout semantics match SliceWP where the two overlap, so anyone coming from there feels at home. The differences that exist are deliberate and recorded in [`docs/adr/`](docs/adr/).
 
