@@ -363,6 +363,14 @@ adds `IntegrationServiceProvider` on `plugins_loaded` when
 called only behind `function_exists()`. No other directory may reference the
 plugin's symbols.
 
+An integration announces itself; the core shows nothing platform-specific on
+its own. Its `Integration` Hookable adds the platform's commission origin with
+`flyaffiliate_available_commission_sources` and its settings subpage with
+`flyaffiliate_settings_schema` (see `Integrations\WooCommerce\Integration`).
+A new platform gets its own `Integrations\{Platform}\Integration`, its own
+`SOURCE_*` label in `Commission::get_sources()`, and its own guard in
+`init_plugin()`.
+
 The marketplace (Dokan) integration is not on this branch. It lives on
 `feature/dokan-integration`, which is this branch plus that work; keep the
 neutral seams it plugs into — `vendor_id` on commissions, the

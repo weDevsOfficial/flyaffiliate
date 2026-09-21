@@ -40,6 +40,8 @@ export type AdminGlobals = {
 		commission: Record< string, string >;
 	};
 	sources: Record< string, string >;
+	/** The origins a new commission may be given: manual, plus each active integration's. */
+	availableSources: Record< string, string >;
 	types: Record< string, string >;
 	methods: Record< string, string >;
 	/** Only on the affiliate dashboard page. */
@@ -89,6 +91,7 @@ const fallback: AdminGlobals = {
 	},
 	statuses: { affiliate: {}, commission: {} },
 	sources: {},
+	availableSources: { manual: 'Manual' },
 	types: {},
 	methods: {},
 	dashboard: { tab: 'overview', notice: '' },

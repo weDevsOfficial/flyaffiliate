@@ -114,6 +114,37 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * An origin is open only while its integration is active; the manual origin always is.
+	 *
+	 * @return void
+	 */
+	public function test_an_origin_is_open_only_while_its_integration_is_active(): void {
+		$affiliate = $this->factory()->affiliate->create();
+		$manager   = flyaffiliate()->commission;
+
+		$this->assertSame( [ Commission::SOURCE_WOOCOMMERCE, Commission::SOURCE_MANUAL ], array_keys( Commission::get_available_sources() ), 'WooCommerce is active in the test site, so its integration offers its origin first' );
+
+		// What a site without the integration sees.
+		remove_all_filters( 'flyaffiliate_available_commission_sources' );
+
+		$this->assertSame( [ Commission::SOURCE_MANUAL ], array_keys( Commission::get_available_sources() ) );
+
+		$refused = $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5, 'source' => Commission::SOURCE_WOOCOMMERCE ] );
+
+		$this->assertWPError( $refused );
+		$this->assertSame( 'flyaffiliate_invalid_source', $refused->get_error_code() );
+
+		$default = $manager->create( [ 'affiliate_id' => $affiliate, 'amount' => 5 ] );
+
+		$this->assertInstanceOf( Commission::class, $default );
+		$this->assertSame( Commission::SOURCE_MANUAL, $default->get( 'source' ), 'the default origin is the first open one' );
+
+		flyaffiliate()->get_container()->get( \FlyAffiliate\Integrations\WooCommerce\Integration::class )->register_hooks();
+
+		$this->assertSame( Commission::SOURCE_WOOCOMMERCE, array_key_first( Commission::get_available_sources() ) );
+	}
+
+	/**
 	 * A WooCommerce-origin commission refers to an order that exists; a manual one refers to anything.
 	 *
 	 * @return void

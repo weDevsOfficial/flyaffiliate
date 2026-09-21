@@ -64,7 +64,18 @@ class SettingsSchema {
 		 *
 		 * @param array<int, array<string, mixed>> $elements Flat schema elements.
 		 */
-		return apply_filters( 'flyaffiliate_settings_schema', $elements );
+		$elements = (array) apply_filters( 'flyaffiliate_settings_schema', $elements );
+
+		$has_integration = false;
+
+		foreach ( $elements as $element ) {
+			if ( 'subpage' === ( $element['type'] ?? '' ) && 'integrations' === ( $element['page_id'] ?? '' ) ) {
+				$has_integration = true;
+				break;
+			}
+		}
+
+		return $has_integration ? $elements : array_merge( $elements, self::no_integrations_subpage() );
 	}
 
 	/**
@@ -220,7 +231,7 @@ class SettingsSchema {
 	 *
 	 * @return array<string, mixed>
 	 */
-	private static function switch_field( string $id, string $section_id, string $title, string $description, bool $default_value ): array {
+	public static function switch_field( string $id, string $section_id, string $title, string $description, bool $default_value ): array {
 		return [
 			'id'            => $id,
 			'type'          => 'field',
@@ -297,7 +308,7 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'general',
 				'title'       => __( 'Currency', 'flyaffiliate' ),
-				'description' => __( 'How commission and payout amounts are shown. This is separate from the WooCommerce currency setting.', 'flyaffiliate' ),
+				'description' => __( 'How commission and payout amounts are shown. This is separate from your shop’s own currency setting.', 'flyaffiliate' ),
 				'priority'    => 15,
 			],
 			[
@@ -693,28 +704,37 @@ class SettingsSchema {
 				'description' => __( 'Which platforms create commissions.', 'flyaffiliate' ),
 				'priority'    => 40,
 			],
+		];
+	}
+
+	/**
+	 * A subpage saying no integration is active, for an Integrations page nothing filled.
+	 *
+	 * Each integration adds its own subpage through `flyaffiliate_settings_schema`
+	 * while its platform is active (ADR-0013).
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function no_integrations_subpage(): array {
+		return [
 			[
-				'id'          => 'woocommerce',
+				'id'          => 'integrations_none',
 				'type'        => 'subpage',
 				'page_id'     => 'integrations',
-				'title'       => __( 'WooCommerce', 'flyaffiliate' ),
-				'description' => __( 'Referred orders become commissions.', 'flyaffiliate' ),
+				'title'       => __( 'Overview', 'flyaffiliate' ),
+				'description' => __( 'No platform integration is active.', 'flyaffiliate' ),
 				'priority'    => 10,
+				'hide_save'   => true,
 			],
 			[
-				'id'         => 'woocommerce_settings',
-				'type'       => 'section',
-				'subpage_id' => 'woocommerce',
-				'title'      => __( 'Orders', 'flyaffiliate' ),
-				'description' => __( 'Whether orders placed through a referral link create commissions.', 'flyaffiliate' ),
+				'id'          => 'integrations_none_section',
+				'type'        => 'section',
+				'subpage_id'  => 'integrations_none',
+				'title'       => __( 'Nothing to configure yet', 'flyaffiliate' ),
+				'description' => __( 'Activate WooCommerce and its settings appear here. Until then, commissions are recorded by hand under Commissions.', 'flyaffiliate' ),
 			],
-			self::switch_field(
-				'woocommerce_enabled',
-				'woocommerce_settings',
-				__( 'Track WooCommerce orders', 'flyaffiliate' ),
-				__( 'Create commissions for referred WooCommerce orders.', 'flyaffiliate' ),
-				true
-			),
 		];
 	}
 

@@ -45,6 +45,15 @@ others follow, and none of them is special to the core.
   host. WordPress.org's scanner reads any such string as a remote file.
 - Other plugins' admin notices are left alone on FlyAffiliate's screens; the
   plugin adds no notices of its own outside them.
+- An integration announces itself on the plugin's own screens; the core
+  shows nothing platform-specific by itself. `Integrations\WooCommerce\Integration`
+  adds the WooCommerce origin through `flyaffiliate_available_commission_sources`
+  (so the add-commission form and `Commission\Manager::create()` offer it only
+  while WooCommerce is active) and the Integrations → WooCommerce settings
+  subpage through `flyaffiliate_settings_schema`. With no integration active
+  the Integrations page shows an overview saying so, and new commissions are
+  manual. `Commission::get_sources()` keeps every label for rows already
+  recorded.
 - Public signup is behind an "Open registration" setting (on by default) and
   the form carries a honeypot field.
 - Classes are autoloaded by Composer's own loader (`vendor/autoload.php`,

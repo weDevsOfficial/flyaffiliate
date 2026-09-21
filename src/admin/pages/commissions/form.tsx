@@ -342,7 +342,8 @@ export default function CommissionFormPage() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [ searchParams ] = useSearchParams();
-	const { currency, statuses, sources, types } = getGlobals();
+	const { currency, statuses, sources, availableSources, types } =
+		getGlobals();
 
 	const from =
 		( location.state as { from?: string } | null )?.from ?? '/commissions';
@@ -358,7 +359,11 @@ export default function CommissionFormPage() {
 		amount: '',
 		base_amount: '',
 		order_id: '',
-		source: 'woocommerce',
+		// The platform's origin when its integration is active, otherwise manual.
+		source:
+			'woocommerce' in availableSources
+				? 'woocommerce'
+				: Object.keys( availableSources )[ 0 ] ?? 'manual',
 		// Now, in the site's timezone.
 		date: dateI18n( 'Y-m-d' ),
 		time: dateI18n( 'H:i' ),
@@ -900,16 +905,16 @@ export default function CommissionFormPage() {
 									</SelectValue>
 								</SelectTrigger>
 								<SelectContent>
-									{ Object.entries( sources ).map(
-										( [ value, label ] ) => (
-											<SelectItem
-												key={ value }
-												value={ value }
-											>
-												{ label }
-											</SelectItem>
-										)
-									) }
+									{ Object.entries(
+										editing ? sources : availableSources
+									).map( ( [ value, label ] ) => (
+										<SelectItem
+											key={ value }
+											value={ value }
+										>
+											{ label }
+										</SelectItem>
+									) ) }
 								</SelectContent>
 							</Select>
 						</Row>

@@ -159,6 +159,31 @@ class Commission extends BaseModel {
 	}
 
 	/**
+	 * The origins a new commission can be given right now.
+	 *
+	 * The manual origin is always there. A platform's origin is added by its
+	 * integration while that platform is active (ADR-0013), so a commission is
+	 * never recorded against an origin nothing can check or follow. Rows that
+	 * already carry an origin keep their label from `get_sources()`.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return array<string, string> Origin => label, the preferred one first.
+	 */
+	public static function get_available_sources(): array {
+		/**
+		 * Filters the origins open to a new commission.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param array<string, string> $sources Origin => label. Manual only, until an integration adds its own.
+		 */
+		$sources = (array) apply_filters( 'flyaffiliate_available_commission_sources', [ self::SOURCE_MANUAL => self::get_sources()[ self::SOURCE_MANUAL ] ] );
+
+		return array_intersect_key( $sources, self::get_sources() );
+	}
+
+	/**
 	 * Every commission type.
 	 *
 	 * @since FLYAFFILIATE_SINCE

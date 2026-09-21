@@ -62,7 +62,7 @@ const STEPS: Step[] = [
 		label: __( 'Tracking', 'flyaffiliate' ),
 		title: __( 'Track referrals', 'flyaffiliate' ),
 		description: __(
-			'FlyAffiliate credits affiliates for the WooCommerce orders they refer.',
+			'FlyAffiliate credits affiliates for the orders they refer.',
 			'flyaffiliate'
 		),
 		fields: [ 'woocommerce_enabled', 'cookie_duration' ],

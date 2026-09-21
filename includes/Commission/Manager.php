@@ -116,7 +116,7 @@ class Manager {
 	 *     @type float  $amount       Required. What the affiliate earns.
 	 *     @type float  $base_amount  The sale amount the commission is on. Default equal to `amount`.
 	 *     @type int    $order_id     Optional reference order. Under the WooCommerce origin it must be an existing order.
-	 *     @type string $source       `woocommerce` or `manual`. Default `woocommerce`.
+	 *     @type string $source       One of `Commission::get_available_sources()`. Default the first of them.
 	 *     @type string $type         A key of `Commission::get_types()`. Default `sale`.
 	 *     @type string $status       Any commission status. Default `unpaid`.
 	 *     @type string $created_at   Optional `Y-m-d H:i:s` in GMT. Default now.
@@ -140,7 +140,8 @@ class Manager {
 		$base = Money::round( (float) ( $args['base_amount'] ?? $amount ) );
 		$base = Money::to_cents( $base ) > 0 ? $base : $amount;
 
-		$source = $this->choice( $args['source'] ?? Commission::SOURCE_WOOCOMMERCE, Commission::get_sources(), 'flyaffiliate_invalid_source', __( 'Choose where the commission comes from.', 'flyaffiliate' ) );
+		$available = Commission::get_available_sources();
+		$source    = $this->choice( $args['source'] ?? (string) array_key_first( $available ), $available, 'flyaffiliate_invalid_source', __( 'Choose where the commission comes from. An origin is open only while its platform is active.', 'flyaffiliate' ) );
 		$type   = $this->choice( $args['type'] ?? Commission::TYPE_SALE, Commission::get_types(), 'flyaffiliate_invalid_type', __( 'Choose a commission type.', 'flyaffiliate' ) );
 		$status = $this->choice( $args['status'] ?? Commission::STATUS_UNPAID, Commission::get_statuses(), 'flyaffiliate_invalid_status', __( 'Choose a commission status.', 'flyaffiliate' ) );
 

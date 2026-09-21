@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T04:31:25+00:00\n"
+"POT-Creation-Date: 2026-09-21T05:00:01+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -78,7 +78,7 @@ msgid "Affiliates"
 msgstr ""
 
 #: includes/Admin/Menu.php:106
-#: includes/Admin/Settings/Schema/SettingsSchema.php:473
+#: includes/Admin/Settings/Schema/SettingsSchema.php:484
 #: includes/Frontend/AffiliateDashboard.php:47
 #: includes/Payout/CsvExporter.php:39
 #: assets/js/admin.js:279
@@ -105,7 +105,7 @@ msgid "Visits"
 msgstr ""
 
 #: includes/Admin/Menu.php:108
-#: includes/Admin/Settings/Schema/SettingsSchema.php:620
+#: includes/Admin/Settings/Schema/SettingsSchema.php:631
 #: includes/Frontend/AffiliateDashboard.php:49
 #: assets/js/admin.js:282
 #: assets/js/admin.js:285
@@ -158,498 +158,491 @@ msgstr ""
 msgid "Value must be at most %s."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:101
+#: includes/Admin/Settings/Schema/SettingsSchema.php:112
 msgid "Enabled"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:115
+#: includes/Admin/Settings/Schema/SettingsSchema.php:126
 msgid "Disabled"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:167
+#: includes/Admin/Settings/Schema/SettingsSchema.php:178
 msgid "Enter a percentage between 0 and 100."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:202
+#: includes/Admin/Settings/Schema/SettingsSchema.php:213
 msgid "days"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:204
+#: includes/Admin/Settings/Schema/SettingsSchema.php:215
 msgid "Enter zero or a positive number of days."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:249
+#: includes/Admin/Settings/Schema/SettingsSchema.php:260
 msgid "General"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:251
+#: includes/Admin/Settings/Schema/SettingsSchema.php:262
 msgid "How referrals are tracked and where affiliates sign in."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:260
+#: includes/Admin/Settings/Schema/SettingsSchema.php:271
 #: assets/js/admin.js:310
 msgid "Tracking"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:261
+#: includes/Admin/Settings/Schema/SettingsSchema.php:272
 msgid "The referral link and how long a click keeps earning."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:268
+#: includes/Admin/Settings/Schema/SettingsSchema.php:279
 msgid "Referral links"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:269
+#: includes/Admin/Settings/Schema/SettingsSchema.php:280
 msgid "Every affiliate gets a link built from these rules."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:276
+#: includes/Admin/Settings/Schema/SettingsSchema.php:287
 msgid "Referral variable"
 msgstr ""
 
 #. translators: %s: an example referral link.
-#: includes/Admin/Settings/Schema/SettingsSchema.php:278
+#: includes/Admin/Settings/Schema/SettingsSchema.php:289
 msgid "The query variable a referral link carries, e.g. %s"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:282
+#: includes/Admin/Settings/Schema/SettingsSchema.php:293
 msgid "The referral variable cannot be empty."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:289
+#: includes/Admin/Settings/Schema/SettingsSchema.php:300
 msgid "Attribution window"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:290
+#: includes/Admin/Settings/Schema/SettingsSchema.php:301
 msgid "How long after clicking a referral link a purchase is still credited to the affiliate. 0 means until the browser closes."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:299
-#: includes/Admin/Settings/Schema/SettingsSchema.php:315
+#: includes/Admin/Settings/Schema/SettingsSchema.php:310
+#: includes/Admin/Settings/Schema/SettingsSchema.php:326
 #: includes/Payout/CsvExporter.php:38
 msgid "Currency"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:300
-msgid "How commission and payout amounts are shown. This is separate from the WooCommerce currency setting."
+#: includes/Admin/Settings/Schema/SettingsSchema.php:311
+msgid "How commission and payout amounts are shown. This is separate from your shop’s own currency setting."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:307
+#: includes/Admin/Settings/Schema/SettingsSchema.php:318
 msgid "Currency settings"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:308
+#: includes/Admin/Settings/Schema/SettingsSchema.php:319
 msgid "The currency and number format used in the admin and on the affiliate dashboard."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:316
+#: includes/Admin/Settings/Schema/SettingsSchema.php:327
 msgid "The currency amounts are shown in."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:320
+#: includes/Admin/Settings/Schema/SettingsSchema.php:331
 msgid "Choose a currency."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:329
+#: includes/Admin/Settings/Schema/SettingsSchema.php:340
 msgid "Currency symbol position"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:330
+#: includes/Admin/Settings/Schema/SettingsSchema.php:341
 msgid "Where the currency symbol sits next to an amount."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:335
+#: includes/Admin/Settings/Schema/SettingsSchema.php:346
 msgid "Before amount"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:339
+#: includes/Admin/Settings/Schema/SettingsSchema.php:350
 msgid "After amount"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:343
+#: includes/Admin/Settings/Schema/SettingsSchema.php:354
 msgid "Before amount with space"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:347
+#: includes/Admin/Settings/Schema/SettingsSchema.php:358
 msgid "After amount with space"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:351
+#: includes/Admin/Settings/Schema/SettingsSchema.php:362
 msgid "Choose where the symbol goes."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:360
+#: includes/Admin/Settings/Schema/SettingsSchema.php:371
 msgid "Thousands separator"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:361
+#: includes/Admin/Settings/Schema/SettingsSchema.php:372
 msgid "The character between thousands, e.g. the comma in 1,000. Leave empty for none."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:370
+#: includes/Admin/Settings/Schema/SettingsSchema.php:381
 msgid "Decimal separator"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:371
+#: includes/Admin/Settings/Schema/SettingsSchema.php:382
 msgid "The character before the cents, e.g. the point in 9.99."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:374
+#: includes/Admin/Settings/Schema/SettingsSchema.php:385
 msgid "Enter a decimal separator."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:384
+#: includes/Admin/Settings/Schema/SettingsSchema.php:395
 msgid "Affiliate area"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:385
+#: includes/Admin/Settings/Schema/SettingsSchema.php:396
 msgid "Who can join, and the pages affiliates use. The pages were created when the plugin was activated; to move one, paste its shortcode into another page."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:392
+#: includes/Admin/Settings/Schema/SettingsSchema.php:403
 msgid "Signup"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:393
+#: includes/Admin/Settings/Schema/SettingsSchema.php:404
 msgid "Whether the registration form takes new affiliates."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:398
+#: includes/Admin/Settings/Schema/SettingsSchema.php:409
 msgid "Open registration"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:399
+#: includes/Admin/Settings/Schema/SettingsSchema.php:410
 msgid "When off, the registration form says the programme is not taking new members. You can still add affiliates from the admin."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:406
+#: includes/Admin/Settings/Schema/SettingsSchema.php:417
 msgid "Shortcodes"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:407
+#: includes/Admin/Settings/Schema/SettingsSchema.php:418
 msgid "Paste a shortcode into any page to show the affiliate dashboard or the registration form there."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:414
+#: includes/Admin/Settings/Schema/SettingsSchema.php:425
 #: assets/js/admin.js:310
 msgid "Affiliate dashboard"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:415
+#: includes/Admin/Settings/Schema/SettingsSchema.php:426
 msgid "Referral link, balance, commissions, visits, payouts and the affiliate’s own settings."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:424
+#: includes/Admin/Settings/Schema/SettingsSchema.php:435
 msgid "Registration form"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:425
+#: includes/Admin/Settings/Schema/SettingsSchema.php:436
 msgid "Email-only signup with an activation link."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:435
+#: includes/Admin/Settings/Schema/SettingsSchema.php:446
 msgid "Data"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:436
+#: includes/Admin/Settings/Schema/SettingsSchema.php:447
 msgid "What happens to your data when the plugin is removed."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:443
+#: includes/Admin/Settings/Schema/SettingsSchema.php:454
 msgid "Uninstall"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:444
+#: includes/Admin/Settings/Schema/SettingsSchema.php:455
 msgid "What happens to FlyAffiliate's affiliates, commissions, visits and payouts when the plugin is deleted."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:451
+#: includes/Admin/Settings/Schema/SettingsSchema.php:462
 msgid "Remove all data on uninstall"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:452
+#: includes/Admin/Settings/Schema/SettingsSchema.php:463
 msgid "Delete all affiliates, commissions, visits, payouts and settings when the plugin is deleted. Leave this off to keep the data for a reinstall."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:475
+#: includes/Admin/Settings/Schema/SettingsSchema.php:486
 msgid "Commissions are calculated per order item. The rate comes from the product, or the default rate, and never goes above the maximum."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:484
-#: includes/Admin/Settings/Schema/SettingsSchema.php:492
+#: includes/Admin/Settings/Schema/SettingsSchema.php:495
+#: includes/Admin/Settings/Schema/SettingsSchema.php:503
 msgid "Rates"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:485
+#: includes/Admin/Settings/Schema/SettingsSchema.php:496
 msgid "The default rate, and the highest rate allowed."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:493
+#: includes/Admin/Settings/Schema/SettingsSchema.php:504
 msgid "What an affiliate earns on each product sold through their link."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:499
+#: includes/Admin/Settings/Schema/SettingsSchema.php:510
 msgid "Default rate"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:500
+#: includes/Admin/Settings/Schema/SettingsSchema.php:511
 msgid "Used when the product doesn’t set its own rate."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:510
+#: includes/Admin/Settings/Schema/SettingsSchema.php:521
 msgid "Maximum rate"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:511
+#: includes/Admin/Settings/Schema/SettingsSchema.php:522
 msgid "No commission is calculated above this rate, even if a product sets a higher one."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:519
+#: includes/Admin/Settings/Schema/SettingsSchema.php:530
 msgid "Rate type"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:520
+#: includes/Admin/Settings/Schema/SettingsSchema.php:531
 msgid "Percentage rates only, for now."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:525
+#: includes/Admin/Settings/Schema/SettingsSchema.php:536
 msgid "Percentage of the item total"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:529
+#: includes/Admin/Settings/Schema/SettingsSchema.php:540
 msgid "Choose a rate type."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:538
-#: includes/Admin/Settings/Schema/SettingsSchema.php:631
+#: includes/Admin/Settings/Schema/SettingsSchema.php:549
+#: includes/Admin/Settings/Schema/SettingsSchema.php:642
 msgid "Rules"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:539
+#: includes/Admin/Settings/Schema/SettingsSchema.php:550
 msgid "When a commission matures and what it is calculated on."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:546
-#: includes/Admin/Settings/Schema/SettingsSchema.php:552
+#: includes/Admin/Settings/Schema/SettingsSchema.php:557
+#: includes/Admin/Settings/Schema/SettingsSchema.php:563
 #: assets/js/dashboard.js:276
 msgid "Hold period"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:547
+#: includes/Admin/Settings/Schema/SettingsSchema.php:558
 msgid "How long a commission waits before it can be paid out. This leaves time to reject it if the order is returned."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:553
+#: includes/Admin/Settings/Schema/SettingsSchema.php:564
 msgid "How many days a commission waits after the sale before it can be paid out. 0 means as soon as the order is paid."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:560
+#: includes/Admin/Settings/Schema/SettingsSchema.php:571
 msgid "Base amount"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:561
+#: includes/Admin/Settings/Schema/SettingsSchema.php:572
 msgid "What the rate is applied to on each order item."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:566
+#: includes/Admin/Settings/Schema/SettingsSchema.php:577
 msgid "Exclude shipping"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:567
+#: includes/Admin/Settings/Schema/SettingsSchema.php:578
 msgid "Shipping is not counted when calculating a commission."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:573
+#: includes/Admin/Settings/Schema/SettingsSchema.php:584
 msgid "Exclude tax"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:574
+#: includes/Admin/Settings/Schema/SettingsSchema.php:585
 msgid "Tax is not counted when calculating a commission."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:581
+#: includes/Admin/Settings/Schema/SettingsSchema.php:592
 msgid "Eligibility"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:582
+#: includes/Admin/Settings/Schema/SettingsSchema.php:593
 msgid "Which referred orders can earn a commission."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:587
+#: includes/Admin/Settings/Schema/SettingsSchema.php:598
 msgid "Block self-referrals"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:588
+#: includes/Admin/Settings/Schema/SettingsSchema.php:599
 msgid "An affiliate buying through their own link earns nothing."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:595
+#: includes/Admin/Settings/Schema/SettingsSchema.php:606
 msgid "Refunds"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:596
+#: includes/Admin/Settings/Schema/SettingsSchema.php:607
 msgid "What happens when an order is refunded. Failed and cancelled orders always reject their commissions. Paid commissions are never changed."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:601
+#: includes/Admin/Settings/Schema/SettingsSchema.php:612
 msgid "Reject commissions on refund"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:602
+#: includes/Admin/Settings/Schema/SettingsSchema.php:613
 msgid "Reject unpaid commissions when their order is refunded."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:622
+#: includes/Admin/Settings/Schema/SettingsSchema.php:633
 msgid "Payouts are recorded by hand. FlyAffiliate shows who is owed what, you send the money, then mark the payment paid."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:632
+#: includes/Admin/Settings/Schema/SettingsSchema.php:643
 msgid "Who is paid, and how."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:639
+#: includes/Admin/Settings/Schema/SettingsSchema.php:650
 msgid "Payout rules"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:640
+#: includes/Admin/Settings/Schema/SettingsSchema.php:651
 msgid "Who is included when you create a payout, and how they are paid."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:647
+#: includes/Admin/Settings/Schema/SettingsSchema.php:658
 #: assets/js/dashboard.js:276
 msgid "Minimum payout"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:648
+#: includes/Admin/Settings/Schema/SettingsSchema.php:659
 msgid "The default minimum for a payout. Affiliates below it wait for the next one."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:654
+#: includes/Admin/Settings/Schema/SettingsSchema.php:665
 msgid "Enter zero or a positive amount."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:663
+#: includes/Admin/Settings/Schema/SettingsSchema.php:674
 msgid "Payout method"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:664
+#: includes/Admin/Settings/Schema/SettingsSchema.php:675
 msgid "How affiliates are paid. Automatic methods are coming in a later version."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:669
+#: includes/Admin/Settings/Schema/SettingsSchema.php:680
 msgid "Manual: pay outside WordPress and record it here"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:673
+#: includes/Admin/Settings/Schema/SettingsSchema.php:684
 msgid "Choose a payout method."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:691
+#: includes/Admin/Settings/Schema/SettingsSchema.php:702
 msgid "Integrations"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:693
+#: includes/Admin/Settings/Schema/SettingsSchema.php:704
 msgid "Which platforms create commissions."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:700
-#: includes/Models/Commission.php:156
-msgid "WooCommerce"
+#: includes/Admin/Settings/Schema/SettingsSchema.php:726
+#: includes/Frontend/AffiliateDashboard.php:46
+#: assets/js/dashboard.js:281
+msgid "Overview"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:701
-msgid "Referred orders become commissions."
+#: includes/Admin/Settings/Schema/SettingsSchema.php:727
+msgid "No platform integration is active."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:708
-msgid "Orders"
+#: includes/Admin/Settings/Schema/SettingsSchema.php:735
+msgid "Nothing to configure yet"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:709
-msgid "Whether orders placed through a referral link create commissions."
+#: includes/Admin/Settings/Schema/SettingsSchema.php:736
+msgid "Activate WooCommerce and its settings appear here. Until then, commissions are recorded by hand under Commissions."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:714
-msgid "Track WooCommerce orders"
-msgstr ""
-
-#: includes/Admin/Settings/Schema/SettingsSchema.php:715
-msgid "Create commissions for referred WooCommerce orders."
-msgstr ""
-
-#: includes/Admin/Settings/Schema/SettingsSchema.php:733
+#: includes/Admin/Settings/Schema/SettingsSchema.php:753
 #: assets/js/admin.js:276
 #: assets/js/admin.js:310
 msgid "Email"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:735
+#: includes/Admin/Settings/Schema/SettingsSchema.php:755
 #: assets/js/admin.js:310
 msgid "The activation link is the only email this version sends."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:743
-#: includes/Admin/Settings/Schema/SettingsSchema.php:751
+#: includes/Admin/Settings/Schema/SettingsSchema.php:763
+#: includes/Admin/Settings/Schema/SettingsSchema.php:771
 msgid "Notifications"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:744
+#: includes/Admin/Settings/Schema/SettingsSchema.php:764
 msgid "The emails the plugin sends."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:752
+#: includes/Admin/Settings/Schema/SettingsSchema.php:772
 msgid "The emails FlyAffiliate sends to affiliates."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:757
+#: includes/Admin/Settings/Schema/SettingsSchema.php:777
 msgid "Send an activation link on signup"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:758
+#: includes/Admin/Settings/Schema/SettingsSchema.php:778
 msgid "When off, new affiliates stay pending until you activate them."
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:825
+#: includes/Admin/Settings/Schema/SettingsSchema.php:845
 msgid "United States (US) dollar"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:826
+#: includes/Admin/Settings/Schema/SettingsSchema.php:846
 msgid "Euro"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:827
+#: includes/Admin/Settings/Schema/SettingsSchema.php:847
 msgid "Pound sterling"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:828
+#: includes/Admin/Settings/Schema/SettingsSchema.php:848
 msgid "Australian dollar"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:829
+#: includes/Admin/Settings/Schema/SettingsSchema.php:849
 msgid "Canadian dollar"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:830
+#: includes/Admin/Settings/Schema/SettingsSchema.php:850
 msgid "Indian rupee"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:831
+#: includes/Admin/Settings/Schema/SettingsSchema.php:851
 msgid "Bangladeshi taka"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:832
+#: includes/Admin/Settings/Schema/SettingsSchema.php:852
 msgid "Japanese yen"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:833
+#: includes/Admin/Settings/Schema/SettingsSchema.php:853
 msgid "Brazilian real"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:834
+#: includes/Admin/Settings/Schema/SettingsSchema.php:854
 msgid "South African rand"
 msgstr ""
 
-#: includes/Admin/Settings/Schema/SettingsSchema.php:961
+#: includes/Admin/Settings/Schema/SettingsSchema.php:981
 msgid "The default rate cannot be higher than the maximum rate."
 msgstr ""
 
@@ -789,67 +782,62 @@ msgid "Choose an affiliate."
 msgstr ""
 
 #: includes/Commission/Manager.php:137
-#: includes/Commission/Manager.php:243
+#: includes/Commission/Manager.php:244
 msgid "The commission amount must be more than zero."
 msgstr ""
 
-#: includes/Commission/Manager.php:143
-msgid "Choose where the commission comes from."
-msgstr ""
-
 #: includes/Commission/Manager.php:144
-#: includes/Commission/Manager.php:273
-msgid "Choose a commission type."
+msgid "Choose where the commission comes from. An origin is open only while its platform is active."
 msgstr ""
 
 #: includes/Commission/Manager.php:145
+#: includes/Commission/Manager.php:274
+msgid "Choose a commission type."
+msgstr ""
+
+#: includes/Commission/Manager.php:146
 msgid "Choose a commission status."
 msgstr ""
 
-#: includes/Commission/Manager.php:184
-#: includes/Commission/Manager.php:290
-#: includes/Commission/Manager.php:451
+#: includes/Commission/Manager.php:185
+#: includes/Commission/Manager.php:291
+#: includes/Commission/Manager.php:452
 #: assets/js/admin.js:289
 msgid "The commission could not be saved."
 msgstr ""
 
-#: includes/Commission/Manager.php:234
-#: includes/Commission/Manager.php:425
+#: includes/Commission/Manager.php:235
+#: includes/Commission/Manager.php:426
 #: includes/REST/Controllers/CommissionsController.php:547
 #: includes/REST/Controllers/MeController.php:163
 msgid "No commission with that ID."
 msgstr ""
 
-#: includes/Commission/Manager.php:259
+#: includes/Commission/Manager.php:260
 msgid "This commission came from an order item, so its reference cannot change."
 msgstr ""
 
-#: includes/Commission/Manager.php:375
+#: includes/Commission/Manager.php:376
 msgid "WooCommerce is not active, so the order cannot be checked. Activate WooCommerce, or use the manual origin."
 msgstr ""
 
 #. translators: %d: the order id given
-#: includes/Commission/Manager.php:387
+#: includes/Commission/Manager.php:388
 msgid "There is no WooCommerce order #%d. Enter the number of an existing order, or change the origin."
 msgstr ""
 
-#: includes/Commission/Manager.php:445
+#: includes/Commission/Manager.php:446
 msgid "That status change is not allowed."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:486
+#: includes/Commission/Manager.php:487
 msgid "This commission was paid in payment #%d, which keeps it."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:489
+#: includes/Commission/Manager.php:490
 msgid "This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, first."
-msgstr ""
-
-#: includes/Frontend/AffiliateDashboard.php:46
-#: assets/js/dashboard.js:281
-msgid "Overview"
 msgstr ""
 
 #: includes/Frontend/RegistrationForm.php:81
@@ -868,6 +856,31 @@ msgstr ""
 msgid "Affiliate Registration"
 msgstr ""
 
+#: includes/Integrations/WooCommerce/Integration.php:67
+#: includes/Models/Commission.php:156
+msgid "WooCommerce"
+msgstr ""
+
+#: includes/Integrations/WooCommerce/Integration.php:68
+msgid "Referred orders become commissions."
+msgstr ""
+
+#: includes/Integrations/WooCommerce/Integration.php:75
+msgid "Orders"
+msgstr ""
+
+#: includes/Integrations/WooCommerce/Integration.php:76
+msgid "Whether orders placed through a referral link create commissions."
+msgstr ""
+
+#: includes/Integrations/WooCommerce/Integration.php:81
+msgid "Track WooCommerce orders"
+msgstr ""
+
+#: includes/Integrations/WooCommerce/Integration.php:82
+msgid "Create commissions for referred WooCommerce orders."
+msgstr ""
+
 #. translators: %d: affiliate ID.
 #: includes/Models/Affiliate.php:143
 msgid "Affiliate #%d"
@@ -880,7 +893,7 @@ msgstr ""
 msgid "Manual"
 msgstr ""
 
-#: includes/Models/Commission.php:170
+#: includes/Models/Commission.php:195
 #: assets/js/admin.js:279
 #: assets/js/admin.js:300
 #: assets/js/dashboard.js:279
@@ -3016,7 +3029,7 @@ msgid "Track referrals"
 msgstr ""
 
 #: assets/js/admin.js:310
-msgid "FlyAffiliate credits affiliates for the WooCommerce orders they refer."
+msgid "FlyAffiliate credits affiliates for the orders they refer."
 msgstr ""
 
 #: assets/js/admin.js:310
