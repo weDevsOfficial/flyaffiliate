@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-FlyAffiliate is an affiliate-marketing plugin for WordPress, with WooCommerce support built in, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.4+; the WooCommerce integration needs WooCommerce 8.5+ and loads only when WooCommerce is active (ADR-0013). This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
+FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.4+. Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) today, Dokan and others later. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
 
 The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service providers, `Hookable` classes, `Manager` facades, overridable templates, an `Installer`/`Upgrade` pair, `FlyAffiliateTestCase`-based PHPUnit tests. Anyone who knows the Dokan codebase should feel at home here.
 
@@ -143,7 +143,7 @@ Tagged groups resolved at boot: `common-service`, `admin-service`, `frontend-ser
 Any class implementing `FlyAffiliate\Contracts\Hookable` is also tagged with the interface name and gets `register_hooks()` called automatically. The container is in-house and League-shaped (ADR-0002): `add`/`addShared`/`addTag`/`setShared`/`addServiceProvider` keep League's camelCase, and constructor dependencies are autowired by type hint.
 
 ### REST API
-Namespace `flyaffiliate/v1`. Controllers extend `FlyAffiliate\REST\AdminBaseController` (admin-only, `manage_woocommerce`) or `FlyAffiliate\REST\AffiliateBaseController` (self-scoped affiliate endpoints). Every route has a `permission_callback`. Every controller implements `prepare_item_for_response()`, `prepare_links()`, `get_item_schema()`.
+Namespace `flyaffiliate/v1`. Controllers extend `FlyAffiliate\REST\AdminBaseController` (admin-only, `flyaffiliate_admin_capability()`: `manage_options` unless filtered) or `FlyAffiliate\REST\AffiliateBaseController` (self-scoped affiliate endpoints). Every route has a `permission_callback`. Every controller implements `prepare_item_for_response()`, `prepare_links()`, `get_item_schema()`.
 
 ## Coding Standards
 

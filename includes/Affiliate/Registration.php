@@ -75,7 +75,7 @@ class Registration implements Hookable {
 		 *
 		 * @param bool $enabled Default true.
 		 */
-		return (bool) apply_filters( 'flyaffiliate_registration_enabled', true );
+		return (bool) apply_filters( 'flyaffiliate_registration_enabled', flyaffiliate_option_enabled( 'registration_enabled' ) );
 	}
 
 	/**
@@ -91,6 +91,13 @@ class Registration implements Hookable {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.
 		$redirect = isset( $_POST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) : '';
 		$redirect = '' !== $redirect ? $redirect : home_url( '/' );
+		// A field people never see; a bot filling every input trips it.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.
+		if ( ! empty( $_POST['flyaffiliate_website'] ) ) {
+			wp_safe_redirect( add_query_arg( 'flyaffiliate_error', 'spam', $redirect ) );
+			exit;
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.
 		$email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.

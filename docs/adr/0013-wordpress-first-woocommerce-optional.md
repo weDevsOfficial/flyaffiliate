@@ -1,4 +1,4 @@
-# ADR-0013 — WordPress first: WooCommerce is an integration, not a requirement
+# ADR-0013 — Standalone: every platform is an optional integration
 
 **Status:** Accepted
 **Date:** 2026-09-17
@@ -12,10 +12,11 @@ Until now the plugin declared `Requires Plugins: woocommerce`, carried the
 made FlyAffiliate a WooCommerce add-on in the eyes of WordPress.org and of
 the code.
 
-FlyAffiliate is meant to serve more than one platform. WooCommerce is the
-first source of order-based commissions; others follow. Affiliates, referral
-links, visits, hand-entered commissions, payouts, the admin and the affiliate
-dashboard do not need a shop plugin at all.
+FlyAffiliate is a standalone plugin. Affiliates, referral links, visits,
+hand-entered commissions, payouts, the admin and the affiliate dashboard need
+no other plugin at all. Platforms plug in as integrations, every one of them
+optional: WooCommerce is the first source of order-based commissions, Dokan and
+others follow, and none of them is special to the core.
 
 ## Decision
 
@@ -31,8 +32,21 @@ dashboard do not need a shop plugin at all.
 - The currency setting lists WooCommerce's currencies when WooCommerce is
   there and a built-in set of common ones otherwise.
 - The plugin header and the readme describe FlyAffiliate as affiliate marketing
-  for WordPress with WooCommerce support built in. WooCommerce stays the
-  reference platform for the tests, the seeder and the money rules.
+  for WordPress that integrates with WooCommerce and more. WooCommerce stays the
+  reference platform for the tests, the seeder and the money rules until a
+  second integration exists.
+- Activation runs the installer on any WordPress site; it no longer returns
+  early without WooCommerce. The admin capability is `manage_options`,
+  filterable to `manage_woocommerce` for stores that want shop managers in
+  (ADR-0008, amended); nothing about access depends on WooCommerce.
+- The build strips the remote-looking strings the bundled libraries leave
+  behind (the Tailwind licence comment, the `xmlns` URL inside inlined SVG
+  icons, plugin-ui's Google logo), so the shipped CSS and JS name no external
+  host. WordPress.org's scanner reads any such string as a remote file.
+- Other plugins' admin notices are left alone on FlyAffiliate's screens; the
+  plugin adds no notices of its own outside them.
+- Public signup is behind an "Open registration" setting (on by default) and
+  the form carries a honeypot field.
 - Classes are autoloaded by Composer's own loader (`vendor/autoload.php`,
   PSR-4 from `composer.json`), as Dokan does; the in-house
   `includes/Autoloader.php` is gone. The release zip carries a production
@@ -48,8 +62,8 @@ dashboard do not need a shop plugin at all.
 
 ## Consequences
 
-- A site without WooCommerce gets a working affiliate programme: signups,
-  links, visits, commissions the admin records by hand, payouts.
+- A site with no integration active gets a working affiliate programme:
+  signups, links, visits, commissions the admin records by hand, payouts.
 - A commission with the WooCommerce origin still needs an existing order
   (`Commission\Manager::check_reference()`). Without WooCommerce the order
   cannot be checked, so a WooCommerce-origin commission with a reference is

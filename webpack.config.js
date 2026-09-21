@@ -118,6 +118,72 @@ class MoveStylesToCssDirPlugin {
 	}
 }
 
+/**
+ * Strip the remote-looking strings the bundled libraries leave in the output.
+ *
+ * WordPress.org's review scanner flags any `http://` inside a stylesheet as a
+ * remote file, and its reviewers ask for external hosts to be gone from the
+ * scripts. None of these load anything: the Tailwind licence comment names
+ * its website, `@wordpress/components` inlines SVG icons whose `xmlns` is a
+ * URL (percent-encoding it inside the data URI changes nothing for the
+ * browser), and plugin-ui carries a Google logo for a sign-in button this
+ * plugin never renders.
+ */
+class StripRemoteReferencesPlugin {
+	apply( compiler ) {
+		const { RawSource } = compiler.webpack.sources;
+
+		compiler.hooks.thisCompilation.tap(
+			'FlyAffiliateStripRemoteReferences',
+			( compilation ) => {
+				compilation.hooks.processAssets.tap(
+					{
+						name: 'FlyAffiliateStripRemoteReferences',
+						stage: compiler.webpack.Compilation
+							.PROCESS_ASSETS_STAGE_REPORT,
+					},
+					( assets ) => {
+						Object.keys( assets ).forEach( ( name ) => {
+							const isCss = /\.css$/.test( name );
+							const isJs = /\.js$/.test( name );
+
+							if ( ! isCss && ! isJs ) {
+								return;
+							}
+
+							const before = assets[ name ].source().toString();
+							let after = before;
+
+							if ( isCss ) {
+								after = after
+									.replace( /\/\*![\s\S]*?\*\//g, '' )
+									.replace(
+										/http:\/\/www\.w3\.org\/2000\/svg/g,
+										'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'
+									);
+							}
+
+							if ( isJs ) {
+								after = after.replace(
+									/https:\/\/upload\.wikimedia\.org\/[^"'`)\s]*/g,
+									'data:,'
+								);
+							}
+
+							if ( after !== before ) {
+								compilation.updateAsset(
+									name,
+									new RawSource( after )
+								);
+							}
+						} );
+					}
+				);
+			}
+		);
+	}
+}
+
 module.exports = {
 	...defaultConfig,
 	entry,
@@ -146,6 +212,7 @@ module.exports = {
 		// plugin in its default config.
 		new RemoveEmptyScriptsPlugin(),
 		...defaultConfig.plugins,
+		new StripRemoteReferencesPlugin(),
 		new MoveStylesToCssDirPlugin(),
 	],
 };

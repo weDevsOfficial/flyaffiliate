@@ -20,6 +20,15 @@ FlyAffiliate uses **`manage_woocommerce`** for the admin menu, every admin
 screen, every `admin_post_flyaffiliate_*` handler, and every route on
 `REST\AdminBaseController`.
 
+*Amended 2026-09-21 (ADR-0013):* the plugin is standalone and every
+integration is optional, so it no longer leans on a WooCommerce capability. `flyaffiliate_admin_capability()`
+answers **`manage_options`**: every administrator holds it on every WordPress
+site and nothing is written to roles. A store that wants shop managers to run
+the programme returns `manage_woocommerce` from the
+`flyaffiliate_admin_capability` filter, which is the one line of code the
+original decision above bought them. Every screen, handler and admin REST
+route reads the helper, never a literal.
+
 `manage_options` does not appear in this codebase.
 
 Reasons a custom capability was rejected for Phase 1:

@@ -382,11 +382,23 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'general',
 				'title'       => __( 'Affiliate area', 'flyaffiliate' ),
-				'description' => __( 'These pages were created when the plugin was activated. To move one, paste its shortcode into another page.', 'flyaffiliate' ),
+				'description' => __( 'Who can join, and the pages affiliates use. The pages were created when the plugin was activated; to move one, paste its shortcode into another page.', 'flyaffiliate' ),
 				'priority'    => 20,
-				// Nothing on this subpage is editable, so a save button would only confuse.
-				'hide_save'   => true,
 			],
+			[
+				'id'          => 'affiliate_area_signup',
+				'type'        => 'section',
+				'subpage_id'  => 'affiliate_area',
+				'title'       => __( 'Signup', 'flyaffiliate' ),
+				'description' => __( 'Whether the registration form takes new affiliates.', 'flyaffiliate' ),
+			],
+			self::switch_field(
+				'registration_enabled',
+				'affiliate_area_signup',
+				__( 'Open registration', 'flyaffiliate' ),
+				__( 'When off, the registration form says the programme is not taking new members. You can still add affiliates from the admin.', 'flyaffiliate' ),
+				true
+			),
 			[
 				'id'         => 'affiliate_area_pages',
 				'type'       => 'section',
