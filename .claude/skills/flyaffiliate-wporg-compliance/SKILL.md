@@ -86,9 +86,11 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 - Nothing writes to the database on `admin_init` or on a plain page load except
   in response to a user action. **No seeders.** Sample data is a WP-CLI command
   (`wp flyaffiliate seed`) registered in `CliServiceProvider`.
-- No forced admin redirect on activation without a user-visible way out. The
-  setup wizard redirect fires once, records that it fired, and the wizard has a
-  visible skip.
+- No admin redirect on activation. The setup wizard's one-time redirect is
+  removed until WordPress.org approves the plugin (Guideline 11 flags any
+  redirect on `admin_init`); the wizard is opened from Settings instead. If it
+  returns after approval, it fires once, records that it fired, skips bulk
+  activation, and the wizard keeps its visible skip.
 - No admin notice that cannot be dismissed, and none outside the plugin's own
   screens.
 - No telemetry, no phone-home, no external API call the user did not ask for.

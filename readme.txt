@@ -59,6 +59,8 @@ The plugin makes no external requests, contains no analytics, and phones nothing
 
 FlyAffiliate is developed in the open on [GitHub](https://github.com/weDevsOfficial/flyaffiliate). Bug reports, pull requests and ideas are welcome there.
 
+The JavaScript and CSS shipped in `assets/` are compiled from the TypeScript and SCSS sources under `src/` in that repository; `npm run build` reproduces them.
+
 == Installation ==
 
 1. Upload the plugin to `/wp-content/plugins/flyaffiliate`, or install it through **Plugins → Add New**.

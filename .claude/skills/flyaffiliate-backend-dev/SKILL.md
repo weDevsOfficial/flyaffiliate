@@ -328,8 +328,11 @@ contain no queries — the caller prepares the data.
   `window.flyaffiliate` through `wp_add_inline_script()` in `Assets.php`.
 - The setup wizard is `src/admin/pages/setup` (route `#/setup`): it renders
   fields from the settings schema, saves with `PUT /settings/{page}` and calls
-  `POST /setup/complete`; `Admin\SetupWizard` only owns the one-time redirect
-  and the done flag. The one PHP-rendered admin page left (user profile) keeps
+  `POST /setup/complete`; `Admin\SetupWizard` only owns the route URL and
+  the done flag. Nothing redirects to the wizard: the one-time
+  post-activation redirect is removed until WordPress.org approves the
+  plugin (Guideline 11), and Settings shows "Run the setup wizard" until it
+  is done. The one PHP-rendered admin page left (user profile) keeps
   the old rules: capability, `check_admin_referer()`, then sanitize.
 
 ## REST

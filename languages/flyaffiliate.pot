@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T08:56:37+00:00\n"
+"POT-Creation-Date: 2026-09-21T09:14:36+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -117,11 +117,11 @@ msgstr ""
 msgid "You are not allowed to view this page."
 msgstr ""
 
-#: includes/Admin/Notices/Manager.php:146
+#: includes/Admin/Notices/Manager.php:155
 msgid "Do not show this again"
 msgstr ""
 
-#: includes/Admin/Notices/Manager.php:159
+#: includes/Admin/Notices/Manager.php:168
 #: includes/Admin/PayoutExport.php:77
 msgid "You are not allowed to do that."
 msgstr ""
@@ -835,11 +835,11 @@ msgstr ""
 msgid "Something went wrong. Try again."
 msgstr ""
 
-#: includes/Install/Installer.php:339
+#: includes/Install/Installer.php:335
 msgid "Affiliate Dashboard"
 msgstr ""
 
-#: includes/Install/Installer.php:343
+#: includes/Install/Installer.php:339
 msgid "Affiliate Registration"
 msgstr ""
 
