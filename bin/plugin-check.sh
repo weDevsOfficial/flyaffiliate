@@ -49,6 +49,33 @@ FINDINGS="$(printf '%s\n' "${RESULT}" | sed -n '/^file,line,column,type,code,mes
 if [ -z "${FINDINGS}" ]; then
 	echo
 	echo "Plugin Check: 0 errors, 0 warnings."
+
+	# Uninstall gate. WordPress runs uninstall.php with the plugin inactive and
+	# none of it loaded; run it the same way, with the data-clear setting on,
+	# and require that it finishes and leaves no table behind. A require of a
+	# file that no longer ships surfaces here, not when a reviewer clicks Delete.
+	echo "==> Running uninstall.php against the staged plugin"
+	UNINSTALL="$(npx wp-env run tests-cli -- wp eval '
+		activate_plugin( "'"${SLUG}"'/'"${SLUG}"'.php" );
+		$settings = get_option( "flyaffiliate_settings", [] );
+		$settings["data_clear_on_uninstall"] = "on";
+		update_option( "flyaffiliate_settings", $settings );
+		deactivate_plugins( "'"${SLUG}"'/'"${SLUG}"'.php" );
+		ob_start();
+		uninstall_plugin( "'"${SLUG}"'/'"${SLUG}"'.php" );
+		$output = ob_get_clean();
+		wp_cache_flush();
+		global $wpdb;
+		$tables = count( $wpdb->get_col( "SHOW TABLES LIKE \"{$wpdb->prefix}flyaffiliate_%\"" ) );
+		echo "uninstall output_bytes=" . strlen( $output ) . " tables_left={$tables}\n";
+	' 2>&1 | tr -d '\r' | grep '^uninstall ' || true)"
+
+	if [ "${UNINSTALL}" != "uninstall output_bytes=0 tables_left=0" ]; then
+		echo "Uninstall gate failed: ${UNINSTALL:-uninstall.php did not run to completion (see the wp-env output above)}" >&2
+		exit 1
+	fi
+
+	echo "Uninstall: ran to completion, no output, no tables left."
 	exit 0
 fi
 
