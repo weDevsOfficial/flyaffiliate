@@ -19,6 +19,5 @@ export const urls = {
 	newPayout: `${ app }#/payouts/new`,
 	settings: `${ app }#/settings`,
 	setup: `${ app }#/setup`,
-	legacySetup: '/wp-admin/admin.php?page=flyaffiliate-setup',
-	legacySettings: '/wp-admin/admin.php?page=flyaffiliate-settings',
+	plugins: '/wp-admin/plugins.php',
 };

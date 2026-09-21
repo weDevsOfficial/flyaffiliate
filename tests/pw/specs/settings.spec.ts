@@ -126,8 +126,16 @@ test.describe( 'Settings', () => {
 		await settings.save();
 	} );
 
-	test( 'redirects the old settings slug to the app', async ( { page } ) => {
-		await page.goto( urls.legacySettings );
-		await expect( page ).toHaveURL( /page=flyaffiliate#\/settings/ );
+	test( 'the Plugins screen links straight to the settings route', async ( {
+		page,
+	} ) => {
+		await page.goto( urls.plugins );
+		const link = page
+			.locator( 'tr[data-slug="flyaffiliate"] .row-actions a' )
+			.filter( { hasText: 'Settings' } );
+		await expect( link ).toHaveAttribute(
+			'href',
+			/page=flyaffiliate#\/settings$/
+		);
 	} );
 } );

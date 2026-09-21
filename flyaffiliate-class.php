@@ -5,6 +5,7 @@
  * @package FlyAffiliate
  */
 
+use FlyAffiliate\Admin\Menu;
 use FlyAffiliate\Contracts\Hookable;
 use FlyAffiliate\DependencyManagement\Container;
 use FlyAffiliate\Install\Installer;
@@ -284,7 +285,7 @@ final class FlyAffiliate_Plugin {
 			$links,
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
-				esc_url( admin_url( 'admin.php?page=flyaffiliate-settings' ) ),
+				esc_url( Menu::get_route_url( 'settings' ) ),
 				esc_html__( 'Settings', 'flyaffiliate' )
 			)
 		);
