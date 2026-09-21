@@ -21,8 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Nothing sends an admin there. Settings shows "Run the setup wizard" until
  * it is done. A one-time redirect after activation was removed for the
- * WordPress.org review (Guideline 11 reads any redirect on `admin_init` as
- * hijacking the dashboard); it comes back, if at all, once the plugin is
+ * WordPress.org review (Guideline 11 reads a redirect on an admin page load
+ * as hijacking the dashboard); it comes back, if at all, once the plugin is
  * approved — reverting the commit that removed it restores the whole thing.
  *
  * @since FLYAFFILIATE_SINCE
