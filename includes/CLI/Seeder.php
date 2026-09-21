@@ -21,8 +21,8 @@ use WP_CLI;
  *
  * This is the only place sample data is ever created. It is resolved only under
  * WP-CLI, it refuses to run on a production site, and nothing about it touches
- * an ordinary request. The prototype seeded on `admin_init`; that is exactly
- * what WordPress.org rejects.
+ * an ordinary request: sample data is created only when an administrator
+ * asks for it from the command line.
  *
  * @since FLYAFFILIATE_SINCE
  */

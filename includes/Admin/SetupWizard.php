@@ -19,11 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST endpoint. This class owns what only PHP can do — the route, its URL,
  * and the flag that records the wizard was completed or dismissed.
  *
- * Nothing sends an admin there. Settings shows "Run the setup wizard" until
- * it is done. A one-time redirect after activation was removed for the
- * WordPress.org review (Guideline 11 reads a redirect on an admin page load
- * as hijacking the dashboard); it comes back, if at all, once the plugin is
- * approved — reverting the commit that removed it restores the whole thing.
+ * Nothing sends an admin there: no redirect, no notice. Settings shows "Run
+ * the setup wizard" until it is done, and the wizard keeps a visible skip.
  *
  * @since FLYAFFILIATE_SINCE
  */

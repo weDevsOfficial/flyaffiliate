@@ -68,6 +68,9 @@ foreach ( $flyaffiliate_options as $flyaffiliate_option ) {
 	delete_option( $flyaffiliate_option );
 }
 
+// The lock the upgrade routine holds while it runs, in case a request died mid-upgrade.
+delete_transient( FlyAffiliate\Upgrade\Manager::LOCK_KEY );
+
 // Per-user notice dismissals and any other user meta this plugin wrote. A meta_key
 // LIKE sweep is the only way to reach them: there is no WordPress API for
 // "delete this meta key for every user".

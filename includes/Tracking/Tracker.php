@@ -232,6 +232,11 @@ class Tracker implements Hookable {
 	/**
 	 * The page the visitor landed on, without the referral variable.
 	 *
+	 * The request URI already carries the site's directory when WordPress
+	 * lives in one (`/wp/shop/`), so it is joined to the home URL's origin
+	 * rather than passed through `home_url()`, which would add the directory
+	 * a second time.
+	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @param string $variable The referral variable.
@@ -239,9 +244,11 @@ class Tracker implements Hookable {
 	 * @return string
 	 */
 	protected function get_landing_url( string $variable ): string {
-		$path = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+		$request = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+		$home    = wp_parse_url( home_url( '/' ) );
+		$origin  = ( $home['scheme'] ?? 'http' ) . '://' . ( $home['host'] ?? '' ) . ( isset( $home['port'] ) ? ':' . $home['port'] : '' );
 
-		return remove_query_arg( $variable, home_url( $path ) );
+		return remove_query_arg( $variable, $origin . '/' . ltrim( $request, '/' ) );
 	}
 
 	/**

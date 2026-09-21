@@ -2,7 +2,7 @@
 /**
  * Procedural helpers.
  *
- * Loaded on every request once WooCommerce is available. Everything here is a
+ * Loaded on every request by `init_plugin()`, and by `activate()`. Everything here is a
  * thin, prefixed wrapper over a class; behaviour lives in the classes.
  *
  * @package FlyAffiliate

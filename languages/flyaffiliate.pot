@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T09:14:36+00:00\n"
+"POT-Creation-Date: 2026-09-21T10:11:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -17,8 +17,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #. translators: %d: Number of fields that need attention
 #: flyaffiliate.php
-#: includes/Admin/Menu.php:151
-#: includes/Admin/Menu.php:152
+#: includes/Admin/Menu.php:119
+#: includes/Admin/Menu.php:120
 #: templates/admin/user-profile.php:17
 #: assets/js/admin.js:275
 msgid "FlyAffiliate"
@@ -44,8 +44,8 @@ msgstr ""
 msgid "https://wedevs.com/"
 msgstr ""
 
-#: flyaffiliate-class.php:288
-#: includes/Admin/Menu.php:109
+#: flyaffiliate-class.php:289
+#: includes/Admin/Menu.php:77
 #: includes/Frontend/AffiliateDashboard.php:50
 #: assets/js/admin.js:310
 #: assets/js/dashboard.js:281
@@ -53,11 +53,11 @@ msgid "Settings"
 msgstr ""
 
 #. translators: 1: required PHP version, 2: the PHP version running.
-#: flyaffiliate-class.php:310
+#: flyaffiliate-class.php:311
 msgid "FlyAffiliate needs PHP %1$s or newer. This site runs PHP %2$s."
 msgstr ""
 
-#: flyaffiliate-class.php:315
+#: flyaffiliate-class.php:316
 msgid "Plugin activation failed"
 msgstr ""
 
@@ -65,19 +65,19 @@ msgstr ""
 msgid "FlyAffiliate is missing its autoloader. Run \"composer install\" in the plugin directory, or install the release build."
 msgstr ""
 
-#: includes/Admin/Menu.php:104
+#: includes/Admin/Menu.php:72
 #: assets/js/admin.js:290
 msgid "Dashboard"
 msgstr ""
 
-#: includes/Admin/Menu.php:105
+#: includes/Admin/Menu.php:73
 #: assets/js/admin.js:278
 #: assets/js/admin.js:293
 #: assets/js/admin.js:305
 msgid "Affiliates"
 msgstr ""
 
-#: includes/Admin/Menu.php:106
+#: includes/Admin/Menu.php:74
 #: includes/Admin/Settings/Schema/SettingsSchema.php:473
 #: includes/Frontend/AffiliateDashboard.php:47
 #: includes/Payout/CsvExporter.php:39
@@ -92,7 +92,7 @@ msgstr ""
 msgid "Commissions"
 msgstr ""
 
-#: includes/Admin/Menu.php:107
+#: includes/Admin/Menu.php:75
 #: includes/Frontend/AffiliateDashboard.php:48
 #: assets/js/admin.js:279
 #: assets/js/admin.js:284
@@ -104,7 +104,7 @@ msgstr ""
 msgid "Visits"
 msgstr ""
 
-#: includes/Admin/Menu.php:108
+#: includes/Admin/Menu.php:76
 #: includes/Admin/Settings/Schema/SettingsSchema.php:620
 #: includes/Frontend/AffiliateDashboard.php:49
 #: assets/js/admin.js:282
@@ -113,7 +113,7 @@ msgstr ""
 msgid "Payouts"
 msgstr ""
 
-#: includes/Admin/Menu.php:182
+#: includes/Admin/Menu.php:150
 msgid "You are not allowed to view this page."
 msgstr ""
 

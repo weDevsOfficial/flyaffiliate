@@ -27,9 +27,9 @@ use FlyAffiliate\Models\Payout;
  * page, the setup wizard included) and the affiliate dashboard app (mounted by
  * its shortcode). The registration form and the dashboard's PHP-rendered
  * states share one plain stylesheet. Nothing is loaded from a remote host, and
- * nothing is emitted as an inline `<style>` or `<script>` block — both are
- * rejected by WordPress.org. Data reaches JavaScript through
- * `wp_add_inline_script()`, attached to a handle that was registered here.
+ * nothing is emitted as an inline `<style>` or `<script>` block. Data reaches
+ * JavaScript through `wp_add_inline_script()`, attached to a handle that was
+ * registered here.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -264,7 +264,7 @@ class Assets implements Hookable {
 				'app'       => Menu::get_route_url(),
 				'logo'      => FLYAFFILIATE_ASSETS_URL . '/images/logo.svg',
 				'wizard'    => SetupWizard::get_url(),
-				'docs'      => 'https://wedevs.com/docs/flyaffiliate/',
+				'docs'      => 'https://flyaffiliate.co/',
 				'support'   => 'https://wedevs.com/support/',
 				'payoutCsv' => PayoutExport::get_url(),
 				'users'     => admin_url( 'user-edit.php?user_id=' ),

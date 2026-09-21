@@ -42,9 +42,6 @@ class Menu implements Hookable {
 	 */
 	public function register_hooks(): void {
 		add_action( 'admin_menu', [ $this, 'register_menu' ] );
-		// wp-admin/menu.php rejects an unknown page before admin_init ever fires;
-		// this action runs just before that rejection.
-		add_action( 'admin_page_access_denied', [ $this, 'redirect_legacy_slugs' ] );
 	}
 
 	/**
@@ -58,35 +55,6 @@ class Menu implements Hookable {
 	 */
 	public static function get_menu_icon(): string {
 		return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZmlsbD0iI2E3YWFhZCIgZD0iTTI1LjYgNi43IDYuNyAxMy45Yy0uNjIuMjQtLjYgMS4xMy4wMyAxLjM0TDEzIDE3LjNsMi40IDYuM2MuMjIuNiAxLjA2LjYyIDEuMzIuMDNMMjYuNiA3LjljLjI4LS42Mi0uMzctMS4yNi0xLTEuMloiLz48L3N2Zz4=';
-	}
-
-	/**
-	 * Send the per-screen slugs of the first release to their hash routes.
-	 *
-	 * `admin.php?page=flyaffiliate-settings` was a page of its own before the
-	 * admin app; a bookmark or a link from another plugin still says so.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return void
-	 */
-	public function redirect_legacy_slugs(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the page slug to pick a redirect target changes nothing.
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-
-		if ( '' === $page || 0 !== strpos( $page, self::PARENT_SLUG . '-' ) ) {
-			return;
-		}
-
-		$route = substr( $page, strlen( self::PARENT_SLUG ) + 1 );
-
-		// The menu routes, plus the pages that never had a menu entry.
-		if ( ! isset( $this->get_routes()[ $route ] ) && SetupWizard::ROUTE !== $route ) {
-			return;
-		}
-
-		wp_safe_redirect( self::get_route_url( $route ) );
-		exit;
 	}
 
 	/**
