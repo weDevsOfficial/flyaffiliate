@@ -82,8 +82,8 @@ class Manager implements Hookable {
 			return;
 		}
 
-		// FlyAffiliate's notices appear on FlyAffiliate's screen only. Notices
-		// on someone else's screen are what WordPress.org's Guideline 11 is about.
+		// FlyAffiliate's notices appear on FlyAffiliate's screen only, never on
+		// another screen of the admin.
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 
 		if ( ! $screen || 'toplevel_page_' . Menu::PARENT_SLUG !== $screen->id ) {
