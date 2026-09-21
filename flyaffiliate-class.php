@@ -164,7 +164,7 @@ final class FlyAffiliate_Plugin {
 	}
 
 	/**
-	 * Boot the plugin, once WooCommerce is available.
+	 * Boot the plugin on `plugins_loaded`.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *

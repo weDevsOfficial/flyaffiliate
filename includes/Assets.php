@@ -27,9 +27,9 @@ use FlyAffiliate\Models\Payout;
  * page, the setup wizard included) and the affiliate dashboard app (mounted by
  * its shortcode). The registration form and the dashboard's PHP-rendered
  * states share one plain stylesheet. Nothing is loaded from a remote host, and
- * nothing is emitted as an inline `<style>` or `<script>` block — both are
- * rejected by WordPress.org. Data reaches JavaScript through
- * `wp_add_inline_script()`, attached to a handle that was registered here.
+ * nothing is emitted as an inline `<style>` or `<script>` block. Data reaches
+ * JavaScript through `wp_add_inline_script()`, attached to a handle that was
+ * registered here.
  *
  * @since FLYAFFILIATE_SINCE
  */

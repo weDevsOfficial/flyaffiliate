@@ -125,7 +125,7 @@ class Installer {
 	 *
 	 * dbDelta adds missing columns and widens existing ones, but it never turns
 	 * a `NOT NULL` column into a nullable one. A site whose table was created
-	 * by the prototype therefore keeps `order_item_id NOT NULL`, and every
+	 * by an earlier build therefore keeps `order_item_id NOT NULL`, and every
 	 * manual commission insert fails. This runs after dbDelta on every install
 	 * or repair, and is a no-op once the column is right.
 	 *
@@ -385,8 +385,9 @@ class Installer {
 	/**
 	 * Schedule the daily maturation job.
 	 *
-	 * Action Scheduler, which WooCommerce bundles, rather than WP-Cron: the job
-	 * pages through commissions and must survive a request that dies halfway.
+	 * Action Scheduler when it is available (WooCommerce bundles it), WP-Cron
+	 * otherwise. The job pages through commissions and must survive a request
+	 * that dies halfway, which Action Scheduler handles better.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
