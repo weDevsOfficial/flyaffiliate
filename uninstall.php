@@ -14,9 +14,15 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/includes/Autoloader.php';
+// Composer's autoloader, as in flyaffiliate.php: the release zip carries a
+// production `vendor/` that holds nothing but this loader (ADR-0002). A
+// checkout without it has nothing to clean up, and a fatal on Delete is worse
+// than leaving the data in place.
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	return;
+}
 
-FlyAffiliate\Autoloader::register( __DIR__ . '/includes' );
+require_once __DIR__ . '/vendor/autoload.php';
 
 $flyaffiliate_settings = get_option( FlyAffiliate\Admin\Settings\Repository\SettingsRepository::OPTION_KEY, [] );
 $flyaffiliate_settings = is_array( $flyaffiliate_settings ) ? $flyaffiliate_settings : [];
@@ -28,10 +34,9 @@ if ( 'on' !== ( $flyaffiliate_settings['data_clear_on_uninstall'] ?? 'off' ) ) {
 
 global $wpdb;
 
-// The recurring maturation job, if Action Scheduler is still around.
-if ( function_exists( 'as_unschedule_all_actions' ) ) {
-	as_unschedule_all_actions( FlyAffiliate\Install\Installer::MATURATION_HOOK );
-}
+// The recurring maturation job: Action Scheduler's when it is still around, and
+// the WP-Cron event a site without it runs — the same pair deactivation clears.
+FlyAffiliate\Install\Installer::clear_scheduled_events();
 
 // The pages the installer created.
 $flyaffiliate_pages = get_option( FlyAffiliate\Install\Installer::PAGES_OPTION, [] );
