@@ -395,6 +395,11 @@ class Registration implements Hookable {
 	 * deterministic, so the lookup stays one read of the `activation_key` index
 	 * instead of a scan.
 	 *
+	 * Cut to the column's width here, where both the write and the lookup pass
+	 * through: `wp_hash()` is HMAC-MD5 in core, but it is pluggable, and a wider
+	 * digest the column silently truncated on the way in would never match the
+	 * untruncated one on the way out.
+	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @param string $key The activation key, unhashed.
@@ -402,7 +407,7 @@ class Registration implements Hookable {
 	 * @return string The hash, or an empty string for an empty key.
 	 */
 	protected function hash_key( string $key ): string {
-		return '' === $key ? '' : wp_hash( $key );
+		return '' === $key ? '' : substr( wp_hash( $key ), 0, 64 );
 	}
 
 	/**

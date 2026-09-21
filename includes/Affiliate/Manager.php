@@ -100,7 +100,10 @@ class Manager {
 	 *     @type string $promo_method   How the affiliate plans to promote the store.
 	 *     @type string $website        The affiliate's website; stored on the user, as SliceWP does.
 	 *     @type bool   $send_welcome_email Email the new affiliate a welcome with their referral link. Default false.
-	 *     @type string $activation_key Set by the registration flow.
+	 *     @type string $activation_key The **stored** form of the key — its hash, not the key.
+	 *                                  `Affiliate\Registration` is the only thing that writes one,
+	 *                                  and it hashes before it gets here.
+	 *     @type string $activation_expires_at When that key stops working, UTC. Null for never.
 	 * }
 	 *
 	 * @return Affiliate|WP_Error
