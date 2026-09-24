@@ -45,9 +45,16 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 - Admin screens use `flyaffiliate_admin_capability()`: `manage_options`, unless
   a site filters it to `manage_woocommerce` (ADR-0008, ADR-0013). Never a literal.
 - The shipped CSS and JS must name no external host: WordPress.org's scanner
-  reads any `http://` in a stylesheet as a remote file. `webpack.config.js`
-  strips the library leftovers at build time; check the built files with
-  `grep -c 'https\\?://' assets/css/*.css` (expect 0) before a release.
+  reads any `http://` in a stylesheet as a remote file, **and** it matches the
+  host names of placeholder-image services and CDNs as bare substrings, with no
+  word boundary and no `url(` around them. Review round 2 flagged
+  `.components-placeholder.components-placeholder` in every stylesheet because
+  the middle of that selector spells `placeholder.com`. `webpack.config.js`
+  (`RemoveRemoteUrlsPlugin`) strips the library leftovers and renames those
+  rules to `.section-content` (neither app renders that component).
+  Before a release, confirm on the built files with a boundary-free grep:
+  `grep -ciE 'https?://|placeholder\.com|placehold\.it|w3\.org|googleapis' assets/css/*.css assets/js/*.js`
+  (expect 0 for every file). A `\b`-anchored grep passes and proves nothing.
 - Every REST route has a real `permission_callback`. `__return_true` is a
   finding, not a shortcut.
 

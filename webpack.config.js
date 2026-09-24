@@ -1,18 +1,3 @@
-/**
- * FlyAffiliate build configuration.
- *
- * Extends @wordpress/scripts' default webpack config with two changes:
- *
- * 1. Output lands in assets/js and assets/css, which is what Assets.php enqueues
- *    and what ships in the release zip. Sources live in assets/src.
- * 2. Entries are discovered rather than listed, so adding assets/src/js/foo.js or
- *    assets/src/css/foo.css is enough — no edit here.
- *
- * React apps live under src/<name>/index.tsx and build to assets/js/<name>.js;
- * the stylesheet an app imports is extracted to assets/css/<name>.css so it
- * sits beside the plain stylesheets and Assets.php can treat them alike.
- */
-
 const path = require( 'path' );
 const fs = require( 'fs' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
@@ -73,8 +58,7 @@ if ( fs.existsSync( srcDir ) ) {
 		} );
 }
 
-// webpack refuses to run without at least one entry; a build with nothing to
-// build should say so rather than fail with a stack trace.
+// webpack needs at least one entry; say so instead of failing with a stack trace.
 if ( Object.keys( entry ).length === 0 ) {
 	// eslint-disable-next-line no-console
 	console.warn(
@@ -119,33 +103,9 @@ class MoveStylesToCssDirPlugin {
 }
 
 /**
- * Remove the remote-looking URLs the bundled libraries leave in the output.
- *
- * ("Remove" as in delete — nothing here has anything to do with payments.)
- *
- * WordPress.org's review scanner flags any `http://` inside a stylesheet as a
- * remote file, and its reviewers ask for external hosts to be gone from the
- * scripts. None of these load anything: the Tailwind licence comment names its
- * website, the SVG namespace is a namespace rather than an address, and
- * plugin-ui carries a Google logo for a sign-in button this plugin never
- * renders.
- *
- * The one stylesheet rule that carries the SVG namespace — wp-components'
- * colour-picker checkerboard, a component no FlyAffiliate screen renders — is
- * dropped, so the stylesheets name no host at all. The scripts lose it the
- * same way: the `xmlns` prop of a React SVG element is never read, because an
- * inline `<svg>` takes its namespace from `createElementNS()` in react-dom (a
- * WordPress-provided external that no bundle here contains); the HTML parser
- * ignores the same attribute in the two SVG markup strings; and
- * react-colorful's alpha-slider checkerboard is an SVG data URI inside a
- * stylesheet string, in a colour picker no FlyAffiliate screen renders.
- * Anything that still slips through is percent-encoded, which is inert.
- *
- * The documentation URLs that libraries put in their own error messages
- * (redux, radix, base-ui, uuid, date-fns, prop-types) lose their scheme. They
- * are error text, not resources, but the review asks for every occurrence to
- * go, and `redux.js.org/Errors?code=` reads the same to a person while
- * matching no scanner.
+ * Strip the remote-looking strings that bundled libraries leave in the built
+ * CSS and JS. None of them loads anything, but WordPress.org's review scanner
+ * reports each as "Calling files remotely".
  */
 class RemoveRemoteUrlsPlugin {
 	apply( compiler ) {
@@ -172,6 +132,7 @@ class RemoveRemoteUrlsPlugin {
 							const before = assets[ name ].source().toString();
 							let after = before;
 
+							// SVG namespace attributes: react-dom sets the namespace itself via createElementNS().
 							if ( isJs ) {
 								after = after
 									.replace(
@@ -192,6 +153,7 @@ class RemoveRemoteUrlsPlugin {
 									);
 							}
 
+							// Whatever is left sits in a data: URI; percent-encoded it is inert and decodes the same.
 							after = after.replace(
 								/http:\/\/www\.w3\.org\/2000\/svg/g,
 								'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'
@@ -199,13 +161,21 @@ class RemoveRemoteUrlsPlugin {
 
 							if ( isCss ) {
 								after = after
+									// Tailwind's licence banner names its website.
 									.replace( /\/\*![\s\S]*?\*\//g, '' )
+									// wp-components' colour-picker checkerboard: the one data: URI carrying the namespace.
 									.replace(
 										/\.components-circular-option-picker__option-wrapper:before\{[^}]*\}/g,
 										''
+									)
+									// Its doubled selector spells "placeholder.com"; wp-components' Placeholder is never rendered here.
+									.replace(
+										/\.components-placeholder/g,
+										'.section-content'
 									);
 							}
 
+							// plugin-ui's Google logo (never rendered) and library doc URLs in error text.
 							if ( isJs ) {
 								after = after
 									.replace(
@@ -246,18 +216,13 @@ module.exports = {
 		...defaultConfig.output,
 		path: path.resolve( root, 'assets' ),
 		filename: '[name].js',
-		// The output directory also holds hand-maintained files — assets/src —
-		// so the default "wipe everything" clean would delete
-		// the sources it was about to build from. Only the generated
-		// subdirectories are cleared.
+		// assets/ also holds the sources (assets/src); only the built css/ and js/ are cleared.
 		clean: {
 			keep: ( asset ) => ! /^(css|js)\//.test( asset ),
 		},
 	},
 	plugins: [
-		// A CSS-only entry otherwise emits an empty sibling .js file, which would
-		// then ship in the release zip. @wordpress/scripts does not include this
-		// plugin in its default config.
+		// A CSS-only entry would otherwise emit an empty .js file that ships in the zip.
 		new RemoveEmptyScriptsPlugin(),
 		...defaultConfig.plugins,
 		new RemoveRemoteUrlsPlugin(),
