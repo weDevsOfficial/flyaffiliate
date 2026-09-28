@@ -135,6 +135,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$this->assertInstanceOf( Payout::class, $paid );
 		$this->assertTrue( $paid->is_paid() );
+		$this->assertNotEmpty( $paid->get( 'paid_at' ), 'the day the money went is recorded' );
 		$this->assertSame( Commission::STATUS_PAID, flyaffiliate()->commission->get( $c1 )->get( 'status' ) );
 
 		flyaffiliate()->payout->mark_paid( $payout_id );
@@ -143,6 +144,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$unpaid = flyaffiliate()->payout->mark_unpaid( $payout_id );
 
 		$this->assertFalse( $unpaid->is_paid() );
+		$this->assertNull( $unpaid->get( 'paid_at' ), 'the payment did not happen, so neither did the date' );
 		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $c1 )->get( 'status' ) );
 		$this->assertSame( $payout_id, (int) flyaffiliate()->commission->get( $c1 )->get( 'payout_id' ), 'still attached, so never paid twice' );
 		$this->assertSame( 0, flyaffiliate()->payout->preview( [ 'minimum_amount' => 0 ] )['count'] );
@@ -317,8 +319,8 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] );
 
-		// What a refund, a cancellation or a trashed order asks for.
-		$refused = flyaffiliate()->commission->set_status( $commission, Commission::STATUS_REJECTED );
+		// What a refund, a cancellation or a trashed order asks for: an automatic move.
+		$refused = flyaffiliate()->commission->set_status( $commission, Commission::STATUS_REJECTED, true );
 
 		$this->assertWPError( $refused );
 		$this->assertSame( 'flyaffiliate_commission_in_payout', $refused->get_error_code() );
@@ -352,7 +354,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * A commission inside an unpaid payment cannot be edited or deleted, and leaving the payment frees it.
+	 * A commission inside an unpaid payment is edited by the admin and the payment follows; it cannot be deleted, and leaving the payment frees it.
 	 *
 	 * @return void
 	 */
@@ -370,9 +372,10 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$payout = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0];
 
-		$this->assertWPError( flyaffiliate()->commission->set_manual_amount( $commission, 5 ) );
-		$this->assertFalse( flyaffiliate()->commission->delete( $commission ) );
-		$this->assertCentsEquals( 2500, flyaffiliate()->commission->get( $commission )->get( 'amount' ) );
+		$this->assertNotWPError( flyaffiliate()->commission->update( $commission, [ 'amount' => 5 ] ), 'the admin edits it as in SliceWP' );
+		$this->assertCentsEquals( 500, flyaffiliate()->commission->get( $commission )->get( 'amount' ) );
+		$this->assertCentsEquals( 500, flyaffiliate()->payout->get( $payout->get_id() )->get( 'amount' ), 'and the unpaid payment re-sums' );
+		$this->assertFalse( flyaffiliate()->commission->delete( $commission ), 'but the payment keeps it from being deleted' );
 
 		// Out of the payment, it is an ordinary unpaid commission again.
 		flyaffiliate()->payout->remove_commission( $payout->get_id(), $commission );

@@ -4,15 +4,9 @@
  * the card, so a row of them stays level.
  */
 import type { ReactNode } from 'react';
-import { Info, type LucideIcon } from 'lucide-react';
-import {
-	Card,
-	Skeleton,
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-	cn,
-} from '@wedevs/plugin-ui';
+import type { LucideIcon } from 'lucide-react';
+import { Card, Skeleton, cn } from '@wedevs/plugin-ui';
+import Hint from './Hint';
 
 type Props = {
 	icon: LucideIcon;
@@ -42,24 +36,7 @@ export default function StatCard( {
 			</div>
 			<div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
 				{ label }
-				{ tooltip && (
-					<Tooltip>
-						<TooltipTrigger
-							render={
-								<button
-									type="button"
-									className="inline-flex cursor-default text-muted-foreground"
-									aria-label={ tooltip }
-								/>
-							}
-						>
-							<Info className="size-3.5" aria-hidden="true" />
-						</TooltipTrigger>
-						<TooltipContent className="max-w-xs">
-							{ tooltip }
-						</TooltipContent>
-					</Tooltip>
-				) }
+				{ tooltip && <Hint text={ tooltip } /> }
 			</div>
 			<div className="-mt-1 whitespace-nowrap text-2xl font-bold leading-tight text-foreground tabular-nums">
 				{ value }

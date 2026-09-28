@@ -186,6 +186,14 @@ $brand: #0d7377;
 
 /* stylelint-disable selector-class-pattern -- WordPress DataViews' own classes. */
 
+// Loading bars: plugin-ui's skeleton paints the muted colour, which the
+// admin's grey page ground swallows. Dokan's bars read on white and grey
+// alike. The utility is `!important` inside Tailwind's layer, where an
+// unlayered override loses, so the token it reads is what changes here.
+.flyaffiliate-app [data-slot='skeleton'] {
+	--muted: color-mix(in oklab, var(--foreground) 9%, transparent);
+}
+
 /* Both apps carry this class on their mount point. */
 .flyaffiliate-app {
 	font-size: 14px;

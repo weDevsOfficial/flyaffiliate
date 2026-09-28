@@ -1,6 +1,6 @@
 # ADR-0011 — A refunded order rejects its unpaid commissions; any unpaid amount is editable
 
-**Status:** Reverted 2026-09-15 (product decision: a WooCommerce commission's amount is not editable and the commission note is gone). The `reject_commissions_on_refund` switch returned the same day with SliceWP's semantics — off by default, rejecting the order's pending and unpaid commissions on `refunded`, restored when the order is accepted again — in `Integrations\WooCommerce\OrderStatusSync` (this ADR's `RefundHandler` never shipped under that name). Since ADR-0012 a refund cannot reject a commission that an unpaid payment is already counting: the payment has to let it go first.
+**Status:** Reverted 2026-09-15 (product decision: a WooCommerce commission's amount is not editable and the commission note is gone); the amount part was restored on 2026-09-17 for SliceWP parity — `Commission\Manager::update()` edits the amount, reference, reference amount, type and status of any commission that is not paid and not inside a payment, whatever its origin, and the admin form carries SliceWP's fields (origin, type, date, every status). The commission note stays gone. The `reject_commissions_on_refund` switch returned the same day with SliceWP's semantics — off by default, rejecting the order's pending and unpaid commissions on `refunded`, restored when the order is accepted again — in `Integrations\WooCommerce\OrderStatusSync` (this ADR's `RefundHandler` never shipped under that name). Since ADR-0012 a refund cannot reject a commission that an unpaid payment is already counting: the payment has to let it go first.
 **Date:** 2026-09-14
 
 ## Context
@@ -58,8 +58,9 @@ handler nor SliceWP's. Rescaling by the unrefunded fraction (`CONTEXT.md` rule
 refuses a `woocommerce` row. The old refusal existed because a future rescaler
 would have overwritten the edit; with rejection instead of rescaling there is
 nothing that recalculates an amount after checkout, so an edit sticks. The stored
-`rate` is re-derived from `base_amount` so the row stays self-consistent. `paid`
-is still terminal, for amount as for status.
+`rate` is re-derived from `base_amount` so the row stays self-consistent. A
+commission inside a payment is still untouchable, for amount as for status
+(ADR-0012).
 
 When Phase 2 rescaling lands it must scale from the **current** amount, never
 recompute from the rate, or it will undo these edits.

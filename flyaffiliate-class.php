@@ -5,6 +5,7 @@
  * @package FlyAffiliate
  */
 
+use FlyAffiliate\Admin\Menu;
 use FlyAffiliate\Contracts\Hookable;
 use FlyAffiliate\DependencyManagement\Container;
 use FlyAffiliate\Install\Installer;
@@ -46,7 +47,7 @@ final class FlyAffiliate_Plugin {
 	 *
 	 * @var string
 	 */
-	private string $min_php = '7.4';
+	private string $min_php = '8.1';
 
 	/**
 	 * The single instance.
@@ -67,8 +68,7 @@ final class FlyAffiliate_Plugin {
 		register_deactivation_hook( FLYAFFILIATE_FILE, [ $this, 'deactivate' ] );
 
 		add_action( 'before_woocommerce_init', [ $this, 'declare_woocommerce_feature_compatibility' ] );
-		add_action( 'woocommerce_loaded', [ $this, 'init_plugin' ] );
-		add_action( 'plugins_loaded', [ $this, 'woocommerce_not_loaded' ], 11 );
+		add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
 	}
 
 	/**
@@ -165,7 +165,7 @@ final class FlyAffiliate_Plugin {
 	}
 
 	/**
-	 * Boot the plugin, once WooCommerce is available.
+	 * Boot the plugin on `plugins_loaded`.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -173,6 +173,16 @@ final class FlyAffiliate_Plugin {
 	 */
 	public function init_plugin(): void {
 		$this->includes();
+
+		// Integrations are optional, as in SliceWP: each one is always listed
+		// (as a commission origin and under Settings → Integrations) and its
+		// hooks run only while its plugin is active — WooCommerce today, others
+		// the same way. Everything else — affiliates, referral links,
+		// hand-entered commissions, payouts, the admin and the affiliate
+		// dashboard — runs on WordPress alone (ADR-0013). Registered here, on
+		// `plugins_loaded`, once it is known which plugins are active.
+		$this->get_container()->addServiceProvider( new \FlyAffiliate\DependencyManagement\Providers\IntegrationServiceProvider() );
+
 		$this->init_hooks();
 
 		/**
@@ -275,7 +285,7 @@ final class FlyAffiliate_Plugin {
 			$links,
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
-				esc_url( admin_url( 'admin.php?page=flyaffiliate-settings' ) ),
+				esc_url( Menu::get_route_url( 'settings' ) ),
 				esc_html__( 'Settings', 'flyaffiliate' )
 			)
 		);
@@ -308,12 +318,8 @@ final class FlyAffiliate_Plugin {
 			);
 		}
 
-		if ( ! $this->has_woocommerce() ) {
-			set_transient( 'flyaffiliate_woocommerce_missing', true, HOUR_IN_SECONDS );
-
-			return;
-		}
-
+		// The plugin is standalone (ADR-0013): the tables, options, role, pages
+		// and the daily job are created on any WordPress site, integrations or not.
 		require_once FLYAFFILIATE_INC_DIR . '/functions.php';
 
 		( new Installer() )->do_install();
@@ -328,8 +334,6 @@ final class FlyAffiliate_Plugin {
 	 */
 	public function deactivate(): void {
 		Installer::clear_scheduled_events();
-
-		delete_transient( 'flyaffiliate_woocommerce_missing' );
 	}
 
 	/**
@@ -352,37 +356,6 @@ final class FlyAffiliate_Plugin {
 	 */
 	public function has_woocommerce(): bool {
 		return class_exists( 'WooCommerce' );
-	}
-
-	/**
-	 * Say so, when WooCommerce is not there.
-	 *
-	 * `Requires Plugins: woocommerce` stops this from happening on WordPress 6.5
-	 * and later, but the header is inert on 6.4 (ADR-0009), and WooCommerce can
-	 * be deactivated after FlyAffiliate is installed on any version.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return void
-	 */
-	public function woocommerce_not_loaded(): void {
-		if ( $this->has_woocommerce() || ! is_admin() ) {
-			return;
-		}
-
-		add_action(
-			'admin_notices',
-			static function () {
-				if ( ! current_user_can( 'activate_plugins' ) ) {
-					return;
-				}
-
-				printf(
-					'<div class="notice notice-error"><p>%s</p></div>',
-					esc_html__( 'FlyAffiliate needs WooCommerce to be installed and active.', 'flyaffiliate' )
-				);
-			}
-		);
 	}
 
 	/**

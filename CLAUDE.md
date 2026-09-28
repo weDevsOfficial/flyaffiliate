@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-FlyAffiliate is an affiliate-marketing plugin for WordPress + WooCommerce with optional native Dokan multivendor support, built by weDevs for distribution on WordPress.org. Requires PHP 7.4+, WordPress 6.4+, WooCommerce 8.5+. Dokan Lite 5.0+ is optional and detected at runtime.
+FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) and Dokan Lite (5.0+). This branch (`feature/dokan-integration`) is `develop` plus the Dokan integration: the `dokan_loaded` provider, the Integrations → Dokan settings, the `hasDokan` admin global and the with/without-Dokan test legs. Keep `develop` free of it — the neutral seams live there (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters) — and merge `develop` in to stay in sync.
 
 The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service providers, `Hookable` classes, `Manager` facades, overridable templates, an `Installer`/`Upgrade` pair, `FlyAffiliateTestCase`-based PHPUnit tests. Anyone who knows the Dokan codebase should feel at home here.
 
@@ -30,7 +30,7 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 > `@wedevs/plugin-ui` (ADR-0010): one page, hash routes, DataViews lists for
 > Affiliates, Commissions, Visits and Payouts (preview → create → mark paid, ADR-0012), the
 > plugin-ui `<Settings>` screen driven by a flat-array schema stored in one
-> option, dialogs for add/edit, and Playwright coverage under `tests/pw`. The
+> option, dialogs for add/edit (the commission form is a page), and Playwright coverage under `tests/pw`. The
 > setup wizard is the `#/setup` route of the same app; only the user-profile
 > section stays PHP-rendered. The affiliate dashboard (`[flyaffiliate_dashboard]`)
 > is a second React app (`src/dashboard`) on the same components, reading the
@@ -44,7 +44,7 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 > daily maturation job) and `Integrations\WooCommerce\OrderStatusSync` (the
 > commission status follows the order, as in SliceWP, with the optional
 > `reject_commissions_on_refund` switch). Not yet built: partial-refund
-> rescaling. This branch carries the Dokan integration (Phase 4).
+> rescaling and the optional Dashboard. This branch carries the Dokan integration (Phase 4).
 
 ```bash
 # PHP
@@ -70,7 +70,7 @@ npm run phpunit:no-dokan    # what CI's "without Dokan" leg runs
 npm run test:phpunit        # env:start → phpunit → env:stop
 
 # WordPress.org gate
-npm run release             # Builds build/flyaffiliate.zip honouring .distignore
+npm run release             # Builds build/flyaffiliate-v<version>.zip honouring .distignore
 npm run plugin-check        # Runs Plugin Check against the built zip (wp-env)
 ```
 
@@ -82,13 +82,13 @@ npm run plugin-check        # Runs Plugin Check against the built zip (wp-env)
 - `uninstall.php` — data removal, gated by the "clear data on uninstall" setting
 
 ### Initialization Flow
-1. `flyaffiliate.php` registers the PSR-4 autoloader (`FlyAffiliate\` → `includes/`)
+1. `flyaffiliate.php` requires Composer's autoloader (`vendor/autoload.php`, PSR-4 `FlyAffiliate\` → `includes/`)
 2. Creates the `Container` instance
 3. Registers `Providers\ServiceProvider`
 4. Calls `FlyAffiliate_Plugin::init()`
-5. On `woocommerce_loaded`, `init_plugin()` includes function files and registers hooks
+5. On `plugins_loaded`, `init_plugin()` includes function files, adds the integration provider (whose platform services register only when WooCommerce is active), and registers hooks
 6. On `init` (priority 4), `init_classes()` resolves the tagged service groups; every `Hookable` gets `register_hooks()` called
-7. On `dokan_loaded`, the Dokan integration provider registers its services (only when Dokan is active)
+7. When Dokan is active, the integration provider adds `DokanServiceProvider` once `dokan_loaded` has fired — at once if Dokan already fired it (it does so from `woocommerce_loaded`, before our `plugins_loaded` callback), otherwise from a listener
 
 ### Directory Structure
 
@@ -108,8 +108,8 @@ flyaffiliate/
 │   ├── Frontend/                  # Shortcodes, AffiliateDashboard, Hooks
 │   ├── Install/                   # Installer (dbDelta, pages, options, cron)
 │   ├── Integrations/
-│   │   ├── WooCommerce/           # OrderAttribution (checkout), HPOS-safe helpers
-│   │   └── Dokan/                 # VendorProgram, VendorRates, EarningsAdjuster, VendorCharge, RefundSync, VendorDashboard, ProductPromote, SuborderAttribution
+│   │   ├── WooCommerce/           # OrderAttribution (checkout), OrderStatusSync, HPOS-safe helpers
+│   │   └── Dokan/                 # Integration (the settings subpage); Phase 4: VendorProgram, VendorRates, EarningsAdjuster, VendorCharge, RefundSync, VendorDashboard, ProductPromote, SuborderAttribution
 │   ├── Models/                    # BaseModel + data stores over the custom tables
 │   ├── Payout/                    # Manager, Payout model, CsvExporter
 │   ├── REST/                      # Manager, BaseController, AdminBaseController, controllers
@@ -117,10 +117,9 @@ flyaffiliate/
 │   ├── Upgrade/                   # Manager + Upgrades/ versioned upgraders
 │   ├── Utilities/
 │   ├── Assets.php
-│   ├── Autoloader.php
 │   └── functions.php              # flyaffiliate_get_option(), flyaffiliate_get_template_part(), helpers
-├── templates/                     # Overridable templates: admin/ (app mount, profile), affiliate-dashboard/, registration/, dokan/
-├── assets/                        # css/, js/, images/ (built output only; plain sources in assets/src/)
+├── templates/                     # Overridable templates: admin/ (app mount, profile), affiliate-dashboard/, registration/
+├── assets/                        # css/, js/ (built output only; plain sources in assets/src/)
 ├── src/admin/                     # The React admin app: App.tsx (routes), pages/, components/, hooks/, lib/, tailwind.css + admin.scss
 ├── src/dashboard/                 # The affiliate dashboard app (frontend): App.tsx (tabs), pages/, tables/, tailwind.css + dashboard.scss
 ├── src/styles/tailwind.css        # The Tailwind entry both apps import: plugin-ui tokens, scoped preflight and utilities
@@ -140,14 +139,14 @@ Services are accessed via `flyaffiliate()->service_name` (magic getter) or `flya
 
 Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Arriving with Phase 4: `dokan` (only when Dokan is active). Add a name here in the same commit that registers it.
 
-The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs; the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
+The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
 
 Tagged groups resolved at boot: `common-service`, `admin-service`, `frontend-service`, `ajax-service`, `integration-service`, `container-service`, `cli-service`. A group with nothing in it yet is normal — read groups with `get_tagged()`, which returns an empty array, rather than `get()`, which throws for an unknown identifier.
 
 Any class implementing `FlyAffiliate\Contracts\Hookable` is also tagged with the interface name and gets `register_hooks()` called automatically. The container is in-house and League-shaped (ADR-0002): `add`/`addShared`/`addTag`/`setShared`/`addServiceProvider` keep League's camelCase, and constructor dependencies are autowired by type hint.
 
 ### REST API
-Namespace `flyaffiliate/v1`. Controllers extend `FlyAffiliate\REST\AdminBaseController` (admin-only, `manage_woocommerce`) or `FlyAffiliate\REST\AffiliateBaseController` (self-scoped affiliate endpoints). Every route has a `permission_callback`. Every controller implements `prepare_item_for_response()`, `prepare_links()`, `get_item_schema()`.
+Namespace `flyaffiliate/v1`. Controllers extend `FlyAffiliate\REST\AdminBaseController` (admin-only, `flyaffiliate_admin_capability()`: `manage_options` unless filtered) or `FlyAffiliate\REST\AffiliateBaseController` (self-scoped affiliate endpoints). Every route has a `permission_callback`. Every controller implements `prepare_item_for_response()`, `prepare_links()`, `get_item_schema()`.
 
 ## Coding Standards
 

@@ -99,8 +99,8 @@ class CsvExporter {
 
 		// A CSV download is streamed, not written to disk: WP_Filesystem has no
 		// stream API and buffering a large batch into a string to echo it is
-		// what this export exists to avoid. See docs/wporg-accepted-warnings.md.
-		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		// what this export exists to avoid.
+		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output is a stream; WP_Filesystem has no stream API.
 
 		fputcsv( $output, $this->get_headings() );
 
@@ -108,7 +108,7 @@ class CsvExporter {
 			fputcsv( $output, $row );
 		}
 
-		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closes the php://output stream opened above.
 
 		exit;
 	}

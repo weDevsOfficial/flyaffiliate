@@ -62,14 +62,15 @@ class Affiliate extends BaseModel {
 	 * @var array<string, string>
 	 */
 	protected static array $columns = [
-		'id'             => 'int',
-		'user_id'        => 'int',
-		'status'         => 'string',
-		'payment_email'  => 'string',
-		'promo_method'   => 'string',
-		'activation_key' => 'string',
-		'created_at'     => 'datetime',
-		'updated_at'     => 'datetime',
+		'id'                    => 'int',
+		'user_id'               => 'int',
+		'status'                => 'string',
+		'payment_email'         => 'string',
+		'promo_method'          => 'string',
+		'activation_key'        => 'string',
+		'activation_expires_at' => 'datetime',
+		'created_at'            => 'datetime',
+		'updated_at'            => 'datetime',
 	];
 
 	/**
@@ -97,6 +98,19 @@ class Affiliate extends BaseModel {
 	 */
 	public function is_active(): bool {
 		return self::STATUS_ACTIVE === $this->get( 'status' );
+	}
+
+	/**
+	 * The affiliate's website, kept on their user's `user_url`.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return string
+	 */
+	public function get_website(): string {
+		$user = $this->get_user();
+
+		return null === $user ? '' : (string) $user->user_url;
 	}
 
 	/**

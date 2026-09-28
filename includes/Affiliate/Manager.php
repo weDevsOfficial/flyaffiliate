@@ -98,7 +98,12 @@ class Manager {
 	 *     @type string $status         Default `pending`.
 	 *     @type string $payment_email  Default the user's own email.
 	 *     @type string $promo_method   How the affiliate plans to promote the store.
-	 *     @type string $activation_key Set by the registration flow.
+	 *     @type string $website        The affiliate's website; stored on the user, as SliceWP does.
+	 *     @type bool   $send_welcome_email Email the new affiliate a welcome with their referral link. Default false.
+	 *     @type string $activation_key The **stored** form of the key — its hash, not the key.
+	 *                                  `Affiliate\Registration` is the only thing that writes one,
+	 *                                  and it hashes before it gets here.
+	 *     @type string $activation_expires_at When that key stops working, UTC. Null for never.
 	 * }
 	 *
 	 * @return Affiliate|WP_Error
@@ -126,11 +131,12 @@ class Manager {
 
 		$affiliate->fill(
 			[
-				'user_id'        => $user_id,
-				'status'         => $this->sanitize_status( $args['status'] ?? Affiliate::STATUS_PENDING ),
-				'payment_email'  => $this->sanitize_email( $args['payment_email'] ?? '', $user_id ),
-				'promo_method'   => sanitize_textarea_field( (string) ( $args['promo_method'] ?? '' ) ),
-				'activation_key' => sanitize_text_field( (string) ( $args['activation_key'] ?? '' ) ),
+				'user_id'               => $user_id,
+				'status'                => $this->sanitize_status( $args['status'] ?? Affiliate::STATUS_PENDING ),
+				'payment_email'         => $this->sanitize_email( $args['payment_email'] ?? '', $user_id ),
+				'promo_method'          => sanitize_textarea_field( (string) ( $args['promo_method'] ?? '' ) ),
+				'activation_key'        => sanitize_text_field( (string) ( $args['activation_key'] ?? '' ) ),
+				'activation_expires_at' => $this->sanitize_expiry( $args['activation_expires_at'] ?? null ),
 			]
 		);
 
@@ -142,6 +148,10 @@ class Manager {
 			);
 		}
 
+		if ( isset( $args['website'] ) ) {
+			$this->set_website( $user_id, (string) $args['website'] );
+		}
+
 		/**
 		 * Fires after an affiliate is created.
 		 *
@@ -150,6 +160,10 @@ class Manager {
 		 * @param Affiliate $affiliate The affiliate.
 		 */
 		do_action( 'flyaffiliate_affiliate_created', $affiliate );
+
+		if ( ! empty( $args['send_welcome_email'] ) ) {
+			flyaffiliate()->registration->send_welcome_email( $affiliate );
+		}
 
 		return $affiliate;
 	}
@@ -196,6 +210,14 @@ class Manager {
 			$affiliate->set( 'activation_key', sanitize_text_field( (string) $args['activation_key'] ) );
 		}
 
+		if ( array_key_exists( 'activation_expires_at', $args ) ) {
+			$affiliate->set( 'activation_expires_at', $this->sanitize_expiry( $args['activation_expires_at'] ) );
+		}
+
+		if ( isset( $args['website'] ) ) {
+			$this->set_website( (int) $affiliate->get( 'user_id' ), (string) $args['website'] );
+		}
+
 		if ( 0 === $affiliate->save() ) {
 			return new WP_Error(
 				'flyaffiliate_update_failed',
@@ -229,6 +251,25 @@ class Manager {
 		do_action( 'flyaffiliate_affiliate_updated', $affiliate );
 
 		return $affiliate;
+	}
+
+	/**
+	 * Store the affiliate's website on their user, where SliceWP keeps it too.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int    $user_id The user.
+	 * @param string $website The URL; empty clears it.
+	 *
+	 * @return void
+	 */
+	protected function set_website( int $user_id, string $website ): void {
+		wp_update_user(
+			[
+				'ID'       => $user_id,
+				'user_url' => esc_url_raw( trim( $website ) ),
+			]
+		);
 	}
 
 	/**
@@ -330,6 +371,25 @@ class Manager {
 			'columns' => [ 'payment_email' ],
 			'in'      => [ 'user_id' => array_map( 'intval', $user_ids ) ],
 		];
+	}
+
+	/**
+	 * A UTC datetime the column accepts, or null for no expiry.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param mixed $value Candidate datetime.
+	 *
+	 * @return string|null
+	 */
+	protected function sanitize_expiry( $value ): ?string {
+		if ( empty( $value ) ) {
+			return null;
+		}
+
+		$time = strtotime( (string) $value );
+
+		return false === $time ? null : gmdate( 'Y-m-d H:i:s', $time );
 	}
 
 	/**

@@ -15,7 +15,6 @@ import DateTime from '@/components/DateTime';
 import AffiliatePicker from '@/components/AffiliatePicker';
 import { useListView } from '@/hooks/useListView';
 import { useCounts } from '@/hooks/useCounts';
-import { getGlobals } from '@/lib/globals';
 import { buildTabs } from '@/lib/tabs';
 import type { Visit } from '@/lib/types';
 import Truncated from '@/components/Truncated';
@@ -56,7 +55,6 @@ type TableProps = {
 };
 
 export function VisitsTable( { affiliateId, headerContent = [] }: TableProps ) {
-	const { urls } = getGlobals();
 	const [ result, setResult ] = useState( 'all' );
 
 	const baseFilters = useMemo(
@@ -153,17 +151,25 @@ export function VisitsTable( { affiliateId, headerContent = [] }: TableProps ) {
 			id: 'order',
 			label: __( 'Order', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) =>
-				item.order_id ? (
-					<a
-						href={ `${ urls.orders }${ item.order_id }` }
-						className="font-medium text-primary hover:underline"
-					>
-						#{ item.order_id }
-					</a>
+			render: ( { item } ) => {
+				// A link only to an order that exists; a number otherwise.
+				if ( item.order_url ) {
+					return (
+						<a
+							href={ item.order_url }
+							className="font-medium text-primary hover:underline"
+						>
+							#{ item.order_id }
+						</a>
+					);
+				}
+
+				return item.order_id ? (
+					<span className="tabular-nums">#{ item.order_id }</span>
 				) : (
 					<span className="text-muted-foreground">—</span>
-				),
+				);
+			},
 		},
 		{
 			id: 'created_at',
@@ -227,7 +233,7 @@ export default function VisitsPage() {
 			<PageHeader
 				title={ __( 'Visits', 'flyaffiliate' ) }
 				description={ __(
-					'IP addresses and user agents are stored as hashes. Only the pages visited are kept as they are.',
+					'IP addresses and user agents are stored as hashes. Only the visited pages are kept as they are.',
 					'flyaffiliate'
 				) }
 			/>

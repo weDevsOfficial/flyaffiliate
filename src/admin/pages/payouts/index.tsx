@@ -184,7 +184,7 @@ export default function PayoutsPage() {
 			icon: <Check size={ 16 } />,
 			confirmTitle: __( 'Mark all as paid', 'flyaffiliate' ),
 			confirmMessage: __(
-				'Every unpaid payment in this payout is marked paid, and every commission in them with it.',
+				'Marks every unpaid payment in this payout as paid, along with their commissions.',
 				'flyaffiliate'
 			),
 			isEligible: ( item ) => unpaidCount( item ) > 0,
@@ -235,7 +235,7 @@ export default function PayoutsPage() {
 			isDestructive: true,
 			confirmTitle: __( 'Delete payout', 'flyaffiliate' ),
 			confirmMessage: __(
-				'Its payments are deleted and their commissions go back to unpaid, ready for the next payout. A payout with a paid payment cannot be deleted.',
+				'Deletes its payments. Their commissions go back to unpaid and into the next payout. A payout with a paid payment can’t be deleted.',
 				'flyaffiliate'
 			),
 			isEligible: ( item ) => item.paid === 0,
@@ -267,7 +267,7 @@ export default function PayoutsPage() {
 			<PageHeader
 				title={ __( 'Payouts', 'flyaffiliate' ) }
 				description={ __(
-					'A payout turns unpaid commissions into one payment per affiliate. Pay them the way you normally would, then mark each payment paid.',
+					'A payout groups unpaid commissions into one payment per affiliate. Send the money your usual way, then mark each payment paid.',
 					'flyaffiliate'
 				) }
 				actions={

@@ -86,6 +86,7 @@ class Payout extends BaseModel {
 		'period_start' => 'datetime',
 		'period_end'   => 'datetime',
 		'created_by'   => 'int',
+		'paid_at'      => 'datetime',
 		'created_at'   => 'datetime',
 	];
 

@@ -1,6 +1,6 @@
 {
     "name": "wedevs/flyaffiliate",
-    "description": "Affiliate marketing for WordPress and WooCommerce, with native Dokan multivendor support.",
+    "description": "Standalone affiliate marketing for WordPress, with optional platform integrations, including native Dokan multivendor support.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [
@@ -12,7 +12,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.4"
+        "php": ">=8.1"
     },
     "require-dev": {
         "wp-coding-standards/wpcs": "^3.1",
@@ -26,11 +26,12 @@
     },
     "config": {
         "platform": {
-            "php": "7.4"
+            "php": "8.1"
         },
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
         },
+        "platform-check": false,
         "sort-packages": true
     },
     "autoload": {
@@ -67,6 +68,6 @@
         "phpcs": "Run PHP CodeSniffer against the plugin (WordPress-Extra + PHPCompatibilityWP).",
         "phpcbf": "Auto-fix the code style violations PHPCS can fix.",
         "test": "Run the PHPUnit suite (requires a provisioned WP test install or wp-env).",
-        "release": "Build build/flyaffiliate.zip honouring .distignore."
+        "release": "Build build/flyaffiliate-v<version>.zip honouring .distignore."
     }
 }

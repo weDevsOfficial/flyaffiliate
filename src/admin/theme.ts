@@ -1,7 +1,7 @@
 /**
  * FlyAffiliate's plugin-ui theme tokens.
  *
- * The brand colour is the teal of the logo and the WordPress.org icon; the
+ * The brand colour is the teal of the WordPress.org icon; the
  * frontend stylesheet and the setup wizard use the same value. Everything
  * else inherits plugin-ui's neutral palette so the app sits quietly inside
  * wp-admin.

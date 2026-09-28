@@ -11,14 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use FlyAffiliate\Admin\Menu;
 use FlyAffiliate\Contracts\Hookable;
 
 /**
  * Collects and renders the plugin's admin notices.
  *
- * Every notice is dismissible and only shown to a user who can act on it.
- * WordPress.org rejects a notice that cannot be dismissed, and a store owner
- * who cannot fix the thing being complained about should not be told about it.
+ * Every notice is dismissible, appears on FlyAffiliate's own screen only, and
+ * is shown only to a user who can act on it: a store owner who cannot fix the
+ * thing being complained about should not be told about it.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -78,6 +79,14 @@ class Manager implements Hookable {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( flyaffiliate_admin_capability() ) ) {
+			return;
+		}
+
+		// FlyAffiliate's notices appear on FlyAffiliate's screen only, never on
+		// another screen of the admin.
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+		if ( ! $screen || 'toplevel_page_' . Menu::PARENT_SLUG !== $screen->id ) {
 			return;
 		}
 

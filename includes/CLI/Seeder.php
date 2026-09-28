@@ -21,8 +21,8 @@ use WP_CLI;
  *
  * This is the only place sample data is ever created. It is resolved only under
  * WP-CLI, it refuses to run on a production site, and nothing about it touches
- * an ordinary request. The prototype seeded on `admin_init`; that is exactly
- * what WordPress.org rejects.
+ * an ordinary request: sample data is created only when an administrator
+ * asks for it from the command line.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -125,12 +125,13 @@ class Seeder implements Hookable {
 			$base = wp_rand( 2000, 50000 ) / 100;
 			$days = wp_rand( 0, 60 );
 
-			$created = flyaffiliate()->commission->create_manual(
+			$created = flyaffiliate()->commission->create(
 				[
 					'affiliate_id' => $affiliate_ids[ array_rand( $affiliate_ids ) ],
 					'base_amount'  => $base,
 					'amount'       => round( $base * wp_rand( 5, 20 ) / 100, 2 ),
 					'order_id'     => wp_rand( 1000, 9999 ),
+					'source'       => Commission::SOURCE_MANUAL,
 					'status'       => $commission_statuses[ array_rand( $commission_statuses ) ],
 					'created_at'   => gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS ),
 				]

@@ -16,14 +16,15 @@ use FlyAffiliate\DependencyManagement\BaseServiceProvider;
 /**
  * Registers the Dokan integration.
  *
- * Added by {@see IntegrationServiceProvider} on `dokan_loaded`, so it is never
- * constructed on a site without Dokan. Everything it registers lives under
- * `FlyAffiliate\Integrations\Dokan`.
+ * Added by {@see IntegrationServiceProvider} once `dokan_loaded` has fired, so
+ * it is never constructed on a site without Dokan. Everything it registers
+ * lives under `FlyAffiliate\Integrations\Dokan`.
  *
- * Phase 4 fills this in: the vendor program and rates, sub-order attribution,
- * the earnings adjuster, the vendor charge, refund sync, the vendor dashboard
- * and the product promote panel. What each of them may and may not do is
- * settled in CONTEXT.md and ADR-0004.
+ * Today it registers the Integrations → Dokan settings. Phase 4 fills in the
+ * rest: the vendor program and rates, sub-order attribution, the earnings
+ * adjuster, the vendor charge, refund sync, the vendor dashboard and the
+ * product promote panel. What each of them may and may not do is settled in
+ * CONTEXT.md and ADR-0004.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -41,7 +42,9 @@ class DokanServiceProvider extends BaseServiceProvider {
 	 *
 	 * @var class-string[]
 	 */
-	protected array $services = [];
+	protected array $services = [
+		\FlyAffiliate\Integrations\Dokan\Integration::class,
+	];
 
 	/**
 	 * {@inheritDoc}

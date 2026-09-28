@@ -379,6 +379,11 @@ abstract class BaseModel {
 
 		$sql .= " ORDER BY {$orderby} {$order}";
 
+		// Rows that tie on the sort column keep a stable order across pages, newest first when descending.
+		if ( 'id' !== $orderby ) {
+			$sql .= ", id {$order}";
+		}
+
 		$per_page = (int) $args['per_page'];
 
 		if ( $per_page > 0 ) {

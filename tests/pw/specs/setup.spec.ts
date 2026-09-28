@@ -77,10 +77,4 @@ test.describe( 'Setup wizard', () => {
 		await page.getByTestId( 'flyaffiliate-setup-skip' ).click();
 		await expect( page ).toHaveURL( /#\/$/ );
 	} );
-
-	test( 'the old page slug redirects into the app', async ( { page } ) => {
-		await page.goto( urls.legacySetup );
-		await expect( page ).toHaveURL( /page=flyaffiliate#\/setup/ );
-		await expect( page.getByTestId( 'flyaffiliate-setup' ) ).toBeVisible();
-	} );
 } );

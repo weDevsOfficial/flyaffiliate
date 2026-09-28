@@ -21,8 +21,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * cannot collide on the constraint.
  *
  * The lifecycle is `pending` -> `unpaid` -> `paid`, with either of the first two
- * able to become `rejected`. `paid` is terminal and is never edited, rescaled or
- * deleted.
+ * able to become `rejected`. A commission inside a payment (`payout_id` set)
+ * is edited the way SliceWP edits one — amount, reference, type and status
+ * stay open to the admin, and an unpaid payment re-sums to follow — while the
+ * automatic movers (order status, maturation job) keep off it and it cannot be
+ * deleted; a paid payment keeps the amount it was paid with.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -156,6 +159,32 @@ class Commission extends BaseModel {
 	}
 
 	/**
+	 * The origins a new commission can be given right now.
+	 *
+	 * The manual origin is always there. A platform's origin is added by its
+	 * integration (ADR-0013), listed whether or not the platform's plugin is
+	 * active, as SliceWP lists its integrations; a third party can take one
+	 * out through the filter. Rows that already carry an origin keep their
+	 * label from `get_sources()`.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return array<string, string> Origin => label, the preferred one first.
+	 */
+	public static function get_available_sources(): array {
+		/**
+		 * Filters the origins open to a new commission.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param array<string, string> $sources Origin => label. Manual, plus what each integration adds.
+		 */
+		$sources = (array) apply_filters( 'flyaffiliate_available_commission_sources', [ self::SOURCE_MANUAL => self::get_sources()[ self::SOURCE_MANUAL ] ] );
+
+		return array_intersect_key( $sources, self::get_sources() );
+	}
+
+	/**
 	 * Every commission type.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -169,17 +198,19 @@ class Commission extends BaseModel {
 	}
 
 	/**
-	 * Whether this commission is terminal and must not be touched.
+	 * Whether a payment holds this commission.
 	 *
-	 * A paid commission is never edited, rescaled or deleted — not by a refund,
-	 * not by an admin, not by a recalculation (CONTEXT.md money rule 5).
+	 * A held commission (CONTEXT.md money rule 7) is not deleted, not moved by
+	 * an order status change or the maturation job, and never put into a second
+	 * payment. An admin can still edit it, as in SliceWP. A paid row recorded by
+	 * hand, outside any payment, is held by nothing.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @return bool
 	 */
 	public function is_locked(): bool {
-		return self::STATUS_PAID === $this->get( 'status' ) || $this->is_in_payout();
+		return $this->is_in_payout();
 	}
 
 	/**

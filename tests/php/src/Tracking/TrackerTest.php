@@ -70,6 +70,36 @@ class TrackerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * A site that lives in a directory records the landing page with that
+	 * directory once, not twice.
+	 *
+	 * @return void
+	 */
+	public function test_the_landing_url_keeps_the_site_directory_once(): void {
+		$affiliate_id = $this->factory()->affiliate->create();
+
+		// The site lives in /wp, whatever the test environment's home URL is.
+		add_filter(
+			'home_url',
+			static function ( string $url, string $path ): string {
+				return 'http://example.org/wp' . $path;
+			},
+			10,
+			2
+		);
+
+		$_GET['affiliate']      = (string) $affiliate_id;
+		$_SERVER['REQUEST_URI'] = '/wp/shop/?affiliate=' . $affiliate_id;
+
+		$this->tracker->track();
+
+		$visits = flyaffiliate()->tracking->query( [ 'where' => [ 'affiliate_id' => $affiliate_id ] ] );
+
+		$this->assertCount( 1, $visits );
+		$this->assertSame( 'http://example.org/wp/shop/', $visits[0]->get( 'url' ) );
+	}
+
+	/**
 	 * A second click on the same link is one visit.
 	 *
 	 * @return void

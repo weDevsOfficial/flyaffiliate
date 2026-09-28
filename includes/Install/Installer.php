@@ -12,7 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use FlyAffiliate\Admin\Settings\Repository\SettingsRepository;
-use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Admin\Settings\Schema\SettingsSchema;
 use FlyAffiliate\Affiliate\Role;
 use FlyAffiliate\Models\Affiliate;
@@ -75,9 +74,6 @@ class Installer {
 
 		update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
 
-		// The first admin page load after activation opens the setup wizard, as Dokan's does.
-		SetupWizard::schedule_redirect();
-
 		/**
 		 * Fires after FlyAffiliate has finished installing or repairing itself.
 		 *
@@ -129,7 +125,7 @@ class Installer {
 	 *
 	 * dbDelta adds missing columns and widens existing ones, but it never turns
 	 * a `NOT NULL` column into a nullable one. A site whose table was created
-	 * by the prototype therefore keeps `order_item_id NOT NULL`, and every
+	 * by an earlier build therefore keeps `order_item_id NOT NULL`, and every
 	 * manual commission insert fails. This runs after dbDelta on every install
 	 * or repair, and is a no-op once the column is right.
 	 *
@@ -184,11 +180,13 @@ class Installer {
 	payment_email VARCHAR(191) NOT NULL DEFAULT '',
 	promo_method TEXT NULL,
 	activation_key VARCHAR(64) NOT NULL DEFAULT '',
+	activation_expires_at DATETIME NULL DEFAULT NULL,
 	created_at DATETIME NULL DEFAULT NULL,
 	updated_at DATETIME NULL DEFAULT NULL,
 	PRIMARY KEY  (id),
 	UNIQUE KEY user_id (user_id),
-	KEY status (status)
+	KEY status (status),
+	KEY activation_key (activation_key)
 ) {$collate};";
 
 		$tables[] = "CREATE TABLE {$prefix}flyaffiliate_commissions (
@@ -222,8 +220,8 @@ class Installer {
 		$tables[] = "CREATE TABLE {$prefix}flyaffiliate_visits (
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	affiliate_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
-	url VARCHAR(255) NOT NULL DEFAULT '',
-	referrer VARCHAR(255) NOT NULL DEFAULT '',
+	url TEXT NULL,
+	referrer TEXT NULL,
 	ip_hash VARCHAR(64) NOT NULL DEFAULT '',
 	user_agent_hash VARCHAR(64) NOT NULL DEFAULT '',
 	converted TINYINT(1) NOT NULL DEFAULT 0,
@@ -231,6 +229,7 @@ class Installer {
 	created_at DATETIME NULL DEFAULT NULL,
 	PRIMARY KEY  (id),
 	KEY affiliate_created (affiliate_id,created_at),
+	KEY created_at (created_at),
 	KEY order_id (order_id)
 ) {$collate};";
 
@@ -241,12 +240,13 @@ class Installer {
 	amount DECIMAL(19,4) NOT NULL DEFAULT 0.0000,
 	currency VARCHAR(10) NOT NULL DEFAULT '',
 	method VARCHAR(20) NOT NULL DEFAULT 'manual',
-	status VARCHAR(20) NOT NULL DEFAULT 'paid',
+	status VARCHAR(20) NOT NULL DEFAULT 'unpaid',
 	reference VARCHAR(191) NOT NULL DEFAULT '',
 	note TEXT NULL,
 	period_start DATETIME NULL DEFAULT NULL,
 	period_end DATETIME NULL DEFAULT NULL,
 	created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+	paid_at DATETIME NULL DEFAULT NULL,
 	created_at DATETIME NULL DEFAULT NULL,
 	PRIMARY KEY  (id),
 	KEY batch_key (batch_key),
@@ -385,15 +385,22 @@ class Installer {
 	/**
 	 * Schedule the daily maturation job.
 	 *
-	 * Action Scheduler, which WooCommerce bundles, rather than WP-Cron: the job
-	 * pages through commissions and must survive a request that dies halfway.
+	 * Action Scheduler when it is available (WooCommerce bundles it), WP-Cron
+	 * otherwise. The job pages through commissions and must survive a request
+	 * that dies halfway, which Action Scheduler handles better.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @return void
 	 */
 	public function schedule_events(): void {
+		// Action Scheduler ships with WooCommerce. Without it, WP-Cron runs the
+		// daily job; the hook is the same, so `HoldPeriod` does not care which.
 		if ( ! function_exists( 'as_has_scheduled_action' ) || ! function_exists( 'as_schedule_recurring_action' ) ) {
+			if ( ! wp_next_scheduled( self::MATURATION_HOOK ) ) {
+				wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::MATURATION_HOOK );
+			}
+
 			return;
 		}
 
@@ -424,6 +431,8 @@ class Installer {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( self::MATURATION_HOOK );
 		}
+
+		wp_clear_scheduled_hook( self::MATURATION_HOOK );
 	}
 
 	/**

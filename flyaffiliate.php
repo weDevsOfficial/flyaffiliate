@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: FlyAffiliate
- * Plugin URI: https://wedevs.com/flyaffiliate/
- * Description: Affiliate marketing for WooCommerce, with native Dokan multivendor support. Referral tracking, per-item commissions, hold periods, refund handling and manual payouts.
+ * Plugin URI: https://flyaffiliate.co/
+ * Description: Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. Integrates with WooCommerce, Dokan and more.
  * Version: 1.0.0
  * Author: weDevs
  * Author URI: https://wedevs.com/
@@ -10,11 +10,8 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: flyaffiliate
  * Domain Path: /languages
- * Requires at least: 6.4
- * Requires PHP: 7.4
- * Requires Plugins: woocommerce
- * WC requires at least: 8.5
- * WC tested up to: 11.1
+ * Requires at least: 6.6
+ * Requires PHP: 8.1
  *
  * @package FlyAffiliate
  */
@@ -40,10 +37,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 defined( 'FLYAFFILIATE_FILE' ) || define( 'FLYAFFILIATE_FILE', __FILE__ );
 
-require_once __DIR__ . '/includes/Autoloader.php';
-require_once __DIR__ . '/flyaffiliate-class.php';
+// Composer's autoloader. The release zip carries a production `vendor/` that
+// holds nothing but this loader; a checkout needs `composer install` first.
+// A checkout without it is told so on the Plugins screen, nowhere else.
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	add_action(
+		'admin_notices',
+		static function () {
+			if ( ! current_user_can( 'activate_plugins' ) ) {
+				return;
+			}
 
-FlyAffiliate\Autoloader::register( __DIR__ . '/includes' );
+			// The one screen where the person who can run Composer is looking.
+			$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+			if ( ! $screen || ! in_array( $screen->id, [ 'plugins', 'plugins-network' ], true ) ) {
+				return;
+			}
+
+			printf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				esc_html__( 'FlyAffiliate is missing its autoloader. Run "composer install" in the plugin directory, or install the release build.', 'flyaffiliate' )
+			);
+		}
+	);
+
+	return;
+}
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/flyaffiliate-class.php';
 
 /**
  * The container, created before anything asks for a service.
@@ -59,8 +82,7 @@ $flyaffiliate_container = new FlyAffiliate\DependencyManagement\Container();
 
 // The root provider registers the named services and adds the rest of the
 // providers. This happens while the plugin file loads — before `plugins_loaded`
-// — so the `dokan_loaded` listener the integration provider attaches is always
-// in place before any plugin can fire it.
+// — so any listener a provider attaches is in place before other plugins load.
 $flyaffiliate_container->addServiceProvider( new FlyAffiliate\DependencyManagement\Providers\ServiceProvider() );
 
 if ( ! function_exists( 'flyaffiliate_get_container' ) ) {

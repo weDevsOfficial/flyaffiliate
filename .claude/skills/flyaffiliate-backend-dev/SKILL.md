@@ -23,8 +23,9 @@ re-derived here.
 
 - Root namespace `FlyAffiliate\`, PSR-4 onto `includes/`.
   `FlyAffiliate\Commission\Manager` → `includes/Commission/Manager.php`.
-- Autoloading is `includes/Autoloader.php`, not Composer. **Nothing from
-  `vendor/` ships** (ADR-0002). Do not add a runtime Composer package.
+- Autoloading is Composer's (`vendor/autoload.php`, PSR-4 in `composer.json`).
+  The zip carries a production `vendor/` with that loader and nothing else
+  (ADR-0002). Do not add a runtime Composer package.
 - Procedural helpers live in `includes/functions.php` and are prefixed
   `flyaffiliate_`.
 
@@ -67,7 +68,7 @@ The `ABSPATH` guard is required in **every** file, templates included.
 - Methods and properties: `snake_case`. The **one** exception is the DI
   container, which mirrors `league/container`'s camelCase public API
   (`addShared`, `addServiceProvider`, `setShared`, `addTag`) — ADR-0002.
-- Type hints on parameters and returns wherever PHP 7.4 allows. Typed properties
+- Type hints on parameters and returns wherever PHP 8.1 allows. Typed properties
   are encouraged: `protected int $affiliate_id = 0;`.
 - Strict comparisons (`===`, `!==`), `in_array( $needle, $haystack, true )`.
 - Yoda conditions are not enforced.
@@ -227,9 +228,14 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
   pending whoever rejected them, and so does an order leaving
   failed/cancelled/refunded (priority 10, before `HoldPeriod` matures them at
   20). Paid and manual commissions are never touched.
-- Partial refunds are not rescaled (ADR-0011 was reverted): an admin handles
-  them by hand. `Manager::set_manual_amount()` edits only a manual commission;
-  a WooCommerce amount is owned by its order item.
+- Partial refunds are not rescaled (ADR-0011's rescaler was reverted): an
+  admin handles them by hand through `Manager::update()`, which edits the
+  amount, reference (only on an admin-created row), reference amount, type
+  and status of any commission that is not paid and not inside a payment.
+  `Manager::create()` is the admin's add form: origin (`source`), type, any
+  status (default `unpaid`) and date; a pending commission created by hand
+  keeps its status until its order is paid or the job matures it — nothing
+  matures it on the spot.
 
 ## Payouts
 
@@ -285,9 +291,10 @@ contain no queries — the caller prepares the data.
   Use `text-foreground`/`text-muted-foreground`/`text-primary`, never
   `text-gray-*` or a hex colour, so a token change reaches every page.
 - `components/Layout.tsx` wraps every page in plugin-ui's `<TopBar>`; page
-  content starts with `<PageHeader>`. `Menu::hide_foreign_notices()` keeps
-  other plugins' notices off the page — register FlyAffiliate's own notices
-  through `Admin\Notices\Manager`, which is put back after the removal.
+  content starts with `<PageHeader>`. Other plugins' admin notices are left
+  alone on our screens (WordPress.org reads removing them as hijacking the
+  dashboard); register FlyAffiliate's own notices through
+  `Admin\Notices\Manager`, and only for our own screens.
 - Plural strings use `_n()`; never `thing(s)`. Zero or missing values render a
   dash or a muted label (`Unknown affiliate`), never a link to `#0`.
 - Styles are split the way Dokan splits them. `src/styles/tailwind.css` is the
@@ -304,7 +311,9 @@ contain no queries — the caller prepares the data.
   `layout.styles`, no `isPrimary` (inline) actions, `Truncated` with a tooltip
   for long text, `StatusBadge` pills, `buildTabs()` so counts show a
   placeholder while they load, `isLoading` covering the counts too. Forms open
-  in `FormDialog` (bordered title bar and footer). Figures use `StatCard`,
+  in `FormDialog` (bordered title bar and footer); the commission form is a
+  page instead (`#/commissions/new`, `#/commissions/:id/edit`), as SliceWP's is,
+  and lists link to it from the commission ID and an Edit action. Figures use `StatCard`,
   nothing-yet states use `EmptyState`, detail pages pass `backTo` and `badge`
   to `PageHeader`. Icons are lucide only; the wp-admin menu icon is the one
   SVG, because WordPress requires a data URI there.
@@ -319,14 +328,17 @@ contain no queries — the caller prepares the data.
   `window.flyaffiliate` through `wp_add_inline_script()` in `Assets.php`.
 - The setup wizard is `src/admin/pages/setup` (route `#/setup`): it renders
   fields from the settings schema, saves with `PUT /settings/{page}` and calls
-  `POST /setup/complete`; `Admin\SetupWizard` only owns the one-time redirect
-  and the done flag. The one PHP-rendered admin page left (user profile) keeps
+  `POST /setup/complete`; `Admin\SetupWizard` only owns the route URL and
+  the done flag. Nothing redirects to the wizard: the one-time
+  post-activation redirect is removed until WordPress.org approves the
+  plugin (Guideline 11), and Settings shows "Run the setup wizard" until it
+  is done. The one PHP-rendered admin page left (user profile) keeps
   the old rules: capability, `check_admin_referer()`, then sanitize.
 
 ## REST
 
 Namespace `flyaffiliate/v1`. Controllers extend `AdminBaseController`
-(`manage_woocommerce`) or `AffiliateBaseController` (self-scoped: an affiliate
+(`flyaffiliate_admin_capability()`: `manage_options` unless filtered) or `AffiliateBaseController` (self-scoped: an affiliate
 sees only their own rows; `MeController` is the one, and it reads the
 affiliate from the session, never from a parameter). Every route has a real `permission_callback` —
 `__return_true` is never acceptable. Every controller implements
@@ -347,10 +359,33 @@ sends `X-WP-Total` / `X-WP-TotalPages` on collection responses.
 
 ## Dokan integration guardrails
 
-Everything Dokan-specific lives under `includes/Integrations/Dokan/` and loads
-**only** on the `dokan_loaded` action, behind `function_exists( 'dokan' )`. The
-plugin is fully functional with Dokan absent; no other directory may reference a
-Dokan symbol.
+Third-party code lives under `includes/Integrations/{Plugin}/` and is
+registered only when that plugin is active: `FlyAffiliate_Plugin::init_plugin()`
+adds `IntegrationServiceProvider` on `plugins_loaded`; the provider registers
+the integration's announcement always and its platform services only when
+`class_exists( 'WooCommerce' )` (ADR-0013). Elsewhere, a WooCommerce function
+is called only behind `function_exists()`. No other directory may reference
+the plugin's symbols.
+
+An integration announces itself; the core shows nothing platform-specific on
+its own. Its `Integration` Hookable adds the platform's commission origin with
+`flyaffiliate_available_commission_sources` and its settings subpage with
+`flyaffiliate_settings_schema` (see `Integrations\WooCommerce\Integration`),
+whether or not the platform plugin is active — SliceWP lists every integration
+the same way; only the hooks wait for the platform.
+A new platform gets its own `Integrations\{Platform}\Integration`, its own
+`SOURCE_*` label in `Commission::get_sources()`, and its own guard in
+`init_plugin()`.
+
+Dokan is the exception to "announced whether or not active": everything
+Dokan-specific lives under `includes/Integrations/Dokan/` and loads **only**
+once `dokan_loaded` has fired, behind `function_exists( 'dokan' )`.
+`IntegrationServiceProvider::boot()` adds `DokanServiceProvider` straight away
+when `did_action( 'dokan_loaded' )` (Dokan fires it from `woocommerce_loaded`,
+before our `plugins_loaded` callback) and listens for it otherwise. Its
+`Integrations\Dokan\Integration` adds the Integrations → Dokan subpage, so an
+admin without a marketplace never sees vendor programs. The plugin is fully
+functional with Dokan absent; no other directory may reference a Dokan symbol.
 
 The rules in `CONTEXT.md` → "Dokan rules" and ADR-0004 are binding. The short
 version, so you do not have to relearn it:
@@ -384,4 +419,10 @@ Every write that touches money is keyed so a hook firing twice changes nothing:
 | Vendor charge | order meta `_flyaffiliate_vendor_charged` |
 | Paid marking | `payout_id` on the commission, set when the payment is created; the payment's `status` says whether the money went |
 
-A `paid` commission is terminal: never edited, rescaled, or deleted.
+A commission inside a payment (`payout_id > 0`) is never moved by the order
+sync or the maturation job (they call `set_status( …, true )`) and never
+deleted; an admin still edits it, and an unpaid payment re-sums
+(`Payout\Manager::resync()`) while a paid one keeps its amount. A `paid` row
+an admin recorded by hand has no payment and is a record like any other. A
+WooCommerce-origin commission's `order_id` must be an existing order;
+`Commission\Manager::check_reference()` enforces it on create and edit.

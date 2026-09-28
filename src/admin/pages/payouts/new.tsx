@@ -211,7 +211,7 @@ export default function NewPayoutPage() {
 				} }
 				title={ __( 'New payout', 'flyaffiliate' ) }
 				description={ __(
-					'Only unpaid commissions are included. Each affiliate gets a payment; pay them outside WordPress, then mark the payment paid.',
+					'Only unpaid commissions are included. Each affiliate gets one payment. Send the money outside WordPress, then mark the payment paid.',
 					'flyaffiliate'
 				) }
 			/>
@@ -368,7 +368,7 @@ export default function NewPayoutPage() {
 								/>
 								<FieldDescription>
 									{ __(
-										'An affiliate below this is carried over to the next run.',
+										'Affiliates below this amount wait for the next payout.',
 										'flyaffiliate'
 									) }
 								</FieldDescription>
@@ -389,7 +389,7 @@ export default function NewPayoutPage() {
 								/>
 								<FieldDescription>
 									{ __(
-										'Only commissions created inside the period are paid.',
+										'Only commissions from this period are included.',
 										'flyaffiliate'
 									) }
 								</FieldDescription>
@@ -505,7 +505,7 @@ export default function NewPayoutPage() {
 							<div className="flex flex-col gap-2">
 								<p className="text-muted-foreground">
 									{ __(
-										'Nobody matches: no unpaid commissions above the minimum.',
+										'No affiliate has unpaid commissions above the minimum.',
 										'flyaffiliate'
 									) }
 								</p>

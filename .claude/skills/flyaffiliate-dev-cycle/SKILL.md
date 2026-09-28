@@ -37,7 +37,7 @@ npm run env:start       # WordPress + WooCommerce + Dokan Lite in Docker
   `bin/plugin-check.sh` to drop the built release directory into. That is what
   makes Plugin Check see the real slug.
 
-PHP is 7.4 by default. To work against 8.3 locally, write a
+PHP is 8.1 by default. To work against 8.3 locally, write a
 `.wp-env.override.json` (gitignored) with `{ "phpVersion": "8.3" }` and restart.
 
 ## PHP
@@ -112,7 +112,7 @@ is the canary; if it fails, stop and fix it before anything else.
 ## Release
 
 ```bash
-npm run release         # build → makepot → build/flyaffiliate.zip
+npm run release         # build → makepot → build/flyaffiliate-v<version>.zip
 npm run plugin-check    # Plugin Check against build/flyaffiliate
 ```
 
@@ -128,7 +128,7 @@ or it lands in the zip.
 | Workflow | Trigger | What fails it |
 |---|---|---|
 | `phpcs.yml` | PR touching `**.php` | Any violation on a changed file (no `--graceful-warnings`) |
-| `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 7.4/8.3 × with/without Dokan |
+| `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 8.1/8.3 × with/without Dokan |
 | `plugin-check.yml` | push, PR, manual | Any Plugin Check error **or warning** on the built zip |
 | `deploy.yml` | `v*` tag | Disabled until the wp.org slug is approved |
 

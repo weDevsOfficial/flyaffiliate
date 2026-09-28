@@ -40,9 +40,21 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 ### Nonces and capabilities
 
 - Every state-changing request checks a capability **and** a nonce, in that
-  order, before it does anything: `current_user_can( 'manage_woocommerce' )`,
+  order, before it does anything: `current_user_can( flyaffiliate_admin_capability() )`,
   then `check_admin_referer()` / `wp_verify_nonce()`.
-- `manage_options` is not used. Admin screens are `manage_woocommerce`.
+- Admin screens use `flyaffiliate_admin_capability()`: `manage_options`, unless
+  a site filters it to `manage_woocommerce` (ADR-0008, ADR-0013). Never a literal.
+- The shipped CSS and JS must name no external host: WordPress.org's scanner
+  reads any `http://` in a stylesheet as a remote file, **and** it matches the
+  host names of placeholder-image services and CDNs as bare substrings, with no
+  word boundary and no `url(` around them. Review round 2 flagged
+  `.components-placeholder.components-placeholder` in every stylesheet because
+  the middle of that selector spells `placeholder.com`. `webpack.config.js`
+  (`RemoveRemoteUrlsPlugin`) strips the library leftovers and renames those
+  rules to `.section-content` (neither app renders that component).
+  Before a release, confirm on the built files with a boundary-free grep:
+  `grep -ciE 'https?://|placeholder\.com|placehold\.it|w3\.org|googleapis' assets/css/*.css assets/js/*.js`
+  (expect 0 for every file). A `\b`-anchored grep passes and proves nothing.
 - Every REST route has a real `permission_callback`. `__return_true` is a
   finding, not a shortcut.
 
@@ -64,7 +76,8 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 - No `load_plugin_textdomain()` — WordPress.org loads translations. The text
   domain is `flyaffiliate` and must equal the slug in every `__()` call.
 - Plugin header carries: `Plugin Name`, `Plugin URI`, `Description`, `Version`,
-  `Requires at least`, `Requires PHP`, `Requires Plugins: woocommerce`,
+  `Requires at least`, `Requires PHP` (no `Requires Plugins`: the plugin is
+  standalone and every integration is optional, ADR-0013),
   `Author`, `Author URI`, `License: GPLv2 or later`, `License URI`,
   `Text Domain: flyaffiliate`, `Domain Path: /languages`.
 - `readme.txt` `Stable tag` **equals** the header `Version` equals
@@ -80,9 +93,11 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 - Nothing writes to the database on `admin_init` or on a plain page load except
   in response to a user action. **No seeders.** Sample data is a WP-CLI command
   (`wp flyaffiliate seed`) registered in `CliServiceProvider`.
-- No forced admin redirect on activation without a user-visible way out. The
-  setup wizard redirect fires once, records that it fired, and the wizard has a
-  visible skip.
+- No admin redirect on activation. The setup wizard's one-time redirect is
+  removed until WordPress.org approves the plugin (Guideline 11 flags any
+  redirect on `admin_init`); the wizard is opened from Settings instead. If it
+  returns after approval, it fires once, records that it fired, skips bulk
+  activation, and the wizard keeps its visible skip.
 - No admin notice that cannot be dismissed, and none outside the plugin's own
   screens.
 - No telemetry, no phone-home, no external API call the user did not ask for.

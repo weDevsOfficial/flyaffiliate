@@ -64,7 +64,7 @@ class SettingsSchema {
 		 *
 		 * @param array<int, array<string, mixed>> $elements Flat schema elements.
 		 */
-		return apply_filters( 'flyaffiliate_settings_schema', $elements );
+		return (array) apply_filters( 'flyaffiliate_settings_schema', $elements );
 	}
 
 	/**
@@ -148,7 +148,7 @@ class SettingsSchema {
 	 *
 	 * @return array<string, mixed>
 	 */
-	private static function percent_field( string $id, string $section_id, string $title, string $description, float $default_value ): array {
+	public static function percent_field( string $id, string $section_id, string $title, string $description, float $default_value ): array {
 		return [
 			'id'                => $id,
 			'type'              => 'field',
@@ -220,7 +220,7 @@ class SettingsSchema {
 	 *
 	 * @return array<string, mixed>
 	 */
-	private static function switch_field( string $id, string $section_id, string $title, string $description, bool $default_value ): array {
+	public static function switch_field( string $id, string $section_id, string $title, string $description, bool $default_value ): array {
 		return [
 			'id'            => $id,
 			'type'          => 'field',
@@ -297,7 +297,7 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'general',
 				'title'       => __( 'Currency', 'flyaffiliate' ),
-				'description' => __( 'How commission and payout amounts are written. This is FlyAffiliate\'s own setting: changing the WooCommerce currency does not change it.', 'flyaffiliate' ),
+				'description' => __( 'How commission and payout amounts are shown. This is separate from your shop’s own currency setting.', 'flyaffiliate' ),
 				'priority'    => 15,
 			],
 			[
@@ -305,7 +305,7 @@ class SettingsSchema {
 				'type'       => 'section',
 				'subpage_id' => 'currency_display',
 				'title'      => __( 'Currency settings', 'flyaffiliate' ),
-				'description' => __( 'The currency amounts are shown in, and the characters they are written with, in the admin and on the affiliate dashboard.', 'flyaffiliate' ),
+				'description' => __( 'The currency and number format used in the admin and on the affiliate dashboard.', 'flyaffiliate' ),
 			],
 			[
 				'id'                => 'currency',
@@ -382,11 +382,23 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'general',
 				'title'       => __( 'Affiliate area', 'flyaffiliate' ),
-				'description' => __( 'The affiliate-facing pages were created on activation. Paste a shortcode into any other page to move them.', 'flyaffiliate' ),
+				'description' => __( 'Who can join, and the pages affiliates use. The pages were created when the plugin was activated; to move one, paste its shortcode into another page.', 'flyaffiliate' ),
 				'priority'    => 20,
-				// Nothing on this subpage is editable, so a save button would only confuse.
-				'hide_save'   => true,
 			],
+			[
+				'id'          => 'affiliate_area_signup',
+				'type'        => 'section',
+				'subpage_id'  => 'affiliate_area',
+				'title'       => __( 'Signup', 'flyaffiliate' ),
+				'description' => __( 'Whether the registration form takes new affiliates.', 'flyaffiliate' ),
+			],
+			self::switch_field(
+				'registration_enabled',
+				'affiliate_area_signup',
+				__( 'Open registration', 'flyaffiliate' ),
+				__( 'When off, the registration form says the programme is not taking new members. You can still add affiliates from the admin.', 'flyaffiliate' ),
+				true
+			),
 			[
 				'id'         => 'affiliate_area_pages',
 				'type'       => 'section',
@@ -421,7 +433,7 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'general',
 				'title'       => __( 'Data', 'flyaffiliate' ),
-				'description' => __( 'What happens to the ledger when the plugin is removed.', 'flyaffiliate' ),
+				'description' => __( 'What happens to your data when the plugin is removed.', 'flyaffiliate' ),
 				'priority'    => 30,
 			],
 			[
@@ -437,7 +449,7 @@ class SettingsSchema {
 				'variant'       => 'switch',
 				'section_id'    => 'data_settings',
 				'title'         => __( 'Remove all data on uninstall', 'flyaffiliate' ),
-				'description'   => __( 'Delete every affiliate, commission, visit, payout and setting when the plugin is deleted. Off by default so a reinstall finds the ledger intact.', 'flyaffiliate' ),
+				'description'   => __( 'Delete all affiliates, commissions, visits, payouts and settings when the plugin is deleted. Leave this off to keep the data for a reinstall.', 'flyaffiliate' ),
 				'default'       => 'off',
 				'enable_state'  => self::on(),
 				'disable_state' => self::off(),
@@ -460,7 +472,7 @@ class SettingsSchema {
 				'type'        => 'page',
 				'title'       => __( 'Commissions', 'flyaffiliate' ),
 				'icon'        => 'Percent',
-				'description' => __( 'Commissions are calculated per order item. The rate comes from the product, then the vendor on a Dokan marketplace, then the default — and is always clamped to the maximum.', 'flyaffiliate' ),
+				'description' => __( 'Commissions are calculated per order item. The rate comes from the product, then the vendor on a Dokan marketplace, or the default rate, and never goes above the maximum.', 'flyaffiliate' ),
 				'priority'    => 20,
 			],
 
@@ -470,7 +482,7 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'commission',
 				'title'       => __( 'Rates', 'flyaffiliate' ),
-				'description' => __( 'The fallback rate and the ceiling every rate is clamped to.', 'flyaffiliate' ),
+				'description' => __( 'The default rate, and the highest rate allowed.', 'flyaffiliate' ),
 				'priority'    => 10,
 			],
 			[
@@ -485,7 +497,7 @@ class SettingsSchema {
 					'default_rate',
 					'rate_settings',
 					__( 'Default rate', 'flyaffiliate' ),
-					__( 'Used when neither the product nor the vendor sets a rate.', 'flyaffiliate' ),
+					__( 'Used when the product doesn’t set its own rate.', 'flyaffiliate' ),
 					10.0
 				),
 				[
@@ -496,7 +508,7 @@ class SettingsSchema {
 				'max_rate',
 				'rate_settings',
 				__( 'Maximum rate', 'flyaffiliate' ),
-				__( 'No commission is ever calculated above this, whatever a product or vendor rate says.', 'flyaffiliate' ),
+				__( 'No commission is calculated above this rate, even if a product sets a higher one.', 'flyaffiliate' ),
 				50.0
 			),
 			[
@@ -505,7 +517,7 @@ class SettingsSchema {
 				'variant'     => 'select',
 				'section_id'  => 'rate_settings',
 				'title'       => __( 'Rate type', 'flyaffiliate' ),
-				'description' => __( 'Percentages only for now. Fixed amounts come with product-level rates.', 'flyaffiliate' ),
+				'description' => __( 'Percentage rates only, for now.', 'flyaffiliate' ),
 				'default'     => 'percentage',
 				'options'     => [
 					[
@@ -532,13 +544,13 @@ class SettingsSchema {
 				'type'       => 'section',
 				'subpage_id' => 'rules',
 				'title'      => __( 'Hold period', 'flyaffiliate' ),
-				'description' => __( 'How long a commission waits before it can be paid out, which leaves time to reject it if the order is returned.', 'flyaffiliate' ),
+				'description' => __( 'How long a commission waits before it can be paid out. This leaves time to reject it if the order is returned.', 'flyaffiliate' ),
 			],
 			self::days_field(
 				'hold_days',
 				'maturation_settings',
 				__( 'Hold period', 'flyaffiliate' ),
-				__( 'A commission stays pending this long after the sale before it becomes unpaid and can be paid out. With 0, a commission becomes unpaid as soon as its order is processing or completed. Changing this moves every pending commission.', 'flyaffiliate' ),
+				__( 'How many days a commission waits after the sale before it can be paid out. 0 means as soon as the order is paid.', 'flyaffiliate' ),
 				30
 			),
 			[
@@ -552,14 +564,14 @@ class SettingsSchema {
 				'exclude_shipping',
 				'base_amount_settings',
 				__( 'Exclude shipping', 'flyaffiliate' ),
-				__( 'Shipping is left out of the amount a commission is calculated on.', 'flyaffiliate' ),
+				__( 'Shipping is not counted when calculating a commission.', 'flyaffiliate' ),
 				true
 			),
 			self::switch_field(
 				'exclude_tax',
 				'base_amount_settings',
 				__( 'Exclude tax', 'flyaffiliate' ),
-				__( 'Tax is left out of the amount a commission is calculated on.', 'flyaffiliate' ),
+				__( 'Tax is not counted when calculating a commission.', 'flyaffiliate' ),
 				true
 			),
 			[
@@ -567,7 +579,7 @@ class SettingsSchema {
 				'type'       => 'section',
 				'subpage_id' => 'rules',
 				'title'      => __( 'Eligibility', 'flyaffiliate' ),
-				'description' => __( 'Which referred orders can earn a commission at all.', 'flyaffiliate' ),
+				'description' => __( 'Which referred orders can earn a commission.', 'flyaffiliate' ),
 			],
 			self::switch_field(
 				'block_self_referral',
@@ -581,13 +593,13 @@ class SettingsSchema {
 				'type'        => 'section',
 				'subpage_id'  => 'rules',
 				'title'       => __( 'Refunds', 'flyaffiliate' ),
-				'description' => __( 'What happens to a commission when its order is refunded. A failed or cancelled order always rejects its commissions, and a commission that has been paid is never changed.', 'flyaffiliate' ),
+				'description' => __( 'What happens when an order is refunded. Failed and cancelled orders always reject their commissions. Paid commissions are never changed.', 'flyaffiliate' ),
 			],
 			self::switch_field(
 				'reject_commissions_on_refund',
 				'refund_settings',
 				__( 'Reject commissions on refund', 'flyaffiliate' ),
-				__( 'Mark unpaid commissions as rejected if the originating purchase is refunded.', 'flyaffiliate' ),
+				__( 'Reject unpaid commissions when their order is refunded.', 'flyaffiliate' ),
 				false
 			),
 		];
@@ -607,7 +619,7 @@ class SettingsSchema {
 				'type'        => 'page',
 				'title'       => __( 'Payouts', 'flyaffiliate' ),
 				'icon'        => 'Wallet',
-				'description' => __( 'Payouts are recorded by hand in this version: FlyAffiliate tells you who is owed what, you pay them, and it marks the commissions paid.', 'flyaffiliate' ),
+				'description' => __( 'Payouts are recorded by hand. FlyAffiliate shows who is owed what, you send the money, then mark the payment paid.', 'flyaffiliate' ),
 				'priority'    => 30,
 			],
 			// Subpage: Rules. Every page has a subpage so the sidebar reads the
@@ -633,7 +645,7 @@ class SettingsSchema {
 				'variant'           => 'number',
 				'section_id'        => 'payout_settings',
 				'title'             => __( 'Minimum payout', 'flyaffiliate' ),
-				'description'       => __( 'The default minimum when creating a payout. An affiliate below it is carried over to the next run.', 'flyaffiliate' ),
+				'description'       => __( 'The default minimum for a payout. Affiliates below it wait for the next one.', 'flyaffiliate' ),
 				'default'           => 50.0,
 				'min'               => 0,
 				'increment'         => 0.01,
@@ -649,12 +661,12 @@ class SettingsSchema {
 				'variant'     => 'select',
 				'section_id'  => 'payout_settings',
 				'title'       => __( 'Payout method', 'flyaffiliate' ),
-				'description' => __( 'How affiliates are paid. Automatic methods arrive in a later version.', 'flyaffiliate' ),
+				'description' => __( 'How affiliates are paid. Automatic methods are coming in a later version.', 'flyaffiliate' ),
 				'default'     => 'manual',
 				'options'     => [
 					[
 						'value' => 'manual',
-						'label' => __( 'Manual — pay outside WordPress and record it here', 'flyaffiliate' ),
+						'label' => __( 'Manual: pay outside WordPress and record it here', 'flyaffiliate' ),
 					],
 				],
 				'validations' => [
@@ -665,14 +677,14 @@ class SettingsSchema {
 	}
 
 	/**
-	 * The Integrations page: WooCommerce and, when present, Dokan.
+	 * The Integrations page: WooCommerce.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function integrations_page(): array {
-		$elements = [
+		return [
 			[
 				'id'          => 'integrations',
 				'type'        => 'page',
@@ -681,114 +693,7 @@ class SettingsSchema {
 				'description' => __( 'Which platforms create commissions.', 'flyaffiliate' ),
 				'priority'    => 40,
 			],
-			[
-				'id'          => 'woocommerce',
-				'type'        => 'subpage',
-				'page_id'     => 'integrations',
-				'title'       => __( 'WooCommerce', 'flyaffiliate' ),
-				'description' => __( 'Referred orders become commissions.', 'flyaffiliate' ),
-				'priority'    => 10,
-			],
-			[
-				'id'         => 'woocommerce_settings',
-				'type'       => 'section',
-				'subpage_id' => 'woocommerce',
-				'title'      => __( 'Orders', 'flyaffiliate' ),
-				'description' => __( 'Whether orders placed through a referral link create commissions.', 'flyaffiliate' ),
-			],
-			self::switch_field(
-				'woocommerce_enabled',
-				'woocommerce_settings',
-				__( 'Track WooCommerce orders', 'flyaffiliate' ),
-				__( 'Create commissions for referred WooCommerce orders.', 'flyaffiliate' ),
-				true
-			),
 		];
-
-		// Dokan is optional. Its settings only exist while it is active, so an
-		// admin without a marketplace never sees vendor programs.
-		if ( function_exists( 'dokan' ) ) {
-			$elements = array_merge(
-				$elements,
-				[
-					[
-						'id'          => 'dokan',
-						'type'        => 'subpage',
-						'page_id'     => 'integrations',
-						'title'       => __( 'Dokan', 'flyaffiliate' ),
-						'description' => __( 'Vendors can run their own affiliate programs. The commission comes out of the vendor’s earning, not the marketplace’s.', 'flyaffiliate' ),
-						'priority'    => 20,
-					],
-					[
-						'id'         => 'dokan_settings',
-						'type'       => 'section',
-						'subpage_id' => 'dokan',
-						'title'      => __( 'Vendor programs', 'flyaffiliate' ),
-						'description' => __( 'Whether vendors can run affiliate programs for their own stores, and how much say they have over the rate.', 'flyaffiliate' ),
-					],
-					self::switch_field(
-						'dokan_vendor_programs',
-						'dokan_settings',
-						__( 'Let vendors run affiliate programs', 'flyaffiliate' ),
-						__( 'Each vendor can opt their store in from their store settings.', 'flyaffiliate' ),
-						true
-					),
-					array_merge(
-						self::switch_field(
-							'dokan_vendor_can_set_rate',
-							'dokan_settings',
-							__( 'Let vendors set their own rate', 'flyaffiliate' ),
-							__( 'When off, every vendor program uses the default rate.', 'flyaffiliate' ),
-							true
-						),
-						[
-							'dependencies' => [
-								[
-									'key'        => 'dokan_vendor_programs',
-									'value'      => 'on',
-									'comparison' => '==',
-									'to_self'    => true,
-									'attribute'  => 'display',
-									'effect'     => 'show',
-								],
-							],
-						]
-					),
-					array_merge(
-						self::percent_field(
-							'dokan_vendor_max_rate',
-							'dokan_settings',
-							__( 'Maximum vendor rate', 'flyaffiliate' ),
-							__( 'A vendor cannot set a rate above this.', 'flyaffiliate' ),
-							50.0
-						),
-						[
-							// Both switches must be on: no programs means no vendor rate to cap.
-							'dependencies' => [
-								[
-									'key'        => 'dokan_vendor_programs',
-									'value'      => 'on',
-									'comparison' => '==',
-									'to_self'    => true,
-									'attribute'  => 'display',
-									'effect'     => 'show',
-								],
-								[
-									'key'        => 'dokan_vendor_can_set_rate',
-									'value'      => 'on',
-									'comparison' => '==',
-									'to_self'    => true,
-									'attribute'  => 'display',
-									'effect'     => 'show',
-								],
-							],
-						]
-					),
-				]
-			);
-		}
-
-		return $elements;
 	}
 
 	/**
@@ -843,12 +748,16 @@ class SettingsSchema {
 	 */
 	private static function currency_options(): array {
 		if ( ! function_exists( 'get_woocommerce_currencies' ) ) {
-			return [
-				[
-					'value' => 'USD',
-					'label' => 'USD',
-				],
-			];
+			$options = [];
+
+			foreach ( self::builtin_currencies() as $code => $currency ) {
+				$options[] = [
+					'value' => $code,
+					'label' => sprintf( '%1$s (%2$s)', $currency[0], $currency[1] ),
+				];
+			}
+
+			return $options;
 		}
 
 		$options = [];
@@ -877,9 +786,31 @@ class SettingsSchema {
 	private static function stored_currency_symbol(): string {
 		$stored = (array) get_option( 'flyaffiliate_settings', [] );
 		$code   = ! empty( $stored['currency'] ) ? (string) $stored['currency'] : ( function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'USD' );
-		$symbol = function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol( $code ) : '';
+		$symbol = function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol( $code ) : ( self::builtin_currencies()[ $code ][1] ?? '' );
 
 		return html_entity_decode( $symbol, ENT_QUOTES, 'UTF-8' );
+	}
+
+	/**
+	 * The currencies offered when WooCommerce is not there to list them.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return array<string, array{0: string, 1: string}> Code => [ name, symbol ].
+	 */
+	public static function builtin_currencies(): array {
+		return [
+			'USD' => [ __( 'United States (US) dollar', 'flyaffiliate' ), '$' ],
+			'EUR' => [ __( 'Euro', 'flyaffiliate' ), '€' ],
+			'GBP' => [ __( 'Pound sterling', 'flyaffiliate' ), '£' ],
+			'AUD' => [ __( 'Australian dollar', 'flyaffiliate' ), '$' ],
+			'CAD' => [ __( 'Canadian dollar', 'flyaffiliate' ), '$' ],
+			'INR' => [ __( 'Indian rupee', 'flyaffiliate' ), '₹' ],
+			'BDT' => [ __( 'Bangladeshi taka', 'flyaffiliate' ), '৳' ],
+			'JPY' => [ __( 'Japanese yen', 'flyaffiliate' ), '¥' ],
+			'BRL' => [ __( 'Brazilian real', 'flyaffiliate' ), 'R$' ],
+			'ZAR' => [ __( 'South African rand', 'flyaffiliate' ), 'R' ],
+		];
 	}
 
 	/**

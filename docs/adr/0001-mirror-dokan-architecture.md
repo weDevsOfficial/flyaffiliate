@@ -30,7 +30,8 @@ FlyAffiliate mirrors Dokan Lite's architecture:
   `Upgrade\Manager` and versioned upgraders.
 - A singleton plugin class (`FlyAffiliate_Plugin`) with a magic getter over the
   container, bootstrapped from the plugin entry file, initialised on
-  `woocommerce_loaded`.
+  `plugins_loaded` (ADR-0013; it was `woocommerce_loaded` while WooCommerce
+  was required).
 - PHPUnit with WP-PHPUnit, a `FlyAffiliateTestCase` base class, and factories.
 
 The names, file layout and boot order follow Dokan's so that the mapping is

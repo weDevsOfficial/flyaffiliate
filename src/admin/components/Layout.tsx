@@ -3,7 +3,7 @@
  */
 import type { ReactNode } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { BookOpen, LifeBuoy } from 'lucide-react';
+import { BookOpen, CircleStar, LifeBuoy } from 'lucide-react';
 import { Button, TopBar } from '@wedevs/plugin-ui';
 import { getGlobals } from '@/lib/globals';
 import { BRAND_OUTLINE } from '@/lib/ui';
@@ -24,11 +24,12 @@ export default function Layout( { children }: { children: ReactNode } ) {
 						className="flex h-full items-center gap-2.5 text-foreground"
 						data-testid="flyaffiliate-brand"
 					>
-						<img
-							src={ urls.logo }
-							alt=""
-							className="size-7 rounded-md"
-						/>
+						<span
+							className="flex size-7 items-center justify-center rounded-md bg-primary text-white"
+							aria-hidden="true"
+						>
+							<CircleStar className="size-5" />
+						</span>
 						<span className="text-lg font-bold leading-none">
 							{ __( 'FlyAffiliate', 'flyaffiliate' ) }
 						</span>

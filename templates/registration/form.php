@@ -66,6 +66,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<label for="flyaffiliate-register-promo"><?php esc_html_e( 'How will you promote us?', 'flyaffiliate' ); ?></label>
 				<textarea id="flyaffiliate-register-promo" name="promo_method" rows="4"></textarea>
 			</p>
+			<p class="flyaffiliate-trap" aria-hidden="true">
+				<label for="flyaffiliate-register-website"><?php esc_html_e( 'Website', 'flyaffiliate' ); ?></label>
+				<input type="text" id="flyaffiliate-register-website" name="flyaffiliate_website" value="" tabindex="-1" autocomplete="off" />
+			</p>
 			<p>
 				<button type="submit" class="flyaffiliate-button"><?php esc_html_e( 'Join the affiliate programme', 'flyaffiliate' ); ?></button>
 			</p>
