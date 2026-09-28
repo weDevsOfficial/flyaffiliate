@@ -141,6 +141,20 @@ abstract class FlyAffiliateTestCase extends WP_UnitTestCase {
 		return $factory;
 	}
 
+	/**
+	 * Skip the test when Dokan is not part of this run.
+	 *
+	 * Every `@group dokan` test calls this first.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return void
+	 */
+	protected function skip_without_dokan(): void {
+		if ( ! defined( 'FLYAFFILIATE_TESTS_HAS_DOKAN' ) || ! FLYAFFILIATE_TESTS_HAS_DOKAN || ! function_exists( 'dokan' ) ) {
+			$this->markTestSkipped( 'Dokan is not active in this run.' );
+		}
+	}
 
 	/**
 	 * Become a user for the rest of the test.

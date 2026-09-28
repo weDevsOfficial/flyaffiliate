@@ -4,11 +4,12 @@
 
 Welcome to the **FlyAffiliate** repository on **GitHub**!
 
-**FlyAffiliate is an affiliate-marketing plugin for WordPress and WooCommerce, built by [weDevs](https://wedevs.com/).** Affiliates get a referral link, a frontend dashboard and a balance. Store owners get per-item commissions with a configurable hold period, commission statuses that follow the order, and two-step payouts with a CSV export — with nothing leaving their site.
+**FlyAffiliate is an affiliate-marketing plugin for WordPress and WooCommerce, built by [weDevs](https://wedevs.com/), with native [Dokan](https://dokan.co/wordpress/) multivendor support.** Affiliates get a referral link, a frontend dashboard and a balance. Store owners get per-item commissions with a configurable hold period, commission statuses that follow the order, and two-step payouts with a CSV export — with nothing leaving their site. On a Dokan marketplace, each vendor can run their own program — and the vendor, not the marketplace, funds the commission.
 
 Here you can find the **source code**, **open issues**, and **contribute** to the development of the plugin.
 
 - **Requires:** PHP 8.1+, WordPress 6.6+. WooCommerce 8.5+ for the order integration, which loads only when WooCommerce is active.
+- **Optional:** Dokan Lite 5.0+, detected at runtime.
 - **Licence:** GPL-2.0-or-later
 - **Reference behaviour:** commission and payout semantics match SliceWP where the two overlap, so anyone coming from there feels at home. The differences that exist are deliberate and recorded in [`docs/adr/`](docs/adr/).
 
@@ -22,7 +23,7 @@ To get up and running with **FlyAffiliate development**, make sure you have inst
 * **[npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)** — manages the JavaScript dependencies and runs the build and test scripts.
 * **[PHP 8.1](https://www.php.net/manual/en/install.php)+** — the plugin's minimum, and what Composer and the PHP tooling run on.
 * **[Composer](https://getcomposer.org/doc/00-intro.md)** — installs the PHP development dependencies (nothing from `vendor/` ships).
-* **[Docker](https://www.docker.com/)** — `wp-env` runs WordPress + WooCommerce in containers for PHPUnit, Playwright and Plugin Check.
+* **[Docker](https://www.docker.com/)** — `wp-env` runs WordPress + WooCommerce + Dokan Lite in containers for PHPUnit, Playwright and Plugin Check.
 
 Once the prerequisites are installed, the following prepares everything for development:
 
@@ -115,7 +116,7 @@ Every change must pass Plugin Check with zero errors and zero warnings before it
 * **REST** — every resource is under `flyaffiliate/v1` with a schema, links and a real permission callback. The affiliate dashboard reads the self-scoped `/me` routes.
 * **Templates** — copy a file from `templates/` into `{theme}/flyaffiliate/` keeping the same path.
 * **Settings** — add a field to `Admin\Settings\Schema\SettingsSchema` through the `flyaffiliate_settings_schema` filter.
-* **Marketplaces** — the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters are the seams a marketplace integration plugs into. The Dokan integration lives on the `feature/dokan-integration` branch.
+* **Marketplaces** — the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters are the seams a marketplace integration plugs into. The Dokan integration (`includes/Integrations/Dokan/`) plugs into them on this branch.
 
 ## 🤝 Contributing
 

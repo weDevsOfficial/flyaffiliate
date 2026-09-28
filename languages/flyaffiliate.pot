@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T11:36:50+00:00\n"
+"POT-Creation-Date: 2026-09-28T07:56:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -31,7 +31,7 @@ msgstr ""
 
 #. Description of the plugin
 #: flyaffiliate.php
-msgid "Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. Integrates with WooCommerce and more."
+msgid "Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. Integrates with WooCommerce, Dokan and more."
 msgstr ""
 
 #. Author of the plugin
@@ -372,7 +372,7 @@ msgid "Delete all affiliates, commissions, visits, payouts and settings when the
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:475
-msgid "Commissions are calculated per order item. The rate comes from the product, or the default rate, and never goes above the maximum."
+msgid "Commissions are calculated per order item. The rate comes from the product, then the vendor on a Dokan marketplace, or the default rate, and never goes above the maximum."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:484
@@ -720,8 +720,8 @@ msgstr ""
 msgid "Affiliate"
 msgstr ""
 
-#: includes/Assets.php:292
-#: includes/Assets.php:298
+#: includes/Assets.php:293
+#: includes/Assets.php:299
 #: includes/Models/Affiliate.php:85
 #: includes/Models/Commission.php:140
 #: assets/js/admin.js:284
@@ -729,28 +729,28 @@ msgstr ""
 msgid "Pending"
 msgstr ""
 
-#: includes/Assets.php:293
+#: includes/Assets.php:294
 #: includes/Models/Affiliate.php:86
 msgid "Active"
 msgstr ""
 
-#: includes/Assets.php:294
+#: includes/Assets.php:295
 #: includes/Models/Affiliate.php:87
 msgid "Inactive"
 msgstr ""
 
-#: includes/Assets.php:295
+#: includes/Assets.php:296
 #: includes/Models/Affiliate.php:88
 msgid "Suspended"
 msgstr ""
 
-#: includes/Assets.php:299
+#: includes/Assets.php:300
 #: includes/Models/Commission.php:141
 #: assets/js/admin.js:284
 msgid "Unpaid"
 msgstr ""
 
-#: includes/Assets.php:300
+#: includes/Assets.php:301
 #: includes/Models/Commission.php:142
 #: assets/js/admin.js:284
 #: assets/js/admin.js:298
@@ -758,7 +758,7 @@ msgstr ""
 msgid "Paid"
 msgstr ""
 
-#: includes/Assets.php:301
+#: includes/Assets.php:302
 #: includes/Models/Commission.php:143
 msgid "Rejected"
 msgstr ""
@@ -843,6 +843,46 @@ msgstr ""
 msgid "Affiliate Registration"
 msgstr ""
 
+#: includes/Integrations/Dokan/Integration.php:60
+msgid "Dokan"
+msgstr ""
+
+#: includes/Integrations/Dokan/Integration.php:61
+msgid "Vendors can run their own affiliate programs. The commission comes out of the vendor’s earning, not the marketplace’s."
+msgstr ""
+
+#: includes/Integrations/Dokan/Integration.php:68
+msgid "Vendor programs"
+msgstr ""
+
+#: includes/Integrations/Dokan/Integration.php:69
+msgid "Whether vendors can run affiliate programs for their own stores, and how much say they have over the rate."
+msgstr ""
+
+#: includes/Integrations/Dokan/Integration.php:74
+msgid "Let vendors run affiliate programs"
+msgstr ""
+
+#: includes/Integrations/Dokan/Integration.php:75
+msgid "Each vendor can opt their store in from their store settings."
+msgstr ""
+
+#: includes/Integrations/Dokan/Integration.php:82
+msgid "Let vendors set their own rate"
+msgstr ""
+
+#: includes/Integrations/Dokan/Integration.php:83
+msgid "When off, every vendor program uses the default rate."
+msgstr ""
+
+#: includes/Integrations/Dokan/Integration.php:92
+msgid "Maximum vendor rate"
+msgstr ""
+
+#: includes/Integrations/Dokan/Integration.php:93
+msgid "A vendor cannot set a rate above this."
+msgstr ""
+
 #: includes/Integrations/WooCommerce/Integration.php:76
 #: includes/Models/Commission.php:156
 msgid "WooCommerce"
@@ -878,7 +918,7 @@ msgid "Affiliate #%d"
 msgstr ""
 
 #: includes/Models/Commission.php:157
-#: includes/Models/Payout.php:59
+#: includes/Models/Payout.php:60
 #: assets/js/admin.js:298
 #: assets/js/admin.js:300
 msgid "Manual"
@@ -1140,7 +1180,7 @@ msgid "The product."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:401
-msgid "The vendor the item belongs to, or 0 on a single-merchant store."
+msgid "The Dokan vendor, or 0."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:406
@@ -1208,7 +1248,7 @@ msgid "Limit to an order."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:501
-msgid "Limit to a vendor."
+msgid "Limit to a Dokan vendor."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:505

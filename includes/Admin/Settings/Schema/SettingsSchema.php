@@ -148,7 +148,7 @@ class SettingsSchema {
 	 *
 	 * @return array<string, mixed>
 	 */
-	private static function percent_field( string $id, string $section_id, string $title, string $description, float $default_value ): array {
+	public static function percent_field( string $id, string $section_id, string $title, string $description, float $default_value ): array {
 		return [
 			'id'                => $id,
 			'type'              => 'field',
@@ -472,7 +472,7 @@ class SettingsSchema {
 				'type'        => 'page',
 				'title'       => __( 'Commissions', 'flyaffiliate' ),
 				'icon'        => 'Percent',
-				'description' => __( 'Commissions are calculated per order item. The rate comes from the product, or the default rate, and never goes above the maximum.', 'flyaffiliate' ),
+				'description' => __( 'Commissions are calculated per order item. The rate comes from the product, then the vendor on a Dokan marketplace, or the default rate, and never goes above the maximum.', 'flyaffiliate' ),
 				'priority'    => 20,
 			],
 

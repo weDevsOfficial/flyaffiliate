@@ -13,7 +13,7 @@
 ## Checklist
 
 - [ ] `composer phpcs` is clean.
-- [ ] `npm run phpunit` passes.
+- [ ] `npm run phpunit` passes, with and without Dokan active.
 - [ ] `npm run plugin-check` reports 0 errors and 0 warnings on the built zip.
 - [ ] Tests cover what this changes. Money paths also cover partial refund, full refund and idempotency (hook fired twice → same result).
 - [ ] New code uses `@since FLYAFFILIATE_SINCE`, never a guessed version number.

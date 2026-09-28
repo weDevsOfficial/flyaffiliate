@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) today, Dokan and others later. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
+FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) and Dokan Lite (5.0+). This branch (`feature/dokan-integration`) is `develop` plus the Dokan integration: the `dokan_loaded` provider, the Integrations → Dokan settings, the `hasDokan` admin global and the with/without-Dokan test legs. Keep `develop` free of it — the neutral seams live there (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters) — and merge `develop` in to stay in sync.
 
 The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service providers, `Hookable` classes, `Manager` facades, overridable templates, an `Installer`/`Upgrade` pair, `FlyAffiliateTestCase`-based PHPUnit tests. Anyone who knows the Dokan codebase should feel at home here.
 
@@ -10,7 +10,7 @@ The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service p
 
 ## Domain Model
 
-- **`CONTEXT.md`** — the canonical glossary and the money rules. Read it before naming things or touching commission, refund, or payout code. Use its terms (Commission not Referral, Affiliate not Partner, Vendor not Seller) and respect its *Avoid* column.
+- **`CONTEXT.md`** — the canonical glossary and the money rules. Read it before naming things or touching commission, refund, payout, or Dokan-balance code. Use its terms (Commission not Referral, Affiliate not Partner, Vendor not Seller) and respect its *Avoid* column.
 - **`docs/MVP_PRD.md`** — Phase 1 scope. **`docs/PRD.md`** — full product requirements. **`docs/adr/`** — Architecture Decision Records; check here before "fixing" surprising behaviour.
 - New root-level files must be added to `.distignore` or they ship in the release zip.
 
@@ -18,7 +18,7 @@ The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service p
 
 The `.claude/skills/` directory contains procedural HOW-TO instructions:
 
-- **`flyaffiliate-backend-dev`** — Backend PHP conventions: namespaces, bootstrap, DI container, `Hookable`, settings, templates, REST, data access, integration guardrails. **Invoke before writing any PHP code or tests.**
+- **`flyaffiliate-backend-dev`** — Backend PHP conventions: namespaces, bootstrap, DI container, `Hookable`, settings, templates, REST, data access, Dokan integration guardrails. **Invoke before writing any PHP code or tests.**
 - **`flyaffiliate-dev-cycle`** — Build, lint, PHPUnit, Plugin Check, release-zip workflows and test-writing conventions.
 - **`flyaffiliate-wporg-compliance`** — WordPress.org submission rules and the Plugin Check gate. **Invoke before every commit that touches PHP, assets, readme.txt, or the plugin header, and before any release.**
 - **`flyaffiliate-code-review`** — Review standards: security, money-rule, and architecture violations to flag; severity levels; output format.
@@ -44,7 +44,7 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 > daily maturation job) and `Integrations\WooCommerce\OrderStatusSync` (the
 > commission status follows the order, as in SliceWP, with the optional
 > `reject_commissions_on_refund` switch). Not yet built: partial-refund
-> rescaling and the optional Dashboard. The Dokan integration is on `feature/dokan-integration`.
+> rescaling and the optional Dashboard. This branch carries the Dokan integration (Phase 4).
 
 ```bash
 # PHP
@@ -63,9 +63,10 @@ npm run typecheck           # tsc over src/
 npm run test:e2e            # Playwright against the wp-env dev site (env:start first)
 
 # Environment & tests
-npm run env:start           # wp-env: WordPress + WooCommerce in Docker
+npm run env:start           # wp-env: WordPress + WooCommerce + Dokan Lite in Docker
 npm run env:stop
 npm run phpunit             # PHPUnit inside wp-env's tests environment
+npm run phpunit:no-dokan    # what CI's "without Dokan" leg runs
 npm run test:phpunit        # env:start → phpunit → env:stop
 
 # WordPress.org gate
@@ -87,6 +88,7 @@ npm run plugin-check        # Runs Plugin Check against the built zip (wp-env)
 4. Calls `FlyAffiliate_Plugin::init()`
 5. On `plugins_loaded`, `init_plugin()` includes function files, adds the integration provider (whose platform services register only when WooCommerce is active), and registers hooks
 6. On `init` (priority 4), `init_classes()` resolves the tagged service groups; every `Hookable` gets `register_hooks()` called
+7. When Dokan is active, the integration provider adds `DokanServiceProvider` once `dokan_loaded` has fired — at once if Dokan already fired it (it does so from `woocommerce_loaded`, before our `plugins_loaded` callback), otherwise from a listener
 
 ### Directory Structure
 
@@ -106,7 +108,8 @@ flyaffiliate/
 │   ├── Frontend/                  # Shortcodes, AffiliateDashboard, Hooks
 │   ├── Install/                   # Installer (dbDelta, pages, options, cron)
 │   ├── Integrations/
-│   │   └── WooCommerce/           # OrderAttribution (checkout), OrderStatusSync, HPOS-safe helpers
+│   │   ├── WooCommerce/           # OrderAttribution (checkout), OrderStatusSync, HPOS-safe helpers
+│   │   └── Dokan/                 # Integration (the settings subpage); Phase 4: VendorProgram, VendorRates, EarningsAdjuster, VendorCharge, RefundSync, VendorDashboard, ProductPromote, SuborderAttribution
 │   ├── Models/                    # BaseModel + data stores over the custom tables
 │   ├── Payout/                    # Manager, Payout model, CsvExporter
 │   ├── REST/                      # Manager, BaseController, AdminBaseController, controllers
@@ -134,7 +137,7 @@ flyaffiliate/
 ### Service Container
 Services are accessed via `flyaffiliate()->service_name` (magic getter) or `flyaffiliate()->get_container()->get( 'service_name' )`.
 
-Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Add a name here in the same commit that registers it.
+Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Arriving with Phase 4: `dokan` (only when Dokan is active). Add a name here in the same commit that registers it.
 
 The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
 
@@ -168,4 +171,5 @@ Namespace `flyaffiliate/v1`. Controllers extend `FlyAffiliate\REST\AdminBaseCont
 
 - **PHPUnit 9.6** with WP-PHPUnit, Brain Monkey, Mockery; all tests extend `FlyAffiliate\Test\FlyAffiliateTestCase`
 - Test factories in `tests/php/src/Factories/` (affiliate, commission, visit, payout, product, order)
+- Dokan-dependent tests carry `@group dokan` and skip themselves when Dokan is not loaded
 - Every money path has a test that asserts integer-cent equality and idempotency (hook fired twice → same result)

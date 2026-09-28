@@ -2,7 +2,12 @@
 /**
  * PHPUnit bootstrap.
  *
- * Loads WooCommerce, then FlyAffiliate, into the WordPress test environment.
+ * Loads WooCommerce, loads Dokan when it is installed, then FlyAffiliate, into
+ * the WordPress test environment.
+ *
+ * Dokan is optional on purpose: CI runs one leg of the matrix with Dokan absent,
+ * so a `@group dokan` test that forgot to skip itself fails there rather than
+ * passing by accident.
  *
  * @package FlyAffiliate
  */
@@ -14,6 +19,9 @@ require_once FLYAFFILIATE_TESTS_PLUGIN_DIR . '/vendor/autoload.php';
 
 /**
  * Find a plugin's directory, trying the names it is installed under.
+ *
+ * WooCommerce is always `woocommerce`. Dokan Lite is `dokan-lite` when installed
+ * from WordPress.org and `dokan` in a development checkout, so both are tried.
  *
  * @param string[] $candidates Directory names to try, in order.
  *
@@ -31,7 +39,8 @@ function flyaffiliate_tests_locate_plugin( array $candidates ): string {
 	return '';
 }
 
-$flyaffiliate_wc_dir = flyaffiliate_tests_locate_plugin( [ 'woocommerce' ] );
+$flyaffiliate_wc_dir    = flyaffiliate_tests_locate_plugin( [ 'woocommerce' ] );
+$flyaffiliate_dokan_dir = flyaffiliate_tests_locate_plugin( [ 'dokan-lite', 'dokan' ] );
 
 if ( '' === $flyaffiliate_wc_dir || ! file_exists( $flyaffiliate_wc_dir . '/woocommerce.php' ) ) {
 	echo 'WooCommerce was not found next to this plugin. Run `npm run env:start` first.' . PHP_EOL;
@@ -39,6 +48,14 @@ if ( '' === $flyaffiliate_wc_dir || ! file_exists( $flyaffiliate_wc_dir . '/wooc
 }
 
 define( 'FLYAFFILIATE_TESTS_WC_DIR', $flyaffiliate_wc_dir );
+define( 'FLYAFFILIATE_TESTS_DOKAN_DIR', $flyaffiliate_dokan_dir );
+
+/**
+ * Whether the suite is running with Dokan available.
+ *
+ * `@group dokan` tests skip themselves when this is false.
+ */
+define( 'FLYAFFILIATE_TESTS_HAS_DOKAN', '' !== $flyaffiliate_dokan_dir && file_exists( $flyaffiliate_dokan_dir . '/dokan.php' ) );
 
 $flyaffiliate_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : getenv( 'WP_PHPUNIT__DIR' );
 
@@ -81,6 +98,11 @@ tests_add_filter(
 		defined( 'WC_USE_TRANSACTIONS' ) || define( 'WC_USE_TRANSACTIONS', false );
 
 		require FLYAFFILIATE_TESTS_WC_DIR . '/woocommerce.php';
+
+		if ( FLYAFFILIATE_TESTS_HAS_DOKAN ) {
+			require FLYAFFILIATE_TESTS_DOKAN_DIR . '/dokan.php';
+		}
+
 		require FLYAFFILIATE_TESTS_PLUGIN_DIR . '/flyaffiliate.php';
 	}
 );
@@ -120,6 +142,13 @@ tests_add_filter(
 tests_add_filter(
 	'setup_theme',
 	static function () {
+		if ( FLYAFFILIATE_TESTS_HAS_DOKAN && function_exists( 'dokan' ) ) {
+			dokan()->activate();
+			echo 'Installed Dokan.' . PHP_EOL;
+		} else {
+			echo 'Running without Dokan: @group dokan tests will skip.' . PHP_EOL;
+		}
+
 		flyaffiliate()->activate();
 
 		// Empty the tables once, here, outside any test transaction. It cannot go

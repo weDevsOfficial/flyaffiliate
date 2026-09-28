@@ -248,7 +248,7 @@ class OrderAttribution implements Hookable {
 		/**
 		 * Filters the vendor an order item belongs to.
 		 *
-		 * 0 on a single-merchant store; a marketplace integration resolves the
+		 * 0 on a single-merchant store; the Dokan integration resolves the
 		 * product's store owner.
 		 *
 		 * @since FLYAFFILIATE_SINCE
