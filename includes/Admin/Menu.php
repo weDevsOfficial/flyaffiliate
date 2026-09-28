@@ -42,6 +42,7 @@ class Menu implements Hookable {
 	 */
 	public function register_hooks(): void {
 		add_action( 'admin_menu', [ $this, 'register_menu' ] );
+		add_action( 'admin_head', [ $this, 'hide_foreign_notices' ] );
 	}
 
 	/**
@@ -101,6 +102,30 @@ class Menu implements Hookable {
 	 */
 	public static function get_route_url( string $route = '' ): string {
 		return admin_url( 'admin.php?page=' . self::PARENT_SLUG . '#/' . ltrim( $route, '/' ) );
+	}
+
+	/**
+	 * Keep other plugins' notices off FlyAffiliate's own screens.
+	 *
+	 * The app has the page to itself, as WooCommerce's and Dokan's React
+	 * screens do; FlyAffiliate's own notices are put back after the removal.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return void
+	 */
+	public function hide_foreign_notices(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the page slug to decide what to render.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+		if ( self::PARENT_SLUG !== $page ) {
+			return;
+		}
+
+		remove_all_actions( 'admin_notices' );
+		remove_all_actions( 'all_admin_notices' );
+
+		add_action( 'admin_notices', [ flyaffiliate()->admin_notices, 'render' ] );
 	}
 
 	/**

@@ -291,10 +291,9 @@ contain no queries — the caller prepares the data.
   Use `text-foreground`/`text-muted-foreground`/`text-primary`, never
   `text-gray-*` or a hex colour, so a token change reaches every page.
 - `components/Layout.tsx` wraps every page in plugin-ui's `<TopBar>`; page
-  content starts with `<PageHeader>`. Other plugins' admin notices are left
-  alone on our screens (WordPress.org reads removing them as hijacking the
-  dashboard); register FlyAffiliate's own notices through
-  `Admin\Notices\Manager`, and only for our own screens.
+  content starts with `<PageHeader>`. `Menu::hide_foreign_notices()` keeps
+  other plugins' notices off the page — register FlyAffiliate's own notices
+  through `Admin\Notices\Manager`, which is put back after the removal.
 - Plural strings use `_n()`; never `thing(s)`. Zero or missing values render a
   dash or a muted label (`Unknown affiliate`), never a link to `#0`.
 - Styles are split the way Dokan splits them. `src/styles/tailwind.css` is the
