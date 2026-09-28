@@ -67,6 +67,9 @@ class Installer {
 	 * @return void
 	 */
 	public function do_install(): void {
+		// A first install has never stored a database version, as Dokan reads its own version option.
+		$first_install = false === get_option( self::DB_VERSION_OPTION, false );
+
 		$this->create_tables();
 		$this->create_options();
 		$this->create_roles();
@@ -75,8 +78,10 @@ class Installer {
 
 		update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
 
-		// The first admin page load after activation opens the setup wizard, as Dokan's does.
-		SetupWizard::schedule_redirect();
+		// Only a first install opens the setup wizard on the next admin page load, as Dokan's onboarding does.
+		if ( $first_install ) {
+			SetupWizard::schedule_redirect();
+		}
 
 		/**
 		 * Fires after FlyAffiliate has finished installing or repairing itself.

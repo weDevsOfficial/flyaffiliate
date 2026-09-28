@@ -95,7 +95,7 @@ class SetupWizard implements Hookable {
 	/**
 	 * Arm the one-time redirect.
 	 *
-	 * Called by the installer, not from a hook: activation runs the installer
+	 * Called by the installer on a first install only, not from a hook: activation runs the installer
 	 * after `init`, when the plugin's own listeners are not attached yet, so a
 	 * hook here would never fire on the activation that matters.
 	 *

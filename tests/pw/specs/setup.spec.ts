@@ -30,6 +30,17 @@ test.describe( 'Setup wizard', () => {
 		await expect(
 			page.locator( '#flyaffiliate-setup-cookie_duration' )
 		).toBeVisible();
+
+		// Back returns to the previous step with what was entered.
+		await page.getByTestId( 'flyaffiliate-setup-back' ).click();
+		await expect(
+			page.getByTestId( 'flyaffiliate-setup-step-commissions' )
+		).toHaveAttribute( 'data-state', 'active' );
+		await expect( maxRate ).toHaveValue( '60' );
+		await expect(
+			page.getByTestId( 'flyaffiliate-setup-back' )
+		).toHaveCount( 0 );
+		await page.getByTestId( 'flyaffiliate-setup-continue' ).click();
 		await page.getByTestId( 'flyaffiliate-setup-continue' ).click();
 
 		await expect(
