@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use FlyAffiliate\Admin\Settings\Repository\SettingsRepository;
-use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Admin\Settings\Schema\SettingsSchema;
 use FlyAffiliate\Affiliate\Role;
+use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Models\Affiliate;
 
 /**
@@ -53,7 +53,7 @@ class Installer {
 	const PAGES_OPTION = 'flyaffiliate_pages';
 
 	/**
-	 * The recurring Action Scheduler hook that matures commissions.
+	 * The recurring daily hook. It once matured commissions; nothing listens to it since ADR-0014.
 	 *
 	 * @var string
 	 */

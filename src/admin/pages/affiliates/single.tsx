@@ -200,7 +200,7 @@ export default function AffiliatePage() {
 					label={ __( 'Pending', 'flyaffiliate' ) }
 					value={ formatMoney( totals?.pending ?? 0 ) }
 					tooltip={ __(
-						'Commissions still inside their hold period.',
+						'Commissions waiting for their order to be paid.',
 						'flyaffiliate'
 					) }
 				/>

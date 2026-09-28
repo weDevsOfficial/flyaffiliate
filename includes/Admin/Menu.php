@@ -92,6 +92,18 @@ class Menu implements Hookable {
 	}
 
 	/**
+	 * Whether the current admin request is for one of the plugin's screens.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return bool
+	 */
+	public static function is_plugin_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the page slug to decide what to render changes nothing.
+		return isset( $_GET['page'] ) && self::PARENT_SLUG === sanitize_key( wp_unslash( $_GET['page'] ) );
+	}
+
+	/**
 	 * The admin URL of a route.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -115,10 +127,7 @@ class Menu implements Hookable {
 	 * @return void
 	 */
 	public function hide_foreign_notices(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the page slug to decide what to render.
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-
-		if ( self::PARENT_SLUG !== $page ) {
+		if ( ! self::is_plugin_screen() ) {
 			return;
 		}
 
