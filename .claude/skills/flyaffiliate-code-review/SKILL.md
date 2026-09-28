@@ -31,8 +31,10 @@ Check against `CONTEXT.md`; these are not matters of opinion.
   marking on `payout_id`. Ask:
   what happens when this hook fires twice?
 - A `paid` commission edited, rescaled, or deleted. `paid` is terminal.
-- A commission maturing without both conditions: hold period elapsed **and**
-  order `processing` or `completed`.
+- A commission becoming `unpaid` for any reason other than its order reaching
+  `processing` or `completed` (cash on delivery: `completed`) or an admin
+  moving it; a payout taking an `unpaid` commission whose `matures_at` is
+  still in the future (ADR-0014).
 - A refund rescaling by the order's refunded fraction rather than the **item's**.
 - Shipping or tax included in the base amount when the setting excludes them.
 - More than one affiliate attributed to an order.

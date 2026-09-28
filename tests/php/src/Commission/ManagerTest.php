@@ -67,7 +67,11 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$this->assertSame( Commission::STATUS_PENDING, $commission->get( 'status' ) );
 		$this->assertSame( 777, $commission->get( 'order_id' ) );
 		$this->assertSame( '2026-01-05 10:00:00', $commission->get( 'created_at' ) );
-		$this->assertSame( '2026-01-15 10:00:00', $commission->get( 'matures_at' ), 'a pending commission matures hold_days after the date it was given' );
+		$this->assertSame( '2026-01-15 10:00:00', $commission->get( 'matures_at' ), 'the hold period counts from the date it was given' );
+
+		$unpaid = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 4, 'status' => Commission::STATUS_UNPAID, 'created_at' => '2026-01-05 10:00:00' ] );
+
+		$this->assertSame( '2026-01-15 10:00:00', $unpaid->get( 'matures_at' ), 'an unpaid commission entered by hand waits out the hold before a payout takes it' );
 
 		$paid = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate->get_id(), 'amount' => 4, 'status' => Commission::STATUS_PAID ] );
 
@@ -314,7 +318,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$automatic = $manager->set_status( $first, Commission::STATUS_REJECTED, true );
 
-		$this->assertWPError( $automatic, 'an order status change or the maturation job leaves it alone' );
+		$this->assertWPError( $automatic, 'an order status change leaves it alone' );
 		$this->assertSame( 'flyaffiliate_commission_in_payout', $automatic->get_error_code() );
 		$this->assertSame( Commission::STATUS_UNPAID, $manager->get( $first )->get( 'status' ) );
 

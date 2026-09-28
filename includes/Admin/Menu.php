@@ -42,6 +42,7 @@ class Menu implements Hookable {
 	 */
 	public function register_hooks(): void {
 		add_action( 'admin_menu', [ $this, 'register_menu' ] );
+		add_action( 'admin_head', [ $this, 'hide_foreign_notices' ] );
 	}
 
 	/**
@@ -91,6 +92,18 @@ class Menu implements Hookable {
 	}
 
 	/**
+	 * Whether the current admin request is for one of the plugin's screens.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return bool
+	 */
+	public static function is_plugin_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the page slug to decide what to render changes nothing.
+		return isset( $_GET['page'] ) && self::PARENT_SLUG === sanitize_key( wp_unslash( $_GET['page'] ) );
+	}
+
+	/**
 	 * The admin URL of a route.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -101,6 +114,27 @@ class Menu implements Hookable {
 	 */
 	public static function get_route_url( string $route = '' ): string {
 		return admin_url( 'admin.php?page=' . self::PARENT_SLUG . '#/' . ltrim( $route, '/' ) );
+	}
+
+	/**
+	 * Keep other plugins' notices off FlyAffiliate's own screens.
+	 *
+	 * The app has the page to itself, as WooCommerce's and Dokan's React
+	 * screens do; FlyAffiliate's own notices are put back after the removal.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return void
+	 */
+	public function hide_foreign_notices(): void {
+		if ( ! self::is_plugin_screen() ) {
+			return;
+		}
+
+		remove_all_actions( 'admin_notices' );
+		remove_all_actions( 'all_admin_notices' );
+
+		add_action( 'admin_notices', [ flyaffiliate()->admin_notices, 'render' ] );
 	}
 
 	/**
