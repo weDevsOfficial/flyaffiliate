@@ -13,6 +13,7 @@ import {
 import StatusBadge from '@/components/StatusBadge';
 import DateTime from '@/components/DateTime';
 import Matures from '@/components/Matures';
+import VendorTermsHint from '@/components/VendorTermsHint';
 import Money from '@/components/Money';
 import { useListView } from '@/hooks/useListView';
 import { useCounts } from '@/hooks/useCounts';
@@ -102,7 +103,10 @@ export default function CommissionsTable( { dates }: { dates: DateArgs } ) {
 			id: 'amount',
 			label: __( 'Amount', 'flyaffiliate' ),
 			render: ( { item } ) => (
-				<Money amount={ item.amount } className="font-semibold" />
+				<span className="inline-flex items-center gap-1.5">
+					<Money amount={ item.amount } className="font-semibold" />
+					<VendorTermsHint program={ item.vendor_program } />
+				</span>
 			),
 		},
 		{

@@ -1,9 +1,33 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
+const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 
 const root = __dirname;
+
+// The page inside Dokan's vendor dashboard is built on its own, against Dokan's shared components.
+const DOKAN_ENTRY = 'dokan-vendor';
+
+// What Dokan shares with a script on its vendor dashboard: the import, its global, its script handle.
+const DOKAN_EXTERNALS = {
+	'@dokan/components': {
+		external: [ 'dokan', 'components' ],
+		handle: 'dokan-react-components',
+	},
+	'@dokan/utilities': {
+		external: [ 'dokan', 'utilities' ],
+		handle: 'dokan-utilities',
+	},
+	'@dokan/hooks': {
+		external: [ 'dokan', 'reactHooks' ],
+		handle: 'dokan-hooks',
+	},
+	'@wedevs/plugin-ui': {
+		external: [ 'dokan', 'pluginUI' ],
+		handle: 'dokan-plugin-ui',
+	},
+};
 
 /**
  * List files in a directory that match an extension, tolerating a missing directory.
@@ -46,7 +70,7 @@ const srcDir = path.resolve( root, 'src' );
 
 if ( fs.existsSync( srcDir ) ) {
 	fs.readdirSync( srcDir, { withFileTypes: true } )
-		.filter( ( item ) => item.isDirectory() )
+		.filter( ( item ) => item.isDirectory() && item.name !== DOKAN_ENTRY )
 		.forEach( ( item ) => {
 			const match = [ 'index.tsx', 'index.ts', 'index.jsx', 'index.js' ]
 				.map( ( file ) => path.join( srcDir, item.name, file ) )
@@ -202,23 +226,28 @@ class RemoveRemoteUrlsPlugin {
 	}
 }
 
-module.exports = {
+const resolve = {
+	...defaultConfig.resolve,
+	alias: {
+		...( defaultConfig.resolve && defaultConfig.resolve.alias ),
+		'@': path.resolve( root, 'src/admin' ),
+	},
+};
+
+const dokanOutput = new RegExp( `^js/${ DOKAN_ENTRY }\\.` );
+
+const apps = {
 	...defaultConfig,
 	entry,
-	resolve: {
-		...defaultConfig.resolve,
-		alias: {
-			...( defaultConfig.resolve && defaultConfig.resolve.alias ),
-			'@': path.resolve( root, 'src/admin' ),
-		},
-	},
+	resolve,
 	output: {
 		...defaultConfig.output,
 		path: path.resolve( root, 'assets' ),
 		filename: '[name].js',
-		// assets/ also holds the sources (assets/src); only the built css/ and js/ are cleared.
+		// assets/ also holds the sources (assets/src); only the built css/ and js/ are cleared, and the Dokan build's files are its own.
 		clean: {
-			keep: ( asset ) => ! /^(css|js)\//.test( asset ),
+			keep: ( asset ) =>
+				! /^(css|js)\//.test( asset ) || dokanOutput.test( asset ),
 		},
 	},
 	plugins: [
@@ -229,3 +258,34 @@ module.exports = {
 		new MoveStylesToCssDirPlugin(),
 	],
 };
+
+const dokanSource = path.resolve( root, 'src', DOKAN_ENTRY, 'index.tsx' );
+
+// The vendor dashboard page bundles no component library of its own: Dokan's is already on the page.
+const dokan = {
+	...defaultConfig,
+	name: DOKAN_ENTRY,
+	entry: { [ `js/${ DOKAN_ENTRY }` ]: dokanSource },
+	resolve,
+	output: {
+		...defaultConfig.output,
+		path: path.resolve( root, 'assets' ),
+		filename: '[name].js',
+		clean: false,
+	},
+	plugins: [
+		...defaultConfig.plugins.filter(
+			( plugin ) =>
+				plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
+		),
+		new DependencyExtractionWebpackPlugin( {
+			requestToExternal: ( request ) =>
+				DOKAN_EXTERNALS[ request ]?.external,
+			requestToHandle: ( request ) => DOKAN_EXTERNALS[ request ]?.handle,
+		} ),
+		new RemoveRemoteUrlsPlugin(),
+		new MoveStylesToCssDirPlugin(),
+	],
+};
+
+module.exports = fs.existsSync( dokanSource ) ? [ apps, dokan ] : apps;

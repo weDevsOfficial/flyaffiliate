@@ -383,9 +383,24 @@ once `dokan_loaded` has fired, behind `function_exists( 'dokan' )`.
 `IntegrationServiceProvider::boot()` adds `DokanServiceProvider` straight away
 when `did_action( 'dokan_loaded' )` (Dokan fires it from `woocommerce_loaded`,
 before our `plugins_loaded` callback) and listens for it otherwise. Its
-`Integrations\Dokan\Integration` adds the Integrations → Dokan subpage, so an
-admin without a marketplace never sees vendor programs. The plugin is fully
-functional with Dokan absent; no other directory may reference a Dokan symbol.
+vendor-program settings live **inside Dokan's admin settings**, not in
+FlyAffiliate's: `Integrations\Dokan\AdminSettings` adds a sub-section to the
+legacy "Selling Options" (`dokan_settings_selling_options`) and a "FlyAffiliate"
+page to the new screen (`dokan_get_admin_settings_schema`), every new field
+naming its `legacy_key` so both edit the same `dokan_selling` keys, read with
+`Integrations\Dokan\Settings` (`dokan_get_option()`). A vendor overrides the
+rate and commission lock as in Dokan's Delivery Time module:
+`VendorProgram` resolves (vendor value only when the marketplace allows vendor
+settings and the vendor switched theirs on), `VendorSettings` adds the vendor's
+tab to both vendor settings screens (legacy `dokan_render_settings_content` +
+POST, new `dokan_get_vendor_settings_schema`), and `VendorRates` feeds the
+neutral seams (`flyaffiliate_order_item_vendor_id`, `flyaffiliate_vendor_rate`,
+`flyaffiliate_hold_days`). `StorefrontNotices` shows the terms to affiliates and
+vendors only; `VendorDashboard` + `REST\VendorAffiliatesController` are the
+vendor dashboard's Affiliates page, a route of Dokan's React dashboard built by
+the separate `dokan-vendor` webpack config against Dokan's shared components.
+The plugin is fully functional with Dokan absent; no other directory may
+reference a Dokan symbol.
 
 The rules in `CONTEXT.md` → "Dokan rules" and ADR-0004 are binding. The short
 version, so you do not have to relearn it:

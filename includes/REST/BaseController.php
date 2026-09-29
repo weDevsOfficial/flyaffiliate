@@ -148,6 +148,19 @@ abstract class BaseController extends WP_REST_Controller {
 	}
 
 	/**
+	 * Format a stored datetime as RFC3339 for the response.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param string|null $value Stored `Y-m-d H:i:s` value, in GMT.
+	 *
+	 * @return string|null
+	 */
+	protected function prepare_date( $value ): ?string {
+		return empty( $value ) ? null : mysql_to_rfc3339( (string) $value );
+	}
+
+	/**
 	 * An affiliate's display name, for rows that only carry the id.
 	 *
 	 * Cached for the request: a page of commissions repeats the same few

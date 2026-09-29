@@ -162,6 +162,10 @@ class HoldPeriod implements Hookable {
 	 * commission was created. Rejected commissions move too: one whose order
 	 * recovers goes back to pending and must mature on the current hold.
 	 *
+	 * A vendor's commissions are rescheduled one vendor at a time, because a
+	 * marketplace integration may hold each vendor's sales for a different
+	 * time (`flyaffiliate_hold_days`).
+	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @param int $hold_days The hold period in days.
@@ -171,15 +175,75 @@ class HoldPeriod implements Hookable {
 	public function reschedule( int $hold_days ): int {
 		global $wpdb;
 
-		$table = Commission::get_table();
+		$table   = Commission::get_table();
+		$updated = $this->reschedule_rows( [ 0 ], $hold_days );
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- FlyAffiliate's own table; the only interpolation is its name, the values are placeholders.
-		$updated = $wpdb->query(
+		$vendor_ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"UPDATE {$table} SET matures_at = DATE_ADD( created_at, INTERVAL %d DAY ) WHERE status IN ( %s, %s ) AND created_at IS NOT NULL",
-				max( 0, $hold_days ),
+				"SELECT DISTINCT vendor_id FROM {$table} WHERE vendor_id > 0 AND status IN ( %s, %s )",
 				Commission::STATUS_PENDING,
 				Commission::STATUS_REJECTED
+			)
+		);
+		// phpcs:enable
+
+		$vendor_ids = array_map( 'intval', $vendor_ids );
+
+		// One read of every vendor's settings, then one update per distinct hold rather than per vendor.
+		update_meta_cache( 'user', $vendor_ids );
+
+		$by_hold = [];
+
+		foreach ( $vendor_ids as $vendor_id ) {
+			$by_hold[ flyaffiliate()->commission->get_hold_days( $vendor_id ) ][] = $vendor_id;
+		}
+
+		foreach ( $by_hold as $days => $ids ) {
+			$updated += $this->reschedule_rows( $ids, (int) $days );
+		}
+
+		return $updated;
+	}
+
+	/**
+	 * Recompute the maturity date of one vendor's commissions.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int $vendor_id The vendor.
+	 *
+	 * @return int How many rows were updated.
+	 */
+	public function reschedule_vendor( int $vendor_id ): int {
+		if ( $vendor_id <= 0 ) {
+			return 0;
+		}
+
+		return $this->reschedule_rows( [ $vendor_id ], flyaffiliate()->commission->get_hold_days( $vendor_id ) );
+	}
+
+	/**
+	 * Move the maturity date of the rows of some vendors, or of no vendor.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int[] $vendor_ids The vendors; 0 stands for the commissions without one.
+	 * @param int   $hold_days  The hold period in days.
+	 *
+	 * @return int How many rows were updated.
+	 */
+	protected function reschedule_rows( array $vendor_ids, int $hold_days ): int {
+		global $wpdb;
+
+		$table        = Commission::get_table();
+		$placeholders = implode( ', ', array_fill( 0, count( $vendor_ids ), '%d' ) );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- FlyAffiliate's own table; the only interpolation is its name and one %d per vendor id, the values are placeholders.
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET matures_at = DATE_ADD( created_at, INTERVAL %d DAY ) WHERE status IN ( %s, %s ) AND created_at IS NOT NULL AND vendor_id IN ( {$placeholders} )",
+				array_merge( [ max( 0, $hold_days ), Commission::STATUS_PENDING, Commission::STATUS_REJECTED ], $vendor_ids )
 			)
 		);
 		// phpcs:enable

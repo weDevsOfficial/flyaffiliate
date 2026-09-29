@@ -35,15 +35,15 @@ class DokanIntegrationTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * The Integrations → Dokan subpage and its fields are in the settings schema.
+	 * The vendor-program settings live in Dokan's admin settings, not in FlyAffiliate's own.
 	 */
-	public function test_dokan_settings_are_in_the_schema(): void {
+	public function test_dokan_settings_are_not_in_the_plugins_own_schema(): void {
 		$ids = array_column( SettingsSchema::get_schema(), 'id' );
 
 		foreach ( [ 'dokan', 'dokan_settings', 'dokan_vendor_programs', 'dokan_vendor_can_set_rate', 'dokan_vendor_max_rate' ] as $id ) {
-			$this->assertContains( $id, $ids );
+			$this->assertNotContains( $id, $ids );
 		}
 
-		$this->assertSame( 50.0, SettingsSchema::get_defaults()['dokan_vendor_max_rate'] );
+		$this->assertInstanceOf( \FlyAffiliate\Integrations\Dokan\VendorProgram::class, flyaffiliate()->dokan );
 	}
 }

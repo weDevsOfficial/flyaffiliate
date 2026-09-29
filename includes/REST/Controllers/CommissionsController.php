@@ -282,6 +282,19 @@ class CommissionsController extends AdminBaseController {
 			'updated_at'    => $this->prepare_date( $item->get( 'updated_at' ) ),
 		];
 
+		/**
+		 * Filters a commission before it is sent.
+		 *
+		 * A marketplace integration adds the vendor's terms here.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param array<string, mixed> $data    The response fields.
+		 * @param Commission           $item    The commission.
+		 * @param WP_REST_Request      $request The request.
+		 */
+		$data = (array) apply_filters( 'flyaffiliate_rest_prepare_commission', $data, $item, $request );
+
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );
 
 		return $this->add_links( $response, $this->prepare_links( $item ) );
@@ -545,18 +558,5 @@ class CommissionsController extends AdminBaseController {
 	 */
 	protected function not_found(): WP_Error {
 		return new WP_Error( 'flyaffiliate_rest_commission_not_found', __( 'No commission with that ID.', 'flyaffiliate' ), [ 'status' => 404 ] );
-	}
-
-	/**
-	 * Format a stored datetime as RFC3339.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string|null $value Stored GMT value.
-	 *
-	 * @return string|null
-	 */
-	protected function prepare_date( $value ): ?string {
-		return empty( $value ) ? null : mysql_to_rfc3339( (string) $value );
 	}
 }

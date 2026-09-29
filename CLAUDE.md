@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) and Dokan Lite (5.0+). This branch (`feature/dokan-integration`) is `develop` plus the Dokan integration: the `dokan_loaded` provider, the Integrations → Dokan settings, the `hasDokan` admin global and the with/without-Dokan test legs. Keep `develop` free of it — the neutral seams live there (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters) — and merge `develop` in to stay in sync.
+FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) and Dokan Lite (5.0+). This branch (`feature/dokan-integration`) is `develop` plus the Dokan integration: the `dokan_loaded` provider, the vendor-program settings inside Dokan's own admin settings (legacy Selling Options sub-section and a FlyAffiliate page on the new screen), the vendor's own rate and lock, the storefront notices, the vendor dashboard's Affiliates page, the `hasDokan` admin global and the with/without-Dokan test legs. Keep `develop` free of it — the neutral seams live there (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters) — and merge `develop` in to stay in sync.
 
 The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service providers, `Hookable` classes, `Manager` facades, overridable templates, an `Installer`/`Upgrade` pair, `FlyAffiliateTestCase`-based PHPUnit tests. Anyone who knows the Dokan codebase should feel at home here.
 
@@ -109,7 +109,7 @@ flyaffiliate/
 │   ├── Install/                   # Installer (dbDelta, pages, options, cron)
 │   ├── Integrations/
 │   │   ├── WooCommerce/           # OrderAttribution (checkout), OrderStatusSync, HPOS-safe helpers
-│   │   └── Dokan/                 # Integration (the settings subpage); Phase 4: VendorProgram, VendorRates, EarningsAdjuster, VendorCharge, RefundSync, VendorDashboard, ProductPromote, SuborderAttribution
+│   │   └── Dokan/                 # Settings, AdminSettings (inside Dokan's settings), VendorProgram (resolver), VendorRates (money seams), VendorSettings, StorefrontNotices, VendorDashboard, REST/; still to come: EarningsAdjuster, VendorCharge, RefundSync
 │   ├── Models/                    # BaseModel + data stores over the custom tables
 │   ├── Payout/                    # Manager, Payout model, CsvExporter
 │   ├── REST/                      # Manager, BaseController, AdminBaseController, controllers
@@ -137,7 +137,7 @@ flyaffiliate/
 ### Service Container
 Services are accessed via `flyaffiliate()->service_name` (magic getter) or `flyaffiliate()->get_container()->get( 'service_name' )`.
 
-Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Arriving with Phase 4: `dokan` (only when Dokan is active). Add a name here in the same commit that registers it.
+Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`, and `dokan` (`Integrations\Dokan\VendorProgram`, only when Dokan is active). Add a name here in the same commit that registers it.
 
 The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
 

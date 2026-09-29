@@ -34,6 +34,7 @@ import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import DateTime from '@/components/DateTime';
 import Matures from '@/components/Matures';
+import VendorTermsHint from '@/components/VendorTermsHint';
 import Money from '@/components/Money';
 import AffiliatePicker from '@/components/AffiliatePicker';
 import { useListView } from '@/hooks/useListView';
@@ -231,12 +232,13 @@ export function CommissionsTable( {
 				item.source === 'manual' ? (
 					<span className="text-muted-foreground">—</span>
 				) : (
-					<span>
+					<span className="inline-flex items-center gap-1.5">
 						{ item.rate_type === 'percentage' ? (
 							`${ item.rate }%`
 						) : (
 							<Money amount={ item.rate } />
 						) }
+						<VendorTermsHint program={ item.vendor_program } />
 					</span>
 				),
 		},

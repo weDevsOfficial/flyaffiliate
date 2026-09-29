@@ -282,7 +282,7 @@ class OrderAttribution implements Hookable {
 				'source'        => Commission::SOURCE_WOOCOMMERCE,
 				'type'          => Commission::TYPE_SALE,
 				'status'        => Commission::STATUS_PENDING,
-				'matures_at'    => flyaffiliate()->commission->maturation_date(),
+				'matures_at'    => flyaffiliate()->commission->maturation_date( '', $vendor_id ),
 				'created_at'    => current_time( 'mysql', true ),
 			]
 		);

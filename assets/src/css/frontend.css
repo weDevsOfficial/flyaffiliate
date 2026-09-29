@@ -132,3 +132,60 @@
 	height: 1px;
 	overflow: hidden;
 }
+
+/*
+ * What an affiliate earns, on the shop loop and the product page of a
+ * marketplace. Shown to affiliates and vendors only.
+ */
+.flyaffiliate-terms {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px 8px;
+	align-items: center;
+	margin: 6px 0;
+	font-size: 13px;
+	line-height: 1.4;
+	color: #6b7280;
+}
+
+.flyaffiliate-terms__rate {
+	font-weight: 600;
+	color: #0d7377;
+}
+
+.flyaffiliate-terms__lock::before,
+.flyaffiliate-terms__origin::before {
+	margin-right: 8px;
+	content: "\00b7";
+}
+
+/* In the shop loop the column is narrow: rate and lock on two lines, no separator to strand. */
+.flyaffiliate-terms--loop {
+	display: block;
+}
+
+/* Block elements take the theme's alignment of the product card, left or centred. */
+.flyaffiliate-terms--loop > span {
+	display: block;
+}
+
+.flyaffiliate-terms--loop .flyaffiliate-terms__lock::before {
+	content: none;
+}
+
+.flyaffiliate-terms--single {
+	padding: 10px 14px;
+	margin: 0 0 16px;
+	font-size: 14px;
+	background: #f0fdfa;
+	border: 1px solid #ccfbf1;
+	border-radius: 6px;
+}
+
+.flyaffiliate-store-notice p {
+	margin: 0;
+}
+
+.flyaffiliate-store-notice strong {
+	margin-right: 6px;
+}
