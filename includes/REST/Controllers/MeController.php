@@ -92,6 +92,52 @@ class MeController extends AffiliateBaseController {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/referral-links',
+			[
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_referral_links' ],
+					'permission_callback' => [ $this, 'get_items_permissions_check' ],
+					'args'                => $this->get_collection_params(),
+				],
+				[
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'create_referral_link' ],
+					'permission_callback' => [ $this, 'check_affiliate_permission' ],
+					'args'                => [
+						// Not sanitize_text_field(), which strips percent-encoded characters:
+						// ReferralLink\Manager::normalize_url() checks the host and escapes it.
+						'url' => [
+							'description' => __( 'The page of this site to link to.', 'flyaffiliate' ),
+							'type'        => 'string',
+							'required'    => true,
+						],
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/referral-links/(?P<id>[\\d]+)',
+			[
+				[
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => [ $this, 'delete_referral_link' ],
+					'permission_callback' => [ $this, 'check_affiliate_permission' ],
+					'args'                => [
+						'id' => [
+							'description' => __( 'The referral link.', 'flyaffiliate' ),
+							'type'        => 'integer',
+							'required'    => true,
+						],
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/commissions/(?P<id>[\\d]+)',
 			[
 				[
@@ -325,6 +371,92 @@ class MeController extends AffiliateBaseController {
 		$args  = $this->list_args( $request, $where, [ 'id', 'amount', 'created_at' ] );
 
 		return $this->list_response( new PayoutsController(), flyaffiliate()->payout, $args, $request );
+	}
+
+	/**
+	 * The affiliate's saved referral links, newest first, with their visits.
+	 *
+	 * A link is listed whatever the dashboard's date range; the range is a
+	 * filter on traffic, and the list is of links.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_referral_links( $request ) {
+		$args = $this->list_args( $request, [ 'affiliate_id' => $this->get_current_affiliate()->get_id() ], [ 'id', 'created_at' ] );
+
+		unset( $args['after'], $args['before'] );
+
+		return ( new ReferralLinksController() )->prepare_collection(
+			flyaffiliate()->referral_link->query( $args ),
+			flyaffiliate()->referral_link->count( $args ),
+			(int) $args['per_page'],
+			$request
+		);
+	}
+
+	/**
+	 * Save a page of this site as one of the affiliate's referral links.
+	 *
+	 * Saving a page that is already in the list returns that link with a 200
+	 * rather than a second copy with a 201.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function create_referral_link( $request ) {
+		$affiliate_id = $this->get_current_affiliate()->get_id();
+		$url          = (string) $request['url'];
+		$existing     = flyaffiliate()->referral_link->find_by_url( $affiliate_id, $url );
+		$link         = $existing ?? flyaffiliate()->referral_link->create( $affiliate_id, $url );
+
+		if ( is_wp_error( $link ) ) {
+			return $link;
+		}
+
+		$response = ( new ReferralLinksController() )->prepare_item_for_response( $link, $request );
+		$response->set_status( null === $existing ? 201 : 200 );
+
+		return $response;
+	}
+
+	/**
+	 * Remove one of the affiliate's referral links from their list.
+	 *
+	 * The link keeps working wherever it was shared; see ReferralLink\Manager.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_referral_link( $request ) {
+		$link = flyaffiliate()->referral_link->get( (int) $request['id'] );
+
+		// Someone else's link is reported as missing, not as forbidden.
+		if ( null === $link || (int) $link->get( 'affiliate_id' ) !== $this->get_current_affiliate()->get_id() ) {
+			return new WP_Error( 'flyaffiliate_rest_referral_link_not_found', __( 'No referral link with that ID.', 'flyaffiliate' ), [ 'status' => 404 ] );
+		}
+
+		$previous = ( new ReferralLinksController() )->prepare_item_for_response( $link, $request );
+
+		if ( ! flyaffiliate()->referral_link->delete( $link->get_id() ) ) {
+			return new WP_Error( 'flyaffiliate_rest_delete_failed', __( 'The link could not be removed.', 'flyaffiliate' ), [ 'status' => 500 ] );
+		}
+
+		return rest_ensure_response(
+			[
+				'deleted'  => true,
+				'previous' => $previous->get_data(),
+			]
+		);
 	}
 
 	/**

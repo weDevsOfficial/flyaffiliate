@@ -29,7 +29,7 @@ class ControllersTest extends FlyAffiliateTestCase {
 	public function test_the_routes_are_registered(): void {
 		$routes = $this->server->get_routes();
 
-		foreach ( [ 'commissions', 'visits', 'payouts', 'payouts/preview', 'settings', 'setup/complete' ] as $route ) {
+		foreach ( [ 'commissions', 'visits', 'referral-links', 'payouts', 'payouts/preview', 'settings', 'setup/complete' ] as $route ) {
 			$this->assertArrayHasKey( '/flyaffiliate/v1/' . $route, $routes );
 		}
 	}
@@ -42,7 +42,7 @@ class ControllersTest extends FlyAffiliateTestCase {
 	public function test_collections_refuse_a_customer(): void {
 		$this->acting_as( $this->customer_id );
 
-		foreach ( [ 'commissions', 'visits', 'payouts', 'settings' ] as $route ) {
+		foreach ( [ 'commissions', 'visits', 'referral-links', 'payouts', 'settings' ] as $route ) {
 			$this->assertSame( 403, $this->get_request( '/' . $route )->get_status(), $route );
 		}
 	}
