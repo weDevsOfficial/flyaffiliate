@@ -17,12 +17,13 @@ use WP_UnitTest_Factory;
  *
  * @since FLYAFFILIATE_SINCE
  *
- * @property AffiliateFactory  $affiliate
- * @property CommissionFactory $commission
- * @property VisitFactory      $visit
- * @property PayoutFactory     $payout
- * @property ProductFactory    $product
- * @property OrderFactory      $order
+ * @property AffiliateFactory    $affiliate
+ * @property CommissionFactory   $commission
+ * @property VisitFactory        $visit
+ * @property ReferralLinkFactory $referral_link
+ * @property PayoutFactory       $payout
+ * @property ProductFactory      $product
+ * @property OrderFactory        $order
  */
 class FlyAffiliateFactory extends WP_UnitTest_Factory {
 
@@ -46,6 +47,13 @@ class FlyAffiliateFactory extends WP_UnitTest_Factory {
 	 * @var VisitFactory
 	 */
 	public $visit;
+
+	/**
+	 * Referral links.
+	 *
+	 * @var ReferralLinkFactory
+	 */
+	public $referral_link;
 
 	/**
 	 * Payouts.
@@ -76,11 +84,12 @@ class FlyAffiliateFactory extends WP_UnitTest_Factory {
 	public function __construct() {
 		parent::__construct();
 
-		$this->affiliate  = new AffiliateFactory( $this );
-		$this->commission = new CommissionFactory( $this );
-		$this->visit      = new VisitFactory( $this );
-		$this->payout     = new PayoutFactory( $this );
-		$this->product    = new ProductFactory( $this );
-		$this->order      = new OrderFactory( $this );
+		$this->affiliate     = new AffiliateFactory( $this );
+		$this->commission    = new CommissionFactory( $this );
+		$this->visit         = new VisitFactory( $this );
+		$this->referral_link = new ReferralLinkFactory( $this );
+		$this->payout        = new PayoutFactory( $this );
+		$this->product       = new ProductFactory( $this );
+		$this->order         = new OrderFactory( $this );
 	}
 }
