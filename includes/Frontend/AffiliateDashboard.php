@@ -44,6 +44,7 @@ class AffiliateDashboard extends Shortcode {
 	public function get_tabs(): array {
 		return [
 			'overview'    => __( 'Overview', 'flyaffiliate' ),
+			'links'       => __( 'Referral links', 'flyaffiliate' ),
 			'commissions' => __( 'Commissions', 'flyaffiliate' ),
 			'visits'      => __( 'Visits', 'flyaffiliate' ),
 			'payouts'     => __( 'Payouts', 'flyaffiliate' ),

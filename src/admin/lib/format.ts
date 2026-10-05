@@ -97,3 +97,20 @@ export function toYmd( date: Date ): string {
 		date.getDate()
 	) }`;
 }
+
+/**
+ * A URL of this site as its path, query and fragment: every link in a list
+ * shares the host, so the part that tells them apart is what is shown.
+ *
+ * @param {string} url A URL.
+ * @return {string} The path onwards, or the URL itself when it cannot be parsed.
+ */
+export function toSitePath( url: string ): string {
+	try {
+		const parsed = new URL( url );
+
+		return parsed.pathname + parsed.search + parsed.hash;
+	} catch ( error ) {
+		return url;
+	}
+}
