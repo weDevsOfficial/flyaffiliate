@@ -197,7 +197,7 @@ export default function ReferralLinksPage( {
 
 					<GenerateLink
 						referralUrl={ profile.referral_url }
-						onSaved={ list.refresh }
+						onSaved={ () => list.refresh() }
 					/>
 				</div>
 			) : (

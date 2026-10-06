@@ -10,6 +10,8 @@ export type CurrencyConfig = {
 	thousandSeparator: string;
 };
 
+import type { PayoutMethodInfo } from './types';
+
 export type AdminGlobals = {
 	version: string;
 	restNonce: string;
@@ -37,12 +39,20 @@ export type AdminGlobals = {
 	statuses: {
 		affiliate: Record< string, string >;
 		commission: Record< string, string >;
+		/** What an automatic payout method reports about a payment. */
+		transfer: Record< string, string >;
+		/** Where a payout stands. */
+		batch: Record< string, string >;
 	};
 	sources: Record< string, string >;
 	/** The origins a new commission may be given: manual, plus each active integration's. */
 	availableSources: Record< string, string >;
 	types: Record< string, string >;
 	methods: Record< string, string >;
+	/** Every payout method (admin), or the ones an affiliate can choose (dashboard). */
+	payoutMethods: PayoutMethodInfo[];
+	/** Only on the affiliate dashboard page: the method an affiliate gets without choosing. */
+	payoutDefault?: string;
 	/** Only on the affiliate dashboard page. */
 	dashboard: {
 		tab: string;
@@ -87,11 +97,12 @@ const fallback: AdminGlobals = {
 		orders: '',
 		products: '',
 	},
-	statuses: { affiliate: {}, commission: {} },
+	statuses: { affiliate: {}, commission: {}, transfer: {}, batch: {} },
 	sources: {},
 	availableSources: { manual: 'Manual' },
 	types: {},
 	methods: {},
+	payoutMethods: [],
 	dashboard: { tab: 'overview', notice: '' },
 	program: {
 		rate: 0,

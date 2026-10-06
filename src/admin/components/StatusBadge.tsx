@@ -16,6 +16,13 @@ const TONES: Record< string, Tone > = {
 	inactive: 'neutral',
 	suspended: 'danger',
 	rejected: 'danger',
+	// Transfers by an automatic payout method, and the payouts they make up.
+	queued: 'neutral',
+	processing: 'info',
+	failed: 'danger',
+	not_sent: 'warning',
+	unavailable: 'neutral',
+	needs_attention: 'danger',
 };
 
 const CLASSES: Record< Tone, string > = {
@@ -28,7 +35,7 @@ const CLASSES: Record< Tone, string > = {
 
 type Props = {
 	status: string;
-	kind?: 'affiliate' | 'commission';
+	kind?: 'affiliate' | 'commission' | 'transfer' | 'batch';
 	label?: string;
 	/** `text` drops the pill and every style with it: just the word. */
 	variant?: 'pill' | 'text';

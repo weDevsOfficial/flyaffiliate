@@ -1,6 +1,11 @@
 /**
- * One payout: how much of it is paid, its payments, and the actions that take
- * the whole batch to paid or throw it away while nothing has been sent.
+ * One payout: where it stands, its payments, and the actions that take it to
+ * paid or throw it away while nothing has been sent.
+ *
+ * Payments an automatic payout method sends settle on their own: while any
+ * is on its way the page shows the progress and asks again every few seconds
+ * — every third time asking the methods themselves, so a site that does not
+ * receive their notifications still settles.
  */
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -13,8 +18,9 @@ import {
 	Wallet,
 	WalletCards,
 } from 'lucide-react';
-import { Button, toast } from '@wedevs/plugin-ui';
+import { Button, Card, CardContent, Progress, toast } from '@wedevs/plugin-ui';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import NotFound from '@/components/NotFound';
 import PageHeader from '@/components/PageHeader';
 import {
 	HeaderSkeleton,
@@ -22,42 +28,115 @@ import {
 	TableSkeleton,
 } from '@/components/PageSkeleton';
 import StatCard from '@/components/StatCard';
-import { errorMessage, fetchList, send } from '@/lib/api';
+import StatusBadge from '@/components/StatusBadge';
+import { usePolling } from '@/hooks/usePolling';
+import { errorMessage, fetchOne, send } from '@/lib/api';
 import { formatDate, formatMoney } from '@/lib/format';
+import { getGlobals } from '@/lib/globals';
 import { BRAND_OUTLINE } from '@/lib/ui';
-import type { Payout } from '@/lib/types';
+import type { PayoutBatch, PayoutSummary } from '@/lib/types';
 import { csvUrl } from './index';
 import { PaymentsTable } from './payments';
+
+/** How often a payout with money on its way asks again. */
+const POLL_MS = 5000;
+
+/**
+ * "6 of 8 settled · 5 paid · 1 on the way · 1 failed": the counts that are not zero.
+ *
+ * @param {PayoutSummary|PayoutBatch} summary The payout.
+ * @return {string} The line.
+ */
+export function progressLine( summary: PayoutSummary | PayoutBatch ): string {
+	const counts = summary.counts;
+
+	if ( ! counts ) {
+		return '';
+	}
+
+	const inFlight = summary.in_flight ?? 0;
+	const parts: string[] = [
+		sprintf(
+			/* translators: 1: payments settled, 2: payments in the payout */
+			__( '%1$d of %2$d settled', 'flyaffiliate' ),
+			counts.paid + counts.failed,
+			summary.affiliates
+		),
+	];
+	const add = ( count: number, text: ( n: number ) => string ) => {
+		if ( count > 0 ) {
+			parts.push( text( count ) );
+		}
+	};
+
+	/* translators: %d: number of payments */
+	add( counts.paid, ( n ) => sprintf( __( '%d paid', 'flyaffiliate' ), n ) );
+	add( inFlight, ( n ) =>
+		/* translators: %d: number of payments */
+		sprintf( __( '%d on the way', 'flyaffiliate' ), n )
+	);
+	add( counts.failed, ( n ) =>
+		/* translators: %d: number of payments */
+		sprintf( __( '%d failed', 'flyaffiliate' ), n )
+	);
+	add( counts.not_sent, ( n ) =>
+		/* translators: %d: number of payments */
+		sprintf( __( '%d not sent', 'flyaffiliate' ), n )
+	);
+	add( counts.manual_unpaid, ( n ) =>
+		/* translators: %d: number of payments */
+		sprintf( __( '%d to pay by hand', 'flyaffiliate' ), n )
+	);
+
+	return parts.join( ' · ' );
+}
 
 export default function PayoutBatchPage() {
 	const { batchKey = '' } = useParams();
 	const navigate = useNavigate();
-	const [ rows, setRows ] = useState< Payout[] >( [] );
+	const { statuses } = getGlobals();
+	const [ summary, setSummary ] = useState< PayoutSummary | null >( null );
 	const [ loading, setLoading ] = useState( true );
 	const [ version, setVersion ] = useState( 0 );
+	const [ pollKey, setPollKey ] = useState( 0 );
 	const [ dialog, setDialog ] = useState< 'pay' | 'delete' | null >( null );
 	const [ busy, setBusy ] = useState( false );
 
-	const load = useCallback( () => {
-		fetchList< Payout >( '/payouts', {
-			batch_key: batchKey,
-			per_page: 100,
-		} )
-			.then( ( result ) => setRows( result.items ) )
-			.catch( () => setRows( [] ) )
-			.finally( () => setLoading( false ) );
-	}, [ batchKey ] );
+	const load = useCallback(
+		( refresh = false ) =>
+			( refresh
+				? send< PayoutSummary >(
+						`/payouts/batch/${ batchKey }/refresh`,
+						'POST'
+				  )
+				: fetchOne< PayoutSummary >( `/payouts/batch/${ batchKey }` )
+			)
+				.then( setSummary )
+				.catch( () => setSummary( null ) )
+				.finally( () => setLoading( false ) ),
+		[ batchKey ]
+	);
 
-	useEffect( load, [ load ] );
+	useEffect( () => {
+		load();
+	}, [ load ] );
 
-	const total = rows.reduce( ( sum, row ) => sum + Number( row.amount ), 0 );
-	const paid = rows
-		.filter( ( row ) => row.status === 'paid' )
-		.reduce( ( sum, row ) => sum + Number( row.amount ), 0 );
-	const unpaidRows = rows.filter( ( row ) => row.status !== 'paid' ).length;
-	const first = rows[ 0 ];
+	const inFlight = ( summary?.in_flight ?? 0 ) > 0;
 
-	const payAll = async () => {
+	usePolling(
+		( tick ) => {
+			load( tick % 3 === 0 ).then( () => setPollKey( ( k ) => k + 1 ) );
+		},
+		POLL_MS,
+		inFlight
+	);
+
+	const reload = () => {
+		load();
+		setVersion( ( v ) => v + 1 );
+	};
+
+	const payManual = async () => {
 		setBusy( true );
 
 		try {
@@ -78,8 +157,7 @@ export default function PayoutBatchPage() {
 				)
 			);
 			setDialog( null );
-			load();
-			setVersion( ( v ) => v + 1 );
+			reload();
 		} catch ( error ) {
 			toast.error(
 				errorMessage(
@@ -120,6 +198,25 @@ export default function PayoutBatchPage() {
 		);
 	}
 
+	if ( ! summary ) {
+		return <NotFound />;
+	}
+
+	const { counts } = summary;
+	// Anything an automatic method sends, or sent: the page then follows the transfers.
+	const automatic =
+		summary.in_flight +
+			counts.failed +
+			counts.not_sent +
+			counts.unavailable >
+			0 || summary.methods.some( ( method ) => method.id !== 'manual' );
+	const settled = counts.paid + counts.failed;
+	const canDelete =
+		summary.paid === 0 &&
+		summary.in_flight === 0 &&
+		counts.unavailable === 0;
+	const unpaidCount = summary.affiliates - summary.paid;
+
 	return (
 		<>
 			<PageHeader
@@ -127,17 +224,19 @@ export default function PayoutBatchPage() {
 					to: '/payouts',
 					label: __( 'All payouts', 'flyaffiliate' ),
 				} }
-				title={ first?.note || __( 'Payout', 'flyaffiliate' ) }
-				description={
-					first
-						? `${ formatDate( first.created_at, true ) }${
-								first.reference ? ` · ${ first.reference }` : ''
-						  }`
-						: batchKey
+				title={ summary.note || __( 'Payout', 'flyaffiliate' ) }
+				badge={
+					<StatusBadge
+						status={ summary.status }
+						label={ statuses.batch?.[ summary.status ] }
+					/>
 				}
+				description={ `${ formatDate( summary.created_at, true ) }${
+					summary.reference ? ` · ${ summary.reference }` : ''
+				}` }
 				actions={
 					<>
-						{ rows.length > 0 && paid === 0 && (
+						{ canDelete && (
 							<Button
 								variant="outline"
 								onClick={ () => setDialog( 'delete' ) }
@@ -150,7 +249,6 @@ export default function PayoutBatchPage() {
 						<Button
 							variant="outline"
 							className={ BRAND_OUTLINE }
-							disabled={ rows.length === 0 }
 							render={
 								// eslint-disable-next-line jsx-a11y/anchor-has-content
 								<a
@@ -162,13 +260,18 @@ export default function PayoutBatchPage() {
 							<Download className="size-4" />
 							{ __( 'Download CSV', 'flyaffiliate' ) }
 						</Button>
-						{ unpaidRows > 0 && (
+						{ counts.manual_unpaid > 0 && (
 							<Button
 								onClick={ () => setDialog( 'pay' ) }
 								data-testid="flyaffiliate-batch-pay"
 							>
 								<Check className="size-4" />
-								{ __( 'Mark all as paid', 'flyaffiliate' ) }
+								{ automatic
+									? __(
+											'Mark manual payments as paid',
+											'flyaffiliate'
+									  )
+									: __( 'Mark all as paid', 'flyaffiliate' ) }
 							</Button>
 						) }
 					</>
@@ -179,7 +282,7 @@ export default function PayoutBatchPage() {
 				<StatCard
 					icon={ Wallet }
 					label={ __( 'Total', 'flyaffiliate' ) }
-					value={ formatMoney( total ) }
+					value={ formatMoney( summary.total ) }
 					tooltip={ __(
 						'Everything in this payout, paid or not.',
 						'flyaffiliate'
@@ -188,54 +291,108 @@ export default function PayoutBatchPage() {
 				<StatCard
 					icon={ WalletCards }
 					label={ __( 'Paid', 'flyaffiliate' ) }
-					value={ formatMoney( paid ) }
+					value={ formatMoney( summary.paid_total ) }
 					tooltip={ __(
-						'The payments already marked paid.',
+						'The payments already paid.',
 						'flyaffiliate'
 					) }
 				/>
 				<StatCard
 					icon={ Wallet }
 					label={ __( 'Still to pay', 'flyaffiliate' ) }
-					value={ formatMoney( total - paid ) }
+					value={ formatMoney(
+						( Math.round( summary.total * 100 ) -
+							Math.round( summary.paid_total * 100 ) ) /
+							100
+					) }
 					tooltip={ sprintf(
 						/* translators: %d: number of unpaid payments */
 						_n(
-							'%d payment is still to be marked paid.',
-							'%d payments are still to be marked paid.',
-							unpaidRows,
+							'%d payment is not paid yet.',
+							'%d payments are not paid yet.',
+							unpaidCount,
 							'flyaffiliate'
 						),
-						unpaidRows
+						unpaidCount
 					) }
 				/>
 				<StatCard
 					icon={ Layers }
-					label={ __( 'Payments', 'flyaffiliate' ) }
-					value={ rows.length }
-					tooltip={ __(
-						'One payment per affiliate in this payout.',
-						'flyaffiliate'
+					label={ __( 'Paid via', 'flyaffiliate' ) }
+					value={
+						summary.methods
+							.map( ( method ) => method.label )
+							.join( ' · ' ) || '—'
+					}
+					tooltip={ sprintf(
+						/* translators: %d: number of affiliates */
+						_n(
+							'%d payment, by the affiliate’s payout method.',
+							'%d payments, one per affiliate, each by their payout method.',
+							summary.affiliates,
+							'flyaffiliate'
+						),
+						summary.affiliates
 					) }
 				/>
 			</div>
 
+			{ automatic && (
+				<Card
+					className="mb-6 gap-3 rounded-md shadow ring-0"
+					data-testid="flyaffiliate-batch-progress"
+				>
+					<CardContent className="flex flex-col gap-3">
+						{ inFlight && (
+							<p className="text-muted-foreground">
+								{ __(
+									'Automatic transfers can take a few minutes to settle. They carry on in the background, so it is safe to leave this page and come back.',
+									'flyaffiliate'
+								) }
+							</p>
+						) }
+						<Progress
+							value={
+								summary.affiliates > 0
+									? Math.round(
+											( settled / summary.affiliates ) *
+												100
+									  )
+									: 0
+							}
+							variant={
+								counts.failed > 0 ? 'warning' : 'success'
+							}
+							aria-label={ __( 'Settled', 'flyaffiliate' ) }
+						/>
+						<p className="tabular-nums text-foreground">
+							{ progressLine( summary ) }
+						</p>
+					</CardContent>
+				</Card>
+			) }
+
 			<PaymentsTable
 				batchKey={ batchKey }
 				refreshKey={ version }
-				onChanged={ load }
+				pollKey={ pollKey }
+				onChanged={ () => load() }
 			/>
 
 			<ConfirmDialog
 				open={ dialog === 'pay' }
 				onOpenChange={ ( open ) => ! open && setDialog( null ) }
-				title={ __( 'Mark all as paid', 'flyaffiliate' ) }
+				title={
+					automatic
+						? __( 'Mark manual payments as paid', 'flyaffiliate' )
+						: __( 'Mark all as paid', 'flyaffiliate' )
+				}
 				description={ __(
-					'Marks every unpaid payment in this payout as paid, along with their commissions. Do this once the money has been sent.',
+					'Marks every unpaid manual payment in this payout as paid, along with their commissions. Do this once the money has been sent. Payments an automatic method sends are left to it.',
 					'flyaffiliate'
 				) }
 				confirmLabel={ __( 'Mark as paid', 'flyaffiliate' ) }
-				onConfirm={ payAll }
+				onConfirm={ payManual }
 				busy={ busy }
 			/>
 			<ConfirmDialog

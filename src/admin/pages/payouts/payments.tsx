@@ -1,13 +1,16 @@
 /**
  * Payments: one row per affiliate per payout. Created unpaid when a payout is
  * made, marked paid once the money has been sent — which is what marks the
- * commissions in it paid — the way SliceWP's payments work.
+ * commissions in it paid — the way SliceWP's payments work. A payment an
+ * automatic payout method sends shows its transfer, is locked while the money
+ * is on its way, and can be sent again when the transfer failed.
  */
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Download, Eye, Layers, Trash2 } from 'lucide-react';
+import { Check, Download, Eye, Layers, RotateCw, Trash2 } from 'lucide-react';
 import {
+	Badge,
 	Button,
 	DataViews,
 	toast,
@@ -18,12 +21,11 @@ import {
 import PageHeader from '@/components/PageHeader';
 import DateTime from '@/components/DateTime';
 import Money from '@/components/Money';
-import StatusBadge from '@/components/StatusBadge';
 import Truncated from '@/components/Truncated';
+import PaymentStatus from '@/components/PaymentStatus';
 import { useCounts } from '@/hooks/useCounts';
 import { useListView } from '@/hooks/useListView';
 import { errorMessage, send } from '@/lib/api';
-import { getGlobals } from '@/lib/globals';
 import { withIconLabels } from '@/lib/actions';
 import { buildTabs } from '@/lib/tabs';
 import { BRAND_OUTLINE } from '@/lib/ui';
@@ -75,6 +77,8 @@ type TableProps = {
 	headerContent?: React.ReactNode[];
 	/** Bump to reload the rows after something outside the table changed them. */
 	refreshKey?: number;
+	/** Bump to reload the rows quietly, keeping them on screen (polling). */
+	pollKey?: number;
 	onChanged?: () => void;
 };
 
@@ -83,6 +87,7 @@ export function PaymentsTable( {
 	batchKey,
 	headerContent = [],
 	refreshKey = 0,
+	pollKey = 0,
 	onChanged,
 }: TableProps ) {
 	const navigate = useNavigate();
@@ -123,6 +128,45 @@ export function PaymentsTable( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ refreshKey ] );
 
+	useEffect( () => {
+		if ( pollKey > 0 ) {
+			list.refresh( { silent: true } );
+			counts.refresh( { silent: true } );
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ pollKey ] );
+
+	const retry = async ( items: Payout[] ) => {
+		try {
+			await Promise.all(
+				items.map( ( item ) =>
+					send( `/payouts/${ item.id }/retry`, 'POST' )
+				)
+			);
+			toast.success(
+				sprintf(
+					/* translators: %d: number of payments */
+					_n(
+						'%d payment sent again.',
+						'%d payments sent again.',
+						items.length,
+						'flyaffiliate'
+					),
+					items.length
+				)
+			);
+			refresh();
+		} catch ( error ) {
+			toast.error(
+				errorMessage(
+					error,
+					__( 'The payment could not be sent again.', 'flyaffiliate' )
+				)
+			);
+			refresh();
+		}
+	};
+
 	// Paid is the end of a payment's life, as in SliceWP: the row menu offers
 	// "Mark as paid" and nothing to take it back. `PUT { status: 'unpaid' }`
 	// still exists for the API.
@@ -155,8 +199,6 @@ export function PaymentsTable( {
 			);
 		}
 	};
-
-	const { methods } = getGlobals();
 
 	const fields: DataViewField< Payout >[] = [
 		{
@@ -267,17 +309,17 @@ export function PaymentsTable( {
 			id: 'status',
 			label: __( 'Status', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) => <StatusBadge status={ item.status } />,
+			render: ( { item } ) => <PaymentStatus item={ item } />,
 		},
 		{
 			id: 'method',
-			label: __( 'Method', 'flyaffiliate' ),
+			label: __( 'Paid via', 'flyaffiliate' ),
 			enableSorting: false,
 			getValue: ( { item } ) => item.method,
 			render: ( { item } ) => (
-				<span className="text-muted-foreground">
-					{ methods[ item.method ] ?? item.method ?? '—' }
-				</span>
+				<Badge variant="secondary">
+					{ item.method_label || item.method || '—' }
+				</Badge>
 			),
 		},
 		{
@@ -307,8 +349,16 @@ export function PaymentsTable( {
 				'Marks every commission in the payment as paid. Do this once the money has been sent.',
 				'flyaffiliate'
 			),
-			isEligible: ( item ) => item.status === 'unpaid',
+			isEligible: ( item ) => item.status === 'unpaid' && ! item.locked,
 			callback: markPaid,
+		},
+		{
+			id: 'retry',
+			label: __( 'Retry', 'flyaffiliate' ),
+			icon: <RotateCw size={ 16 } />,
+			supportsBulk: true,
+			isEligible: ( item ) => !! item.can_retry,
+			callback: retry,
 		},
 		{
 			id: 'batch',
@@ -337,7 +387,7 @@ export function PaymentsTable( {
 				'The commissions in it go back to unpaid and into the next payout. A paid payment can’t be deleted.',
 				'flyaffiliate'
 			),
-			isEligible: ( item ) => item.status === 'unpaid',
+			isEligible: ( item ) => item.status === 'unpaid' && ! item.locked,
 			callback: async ( items ) => {
 				try {
 					await Promise.all(

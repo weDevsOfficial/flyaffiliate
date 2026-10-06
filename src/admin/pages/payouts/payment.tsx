@@ -2,7 +2,9 @@
  * One payment: what it is, the commissions in it, and the actions on it —
  * mark it paid, take a commission out while it is unpaid, delete it. Paid is
  * the end of the road on the screens, as in SliceWP; the API keeps
- * `PUT { status: 'unpaid' }` for a correction.
+ * `PUT { status: 'unpaid' }` for a correction. A payment an automatic payout
+ * method is sending is locked: it shows the transfer instead, and offers to
+ * send it again once it has failed.
  */
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -14,11 +16,15 @@ import {
 	Hash,
 	MinusCircle,
 	Pencil,
+	RotateCw,
 	Trash2,
 	UserRound,
 	Wallet,
 } from 'lucide-react';
 import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
 	Button,
 	DataViews,
 	toast,
@@ -38,6 +44,7 @@ import {
 } from '@/components/PageSkeleton';
 import StatCard, { StatCardSkeleton } from '@/components/StatCard';
 import StatusBadge from '@/components/StatusBadge';
+import PaymentStatus from '@/components/PaymentStatus';
 import Truncated from '@/components/Truncated';
 import { useListView } from '@/hooks/useListView';
 import { errorMessage, fetchOne, send } from '@/lib/api';
@@ -108,6 +115,29 @@ export default function PaymentPage() {
 	} );
 
 	const isPaid = payment?.status === 'paid';
+	// Its method is sending it, or did: nothing changes it by hand.
+	const locked = !! payment?.locked;
+
+	const retry = async () => {
+		setBusy( true );
+
+		try {
+			setPayment(
+				await send< Payout >( `/payouts/${ paymentId }/retry`, 'POST' )
+			);
+			toast.success( __( 'Payment sent again.', 'flyaffiliate' ) );
+		} catch ( error ) {
+			toast.error(
+				errorMessage(
+					error,
+					__( 'The payment could not be sent again.', 'flyaffiliate' )
+				)
+			);
+			load();
+		} finally {
+			setBusy( false );
+		}
+	};
 
 	const markPaid = async () => {
 		setBusy( true );
@@ -249,7 +279,7 @@ export default function PaymentPage() {
 				'The commission stays unpaid and goes into the next payout. This payment’s amount is reduced by it.',
 				'flyaffiliate'
 			),
-			isEligible: () => ! isPaid,
+			isEligible: () => ! isPaid && ! locked,
 			callback: async ( [ item ] ) => {
 				try {
 					setPayment(
@@ -304,7 +334,7 @@ export default function PaymentPage() {
 					__( 'Payment #%d', 'flyaffiliate' ),
 					paymentId
 				) }
-				badge={ payment && <StatusBadge status={ payment.status } /> }
+				badge={ payment && <PaymentStatus item={ payment } /> }
 				description={
 					payment
 						? sprintf(
@@ -319,7 +349,7 @@ export default function PaymentPage() {
 				actions={
 					payment && (
 						<>
-							{ ! isPaid && (
+							{ ! isPaid && ! locked && (
 								<Button
 									variant="outline"
 									onClick={ () => setDialog( 'delete' ) }
@@ -329,7 +359,18 @@ export default function PaymentPage() {
 									{ __( 'Delete', 'flyaffiliate' ) }
 								</Button>
 							) }
-							{ ! isPaid && (
+							{ payment.can_retry && (
+								<Button
+									variant="outline"
+									onClick={ retry }
+									disabled={ busy }
+									data-testid="flyaffiliate-payment-retry"
+								>
+									<RotateCw className="size-4" />
+									{ __( 'Retry', 'flyaffiliate' ) }
+								</Button>
+							) }
+							{ ! isPaid && ! locked && (
 								<Button
 									onClick={ () => setDialog( 'pay' ) }
 									data-testid="flyaffiliate-payment-pay"
@@ -342,6 +383,61 @@ export default function PaymentPage() {
 					)
 				}
 			/>
+
+			{ payment && ! isPaid && payment.transfer?.status === 'failed' && (
+				<Alert variant="destructive" className="mb-6">
+					<AlertTitle>
+						{ sprintf(
+							/* translators: %s: payout method */
+							__(
+								'%s could not send this payment',
+								'flyaffiliate'
+							),
+							payment.method_label
+						) }
+					</AlertTitle>
+					<AlertDescription>
+						{ payment.transfer.message ||
+							__(
+								'The transfer failed.',
+								'flyaffiliate'
+							) }{ ' ' }
+						{ payment.can_retry
+							? __(
+									'Fix the cause, then send it again, or pay it another way and mark it paid.',
+									'flyaffiliate'
+							  )
+							: __(
+									'Pay it another way and mark it paid, or delete it.',
+									'flyaffiliate'
+							  ) }
+					</AlertDescription>
+				</Alert>
+			) }
+
+			{ payment && ! isPaid && locked && (
+				<Alert variant="info" className="mb-6">
+					<AlertDescription>
+						{ payment.transfer
+							? sprintf(
+									/* translators: %s: payout method */
+									__(
+										'%s is sending this payment. It can change once the transfer settles.',
+										'flyaffiliate'
+									),
+									payment.method_label
+							  )
+							: sprintf(
+									/* translators: %s: payout method */
+									__(
+										'This payment was sent by %s, which is not available right now. It cannot change until that method is back.',
+										'flyaffiliate'
+									),
+									payment.method_label
+							  ) }
+					</AlertDescription>
+				</Alert>
+			) }
 
 			<div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				{ payment ? (
@@ -434,9 +530,11 @@ export default function PaymentPage() {
 							icon={ Hash }
 							label={ __( 'Reference', 'flyaffiliate' ) }
 							value={
-								payment.reference ? (
+								payment.reference ||
+								payment.transfer?.reference ? (
 									<span className="block truncate">
-										{ payment.reference }
+										{ payment.reference ||
+											payment.transfer?.reference }
 									</span>
 								) : (
 									<span className="text-muted-foreground">
@@ -445,7 +543,7 @@ export default function PaymentPage() {
 								)
 							}
 							tooltip={ __(
-								'The transaction reference you noted when marking it paid.',
+								'The payment reference noted for this payout, or the transaction the payout method recorded.',
 								'flyaffiliate'
 							) }
 						/>
