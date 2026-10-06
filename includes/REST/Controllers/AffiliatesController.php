@@ -198,6 +198,8 @@ class AffiliatesController extends AdminBaseController {
 				'status'        => $request['status'] ?? Affiliate::STATUS_PENDING,
 				'payment_email' => $request['payment_email'] ?? '',
 				'promo_method'  => $request['promo_method'] ?? '',
+				'payout_method' => $request['payout_method'] ?? '',
+				'payout_details' => $request['payout_details'] ?? null,
 				'website'       => $request['website'] ?? '',
 				'send_welcome_email' => ! empty( $request['send_welcome_email'] ),
 			]
@@ -226,7 +228,7 @@ class AffiliatesController extends AdminBaseController {
 	public function update_item( $request ) {
 		$changes = [];
 
-		foreach ( [ 'status', 'payment_email', 'promo_method', 'website' ] as $field ) {
+		foreach ( [ 'status', 'payment_email', 'promo_method', 'payout_method', 'payout_details', 'website' ] as $field ) {
 			if ( isset( $request[ $field ] ) ) {
 				$changes[ $field ] = $request[ $field ];
 			}
@@ -324,6 +326,7 @@ class AffiliatesController extends AdminBaseController {
 			'email'         => $this->get_user_email( (int) $item->get( 'user_id' ) ),
 			'status'        => (string) $item->get( 'status' ),
 			'payment_email' => $item->get_payment_email(),
+			'payout_method' => $item->get_payout_method(),
 			'promo_method'  => (string) $item->get( 'promo_method', '' ),
 			'website'       => $item->get_website(),
 			'referral_url'  => $item->get_referral_url(),
@@ -338,8 +341,9 @@ class AffiliatesController extends AdminBaseController {
 		}
 
 		if ( 'edit' === ( $request['context'] ?? 'view' ) ) {
-			$data['totals'] = flyaffiliate()->commission->get_affiliate_totals( $item->get_id() );
-			$data['visits'] = flyaffiliate()->tracking->count_by_result( [ 'where' => [ 'affiliate_id' => $item->get_id() ] ] );
+			$data['totals']         = flyaffiliate()->commission->get_affiliate_totals( $item->get_id() );
+			$data['visits']         = flyaffiliate()->tracking->count_by_result( [ 'where' => [ 'affiliate_id' => $item->get_id() ] ] );
+			$data['payout_details'] = $this->get_payout_details( $item );
 		}
 
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );
@@ -398,6 +402,27 @@ class AffiliatesController extends AdminBaseController {
 		}
 
 		return rest_validate_request_arg( $value, $request, $param );
+	}
+
+	/**
+	 * An affiliate's details for every payout method that asks for some.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Affiliate $affiliate The affiliate.
+	 *
+	 * @return array<string, array<string, string>> Method id => field id => value.
+	 */
+	protected function get_payout_details( Affiliate $affiliate ): array {
+		$details = [];
+
+		foreach ( flyaffiliate()->payout_method->all() as $id => $method ) {
+			if ( [] !== $method->get_affiliate_fields() ) {
+				$details[ $id ] = $method->get_affiliate_details( $affiliate );
+			}
+		}
+
+		return $details;
 	}
 
 	/**
@@ -467,6 +492,23 @@ class AffiliatesController extends AdminBaseController {
 					'description' => __( 'How the affiliate plans to promote the store.', 'flyaffiliate' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
+				],
+				'payout_method' => [
+					'description' => __( 'The payout method the affiliate chose. Empty means the default.', 'flyaffiliate' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'arg_options' => [
+						'sanitize_callback' => 'sanitize_key',
+					],
+				],
+				'payout_details' => [
+					'description'          => __( 'The details each payout method needs, method id => field id => value. Only with context=edit.', 'flyaffiliate' ),
+					'type'                 => 'object',
+					'context'              => [ 'edit' ],
+					'additionalProperties' => [
+						'type'                 => 'object',
+						'additionalProperties' => [ 'type' => 'string' ],
+					],
 				],
 				'website'       => [
 					'description' => __( 'The affiliate\'s website. Kept on their WordPress user.', 'flyaffiliate' ),
