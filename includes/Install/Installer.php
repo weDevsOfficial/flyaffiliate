@@ -178,6 +178,7 @@ class Installer {
 	user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 	status VARCHAR(20) NOT NULL DEFAULT 'pending',
 	payment_email VARCHAR(191) NOT NULL DEFAULT '',
+	payout_method VARCHAR(20) NOT NULL DEFAULT '',
 	promo_method TEXT NULL,
 	activation_key VARCHAR(64) NOT NULL DEFAULT '',
 	activation_expires_at DATETIME NULL DEFAULT NULL,

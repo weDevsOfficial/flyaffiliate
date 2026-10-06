@@ -29,6 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @property FlyAffiliate\REST\Manager             $api           REST API bootstrap.
  * @property FlyAffiliate\Install\Installer        $installer     Tables, options, pages, scheduled job.
  * @property FlyAffiliate\Upgrade\Manager          $upgrades      Schema and data upgrades.
+ * @property FlyAffiliate\Payout\Manager           $payout        Payouts and their payments.
+ * @property FlyAffiliate\PayoutMethod\Manager     $payout_method The payout methods: Manual, and any other plugin adds.
  */
 final class FlyAffiliate_Plugin {
 

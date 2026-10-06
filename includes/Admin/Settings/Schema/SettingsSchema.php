@@ -619,7 +619,7 @@ class SettingsSchema {
 				'type'        => 'page',
 				'title'       => __( 'Payouts', 'flyaffiliate' ),
 				'icon'        => 'Wallet',
-				'description' => __( 'Payouts are recorded by hand. FlyAffiliate shows who is owed what, you send the money, then mark the payment paid.', 'flyaffiliate' ),
+				'description' => __( 'FlyAffiliate shows who is owed what. Manual payments are sent by you and marked paid; an automatic payout method sends the money itself.', 'flyaffiliate' ),
 				'priority'    => 30,
 			],
 			// Subpage: Rules. Every page has a subpage so the sidebar reads the
@@ -660,15 +660,24 @@ class SettingsSchema {
 				'type'        => 'field',
 				'variant'     => 'select',
 				'section_id'  => 'payout_settings',
-				'title'       => __( 'Payout method', 'flyaffiliate' ),
-				'description' => __( 'How affiliates are paid. Automatic methods are coming in a later version.', 'flyaffiliate' ),
+				'title'       => __( 'Default payout method', 'flyaffiliate' ),
+				'description' => __( 'How an affiliate who has not chosen a method is paid. A method that is switched off falls back to Manual.', 'flyaffiliate' ),
 				'default'     => 'manual',
-				'options'     => [
-					[
-						'value' => 'manual',
-						'label' => __( 'Manual: pay outside WordPress and record it here', 'flyaffiliate' ),
-					],
-				],
+				// Every registered method, not only the enabled ones: asking a
+				// method whether it is on can read a setting, and reading a
+				// setting that is not stored builds this schema again.
+				'options'     => static function (): array {
+					$options = [];
+
+					foreach ( flyaffiliate()->payout_method->get_labels() as $id => $label ) {
+						$options[] = [
+							'value' => $id,
+							'label' => 'manual' === $id ? __( 'Manual: pay outside WordPress and record it here', 'flyaffiliate' ) : $label,
+						];
+					}
+
+					return $options;
+				},
 				'validations' => [
 					self::rule( 'required', __( 'Choose a payout method.', 'flyaffiliate' ) ),
 				],
