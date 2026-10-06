@@ -32,6 +32,7 @@ table this plugin created itself.
 | Lines | Checks | Why it stands |
 |---|---|---|
 | per-affiliate totals, sums by affiliate, batch summaries | `DirectQuery`, `.NoCaching`, `PreparedSQL.InterpolatedNotPrepared`, `PreparedSQLPlaceholders.UnfinishedPrepare` | `GROUP BY` aggregates over this plugin's own tables. The only interpolation is the table name (and, for the status filter, an `IN` list of one `%s` per status validated against the model's list); every value is a placeholder. |
+| `Payout\Manager::attach()` | `DirectQuery`, `.NoCaching`, `PreparedSQL.InterpolatedNotPrepared`, `UnescapedDBParameter` | One conditional `UPDATE` on this plugin's commissions table, so two payouts recorded at once cannot both take a commission (money rule 7, ADR-0016); the model's `save()` writes by id only and cannot express the condition. The only interpolation is the table name; every value is a placeholder. |
 
 ### CSV export — `includes/Payout/CsvExporter.php`
 

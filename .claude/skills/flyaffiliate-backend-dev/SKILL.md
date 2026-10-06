@@ -249,6 +249,20 @@ payment is paid. `preview()` skips every commission with a `payout_id`. Only
 the payout manager moves a commission to or from `paid` —
 `Commission\Manager::can_transition()` never allows it.
 
+Payout methods (ADR-0016): `flyaffiliate()->payout_method` lists Manual plus
+whatever the `flyaffiliate_payout_methods` filter adds (instances of
+`Contracts\PayoutMethod`). `preview()` resolves each affiliate's method
+(`resolve_for()`: override → their choice → the `method` setting → Manual);
+`create()` writes it on the row, refuses a stale `expected` map, attaches
+commissions with a conditional write, and calls each automatic method's
+`pay()`. An automatic method settles with `mark_paid( $id, true )` /
+`mark_unpaid( $id, true )`. Every hand-made change — `mark_paid()`,
+`mark_unpaid()`, `delete()`, `delete_batch()`, `remove_commission()`,
+`resync()`, and commission edits under the payment — checks
+`payout_method->get_lock()` first and returns 409 `flyaffiliate_payout_locked`.
+`pay_batch()` marks only payments a non-automatic method pays; `retry()`
+re-sums, then asks the method to send again.
+
 ## The affiliate role
 
 `Affiliate\Role` keeps the `flyaffiliate_affiliate` role (label "Affiliate",

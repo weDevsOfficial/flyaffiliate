@@ -97,11 +97,11 @@ flyaffiliate/
 ├── uninstall.php
 ├── readme.txt
 ├── includes/                      # PHP backend, PSR-4 root for FlyAffiliate\
-│   ├── Abstracts/
+│   ├── Abstracts/                 # Shortcode, PayoutMethod (safe defaults + the affiliate-details store)
 │   ├── Admin/                     # Menu (hash routes), PayoutExport, Settings/{Schema,Repository,Manager}, Notices, SetupWizard, UserProfile
 │   ├── Affiliate/                 # Manager, Registration, Role (the flyaffiliate_affiliate user role)
 │   ├── Commission/                # Manager, Commission model, Calculator, RateResolver, HoldPeriod, Hooks
-│   ├── Contracts/                 # Hookable
+│   ├── Contracts/                 # Hookable, PayoutMethod
 │   ├── DependencyManagement/      # Container, Definition, BaseServiceProvider, Providers/
 │   ├── Frontend/                  # Shortcodes, AffiliateDashboard, Hooks
 │   ├── Install/                   # Installer (dbDelta, pages, options, cron)
@@ -109,6 +109,7 @@ flyaffiliate/
 │   │   └── WooCommerce/           # OrderAttribution (checkout), OrderStatusSync, HPOS-safe helpers
 │   ├── Models/                    # BaseModel + data stores over the custom tables
 │   ├── Payout/                    # Manager, Payout model, CsvExporter
+│   ├── PayoutMethod/              # Manager (the `flyaffiliate_payout_methods` registry, locks), Manual
 │   ├── ReferralLink/              # Manager: the affiliate's saved referral links and their visit counts
 │   ├── REST/                      # Manager, BaseController, AdminBaseController, controllers
 │   ├── Tracking/                  # Tracker (query var → cookie), Visit model, Hooks
@@ -135,7 +136,7 @@ flyaffiliate/
 ### Service Container
 Services are accessed via `flyaffiliate()->service_name` (magic getter) or `flyaffiliate()->get_container()->get( 'service_name' )`.
 
-Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `referral_link`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Add a name here in the same commit that registers it.
+Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `payout_method`, `tracking`, `referral_link`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Add a name here in the same commit that registers it.
 
 The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
 
