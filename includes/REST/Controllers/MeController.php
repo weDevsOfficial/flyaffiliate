@@ -69,6 +69,19 @@ class MeController extends AffiliateBaseController {
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_textarea_field',
 						],
+						'payout_method' => [
+							'description'       => __( 'The payout method the affiliate chose; empty for the default.', 'flyaffiliate' ),
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_key',
+						],
+						'payout_details' => [
+							'description'          => __( 'Method id => field id => value: the details a payout method needs.', 'flyaffiliate' ),
+							'type'                 => 'object',
+							'additionalProperties' => [
+								'type'                 => 'object',
+								'additionalProperties' => [ 'type' => 'string' ],
+							],
+						],
 					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
@@ -292,10 +305,14 @@ class MeController extends AffiliateBaseController {
 		$affiliate = $this->get_current_affiliate();
 		$fields    = [];
 
-		foreach ( [ 'payment_email', 'promo_method' ] as $field ) {
+		foreach ( [ 'payment_email', 'promo_method', 'payout_method' ] as $field ) {
 			if ( isset( $request[ $field ] ) ) {
 				$fields[ $field ] = (string) $request[ $field ];
 			}
+		}
+
+		if ( isset( $request['payout_details'] ) && is_array( $request['payout_details'] ) ) {
+			$fields['payout_details'] = $request['payout_details'];
 		}
 
 		if ( [] !== $fields ) {
@@ -367,10 +384,29 @@ class MeController extends AffiliateBaseController {
 	 * @return WP_REST_Response
 	 */
 	public function get_payouts( $request ) {
-		$where = [ 'affiliate_id' => $this->get_current_affiliate()->get_id() ];
-		$args  = $this->list_args( $request, $where, [ 'id', 'amount', 'created_at' ] );
+		$where      = [ 'affiliate_id' => $this->get_current_affiliate()->get_id() ];
+		$args       = $this->list_args( $request, $where, [ 'id', 'amount', 'created_at' ] );
+		$controller = new PayoutsController();
+		$payouts    = flyaffiliate()->payout->query( $args );
+		$items      = [];
 
-		return $this->list_response( new PayoutsController(), flyaffiliate()->payout, $args, $request );
+		$controller->prime_states( $payouts );
+
+		foreach ( $payouts as $payout ) {
+			$data = $this->prepare_response_for_collection( $controller->prepare_item_for_response( $payout, $request ) );
+
+			// The affiliate sees where the money is, not the admin's view of why:
+			// a failure message can name the store's account, and the actions are not theirs.
+			if ( is_array( $data['transfer'] ?? null ) ) {
+				$data['transfer'] = [ 'status' => $data['transfer']['status'] ];
+			}
+
+			unset( $data['locked'], $data['can_retry'] );
+
+			$items[] = $data;
+		}
+
+		return $this->prepare_collection_response( $items, flyaffiliate()->payout->count( $args ), (int) $args['per_page'] );
 	}
 
 	/**
