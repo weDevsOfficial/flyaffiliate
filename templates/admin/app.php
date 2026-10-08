@@ -18,7 +18,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div class="wrap flyaffiliate-wrap">
-	<hr class="wp-header-end">
+	<?php
+	/**
+	 * Fires above the admin app: FlyAffiliate's own notices print here.
+	 *
+	 * Other plugins' notices are hidden on this screen, and the page's only
+	 * `.wp-header-end` sits in their hidden container
+	 * (`Admin\Notices\Manager`), so an override of this template must not
+	 * add another one.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 */
+	do_action( 'flyaffiliate_before_admin_app' );
+	?>
 	<div id="flyaffiliate-admin-app" class="flyaffiliate-app flyaffiliate-admin-app">
 		<p class="flyaffiliate-admin-app__loading"><?php esc_html_e( 'Loading FlyAffiliate…', 'flyaffiliate' ); ?></p>
 	</div>

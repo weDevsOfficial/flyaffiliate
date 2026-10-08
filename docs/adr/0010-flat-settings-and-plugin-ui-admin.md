@@ -1,6 +1,6 @@
 # ADR-0010 — One flat settings option, and a plugin-ui admin app
 
-**Status:** Accepted
+**Status:** Accepted — amended by ADR-0017 (other plugins' notices are hidden on FlyAffiliate's screen)
 **Date:** 2026-09-08
 
 ## Context
