@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use FlyAffiliate\Admin\Settings\Repository\SettingsRepository;
 use FlyAffiliate\Admin\Settings\Schema\SettingsSchema;
 use FlyAffiliate\Affiliate\Role;
+use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Models\Affiliate;
 
 /**
@@ -52,7 +53,7 @@ class Installer {
 	const PAGES_OPTION = 'flyaffiliate_pages';
 
 	/**
-	 * The recurring Action Scheduler hook that matures commissions.
+	 * The recurring daily hook. It once matured commissions; nothing listens to it since ADR-0014.
 	 *
 	 * @var string
 	 */
@@ -66,6 +67,9 @@ class Installer {
 	 * @return void
 	 */
 	public function do_install(): void {
+		// A first install has never stored a database version, as Dokan reads its own version option.
+		$first_install = false === get_option( self::DB_VERSION_OPTION, false );
+
 		$this->create_tables();
 		$this->create_options();
 		$this->create_roles();
@@ -73,6 +77,11 @@ class Installer {
 		$this->schedule_events();
 
 		update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
+
+		// Only a first install opens the setup wizard on the next admin page load, as Dokan's onboarding does.
+		if ( $first_install ) {
+			SetupWizard::schedule_redirect();
+		}
 
 		/**
 		 * Fires after FlyAffiliate has finished installing or repairing itself.

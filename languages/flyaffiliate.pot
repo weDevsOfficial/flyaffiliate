@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T11:36:50+00:00\n"
+"POT-Creation-Date: 2026-09-28T04:25:37+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -17,8 +17,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #. translators: %d: Number of fields that need attention
 #: flyaffiliate.php
-#: includes/Admin/Menu.php:119
-#: includes/Admin/Menu.php:120
+#: includes/Admin/Menu.php:153
+#: includes/Admin/Menu.php:154
 #: templates/admin/user-profile.php:17
 #: assets/js/admin.js:275
 msgid "FlyAffiliate"
@@ -45,9 +45,9 @@ msgid "https://wedevs.com/"
 msgstr ""
 
 #: flyaffiliate-class.php:289
-#: includes/Admin/Menu.php:77
+#: includes/Admin/Menu.php:78
 #: includes/Frontend/AffiliateDashboard.php:50
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 #: assets/js/dashboard.js:281
 msgid "Settings"
 msgstr ""
@@ -65,19 +65,19 @@ msgstr ""
 msgid "FlyAffiliate is missing its autoloader. Run \"composer install\" in the plugin directory, or install the release build."
 msgstr ""
 
-#: includes/Admin/Menu.php:72
+#: includes/Admin/Menu.php:73
 #: assets/js/admin.js:290
 msgid "Dashboard"
 msgstr ""
 
-#: includes/Admin/Menu.php:73
+#: includes/Admin/Menu.php:74
 #: assets/js/admin.js:278
 #: assets/js/admin.js:293
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Affiliates"
 msgstr ""
 
-#: includes/Admin/Menu.php:74
+#: includes/Admin/Menu.php:75
 #: includes/Admin/Settings/Schema/SettingsSchema.php:473
 #: includes/Frontend/AffiliateDashboard.php:47
 #: includes/Payout/CsvExporter.php:39
@@ -86,13 +86,13 @@ msgstr ""
 #: assets/js/admin.js:285
 #: assets/js/admin.js:290
 #: assets/js/admin.js:292
-#: assets/js/admin.js:305
-#: assets/js/admin.js:310
+#: assets/js/admin.js:306
+#: assets/js/admin.js:311
 #: assets/js/dashboard.js:281
 msgid "Commissions"
 msgstr ""
 
-#: includes/Admin/Menu.php:75
+#: includes/Admin/Menu.php:76
 #: includes/Frontend/AffiliateDashboard.php:48
 #: assets/js/admin.js:279
 #: assets/js/admin.js:284
@@ -104,7 +104,7 @@ msgstr ""
 msgid "Visits"
 msgstr ""
 
-#: includes/Admin/Menu.php:76
+#: includes/Admin/Menu.php:77
 #: includes/Admin/Settings/Schema/SettingsSchema.php:620
 #: includes/Frontend/AffiliateDashboard.php:49
 #: assets/js/admin.js:282
@@ -113,7 +113,7 @@ msgstr ""
 msgid "Payouts"
 msgstr ""
 
-#: includes/Admin/Menu.php:150
+#: includes/Admin/Menu.php:184
 msgid "You are not allowed to view this page."
 msgstr ""
 
@@ -187,7 +187,7 @@ msgid "How referrals are tracked and where affiliates sign in."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:260
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Tracking"
 msgstr ""
 
@@ -331,7 +331,7 @@ msgid "Paste a shortcode into any page to show the affiliate dashboard or the re
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:414
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Affiliate dashboard"
 msgstr ""
 
@@ -426,7 +426,7 @@ msgid "Rules"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:539
-msgid "When a commission matures and what it is calculated on."
+msgid "When a commission can be paid out and what it is calculated on."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:546
@@ -554,12 +554,12 @@ msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:711
 #: assets/js/admin.js:276
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Email"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:713
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "The activation link is the only email this version sends."
 msgstr ""
 
@@ -716,109 +716,109 @@ msgstr ""
 #: assets/js/admin.js:289
 #: assets/js/admin.js:290
 #: assets/js/admin.js:302
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Affiliate"
 msgstr ""
 
-#: includes/Assets.php:292
-#: includes/Assets.php:298
+#: includes/Assets.php:290
+#: includes/Assets.php:296
 #: includes/Models/Affiliate.php:85
-#: includes/Models/Commission.php:140
+#: includes/Models/Commission.php:145
 #: assets/js/admin.js:284
 #: assets/js/dashboard.js:278
 msgid "Pending"
 msgstr ""
 
-#: includes/Assets.php:293
+#: includes/Assets.php:291
 #: includes/Models/Affiliate.php:86
 msgid "Active"
 msgstr ""
 
-#: includes/Assets.php:294
+#: includes/Assets.php:292
 #: includes/Models/Affiliate.php:87
 msgid "Inactive"
 msgstr ""
 
-#: includes/Assets.php:295
+#: includes/Assets.php:293
 #: includes/Models/Affiliate.php:88
 msgid "Suspended"
 msgstr ""
 
-#: includes/Assets.php:299
-#: includes/Models/Commission.php:141
+#: includes/Assets.php:297
+#: includes/Models/Commission.php:146
 #: assets/js/admin.js:284
 msgid "Unpaid"
 msgstr ""
 
-#: includes/Assets.php:300
-#: includes/Models/Commission.php:142
+#: includes/Assets.php:298
+#: includes/Models/Commission.php:147
 #: assets/js/admin.js:284
 #: assets/js/admin.js:298
 #: assets/js/dashboard.js:278
 msgid "Paid"
 msgstr ""
 
-#: includes/Assets.php:301
-#: includes/Models/Commission.php:143
+#: includes/Assets.php:299
+#: includes/Models/Commission.php:148
 msgid "Rejected"
 msgstr ""
 
-#: includes/Commission/Manager.php:131
+#: includes/Commission/Manager.php:132
 msgid "Choose an affiliate."
 msgstr ""
 
-#: includes/Commission/Manager.php:137
-#: includes/Commission/Manager.php:244
+#: includes/Commission/Manager.php:138
+#: includes/Commission/Manager.php:245
 msgid "The commission amount must be more than zero."
 msgstr ""
 
-#: includes/Commission/Manager.php:144
+#: includes/Commission/Manager.php:145
 msgid "Choose where the commission comes from. An origin is open only while its platform is active."
 msgstr ""
 
-#: includes/Commission/Manager.php:145
-#: includes/Commission/Manager.php:274
+#: includes/Commission/Manager.php:146
+#: includes/Commission/Manager.php:275
 msgid "Choose a commission type."
 msgstr ""
 
-#: includes/Commission/Manager.php:146
+#: includes/Commission/Manager.php:147
 msgid "Choose a commission status."
 msgstr ""
 
-#: includes/Commission/Manager.php:185
-#: includes/Commission/Manager.php:291
-#: includes/Commission/Manager.php:451
+#: includes/Commission/Manager.php:186
+#: includes/Commission/Manager.php:292
+#: includes/Commission/Manager.php:450
 #: assets/js/admin.js:289
 msgid "The commission could not be saved."
 msgstr ""
 
-#: includes/Commission/Manager.php:235
+#: includes/Commission/Manager.php:236
 #: includes/Commission/Manager.php:425
 #: includes/REST/Controllers/CommissionsController.php:547
 #: includes/REST/Controllers/MeController.php:163
 msgid "No commission with that ID."
 msgstr ""
 
-#: includes/Commission/Manager.php:260
+#: includes/Commission/Manager.php:261
 msgid "This commission came from an order item, so its reference cannot change."
 msgstr ""
 
 #. translators: %d: the order id given
-#: includes/Commission/Manager.php:387
+#: includes/Commission/Manager.php:388
 msgid "There is no WooCommerce order #%d. Enter the number of an existing order, or change the origin."
 msgstr ""
 
-#: includes/Commission/Manager.php:445
+#: includes/Commission/Manager.php:444
 msgid "That status change is not allowed."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:486
+#: includes/Commission/Manager.php:485
 msgid "This commission was paid in payment #%d, which keeps it."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:489
+#: includes/Commission/Manager.php:488
 msgid "This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, first."
 msgstr ""
 
@@ -835,16 +835,16 @@ msgstr ""
 msgid "Something went wrong. Try again."
 msgstr ""
 
-#: includes/Install/Installer.php:335
+#: includes/Install/Installer.php:339
 msgid "Affiliate Dashboard"
 msgstr ""
 
-#: includes/Install/Installer.php:339
+#: includes/Install/Installer.php:343
 msgid "Affiliate Registration"
 msgstr ""
 
 #: includes/Integrations/WooCommerce/Integration.php:76
-#: includes/Models/Commission.php:156
+#: includes/Models/Commission.php:161
 msgid "WooCommerce"
 msgstr ""
 
@@ -877,14 +877,14 @@ msgstr ""
 msgid "Affiliate #%d"
 msgstr ""
 
-#: includes/Models/Commission.php:157
+#: includes/Models/Commission.php:162
 #: includes/Models/Payout.php:59
 #: assets/js/admin.js:298
 #: assets/js/admin.js:300
 msgid "Manual"
 msgstr ""
 
-#: includes/Models/Commission.php:196
+#: includes/Models/Commission.php:201
 #: assets/js/admin.js:279
 #: assets/js/admin.js:300
 #: assets/js/dashboard.js:279
@@ -903,7 +903,7 @@ msgstr ""
 #: includes/Payout/CsvExporter.php:36
 #: assets/js/admin.js:276
 #: assets/js/admin.js:282
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 #: assets/js/dashboard.js:279
 msgid "Payment email"
 msgstr ""
@@ -914,7 +914,7 @@ msgstr ""
 #: assets/js/admin.js:289
 #: assets/js/admin.js:300
 #: assets/js/admin.js:303
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 #: assets/js/dashboard.js:279
 #: assets/js/dashboard.js:280
 msgid "Amount"
@@ -961,40 +961,40 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: includes/Payout/Manager.php:275
+#: includes/Payout/Manager.php:295
 msgid "There is nothing to pay: no unpaid commission matches that selection."
 msgstr ""
 
-#: includes/Payout/Manager.php:303
+#: includes/Payout/Manager.php:323
 msgid "The payout could not be saved."
 msgstr ""
 
-#: includes/Payout/Manager.php:318
+#: includes/Payout/Manager.php:338
 msgid "The payout could not be recorded: a commission would not attach to its payment. Nothing was saved."
 msgstr ""
 
-#: includes/Payout/Manager.php:536
+#: includes/Payout/Manager.php:556
 msgid "A commission cannot be removed from a payment that has been paid."
 msgstr ""
 
-#: includes/Payout/Manager.php:542
+#: includes/Payout/Manager.php:562
 msgid "That commission is not part of this payment."
 msgstr ""
 
-#: includes/Payout/Manager.php:584
+#: includes/Payout/Manager.php:604
 msgid "A payment that has been paid cannot be deleted."
 msgstr ""
 
-#: includes/Payout/Manager.php:629
+#: includes/Payout/Manager.php:649
 msgid "A payout with a paid payment cannot be deleted."
 msgstr ""
 
-#: includes/Payout/Manager.php:706
+#: includes/Payout/Manager.php:726
 #: includes/REST/Controllers/PayoutsController.php:331
 msgid "No payment with that ID."
 msgstr ""
 
-#: includes/Payout/Manager.php:717
+#: includes/Payout/Manager.php:737
 msgid "The payment could not be saved."
 msgstr ""
 
@@ -1108,7 +1108,7 @@ msgstr ""
 #: includes/REST/Controllers/AffiliatesController.php:558
 #: includes/REST/Controllers/CommissionsController.php:530
 #: includes/REST/Controllers/MeController.php:407
-#: includes/REST/Controllers/PayoutsController.php:704
+#: includes/REST/Controllers/PayoutsController.php:705
 #: includes/REST/Controllers/VisitsController.php:330
 msgid "Sort direction."
 msgstr ""
@@ -1160,7 +1160,7 @@ msgid "What the affiliate earns. Editable until the commission is paid or inside
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:419
-#: includes/REST/Controllers/PayoutsController.php:604
+#: includes/REST/Controllers/PayoutsController.php:605
 msgid "Currency code."
 msgstr ""
 
@@ -1181,7 +1181,7 @@ msgid "The payout it was paid in, once paid."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:451
-msgid "When it can mature, in GMT."
+msgid "When the hold period ends and a payout can take it, in GMT."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:458
@@ -1193,12 +1193,12 @@ msgid "When it last changed, in GMT."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:488
-#: includes/REST/Controllers/PayoutsController.php:693
+#: includes/REST/Controllers/PayoutsController.php:694
 msgid "Limit to a status."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:493
-#: includes/REST/Controllers/PayoutsController.php:684
+#: includes/REST/Controllers/PayoutsController.php:685
 #: includes/REST/Controllers/VisitsController.php:306
 msgid "Limit to an affiliate."
 msgstr ""
@@ -1228,7 +1228,7 @@ msgid "Created on or before this GMT datetime."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:524
-#: includes/REST/Controllers/PayoutsController.php:698
+#: includes/REST/Controllers/PayoutsController.php:699
 #: includes/REST/Controllers/VisitsController.php:324
 msgid "Sort field."
 msgstr ""
@@ -1342,63 +1342,63 @@ msgstr ""
 msgid "A payment reference recorded on every row."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:574
+#: includes/REST/Controllers/PayoutsController.php:575
 msgid "Unique identifier for the payout row."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:580
+#: includes/REST/Controllers/PayoutsController.php:581
 msgid "The batch this row belongs to."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:586
+#: includes/REST/Controllers/PayoutsController.php:587
 msgid "The affiliate paid."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:592
+#: includes/REST/Controllers/PayoutsController.php:593
 msgid "Where this affiliate is paid."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:598
+#: includes/REST/Controllers/PayoutsController.php:599
 msgid "The amount paid."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:610
+#: includes/REST/Controllers/PayoutsController.php:611
 msgid "Payment method."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:616
+#: includes/REST/Controllers/PayoutsController.php:617
 msgid "unpaid until the money is sent and the payment marked paid; paid after that."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:623
+#: includes/REST/Controllers/PayoutsController.php:624
 msgid "Payment reference."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:629
+#: includes/REST/Controllers/PayoutsController.php:630
 msgid "Description."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:635
+#: includes/REST/Controllers/PayoutsController.php:636
 msgid "Start of the commission period, in GMT."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:642
+#: includes/REST/Controllers/PayoutsController.php:643
 msgid "End of the commission period, in GMT."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:649
+#: includes/REST/Controllers/PayoutsController.php:650
 msgid "The user who recorded it."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:655
+#: includes/REST/Controllers/PayoutsController.php:656
 msgid "When it was recorded, in GMT."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:662
+#: includes/REST/Controllers/PayoutsController.php:663
 msgid "The commission ids it covers."
 msgstr ""
 
-#: includes/REST/Controllers/PayoutsController.php:688
+#: includes/REST/Controllers/PayoutsController.php:689
 msgid "Limit to a batch."
 msgstr ""
 
@@ -1913,7 +1913,7 @@ msgstr ""
 
 #: assets/js/admin.js:279
 #: assets/js/dashboard.js:279
-msgid "Matures"
+msgid "Payable from"
 msgstr ""
 
 #: assets/js/admin.js:279
@@ -1973,7 +1973,7 @@ msgid "Add commission"
 msgstr ""
 
 #: assets/js/admin.js:279
-msgid "Pending commissions become unpaid when the hold period ends. Unpaid commissions go into the next payout."
+msgid "A commission becomes unpaid when its order is paid, and goes into a payout once its hold period is over."
 msgstr ""
 
 #: assets/js/admin.js:279
@@ -2149,7 +2149,7 @@ msgstr ""
 
 #: assets/js/admin.js:282
 #: assets/js/admin.js:284
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "New payout"
 msgstr ""
 
@@ -2232,7 +2232,7 @@ msgstr ""
 #: assets/js/admin.js:284
 #: assets/js/admin.js:291
 #: assets/js/admin.js:298
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "All payouts"
 msgstr ""
 
@@ -2278,7 +2278,7 @@ msgid "Approved commissions, ready for the next payout."
 msgstr ""
 
 #: assets/js/admin.js:284
-msgid "Commissions still inside their hold period."
+msgid "Commissions waiting for their order to be paid."
 msgstr ""
 
 #: assets/js/admin.js:284
@@ -2322,7 +2322,7 @@ msgid "That commission could not be loaded."
 msgstr ""
 
 #: assets/js/admin.js:288
-msgid "Waits for the hold period to end and for the order to be paid."
+msgid "Waits for the order to be paid."
 msgstr ""
 
 #: assets/js/admin.js:288
@@ -2435,7 +2435,7 @@ msgid "Set when the commission was created."
 msgstr ""
 
 #: assets/js/admin.js:289
-msgid "Where the commission comes from. A WooCommerce commission follows its order: unpaid once the order is paid, rejected if the order fails. A manual commission only follows the hold period."
+msgid "Where the commission comes from. A WooCommerce commission follows its order: unpaid once the order is paid, rejected if the order fails. A manual commission only moves when you move it."
 msgstr ""
 
 #: assets/js/admin.js:289
@@ -2572,7 +2572,7 @@ msgstr ""
 
 #. translators: %s: amount still pending
 #: assets/js/admin.js:292
-msgid "Approved commissions waiting to be paid out. Another %s is still in the hold period."
+msgid "Commissions earned and waiting to be paid out. Another %s is waiting for its order to be paid."
 msgstr ""
 
 #: assets/js/admin.js:292
@@ -2665,7 +2665,7 @@ msgstr ""
 
 #. translators: %d: number of commissions
 #: assets/js/admin.js:296
-#: assets/js/admin.js:308
+#: assets/js/admin.js:309
 #: assets/js/dashboard.js:281
 msgid "%d commission"
 msgid_plural "%d commissions"
@@ -2693,7 +2693,7 @@ msgid "Order #%d"
 msgstr ""
 
 #: assets/js/admin.js:298
-#: assets/js/admin.js:309
+#: assets/js/admin.js:310
 msgid "Total"
 msgstr ""
 
@@ -2811,288 +2811,295 @@ msgstr ""
 msgid "Payment deleted."
 msgstr ""
 
-#: assets/js/admin.js:305
+#. translators: 1: number of commissions, 2: their total
+#: assets/js/admin.js:306
+msgid "%1$d unpaid commission worth %2$s is still inside its hold period, so it is not in this payout."
+msgid_plural "%1$d unpaid commissions worth %2$s are still inside their hold period, so they are not in this payout."
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/js/admin.js:306
 msgid "Only unpaid commissions are included. Each affiliate gets one payment. Send the money outside WordPress, then mark the payment paid."
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Who to pay"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Narrow the batch, then preview it."
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "The preview could not be built."
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Choose at least one affiliate."
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Everyone with an unpaid balance"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Only the affiliates I choose"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Everyone except the affiliates I choose"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Choose affiliates"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Add an affiliate…"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Remove"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Minimum amount"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Affiliates below this amount wait for the next payout."
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Period"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Any time"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Only commissions from this period are included."
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Title"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "e.g. September payout"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Payment reference"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Bank transfer, PayPal batch…"
 msgstr ""
 
-#: assets/js/admin.js:305
+#: assets/js/admin.js:306
 msgid "Preview"
 msgstr ""
 
 #. translators: 1: affiliate count with unit, 2: commission count with unit
-#: assets/js/admin.js:306
+#: assets/js/admin.js:307
 msgid "%1$s, %2$s"
 msgstr ""
 
 #. translators: %d: number of affiliates
-#: assets/js/admin.js:307
+#: assets/js/admin.js:308
 msgid "%d affiliate"
 msgid_plural "%d affiliates"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin.js:308
+#: assets/js/admin.js:309
 msgid "Who gets paid, and how much, before anything is recorded."
 msgstr ""
 
-#: assets/js/admin.js:308
+#: assets/js/admin.js:309
 msgid "Nothing previewed yet"
 msgstr ""
 
-#: assets/js/admin.js:308
+#: assets/js/admin.js:309
 msgid "Set the filters on the left and click Preview."
 msgstr ""
 
-#: assets/js/admin.js:308
+#: assets/js/admin.js:309
 msgid "No affiliate has unpaid commissions above the minimum."
 msgstr ""
 
 #. translators: 1: number of commissions, 2: their total
-#: assets/js/admin.js:309
+#: assets/js/admin.js:310
 msgid "%1$d commission worth %2$s is still pending, so it is not in this payout."
 msgid_plural "%1$d commissions worth %2$s are still pending, so they are not in this payout."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin.js:309
-msgid "A commission becomes payable when its hold period ends, or when you mark it unpaid."
+#: assets/js/admin.js:310
+msgid "A commission becomes unpaid when its order is paid, or when you mark it unpaid."
 msgstr ""
 
-#: assets/js/admin.js:309
+#: assets/js/admin.js:310
 msgid "Payments to make"
 msgstr ""
 
 #. translators: %d: number of affiliates
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Payout created: %d payment to make."
 msgid_plural "Payout created: %d payments to make."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "The payout could not be recorded."
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Create payout"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Could not load the settings."
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Rates, the hold period, payouts and the affiliate area. Changes apply to new orders only. Existing commissions keep their numbers."
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Run the setup wizard"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 #: assets/js/dashboard.js:279
 msgid "Settings saved."
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 #: assets/js/dashboard.js:279
 msgid "The settings could not be saved."
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Search settings…"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Unsaved changes"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "You have unsaved changes on this page. Leaving now discards them."
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Discard and leave"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Stay on this page"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Saving…"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Save changes"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "You have unsaved settings changes. Leaving this page discards them."
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Commission basics"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "How much do affiliates earn, and how long do you hold it?"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Track referrals"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "FlyAffiliate credits affiliates for the orders they refer."
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Affiliate email"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Done"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "You’re all set"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "FlyAffiliate is ready. Two pages were created for your affiliates."
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Setup"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Affiliate registration"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Copy shortcode"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Go to settings"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Add your first affiliate"
 msgstr ""
 
-#: assets/js/admin.js:310
+#: assets/js/admin.js:311
 msgid "Skip setup"
 msgstr ""
 
 #. translators: 1: current step number, 2: number of steps
-#: assets/js/admin.js:311
+#: assets/js/admin.js:312
 msgid "Step %1$d of %2$d"
 msgstr ""
 
-#: assets/js/admin.js:311
+#: assets/js/admin.js:312
 msgid "The step could not be saved."
 msgstr ""
 
-#: assets/js/admin.js:311
+#: assets/js/admin.js:312
 msgid "Continue"
 msgstr ""
 
-#: assets/js/admin.js:311
+#: assets/js/admin.js:312
 msgid "Everything here can be changed later under Settings."
 msgstr ""
 
-#: assets/js/admin.js:311
+#: assets/js/admin.js:312
 msgid "Read the documentation"
 msgstr ""
 
-#: assets/js/admin.js:311
+#: assets/js/admin.js:312
 msgid "Sorry, that page cannot be found"
 msgstr ""
 
-#: assets/js/admin.js:311
+#: assets/js/admin.js:312
 msgid "The page you were looking for has moved or does not exist."
 msgstr ""
 
-#: assets/js/admin.js:311
+#: assets/js/admin.js:312
 msgid "Back to Dashboard"
 msgstr ""
 
@@ -3164,7 +3171,7 @@ msgid "None"
 msgstr ""
 
 #: assets/js/dashboard.js:276
-msgid "How long a commission stays pending before it can be paid."
+msgid "How long after the sale a commission waits before it can be paid out."
 msgstr ""
 
 #: assets/js/dashboard.js:276
@@ -3194,11 +3201,11 @@ msgstr ""
 
 #. translators: %s: the minimum payout amount
 #: assets/js/dashboard.js:278
-msgid "Commissions that are approved and waiting to be paid out. They go into the next payout once your balance reaches %s."
+msgid "Commissions you have earned and that are waiting to be paid out. They go into a payout once their hold period is over and your balance reaches %s."
 msgstr ""
 
 #: assets/js/dashboard.js:278
-msgid "Commissions whose order is not completed yet, or that are still inside the hold period. They join your unpaid balance after that."
+msgid "Commissions whose order is not paid yet. They join your unpaid balance once it is."
 msgstr ""
 
 #. translators: %s: "all time" or "in the selected dates"

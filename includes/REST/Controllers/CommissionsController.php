@@ -448,7 +448,7 @@ class CommissionsController extends AdminBaseController {
 				),
 				'matures_at'    => $ro(
 					[
-						'description' => __( 'When it can mature, in GMT.', 'flyaffiliate' ),
+						'description' => __( 'When the hold period ends and a payout can take it, in GMT.', 'flyaffiliate' ),
 						'type' => [ 'string', 'null' ],
 						'format' => 'date-time',
 						'context' => [ 'view', 'edit' ],

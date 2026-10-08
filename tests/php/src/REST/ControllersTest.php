@@ -222,6 +222,7 @@ class ControllersTest extends FlyAffiliateTestCase {
 
 		$this->assertSame( 200, $preview->get_status() );
 		$this->assertSame( 1, $preview->get_data()['count'] );
+		$this->assertSame( [ 'count' => 0, 'amount' => 0.0 ], $preview->get_data()['held'], 'nothing is inside a hold period' );
 		$this->assertDatabaseCount( 'flyaffiliate_payouts', 0 );
 
 		$created = $this->post_request( '/payouts', [ 'minimum_amount' => 0, 'note' => 'API run' ] );

@@ -536,7 +536,7 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'commission',
 				'title'       => __( 'Rules', 'flyaffiliate' ),
-				'description' => __( 'When a commission matures and what it is calculated on.', 'flyaffiliate' ),
+				'description' => __( 'When a commission can be paid out and what it is calculated on.', 'flyaffiliate' ),
 				'priority'    => 20,
 			],
 			[
