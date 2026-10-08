@@ -1,7 +1,8 @@
 /**
  * Turn any page of this site into a referral link, as SliceWP's affiliate
  * account does: the pasted address must be on this site, and it gets the same
- * referral variable the affiliate's own link carries.
+ * referral variable the affiliate's own link carries. The link is saved to the
+ * list below it on the Referral links tab; the server checks the address again.
  */
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -15,6 +16,8 @@ import {
 	Input,
 } from '@wedevs/plugin-ui';
 import CopyField from '@/components/CopyField';
+import { errorMessage, send } from '@/lib/api';
+import type { ReferralLink } from '@/lib/types';
 
 type Result = { url: string; error: '' } | { url: ''; error: string };
 
@@ -86,15 +89,47 @@ export function buildReferralLink(
 
 export default function GenerateLink( {
 	referralUrl,
+	onSaved,
 }: {
 	referralUrl: string;
+	onSaved?: ( link: ReferralLink ) => void;
 } ) {
 	const [ input, setInput ] = useState( '' );
 	const [ result, setResult ] = useState< Result | null >( null );
+	const [ saving, setSaving ] = useState( false );
 
-	const generate = ( event: React.FormEvent ) => {
+	const generate = async ( event: React.FormEvent ) => {
 		event.preventDefault();
-		setResult( buildReferralLink( input, referralUrl ) );
+
+		const built = buildReferralLink( input, referralUrl );
+
+		if ( built.error ) {
+			setResult( built );
+			return;
+		}
+
+		setSaving( true );
+
+		try {
+			const link = await send< ReferralLink >(
+				'/me/referral-links',
+				'POST',
+				{ url: built.url }
+			);
+
+			setResult( { url: link.referral_url, error: '' } );
+			onSaved?.( link );
+		} catch ( error ) {
+			setResult( {
+				url: '',
+				error: errorMessage(
+					error,
+					__( 'The link could not be saved.', 'flyaffiliate' )
+				),
+			} );
+		} finally {
+			setSaving( false );
+		}
 	};
 
 	return (
@@ -113,7 +148,7 @@ export default function GenerateLink( {
 					</FieldLabel>
 					<FieldDescription>
 						{ __(
-							'Paste the address of any page on this site, a product for example, to get a link to it that earns you a commission.',
+							'Paste the address of any page on this site, a product for example, to get a link to it that earns you a commission. Each link you generate is kept in the list below.',
 							'flyaffiliate'
 						) }
 					</FieldDescription>
@@ -132,7 +167,7 @@ export default function GenerateLink( {
 							aria-invalid={ Boolean( result?.error ) }
 							className="min-w-0 flex-1"
 						/>
-						<Button type="submit">
+						<Button type="submit" disabled={ saving }>
 							{ __( 'Generate', 'flyaffiliate' ) }
 						</Button>
 					</div>

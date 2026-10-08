@@ -253,6 +253,18 @@ class Installer {
 	KEY affiliate_id (affiliate_id)
 ) {$collate};";
 
+		// A TEXT column cannot carry a unique key, so the hash of the URL does.
+		$tables[] = "CREATE TABLE {$prefix}flyaffiliate_referral_links (
+	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	affiliate_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+	url TEXT NULL,
+	url_hash CHAR(32) NOT NULL DEFAULT '',
+	created_at DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY  (id),
+	UNIQUE KEY affiliate_url (affiliate_id,url_hash),
+	KEY affiliate_created (affiliate_id,created_at)
+) {$collate};";
+
 		return $tables;
 	}
 
@@ -450,6 +462,7 @@ class Installer {
 			'flyaffiliate_commissions',
 			'flyaffiliate_visits',
 			'flyaffiliate_payouts',
+			'flyaffiliate_referral_links',
 		];
 	}
 }

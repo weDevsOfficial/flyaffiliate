@@ -9,7 +9,7 @@ Sources: `docs/MVP_PRD.md` and `docs/PRD.md`. FlyAffiliate replaces SliceWP: it 
 | Term | Meaning | Avoid |
 |---|---|---|
 | Affiliate | A WordPress user with a row in `{prefix}flyaffiliate_affiliates`. One user = one affiliate, sitewide. The user also carries the `flyaffiliate_affiliate` role, a label the table drives (`Affiliate\Role`); nothing checks the role for permission. | partner, promoter, "referrer" as a noun |
-| Referral link | `home_url( '/?affiliate={affiliate_id}' )`. The query variable name is a setting. | affiliate URL |
+| Referral link | `home_url( '/?affiliate={affiliate_id}' )`, or any page of the site with the same variable. The query variable name is a setting. An affiliate can save the links they generate to a list (`{prefix}flyaffiliate_referral_links`, one row per page); the list is a bookmark: tracking reads the variable whether or not a row exists, a link's visits are counted from the visits table by landing page, and removing a link from the list stops nothing already shared (ADR-0015). | affiliate URL |
 | Visit | One tracked click on a referral link. Stored in `{prefix}flyaffiliate_visits`. | click, hit |
 | Commission | Money owed to an affiliate for **one order item**. Stored in `{prefix}flyaffiliate_commissions`. | referral — the prototype UI calls commission rows "referrals"; code must not |
 | Base amount | The order item total the rate is applied to. Shipping and tax excluded by default (setting). | subtotal |

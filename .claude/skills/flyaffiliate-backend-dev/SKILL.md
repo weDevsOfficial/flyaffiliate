@@ -320,7 +320,8 @@ contain no queries — the caller prepares the data.
   SVG, because WordPress requires a data URI there.
 - The affiliate dashboard (`src/dashboard`) reuses `src/admin/components`,
   `hooks` and `lib` through the `@/` alias and reads `/me`, `/me/commissions`,
-  `/me/visits`, `/me/payouts`. `Assets::enqueue_dashboard_assets()` loads it
+  `/me/visits`, `/me/payouts`, and `/me/referral-links` (which also saves and
+  removes the affiliate's own links). `Assets::enqueue_dashboard_assets()` loads it
   from the shortcode only; `window.flyaffiliate` carries a subset of the admin
   data plus `dashboard.tab` and `dashboard.notice`.
 - The only admin-post handler is `Admin\PayoutExport` (CSV download); it checks

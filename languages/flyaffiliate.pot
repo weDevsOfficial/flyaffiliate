@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T11:36:50+00:00\n"
+"POT-Creation-Date: 2026-10-05T07:07:31+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -46,7 +46,7 @@ msgstr ""
 
 #: flyaffiliate-class.php:289
 #: includes/Admin/Menu.php:77
-#: includes/Frontend/AffiliateDashboard.php:50
+#: includes/Frontend/AffiliateDashboard.php:51
 #: assets/js/admin.js:310
 #: assets/js/dashboard.js:281
 msgid "Settings"
@@ -79,7 +79,7 @@ msgstr ""
 
 #: includes/Admin/Menu.php:74
 #: includes/Admin/Settings/Schema/SettingsSchema.php:473
-#: includes/Frontend/AffiliateDashboard.php:47
+#: includes/Frontend/AffiliateDashboard.php:48
 #: includes/Payout/CsvExporter.php:39
 #: assets/js/admin.js:279
 #: assets/js/admin.js:282
@@ -93,7 +93,7 @@ msgid "Commissions"
 msgstr ""
 
 #: includes/Admin/Menu.php:75
-#: includes/Frontend/AffiliateDashboard.php:48
+#: includes/Frontend/AffiliateDashboard.php:49
 #: assets/js/admin.js:279
 #: assets/js/admin.js:284
 #: assets/js/admin.js:285
@@ -106,7 +106,7 @@ msgstr ""
 
 #: includes/Admin/Menu.php:76
 #: includes/Admin/Settings/Schema/SettingsSchema.php:620
-#: includes/Frontend/AffiliateDashboard.php:49
+#: includes/Frontend/AffiliateDashboard.php:50
 #: assets/js/admin.js:282
 #: assets/js/admin.js:285
 #: assets/js/dashboard.js:281
@@ -196,6 +196,9 @@ msgid "The referral link and how long a click keeps earning."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:268
+#: includes/Frontend/AffiliateDashboard.php:47
+#: assets/js/admin.js:285
+#: assets/js/dashboard.js:281
 msgid "Referral links"
 msgstr ""
 
@@ -643,6 +646,7 @@ msgid "The affiliate could not be saved."
 msgstr ""
 
 #: includes/Affiliate/Manager.php:190
+#: includes/ReferralLink/Manager.php:124
 #: includes/REST/Controllers/AffiliatesController.php:577
 msgid "No affiliate with that ID."
 msgstr ""
@@ -795,7 +799,7 @@ msgstr ""
 #: includes/Commission/Manager.php:235
 #: includes/Commission/Manager.php:425
 #: includes/REST/Controllers/CommissionsController.php:547
-#: includes/REST/Controllers/MeController.php:163
+#: includes/REST/Controllers/MeController.php:209
 msgid "No commission with that ID."
 msgstr ""
 
@@ -835,11 +839,11 @@ msgstr ""
 msgid "Something went wrong. Try again."
 msgstr ""
 
-#: includes/Install/Installer.php:335
+#: includes/Install/Installer.php:347
 msgid "Affiliate Dashboard"
 msgstr ""
 
-#: includes/Install/Installer.php:339
+#: includes/Install/Installer.php:351
 msgid "Affiliate Registration"
 msgstr ""
 
@@ -998,6 +1002,21 @@ msgstr ""
 msgid "The payment could not be saved."
 msgstr ""
 
+#: includes/ReferralLink/Manager.php:149
+#: assets/js/dashboard.js:279
+msgid "The link could not be saved."
+msgstr ""
+
+#: includes/ReferralLink/Manager.php:242
+#: assets/js/dashboard.js:279
+msgid "Paste a link from this site first."
+msgstr ""
+
+#: includes/ReferralLink/Manager.php:266
+#: assets/js/dashboard.js:279
+msgid "Only links to pages of this website can earn a commission."
+msgstr ""
+
 #: includes/REST/AdminBaseController.php:40
 msgid "You are not allowed to manage affiliates."
 msgstr ""
@@ -1101,14 +1120,15 @@ msgid "Match the affiliate's name, login, email or payment email."
 msgstr ""
 
 #: includes/REST/Controllers/AffiliatesController.php:551
-#: includes/REST/Controllers/MeController.php:402
+#: includes/REST/Controllers/MeController.php:534
 msgid "Sort the result set by this field."
 msgstr ""
 
 #: includes/REST/Controllers/AffiliatesController.php:558
 #: includes/REST/Controllers/CommissionsController.php:530
-#: includes/REST/Controllers/MeController.php:407
+#: includes/REST/Controllers/MeController.php:539
 #: includes/REST/Controllers/PayoutsController.php:704
+#: includes/REST/Controllers/ReferralLinksController.php:332
 #: includes/REST/Controllers/VisitsController.php:330
 msgid "Sort direction."
 msgstr ""
@@ -1199,6 +1219,7 @@ msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:493
 #: includes/REST/Controllers/PayoutsController.php:684
+#: includes/REST/Controllers/ReferralLinksController.php:322
 #: includes/REST/Controllers/VisitsController.php:306
 msgid "Limit to an affiliate."
 msgstr ""
@@ -1229,6 +1250,7 @@ msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:524
 #: includes/REST/Controllers/PayoutsController.php:698
+#: includes/REST/Controllers/ReferralLinksController.php:326
 #: includes/REST/Controllers/VisitsController.php:324
 msgid "Sort field."
 msgstr ""
@@ -1269,19 +1291,37 @@ msgstr ""
 msgid "Affiliate counts."
 msgstr ""
 
-#: includes/REST/Controllers/MeController.php:103
+#: includes/REST/Controllers/MeController.php:111
+msgid "The page of this site to link to."
+msgstr ""
+
+#: includes/REST/Controllers/MeController.php:130
+msgid "The referral link."
+msgstr ""
+
+#: includes/REST/Controllers/MeController.php:149
 msgid "The commission."
 msgstr ""
 
-#: includes/REST/Controllers/MeController.php:390
+#: includes/REST/Controllers/MeController.php:445
+#: includes/REST/Controllers/ReferralLinksController.php:139
+msgid "No referral link with that ID."
+msgstr ""
+
+#: includes/REST/Controllers/MeController.php:451
+#: assets/js/dashboard.js:279
+msgid "The link could not be removed."
+msgstr ""
+
+#: includes/REST/Controllers/MeController.php:522
 msgid "Limit commissions to one status."
 msgstr ""
 
-#: includes/REST/Controllers/MeController.php:394
+#: includes/REST/Controllers/MeController.php:526
 msgid "Limit visits to converted (true) or not (false)."
 msgstr ""
 
-#: includes/REST/Controllers/MeController.php:398
+#: includes/REST/Controllers/MeController.php:530
 msgid "Limit commissions to the ones inside one of your payouts."
 msgstr ""
 
@@ -1402,6 +1442,44 @@ msgstr ""
 msgid "Limit to a batch."
 msgstr ""
 
+#: includes/REST/Controllers/ReferralLinksController.php:79
+#: includes/REST/Controllers/ReferralLinksController.php:248
+msgid "Unique identifier for the referral link."
+msgstr ""
+
+#: includes/REST/Controllers/ReferralLinksController.php:254
+msgid "The affiliate the link belongs to."
+msgstr ""
+
+#: includes/REST/Controllers/ReferralLinksController.php:260
+#: includes/REST/Controllers/VisitsController.php:236
+msgid "The affiliate’s display name."
+msgstr ""
+
+#: includes/REST/Controllers/ReferralLinksController.php:266
+msgid "The page the link leads to."
+msgstr ""
+
+#: includes/REST/Controllers/ReferralLinksController.php:273
+msgid "The page with the affiliate’s referral variable: the link to share."
+msgstr ""
+
+#: includes/REST/Controllers/ReferralLinksController.php:280
+msgid "Visits the affiliate brought to the page."
+msgstr ""
+
+#: includes/REST/Controllers/ReferralLinksController.php:286
+msgid "How many of those visits ended in an order."
+msgstr ""
+
+#: includes/REST/Controllers/ReferralLinksController.php:292
+msgid "The latest of those visits, in GMT."
+msgstr ""
+
+#: includes/REST/Controllers/ReferralLinksController.php:299
+msgid "When the link was saved, in GMT."
+msgstr ""
+
 #: includes/REST/Controllers/SettingsController.php:85
 msgid "The page or subpage whose fields are being saved."
 msgstr ""
@@ -1441,10 +1519,6 @@ msgstr ""
 
 #: includes/REST/Controllers/VisitsController.php:138
 msgid "No visit with that ID."
-msgstr ""
-
-#: includes/REST/Controllers/VisitsController.php:236
-msgid "The affiliate’s display name."
 msgstr ""
 
 #: includes/REST/Controllers/VisitsController.php:242
@@ -1788,14 +1862,19 @@ msgid "Edit"
 msgstr ""
 
 #: assets/js/admin.js:278
+#: assets/js/admin.js:284
 msgid "Copy referral link"
 msgstr ""
 
 #: assets/js/admin.js:278
+#: assets/js/admin.js:284
+#: assets/js/dashboard.js:279
 msgid "Referral link copied."
 msgstr ""
 
 #: assets/js/admin.js:278
+#: assets/js/admin.js:284
+#: assets/js/dashboard.js:279
 msgid "The link could not be copied."
 msgstr ""
 
@@ -1856,14 +1935,13 @@ msgstr ""
 msgid "Add one here, or share the registration page."
 msgstr ""
 
-#. translators: %d: Number of fields that need attention
 #: assets/js/admin.js:278
-#: assets/js/dashboard.js:275
+#: assets/js/dashboard.js:279
 msgid "Copy"
 msgstr ""
 
 #: assets/js/admin.js:278
-#: assets/js/dashboard.js:275
+#: assets/js/dashboard.js:279
 msgid "Copied"
 msgstr ""
 
@@ -2241,6 +2319,44 @@ msgid "Every payment across all payouts. Mark a payment paid once the money has 
 msgstr ""
 
 #: assets/js/admin.js:284
+#: assets/js/admin.js:290
+#: assets/js/dashboard.js:279
+msgid "Page"
+msgstr ""
+
+#: assets/js/admin.js:284
+#: assets/js/dashboard.js:279
+msgid "Referral link"
+msgstr ""
+
+#: assets/js/admin.js:284
+#: assets/js/dashboard.js:279
+msgid "Conversions"
+msgstr ""
+
+#: assets/js/admin.js:284
+msgid "Last visit"
+msgstr ""
+
+#: assets/js/admin.js:284
+#: assets/js/dashboard.js:279
+msgid "Created"
+msgstr ""
+
+#: assets/js/admin.js:284
+#: assets/js/dashboard.js:279
+msgid "Open page"
+msgstr ""
+
+#: assets/js/admin.js:284
+msgid "No referral links saved"
+msgstr ""
+
+#: assets/js/admin.js:284
+msgid "Links the affiliate generates on their dashboard are listed here with the visits they bring."
+msgstr ""
+
+#: assets/js/admin.js:284
 msgid "That affiliate could not be loaded."
 msgstr ""
 
@@ -2263,10 +2379,6 @@ msgstr ""
 
 #: assets/js/admin.js:284
 msgid "WordPress profile"
-msgstr ""
-
-#: assets/js/admin.js:284
-msgid "Referral link"
 msgstr ""
 
 #: assets/js/admin.js:284
@@ -2491,10 +2603,6 @@ msgstr ""
 
 #: assets/js/admin.js:290
 msgid "Revenue"
-msgstr ""
-
-#: assets/js/admin.js:290
-msgid "Page"
 msgstr ""
 
 #: assets/js/admin.js:290
@@ -3096,38 +3204,6 @@ msgstr ""
 msgid "Back to Dashboard"
 msgstr ""
 
-#: assets/js/dashboard.js:275
-msgid "Paste a link from this site first."
-msgstr ""
-
-#: assets/js/dashboard.js:275
-msgid "That is not a valid link."
-msgstr ""
-
-#: assets/js/dashboard.js:275
-msgid "Only links to pages of this website can earn a commission."
-msgstr ""
-
-#: assets/js/dashboard.js:275
-msgid "Generate a referral link"
-msgstr ""
-
-#: assets/js/dashboard.js:275
-msgid "Paste the address of any page on this site, a product for example, to get a link to it that earns you a commission."
-msgstr ""
-
-#: assets/js/dashboard.js:275
-msgid "Paste the link here"
-msgstr ""
-
-#: assets/js/dashboard.js:275
-msgid "Generate"
-msgstr ""
-
-#: assets/js/dashboard.js:275
-msgid "Your generated referral link"
-msgstr ""
-
 #. translators: %d: a number of days
 #: assets/js/dashboard.js:276
 msgid "%d day"
@@ -3211,14 +3287,6 @@ msgid "Clicks on your referral links."
 msgstr ""
 
 #: assets/js/dashboard.js:279
-msgid "Your referral link"
-msgstr ""
-
-#: assets/js/dashboard.js:279
-msgid "Share this link. When someone follows it and buys, you earn a commission on what they buy."
-msgstr ""
-
-#: assets/js/dashboard.js:279
 msgid "Your details"
 msgstr ""
 
@@ -3232,6 +3300,62 @@ msgstr ""
 
 #: assets/js/dashboard.js:279
 msgid "How do you promote us?"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "That is not a valid link."
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Generate a referral link"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Paste the address of any page on this site, a product for example, to get a link to it that earns you a commission. Each link you generate is kept in the list below."
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Paste the link here"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Generate"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Your generated referral link"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Copy link"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Remove from list"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "The link leaves this list only. Wherever you have shared it, it keeps working and earning, and its visits and commissions stay."
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Link removed from the list."
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Your referral link"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Share this link. When someone follows it and buys, you earn a commission on what they buy."
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "No referral links yet"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Generate a link to any page of this site above; it is kept here with the visits it brings."
 msgstr ""
 
 #: assets/js/dashboard.js:279
