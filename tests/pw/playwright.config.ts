@@ -2,8 +2,8 @@
  * Playwright configuration for FlyAffiliate's end-to-end suite.
  *
  * Runs against the wp-env development site (`npm run env:start`), where the
- * plugin is active alongside WooCommerce. Mirrors the layout of Dokan's
- * `tests/pw`: page objects under `pages/`, helpers under `utils/`,
+ * plugin is active alongside WooCommerce and Dokan Lite. Mirrors the layout
+ * of Dokan's `tests/pw`: page objects under `pages/`, helpers under `utils/`,
  * specs under `specs/`.
  */
 import { defineConfig, devices } from '@playwright/test';

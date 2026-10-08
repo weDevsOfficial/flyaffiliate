@@ -578,21 +578,4 @@ class AffiliatesController extends AdminBaseController {
 			[ 'status' => 404 ]
 		);
 	}
-
-	/**
-	 * Format a stored datetime as RFC3339 for the response.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string|null $value Stored `Y-m-d H:i:s` value, in GMT.
-	 *
-	 * @return string|null
-	 */
-	protected function prepare_date( $value ): ?string {
-		if ( empty( $value ) ) {
-			return null;
-		}
-
-		return mysql_to_rfc3339( (string) $value );
-	}
 }

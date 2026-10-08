@@ -158,11 +158,12 @@ class Manager {
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
-	 * @param string $term The search term.
+	 * @param string   $term    The search term.
+	 * @param string[] $columns The user columns searched. Default login, email, display name and nicename.
 	 *
 	 * @return int[] Affiliate ids. Empty when nothing matches, which callers turn into an empty result.
 	 */
-	public function find_affiliate_ids_by_user_search( string $term ): array {
+	public function find_affiliate_ids_by_user_search( string $term, array $columns = [ 'user_login', 'user_email', 'display_name', 'user_nicename' ] ): array {
 		$term = trim( $term );
 
 		if ( '' === $term ) {
@@ -172,7 +173,7 @@ class Manager {
 		$user_ids = get_users(
 			[
 				'search'         => '*' . $term . '*',
-				'search_columns' => [ 'user_login', 'user_email', 'display_name', 'user_nicename' ],
+				'search_columns' => $columns,
 				'fields'         => 'ID',
 				'number'         => 200,
 			]

@@ -1,6 +1,6 @@
 {
     "name": "wedevs/flyaffiliate",
-    "description": "Standalone affiliate marketing for WordPress, with optional platform integrations.",
+    "description": "Standalone affiliate marketing for WordPress, with optional platform integrations, including native Dokan multivendor support.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [

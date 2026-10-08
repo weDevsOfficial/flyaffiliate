@@ -248,7 +248,7 @@ class OrderAttribution implements Hookable {
 		/**
 		 * Filters the vendor an order item belongs to.
 		 *
-		 * 0 on a single-merchant store; a marketplace integration resolves the
+		 * 0 on a single-merchant store; the Dokan integration resolves the
 		 * product's store owner.
 		 *
 		 * @since FLYAFFILIATE_SINCE
@@ -282,7 +282,7 @@ class OrderAttribution implements Hookable {
 				'source'        => Commission::SOURCE_WOOCOMMERCE,
 				'type'          => Commission::TYPE_SALE,
 				'status'        => Commission::STATUS_PENDING,
-				'matures_at'    => flyaffiliate()->commission->maturation_date(),
+				'matures_at'    => flyaffiliate()->commission->maturation_date( '', $vendor_id ),
 				'created_at'    => current_time( 'mysql', true ),
 			]
 		);

@@ -267,6 +267,7 @@ class Assets implements Hookable {
 			'version'    => FLYAFFILIATE_VERSION,
 			'restNonce'  => wp_create_nonce( 'wp_rest' ),
 			'currency'   => $this->get_currency_data(),
+			'hasDokan'   => function_exists( 'dokan' ),
 			'settings'   => [
 				'payoutMinimum' => (float) flyaffiliate_get_option( 'minimum_amount', 0 ),
 			],
@@ -365,7 +366,7 @@ class Assets implements Hookable {
 	 *
 	 * @return string
 	 */
-	protected function get_version( string $relative_path, string $asset_file = '' ): string {
+	public function get_version( string $relative_path, string $asset_file = '' ): string {
 		if ( '' !== $asset_file && file_exists( FLYAFFILIATE_DIR . $asset_file ) ) {
 			$asset = require FLYAFFILIATE_DIR . $asset_file;
 
@@ -396,7 +397,7 @@ class Assets implements Hookable {
 	 *
 	 * @return string[]
 	 */
-	protected function get_script_dependencies( string $relative_path ): array {
+	public function get_script_dependencies( string $relative_path ): array {
 		$file = FLYAFFILIATE_DIR . $relative_path;
 
 		if ( ! file_exists( $file ) ) {

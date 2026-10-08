@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * `boot()` runs immediately after `register()`. It is where a provider adds
  * other providers, or attaches the WordPress hook that will add them later —
- * the root provider adds every other provider from its `boot()`.
+ * the Dokan integration is registered from `boot()` on `dokan_loaded`.
  *
  * @since FLYAFFILIATE_SINCE
  */

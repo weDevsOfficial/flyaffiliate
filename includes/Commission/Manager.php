@@ -731,13 +731,40 @@ class Manager {
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @param string $created_at The creation time in GMT. Defaults to now.
+	 * @param int    $vendor_id  The vendor the sale belongs to, on a marketplace. 0 elsewhere.
 	 *
 	 * @return string `Y-m-d H:i:s` in GMT.
 	 */
-	public function maturation_date( string $created_at = '' ): string {
-		$hold_days = absint( flyaffiliate_get_option( 'hold_days', 30 ) );
+	public function maturation_date( string $created_at = '', int $vendor_id = 0 ): string {
+		$hold_days = $this->get_hold_days( $vendor_id );
 		$base      = '' !== $created_at ? strtotime( $created_at . ' UTC' ) : time();
 
 		return gmdate( 'Y-m-d H:i:s', $base + $hold_days * DAY_IN_SECONDS );
+	}
+
+	/**
+	 * The hold period, in days, for a vendor's sales.
+	 *
+	 * The setting applies everywhere; a marketplace integration can give one
+	 * vendor a different hold through the filter.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int $vendor_id The vendor. 0 for a sale with no vendor.
+	 *
+	 * @return int
+	 */
+	public function get_hold_days( int $vendor_id = 0 ): int {
+		$hold_days = absint( flyaffiliate_get_option( 'hold_days', 30 ) );
+
+		/**
+		 * Filters the hold period applied to a commission.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param int $hold_days The hold period in days, from the settings.
+		 * @param int $vendor_id The vendor the sale belongs to. 0 without one.
+		 */
+		return absint( apply_filters( 'flyaffiliate_hold_days', $hold_days, $vendor_id ) );
 	}
 }

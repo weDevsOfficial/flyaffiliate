@@ -7,7 +7,8 @@ need one; the pull request description is enough.
 Write one when the change:
 
 - adds or alters a database table, an option shape, or a meta key;
-- touches money — commission calculation, maturation, refunds, or payouts;
+- touches money — commission calculation, maturation, refunds, payouts, or the
+  Dokan vendor charge;
 - adds an integration point another plugin can hook (a new filter contract);
 - spans more than roughly three days of work.
 
@@ -20,7 +21,7 @@ Write one when the change:
    that bound the solution. Money rules are quoted, not paraphrased.
 3. **Design** — tables, classes, hooks, and the order things run in.
 4. **Failure modes** — what happens on a duplicate hook, a partial refund, a
-   missing product, a deactivated WooCommerce, a clock skew.
+   missing vendor, a deactivated Dokan, a clock skew.
 5. **Test plan** — the cases that prove it, including the idempotency case.
 6. **Rollout** — the upgrade routine, and what happens to data written by the
    previous version.

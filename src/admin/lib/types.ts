@@ -29,6 +29,16 @@ export type Affiliate = {
 	updated_at: string | null;
 };
 
+/** On a marketplace: the store a commission came from, and the terms it was created under. */
+export type VendorProgram = {
+	vendor_id: number;
+	store_name: string;
+	rate: number;
+	hold_days: number;
+	/** Whether the store's own terms applied, rather than the marketplace's. */
+	overridden: boolean;
+};
+
 export type Commission = {
 	id: number;
 	affiliate_id: number;
@@ -50,6 +60,7 @@ export type Commission = {
 	matures_at: string | null;
 	created_at: string | null;
 	updated_at: string | null;
+	vendor_program?: VendorProgram | null;
 };
 
 export type Visit = {

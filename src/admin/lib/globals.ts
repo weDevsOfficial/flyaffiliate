@@ -14,6 +14,7 @@ export type AdminGlobals = {
 	version: string;
 	restNonce: string;
 	currency: CurrencyConfig;
+	hasDokan: boolean;
 	settings: {
 		payoutMinimum: number;
 	};
@@ -75,6 +76,7 @@ const fallback: AdminGlobals = {
 		decimalSeparator: '.',
 		thousandSeparator: ',',
 	},
+	hasDokan: false,
 	settings: { payoutMinimum: 0 },
 	setup: { done: false, pages: { register: '', dashboard: '' } },
 	urls: {

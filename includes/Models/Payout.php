@@ -20,7 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * left yet — and its commissions link to it through their own `payout_id`,
  * which keeps them out of the next batch. Marking the row paid, once the
  * store has sent the money by hand, is what marks its commissions paid
- * (ADR-0012; there is no automated transfer, ADR-0006).
+ * (ADR-0012; there is no automated transfer and no Dokan withdrawal for
+ * affiliates, ADR-0006).
  *
  * @since FLYAFFILIATE_SINCE
  */

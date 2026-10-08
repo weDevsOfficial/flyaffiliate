@@ -1,6 +1,6 @@
 === FlyAffiliate ===
 Contributors: wedevs, tareq1988
-Tags: affiliate, affiliate marketing, woocommerce, referral, commission
+Tags: affiliate, affiliate marketing, woocommerce, commission, dokan
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. Integrates with WooCommerce; nothing leaves your site.
+Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. Integrates with WooCommerce and Dokan, all on your site.
 
 == Description ==
 
@@ -29,7 +29,7 @@ Everything happens on your own site. FlyAffiliate makes no external requests, se
 = For store owners =
 
 * **Per-item commissions**, not per order — a mixed cart pays the right amount on the right products.
-* **A rate hierarchy**: product → default, clamped to a maximum, with shipping and tax excluded unless you say otherwise.
+* **A rate hierarchy**: product → vendor (on a Dokan marketplace) → default, clamped to a maximum, with shipping and tax excluded unless you say otherwise.
 * **A hold period** that keeps a commission pending until the order has settled, matured by a daily background job.
 * **Commission statuses that follow the order**, as in the affiliate tools you may already know: pending, unpaid, paid, rejected.
 * **Two-step payouts**: create a payout, send the money, mark it paid. A commission inside a payment is never deleted or moved by an order; you can still correct it, and an unpaid payment follows.
@@ -43,9 +43,17 @@ Everything happens on your own site. FlyAffiliate makes no external requests, se
 * **A registration form** (`[flyaffiliate_register]`) that needs only an email address.
 * **Self-referral protection**, so nobody earns a commission on their own order — unless you allow it.
 
+= On a Dokan marketplace =
+
+FlyAffiliate has native support for [Dokan](https://wordpress.org/plugins/dokan-lite/) multivendor marketplaces, and it is entirely optional: the plugin works the same on a single-vendor store.
+
+When Dokan is active, each vendor can opt in to running an affiliate program for their own store, with their own rate. The commission comes out of **the vendor's** earning, not the marketplace's: on a $100 sale with a 20% marketplace commission and a 15% affiliate rate, the vendor withdraws $65, the affiliate is paid $15, and the marketplace keeps its $20. The vendor's dashboard shows the deduction as a line item rather than as an unexplained shortfall.
+
+A multi-vendor cart is split the way Dokan splits it: each vendor's items produce their own commission rows, attributed to their own sub-order.
+
 = Built to be extended =
 
-FlyAffiliate mirrors the architecture of Dokan: a dependency-injection container, service providers, manager classes, overridable templates, a REST API under `flyaffiliate/v1` for every resource, and `flyaffiliate_` hooks throughout. The admin and the affiliate dashboard are React applications on weDevs' plugin UI kit. A Dokan integration — where the vendor, not the marketplace, funds the commission — is in development.
+FlyAffiliate mirrors the architecture of Dokan: a dependency-injection container, service providers, manager classes, overridable templates, a REST API under `flyaffiliate/v1` for every resource, and `flyaffiliate_` hooks throughout. The admin and the affiliate dashboard are React applications on weDevs' plugin UI kit.
 
 = Privacy =
 
@@ -68,11 +76,17 @@ The JavaScript and CSS shipped in `assets/` are compiled from the TypeScript and
 3. Activate the plugin. The Affiliate Dashboard and Affiliate Registration pages are created for you.
 4. Follow the setup wizard, or go to **FlyAffiliate → Settings** and set your default commission rate, your maximum rate and the hold period.
 
+If you run Dokan, activate it as usual: FlyAffiliate detects it and adds the vendor program controls under **FlyAffiliate → Settings → Integrations → Dokan**.
+
 == Frequently Asked Questions ==
 
 = Q. Do I need WooCommerce? =
 
 A. No. Affiliates, referral links, visits, commissions you record by hand and payouts all work on WordPress alone. Commissions from orders come from WooCommerce today, and its integration switches on by itself when WooCommerce is active. More platforms are planned.
+
+= Q. Do I need Dokan? =
+
+A. No. Dokan support is optional. Without it, FlyAffiliate runs as a single-vendor affiliate plugin and every commission is funded by the store.
 
 = Q. Do affiliates get a user role? =
 
@@ -80,11 +94,11 @@ A. Yes. Every affiliate's user carries the **Affiliate** role (`flyaffiliate_aff
 
 = Q. How is a commission calculated? =
 
-A. Per order item. The rate is resolved from the product, then your global default, and is always clamped to the maximum rate you set. Shipping and tax are excluded from the amount the rate applies to, unless you turn that off.
+A. Per order item. The rate is resolved from the product, then the vendor if you run Dokan, then your global default, and is always clamped to the maximum rate you set. Shipping and tax are excluded from the amount the rate applies to, unless you turn that off.
 
 = Q. When does a commission become payable? =
 
-A. When two things are true: the hold period has passed since the order, and the order is processing or completed (cash on delivery: completed). With a hold period of zero the commission is payable the moment the order is paid.
+= Q. Do affiliates get a user role? =
 
 = Q. What happens when an order is refunded? =
 
@@ -109,10 +123,6 @@ A. One: `flyaffiliate_ref`. It is set when someone arrives through a referral li
 = Q. Can I override the templates? =
 
 A. Yes. Copy a file from the plugin's `templates` directory into a `flyaffiliate` directory in your theme, keeping the same path, and your copy is used instead.
-
-= Q. Does it work with Dokan? =
-
-A. FlyAffiliate works on any WordPress site. Integrations are optional and switch on when their plugin is active: WooCommerce today. A Dokan integration, where each vendor funds the commissions on their own products, is in development.
 
 == Screenshots ==
 

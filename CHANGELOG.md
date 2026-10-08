@@ -39,9 +39,13 @@ The first release.
   signup.
 - **REST API** under `flyaffiliate/v1` for affiliates, commissions, visits,
   payouts, settings and the affiliate's own data.
+- **Dokan** — an optional integration that loads on `dokan_loaded`: an
+  Integrations → Dokan settings subpage for vendor programs, the vendor rate
+  and the maximum vendor rate.
 - **WP-CLI** `wp flyaffiliate seed` for demo data.
 - Repository tooling: Composer and npm dependency sets, PHPCS ruleset, PHPUnit
   configuration, wp-env environments, webpack build, release archiver, Plugin
-  Check runner, and CI for PHPCS, PHPUnit (PHP 8.1/8.3) and Plugin Check.
+  Check runner, and CI for PHPCS, PHPUnit (PHP 8.1/8.3, with
+  and without Dokan) and Plugin Check.
 
 [1.0.0]: https://github.com/weDevsOfficial/flyaffiliate/releases/tag/v1.0.0
