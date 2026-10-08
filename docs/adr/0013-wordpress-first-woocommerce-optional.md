@@ -1,6 +1,6 @@
 # ADR-0013 — Standalone: every platform is an optional integration
 
-**Status:** Accepted
+**Status:** Accepted — amended by ADR-0017 (other plugins' notices are hidden on FlyAffiliate's screen)
 **Date:** 2026-09-17
 **Amends:** ADR-0001 (the boot order: `plugins_loaded`, not `woocommerce_loaded`) and ADR-0002 (Composer's loader ships; the in-house autoloader is gone)
 
