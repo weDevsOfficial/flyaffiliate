@@ -45,7 +45,7 @@ class Integration implements Hookable {
 	 * while WooCommerce is active, because the caller reads the first origin as
 	 * the preferred one. A new commission must not default to a platform that
 	 * is not installed: nothing would ever confirm its order, so a `pending`
-	 * row under that origin could never mature (`HoldPeriod::can_mature()`).
+	 * row under that origin could never become unpaid (`OrderStatusSync`).
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *

@@ -40,10 +40,11 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 > Phase 3 money loop: `Tracking\Tracker` (referral link → visit → signed
 > cookie), `Integrations\WooCommerce\OrderAttribution` (one pending commission
 > per order item at checkout, classic and block), `Commission\RateResolver`
-> (product → vendor filter → default, clamped) and `Commission\HoldPeriod` (the
-> daily maturation job) and `Integrations\WooCommerce\OrderStatusSync` (the
-> commission status follows the order, as in SliceWP, with the optional
-> `reject_commissions_on_refund` switch). Not yet built: partial-refund
+> (product → vendor filter → default, clamped), `Commission\HoldPeriod` (the
+> maturity date every commission carries; the hold gates payouts, not statuses,
+> ADR-0014) and `Integrations\WooCommerce\OrderStatusSync` (the commission
+> status follows the order, as in SliceWP: paid → unpaid at once, with the
+> optional `reject_commissions_on_refund` switch). Not yet built: partial-refund
 > rescaling and the optional Dashboard. The Dokan integration is on `feature/dokan-integration`.
 
 ```bash
@@ -161,7 +162,7 @@ Namespace `flyaffiliate/v1`. Controllers extend `FlyAffiliate\REST\AdminBaseCont
 - WordPress hooks for extensibility; every hook name starts with `flyaffiliate_`
 - Overridable templates (`templates/` → theme `flyaffiliate/`)
 - Custom tables via `dbDelta` in `Install\Installer`, versioned upgrades in `Upgrade\Manager`
-- Action Scheduler (bundled with WooCommerce) for the daily maturation job — not raw WP-Cron
+- Action Scheduler (bundled with WooCommerce) for the daily hook, WP-Cron only as the fallback; nothing listens to it today (ADR-0014)
 - HPOS-compatible: always go through `wc_get_order()` / `WC_Order` methods, never `post_meta` on orders
 
 ## Testing

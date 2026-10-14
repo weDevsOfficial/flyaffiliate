@@ -115,7 +115,7 @@ export default function CommissionsTable( { dates }: { dates: DateArgs } ) {
 		},
 		{
 			id: 'matures_at',
-			label: __( 'Matures', 'flyaffiliate' ),
+			label: __( 'Payable from', 'flyaffiliate' ),
 			render: ( { item } ) => (
 				<Matures
 					maturesAt={ item.matures_at }

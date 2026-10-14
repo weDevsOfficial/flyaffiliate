@@ -41,6 +41,44 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * An unpaid commission still inside its hold period is earned but not payable: the
+	 * preview leaves it out and says so; a hold of zero lets it in (ADR-0014).
+	 *
+	 * @return void
+	 */
+	public function test_preview_leaves_out_unpaid_commissions_still_inside_their_hold(): void {
+		$affiliate = $this->factory()->affiliate->create();
+		$created   = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+
+		$this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 10, 'status' => Commission::STATUS_UNPAID, 'created_at' => $created, 'matures_at' => gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ] );
+		$held = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 20, 'status' => Commission::STATUS_UNPAID, 'created_at' => $created, 'matures_at' => gmdate( 'Y-m-d H:i:s', time() + 29 * DAY_IN_SECONDS ) ] );
+		$this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 40, 'status' => Commission::STATUS_PENDING, 'created_at' => $created, 'matures_at' => gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ] );
+
+		$preview = flyaffiliate()->payout->preview( [ 'minimum_amount' => 0 ] );
+
+		$this->assertSame( 1, $preview['count'] );
+		$this->assertCentsEquals( 1000, $preview['total'] );
+		$this->assertSame( 1, $preview['held']['count'] );
+		$this->assertCentsEquals( 2000, $preview['held']['amount'] );
+		$this->assertSame( 1, $preview['pending']['count'], 'a matured pending commission is still not payable: the order is not paid' );
+
+		// Creating the batch pays the same set.
+		$batch = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] );
+
+		$this->assertNotWPError( $batch );
+		$this->assertCentsEquals( 1000, $batch['total'] );
+		$this->assertSame( 0, (int) flyaffiliate()->commission->get( $held )->get( 'payout_id', 0 ), 'the held commission is in no payment' );
+
+		// A hold of zero reschedules the held commission to its creation date, and the next preview takes it.
+		flyaffiliate()->settings->save( [ 'hold_days' => 0 ] );
+		$preview = flyaffiliate()->payout->preview( [ 'minimum_amount' => 0 ] );
+
+		$this->assertSame( 1, $preview['count'] );
+		$this->assertCentsEquals( 2000, $preview['total'] );
+		$this->assertSame( 0, $preview['held']['count'] );
+	}
+
+	/**
 	 * The minimum leaves an affiliate out; the selection modes include and exclude.
 	 *
 	 * @return void

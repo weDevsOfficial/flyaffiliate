@@ -24,22 +24,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  * able to become `rejected`. A commission inside a payment (`payout_id` set)
  * is edited the way SliceWP edits one — amount, reference, type and status
  * stay open to the admin, and an unpaid payment re-sums to follow — while the
- * automatic movers (order status, maturation job) keep off it and it cannot be
- * deleted; a paid payment keeps the amount it was paid with.
+ * order status sync keeps off it and it cannot be deleted; a paid payment
+ * keeps the amount it was paid with.
+ *
+ * `matures_at` is `created_at` plus the hold period, whatever the status: it
+ * says when a payout may take the commission, not when it changes status
+ * (ADR-0014).
  *
  * @since FLYAFFILIATE_SINCE
  */
 class Commission extends BaseModel {
 
 	/**
-	 * Created with the order, inside the hold period. Nothing has moved yet.
+	 * Created with the order, which is not paid yet. Nothing has moved yet.
 	 *
 	 * @var string
 	 */
 	const STATUS_PENDING = 'pending';
 
 	/**
-	 * Matured: the hold period elapsed and the order reached a paying status.
+	 * Earned: the order reached a paying status. A payout takes it once the
+	 * hold period is over.
 	 *
 	 * @var string
 	 */
@@ -201,8 +206,7 @@ class Commission extends BaseModel {
 	 * Whether a payment holds this commission.
 	 *
 	 * A held commission (CONTEXT.md money rule 7) is not deleted, not moved by
-	 * an order status change or the maturation job, and never put into a second
-	 * payment. An admin can still edit it, as in SliceWP. A paid row recorded by
+	 * an order status change, and never put into a second payment. An admin can still edit it, as in SliceWP. A paid row recorded by
 	 * hand, outside any payment, is held by nothing.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -211,6 +215,27 @@ class Commission extends BaseModel {
 	 */
 	public function is_locked(): bool {
 		return $this->is_in_payout();
+	}
+
+	/**
+	 * Whether the hold period is over, so a payout may take this commission.
+	 *
+	 * A commission without a maturity date has nothing to wait for.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param string $now The moment to compare with, `Y-m-d H:i:s` in GMT. Defaults to now.
+	 *
+	 * @return bool
+	 */
+	public function is_matured( string $now = '' ): bool {
+		$matures_at = (string) $this->get( 'matures_at', '' );
+
+		if ( '' === $matures_at ) {
+			return true;
+		}
+
+		return $matures_at <= ( '' !== $now ? $now : current_time( 'mysql', true ) );
 	}
 
 	/**
