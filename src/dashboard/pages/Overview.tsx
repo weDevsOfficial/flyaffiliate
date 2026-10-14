@@ -1,15 +1,12 @@
 /**
- * Overview: the balance figures, then the referral link beside the link
- * generator, then the terms of the programme in one card.
+ * Overview: the balance figures, then the terms of the programme in one card.
+ * The referral link and the generator live on the Referral links tab.
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Clock, MousePointerClick, Wallet, WalletCards } from 'lucide-react';
-import { Card } from '@wedevs/plugin-ui';
 import StatCard, { StatCardSkeleton } from '@/components/StatCard';
-import CopyField from '@/components/CopyField';
 import { formatMoney } from '@/lib/format';
 import { getGlobals } from '@/lib/globals';
-import GenerateLink from '../components/GenerateLink';
 import ProgramDetails from '../components/ProgramDetails';
 import type { AffiliateProfile } from '../types';
 
@@ -98,30 +95,6 @@ export default function OverviewPage( { profile, hasRange }: Props ) {
 						'flyaffiliate'
 					) } ${ converted }` }
 				/>
-			</div>
-
-			<div className="grid gap-4 lg:grid-cols-2">
-				<Card className="gap-3 rounded-md border border-border px-5 py-4 shadow ring-0">
-					<label
-						htmlFor="flyaffiliate-referral-link"
-						className="text-sm font-semibold text-foreground"
-					>
-						{ __( 'Your referral link', 'flyaffiliate' ) }
-					</label>
-					<p className="text-sm text-muted-foreground">
-						{ __(
-							'Share this link. When someone follows it and buys, you earn a commission on what they buy.',
-							'flyaffiliate'
-						) }
-					</p>
-					<CopyField
-						id="flyaffiliate-referral-link"
-						value={ profile.referral_url }
-						className="bg-muted/40"
-					/>
-				</Card>
-
-				<GenerateLink referralUrl={ profile.referral_url } />
 			</div>
 
 			<ProgramDetails />

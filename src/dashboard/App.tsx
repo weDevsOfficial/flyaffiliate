@@ -27,11 +27,22 @@ import { getGlobals } from '@/lib/globals';
 import type { AffiliateProfile, DateArgs } from './types';
 import OverviewPage from './pages/Overview';
 import SettingsPage from './pages/Settings';
+import ReferralLinksPage from './pages/ReferralLinks';
 import CommissionsTable from './tables/CommissionsTable';
 import VisitsTable from './tables/VisitsTable';
 import PayoutsTable from './tables/PayoutsTable';
 
-const TABS = [ 'overview', 'commissions', 'visits', 'payouts', 'settings' ];
+const TABS = [
+	'overview',
+	'links',
+	'commissions',
+	'visits',
+	'payouts',
+	'settings',
+];
+
+/** Tabs the date range does not apply to: the profile, and the list of links. */
+const UNDATED_TABS = [ 'links', 'settings' ];
 
 const TAB_TRIGGER = 'px-4 data-active:text-foreground';
 
@@ -147,6 +158,12 @@ export default function App() {
 								{ __( 'Overview', 'flyaffiliate' ) }
 							</TabsTrigger>
 							<TabsTrigger
+								value="links"
+								className={ TAB_TRIGGER }
+							>
+								{ __( 'Referral links', 'flyaffiliate' ) }
+							</TabsTrigger>
+							<TabsTrigger
 								value="commissions"
 								className={ TAB_TRIGGER }
 							>
@@ -172,7 +189,7 @@ export default function App() {
 							</TabsTrigger>
 						</TabsList>
 
-						{ tab !== 'settings' && (
+						{ ! UNDATED_TABS.includes( tab ) && (
 							<div
 								className="flex items-center gap-2"
 								data-testid="flyaffiliate-date-range"
@@ -241,6 +258,9 @@ export default function App() {
 							profile={ profile }
 							hasRange={ Boolean( dates.after ) }
 						/>
+					</TabsContent>
+					<TabsContent value="links">
+						<ReferralLinksPage profile={ profile } />
 					</TabsContent>
 					<TabsContent value="commissions">
 						<CommissionsTable dates={ dates } />

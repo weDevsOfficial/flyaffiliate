@@ -232,11 +232,6 @@ class Tracker implements Hookable {
 	/**
 	 * The page the visitor landed on, without the referral variable.
 	 *
-	 * The request URI already carries the site's directory when WordPress
-	 * lives in one (`/wp/shop/`), so it is joined to the home URL's origin
-	 * rather than passed through `home_url()`, which would add the directory
-	 * a second time.
-	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @param string $variable The referral variable.
@@ -245,6 +240,28 @@ class Tracker implements Hookable {
 	 */
 	protected function get_landing_url( string $variable ): string {
 		$request = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+
+		return self::to_landing_url( $request, $variable );
+	}
+
+	/**
+	 * The landing URL a visit to a request URI is recorded under.
+	 *
+	 * The request URI already carries the site's directory when WordPress
+	 * lives in one (`/wp/shop/`), so it is joined to the home URL's origin
+	 * rather than passed through `home_url()`, which would add the directory
+	 * a second time. A saved referral link finds its visits by this value, so
+	 * both go through here.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param string $request_uri The path and query string, e.g. `/shop/?orderby=price`.
+	 * @param string $variable    The referral variable, which is left out.
+	 *
+	 * @return string
+	 */
+	public static function to_landing_url( string $request_uri, string $variable ): string {
+		$request = sanitize_text_field( $request_uri );
 		$home    = wp_parse_url( home_url( '/' ) );
 		$origin  = ( $home['scheme'] ?? 'http' ) . '://' . ( $home['host'] ?? '' ) . ( isset( $home['port'] ) ? ':' . $home['port'] : '' );
 
