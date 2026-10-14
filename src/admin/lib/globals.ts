@@ -54,6 +54,8 @@ export type AdminGlobals = {
 		rateType: 'percentage' | 'fixed' | string;
 		cookieDays: number;
 		holdDays: number;
+		/** A sentence on holds of its own (a marketplace's sellers); empty when every commission waits the hold period. */
+		holdNote?: string;
 		payoutMinimum: number;
 	};
 };

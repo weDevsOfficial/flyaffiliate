@@ -184,6 +184,18 @@ class HoldPeriod implements Hookable {
 		);
 		// phpcs:enable
 
+		/**
+		 * Fires after every pending and rejected commission was moved onto
+		 * the hold period, so a commission with a hold of its own
+		 * (`flyaffiliate_commission_hold_days`) can be moved back onto it
+		 * before anything matures.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param int $hold_days The hold period, in days.
+		 */
+		do_action( 'flyaffiliate_commissions_rescheduled', max( 0, $hold_days ) );
+
 		return (int) $updated;
 	}
 

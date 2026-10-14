@@ -249,6 +249,8 @@ class Assets implements Hookable {
 				'rateType'      => (string) flyaffiliate_get_option( 'rate_type', 'percentage' ),
 				'cookieDays'    => absint( flyaffiliate_get_option( 'cookie_duration', 30 ) ),
 				'holdDays'      => absint( flyaffiliate_get_option( 'hold_days', 30 ) ),
+				// A marketplace whose sellers set their own hold says so here (`flyaffiliate_dashboard_script_data`).
+				'holdNote'      => '',
 				'payoutMinimum' => (float) flyaffiliate_get_option( 'minimum_amount', 0 ),
 			],
 		];

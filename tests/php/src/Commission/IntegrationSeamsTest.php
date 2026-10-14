@@ -7,13 +7,15 @@
 
 namespace FlyAffiliate\Test\Commission;
 
+use FlyAffiliate\Commission\HoldPeriod;
 use FlyAffiliate\Commission\RateResolver;
 use FlyAffiliate\Models\Commission;
 use FlyAffiliate\Test\FlyAffiliateTestCase;
 
 /**
- * `flyaffiliate_max_rate`, `flyaffiliate_commission_deleted` and
- * `flyaffiliate_commission_note`.
+ * `flyaffiliate_max_rate`, `flyaffiliate_commission_deleted`,
+ * `flyaffiliate_commission_note`, `flyaffiliate_commission_hold_days` and
+ * `flyaffiliate_commissions_rescheduled`.
  */
 class IntegrationSeamsTest extends FlyAffiliateTestCase {
 
@@ -92,5 +94,58 @@ class IntegrationSeamsTest extends FlyAffiliateTestCase {
 		remove_filter( 'flyaffiliate_commission_note', $note, 10 );
 
 		$this->assertSame( '', $this->get_request( '/me/commissions/' . $id )->get_data()['note'] );
+	}
+
+	/**
+	 * A manual pending commission takes its own hold, and moving every
+	 * pending commission onto a new hold period announces it, so that hold
+	 * can be put back before anything matures.
+	 */
+	public function test_a_hold_of_its_own_survives_a_new_hold_period(): void {
+		global $wpdb;
+
+		flyaffiliate_update_option( 'hold_days', 30 );
+
+		$affiliate  = $this->factory()->affiliate->create();
+		$commission = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 10, 'status' => Commission::STATUS_PENDING ] );
+
+		$this->assertSame( 30 * DAY_IN_SECONDS, $this->hold( $commission->get_id() ) );
+
+		$week = static fn() => 7;
+
+		add_filter( 'flyaffiliate_commission_hold_days', $week );
+		$own = flyaffiliate()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 10, 'status' => Commission::STATUS_PENDING ] );
+		remove_filter( 'flyaffiliate_commission_hold_days', $week );
+
+		$this->assertSame( 7 * DAY_IN_SECONDS, $this->hold( $own->get_id() ) );
+
+		$seen     = null;
+		$listener = static function ( $days ) use ( &$seen, $own, $wpdb ) {
+			$seen = $days;
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the listener puts its own hold back, as an integration would.
+			$wpdb->query( $wpdb->prepare( 'UPDATE ' . Commission::get_table() . ' SET matures_at = DATE_ADD( created_at, INTERVAL 7 DAY ) WHERE id = %d', $own->get_id() ) );
+		};
+
+		add_action( 'flyaffiliate_commissions_rescheduled', $listener );
+		( new HoldPeriod() )->reschedule( 14 );
+		remove_action( 'flyaffiliate_commissions_rescheduled', $listener );
+
+		$this->assertSame( 14, $seen );
+		$this->assertSame( 14 * DAY_IN_SECONDS, $this->hold( $commission->get_id() ) );
+		$this->assertSame( 7 * DAY_IN_SECONDS, $this->hold( $own->get_id() ) );
+	}
+
+	/**
+	 * How long a stored commission waits: `matures_at - created_at`, in seconds.
+	 *
+	 * @param int $id The commission.
+	 *
+	 * @return int
+	 */
+	protected function hold( int $id ): int {
+		$commission = flyaffiliate()->commission->get( $id );
+
+		return strtotime( (string) $commission->get( 'matures_at' ) ) - strtotime( (string) $commission->get( 'created_at' ) );
 	}
 }
