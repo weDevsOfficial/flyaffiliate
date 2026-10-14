@@ -68,7 +68,11 @@ function getRoutes(): AdminRoute[] {
 			element: <CommissionFormPage />,
 		},
 		{ id: 'visits', path: '/visits', element: <VisitsPage /> },
-		{ id: 'payouts', path: '/payouts', element: <PayoutsPage /> },
+		{
+			id: 'payout-batch',
+			path: '/payouts/batch/:batchKey',
+			element: <PayoutBatchPage />,
+		},
 		{ id: 'payout-new', path: '/payouts/new', element: <NewPayoutPage /> },
 		{
 			id: 'payments',
@@ -80,11 +84,7 @@ function getRoutes(): AdminRoute[] {
 			path: '/payouts/payment/:id',
 			element: <PaymentPage />,
 		},
-		{
-			id: 'payout-batch',
-			path: '/payouts/batch/:batchKey',
-			element: <PayoutBatchPage />,
-		},
+		{ id: 'payouts', path: '/payouts', element: <PayoutsPage /> },
 		{ id: 'settings', path: '/settings', element: <SettingsPage /> },
 		{ id: 'setup', path: '/setup', element: <SetupPage /> },
 	];
