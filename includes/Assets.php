@@ -84,7 +84,7 @@ class Assets implements Hookable {
 		}
 
 		foreach ( $this->get_scripts() as $handle => $script ) {
-			wp_register_script( $handle, $script['src'], $script['deps'], $script['version'], true );
+			wp_register_script( $handle, $script['src'], $script['deps'], $script['version'], $script['in_footer'] ?? true );
 			wp_set_script_translations( $handle, 'flyaffiliate', FLYAFFILIATE_DIR . '/languages' );
 		}
 	}
@@ -136,7 +136,7 @@ class Assets implements Hookable {
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
-	 * @return array<string, array{src: string, deps: string[], version: string}>
+	 * @return array<string, array{src: string, deps: string[], version: string, in_footer?: bool}>
 	 */
 	public function get_scripts(): array {
 		$scripts = [
@@ -149,6 +149,14 @@ class Assets implements Hookable {
 				'src'     => FLYAFFILIATE_ASSETS_URL . '/js/dashboard.js',
 				'deps'    => $this->get_script_dependencies( '/assets/js/dashboard.asset.php' ),
 				'version' => $this->get_version( '/assets/js/dashboard.js', '/assets/js/dashboard.asset.php' ),
+			],
+			// The page WooCommerce Analytics' box opens (Integrations\WooCommerce\Analytics):
+			// in the header, so it is added before WooCommerce's app builds its routes.
+			self::HANDLE_PREFIX . 'analytics' => [
+				'src'       => FLYAFFILIATE_ASSETS_URL . '/js/analytics.js',
+				'deps'      => $this->get_script_dependencies( '/assets/js/analytics.asset.php' ),
+				'version'   => $this->get_version( '/assets/js/analytics.js', '/assets/js/analytics.asset.php' ),
+				'in_footer' => false,
 			],
 		];
 

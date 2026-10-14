@@ -210,8 +210,9 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
   The unique key on `order_item_id` is the second idempotency net.
 - Rates: `RateResolver::resolve( $product_id, $vendor_id )` — product meta
   `_flyaffiliate_rate` (variation, then parent) → `flyaffiliate_vendor_rate`
-  filter → `default_rate`, clamped to `max_rate`; `flyaffiliate_commission_rate`
-  runs last and is clamped again.
+  filter → `default_rate`, clamped to `max_rate` (or what
+  `flyaffiliate_max_rate` returns for that product and vendor);
+  `flyaffiliate_commission_rate` runs last and is clamped again.
 - `Commission\HoldPeriod` matures commissions: `pending` with `matures_at <= now`
   becomes `unpaid` through `Manager::set_status()`; a WooCommerce commission also
   needs its order `processing` or `completed` (`flyaffiliate_mature_order_statuses`;
@@ -381,8 +382,11 @@ A new platform gets its own `Integrations\{Platform}\Integration`, its own
 The marketplace (Dokan) integration is not on this branch. It lives on
 `feature/dokan-integration`, which is this branch plus that work; keep the
 neutral seams it plugs into — `vendor_id` on commissions, the
-`flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters —
-and add nothing Dokan-specific here.
+`flyaffiliate_vendor_rate`, `flyaffiliate_order_item_vendor_id`,
+`flyaffiliate_max_rate`, `flyaffiliate_commission_note` and
+`flyaffiliate_analytics_vendor_id` filters, the `flyaffiliate_commission_deleted`
+action — and add nothing Dokan-specific here. FlyAffiliate Pro's Dokan extension
+is the marketplace integration today (its ADR-0008).
 
 Verify any third-party hook signature against the installed source before
 using it. Never assume a version number or a function's availability.

@@ -61,7 +61,21 @@ class RateResolver {
 			$rate = (float) flyaffiliate_get_option( 'default_rate', 10 );
 		}
 
-		$max  = (float) flyaffiliate_get_option( 'max_rate', 50 );
+		/**
+		 * Filters the maximum rate a product's sale can earn.
+		 *
+		 * The global maximum by default. A marketplace that sets its own
+		 * maximum for vendor sales replaces it here, for those sales only; the
+		 * rate is clamped to the result before and after
+		 * `flyaffiliate_commission_rate`.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param float $max        The maximum rate, in percent.
+		 * @param int   $product_id The product.
+		 * @param int   $vendor_id  The vendor. 0 on a single-merchant store.
+		 */
+		$max  = max( 0.0, (float) apply_filters( 'flyaffiliate_max_rate', (float) flyaffiliate_get_option( 'max_rate', 50 ), $product_id, $vendor_id ) );
 		$rate = max( 0.0, min( (float) $rate, $max ) );
 
 		/**

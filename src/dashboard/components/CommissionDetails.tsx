@@ -4,6 +4,7 @@
  */
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Info } from 'lucide-react';
 import {
 	Dialog,
 	DialogContent,
@@ -152,6 +153,18 @@ export default function CommissionDetails( { commissionId, onClose }: Props ) {
 										amount={ detail.amount }
 										className="font-semibold"
 									/>
+									{ detail.note && (
+										<p
+											className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground"
+											data-testid="flyaffiliate-commission-note"
+										>
+											<Info
+												className="mt-px size-3.5 shrink-0"
+												aria-hidden="true"
+											/>
+											{ detail.note }
+										</p>
+									) }
 								</Row>
 								<Row label={ __( 'Status', 'flyaffiliate' ) }>
 									<StatusBadge

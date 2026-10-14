@@ -22,8 +22,9 @@ finding at a higher level outranks every finding below it.
 Check against `CONTEXT.md`; these are not matters of opinion.
 
 - Commission calculated per **order**, not per **order item**.
-- A rate used without clamping to the global maximum — including a stored rate
-  saved before the maximum changed.
+- A rate used without clamping to the maximum (`flyaffiliate_max_rate`, the
+  global one by default) — including a stored rate saved before the maximum
+  changed.
 - Rate hierarchy out of order. It is product → vendor (filter) → global.
 - Money compared or summed as a float. It is integer cents:
   `(int) round( $amount * 100 )`.

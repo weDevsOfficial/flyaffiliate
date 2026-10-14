@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) today, Dokan and others later. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
+FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) today, Dokan and others later. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions; the `flyaffiliate_vendor_rate`, `flyaffiliate_order_item_vendor_id`, `flyaffiliate_max_rate`, `flyaffiliate_commission_note` and `flyaffiliate_analytics_vendor_id` filters; the `flyaffiliate_commission_deleted` action). FlyAffiliate Pro's Dokan extension plugs into them.
 
 The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service providers, `Hookable` classes, `Manager` facades, overridable templates, an `Installer`/`Upgrade` pair, `FlyAffiliateTestCase`-based PHPUnit tests. Anyone who knows the Dokan codebase should feel at home here.
 
@@ -43,7 +43,14 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 > (product → vendor filter → default, clamped) and `Commission\HoldPeriod` (the
 > daily maturation job) and `Integrations\WooCommerce\OrderStatusSync` (the
 > commission status follows the order, as in SliceWP, with the optional
-> `reject_commissions_on_refund` switch). Not yet built: partial-refund
+> `reject_commissions_on_refund` switch), and
+> `Integrations\WooCommerce\Analytics` (an "Affiliate Commission" box on
+> WooCommerce → Analytics → Overview, narrowed to a vendor through
+> `flyaffiliate_analytics_vendor_id`; it counts the orders the report counts —
+> imported into `wc_order_stats`, by the report's date type, excluded
+> statuses left out). Commissions carry a `note`
+> (`flyaffiliate_commission_note`) the Commissions list and the affiliate
+> dashboard show as an info tip. Not yet built: partial-refund
 > rescaling and the optional Dashboard. The Dokan integration is on `feature/dokan-integration`.
 
 ```bash

@@ -531,7 +531,27 @@ class Manager {
 			return false;
 		}
 
-		return $commission->delete();
+		// Deleting empties the model; the action gets the fields it had.
+		$deleted = clone $commission;
+
+		if ( ! $commission->delete() ) {
+			return false;
+		}
+
+		/**
+		 * Fires after a commission is deleted.
+		 *
+		 * The row is gone; the commission passed still carries the fields it
+		 * had, so whatever followed it (a marketplace's charge on the vendor,
+		 * say) can follow it out.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param Commission $commission The commission, as it was.
+		 */
+		do_action( 'flyaffiliate_commission_deleted', $deleted );
+
+		return true;
 	}
 
 	/**

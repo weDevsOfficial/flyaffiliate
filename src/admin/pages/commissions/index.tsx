@@ -35,6 +35,7 @@ import StatusBadge from '@/components/StatusBadge';
 import DateTime from '@/components/DateTime';
 import Matures from '@/components/Matures';
 import Money from '@/components/Money';
+import CommissionAmount from '@/components/CommissionAmount';
 import AffiliatePicker from '@/components/AffiliatePicker';
 import { useListView } from '@/hooks/useListView';
 import { useCounts } from '@/hooks/useCounts';
@@ -244,7 +245,7 @@ export function CommissionsTable( {
 			id: 'amount',
 			label: __( 'Amount', 'flyaffiliate' ),
 			render: ( { item } ) => (
-				<Money amount={ item.amount } className="font-semibold" />
+				<CommissionAmount amount={ item.amount } note={ item.note } />
 			),
 		},
 		{

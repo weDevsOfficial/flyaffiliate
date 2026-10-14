@@ -14,7 +14,7 @@ Sources: `docs/MVP_PRD.md` and `docs/PRD.md`. FlyAffiliate replaces SliceWP: it 
 | Commission | Money owed to an affiliate for **one order item**. Stored in `{prefix}flyaffiliate_commissions`. | referral — the prototype UI calls commission rows "referrals"; code must not |
 | Base amount | The order item total the rate is applied to. Shipping and tax excluded by default (setting). | subtotal |
 | Rate | Percentage (default) or fixed amount applied to the base amount. | fee |
-| Rate hierarchy | product rate → vendor rate (through the `flyaffiliate_vendor_rate` filter; nothing on this branch supplies one) → global default rate, then clamped to the global maximum rate. | |
+| Rate hierarchy | product rate → vendor rate (through the `flyaffiliate_vendor_rate` filter; nothing on this branch supplies one) → global default rate, then clamped to the maximum rate: the global one, or a marketplace's own for its vendors' sales (`flyaffiliate_max_rate`). | |
 | Hold period | Days a commission stays `pending` before it can become `unpaid`. Default 30. Configurable, can be 0. | maturation window |
 | Mature | The `pending` → `unpaid` transition, done by the daily job or manually by an admin. | approve, release |
 | Payout | A batch of payments, one per affiliate, created from `unpaid` commissions (`batch_key`). What the admin screens call a payout, as SliceWP does. | withdrawal |
@@ -32,7 +32,7 @@ The plugin itself reaches `paid` only through a payment being marked paid, and e
 ## Money rules (non-negotiable)
 
 1. Commission is calculated **per order item**, never per order. Formula: `base_amount × rate`.
-2. Rate resolution: product meta `_flyaffiliate_rate` → vendor rate (filter) → global default. Always clamp to the global maximum. Never let a stored rate exceed the max at calculation time even if it was saved before the max changed.
+2. Rate resolution: product meta `_flyaffiliate_rate` → vendor rate (filter) → global default. Always clamp to the maximum — the global one unless a marketplace integration supplies its own for a vendor's sale through `flyaffiliate_max_rate` — before and after `flyaffiliate_commission_rate`. Never let a stored rate exceed the max at calculation time even if it was saved before the max changed.
 3. Commission rows are created when the order is created, as `pending`. Nothing moves money at that point.
 4. A commission matures only when `created_at + hold_days <= now` **and** the order is `processing` or `completed` (cash on delivery: `completed`). It matures as soon as both hold: on the order status change, right after checkout, or from the daily job when the hold ends later. Changing `hold_days` reschedules every pending commission. With a hold of 0 this is SliceWP's behaviour: the order completes, the commission is unpaid. A commission an admin adds by hand keeps the status it is given — a pending one waits for its order (WooCommerce origin) or the job, and never matures at the moment it is created.
 5. Refund before payout: rescale each commission by the unrefunded fraction of its own item. Full refund → `rejected`. Refund after payout: no reversal — whoever paid it absorbs it. The hold period exists to make this rare. *Built so far: the `reject_commissions_on_refund` switch (off by default, SliceWP's rule) rejects the order's pending and unpaid commissions on a full refund; partial-refund rescaling is not built and refunds are otherwise handled by hand.*
