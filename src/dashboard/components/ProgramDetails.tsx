@@ -100,7 +100,7 @@ export default function ProgramDetails() {
 						__( 'None', 'flyaffiliate' )
 					) }
 					hint={ __(
-						'How long a commission stays pending before it can be paid.',
+						'How long after the sale a commission waits before it can be paid out.',
 						'flyaffiliate'
 					) }
 				/>

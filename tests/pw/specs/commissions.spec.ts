@@ -48,8 +48,8 @@ test.describe( 'Commissions', () => {
 		await form.locator( '#flyaffiliate-commission-amount' ).fill( '12.5' );
 		await form.locator( '#flyaffiliate-commission-order' ).fill( '1400' );
 
-		// The form starts on Paid, as SliceWP's does; this one goes through
-		// the hold period.
+		// The form starts on Paid, as SliceWP's does; this one waits for its
+		// order to be paid.
 		await form.locator( '#flyaffiliate-commission-status' ).click();
 		await page.getByRole( 'option', { name: 'Pending' } ).click();
 

@@ -170,9 +170,7 @@ class Assets implements Hookable {
 	 * @return void
 	 */
 	public function enqueue_admin_assets(): void {
-		$page = $this->get_current_page();
-
-		if ( Menu::PARENT_SLUG !== $page ) {
+		if ( ! Menu::is_plugin_screen() ) {
 			return;
 		}
 
@@ -336,18 +334,6 @@ class Assets implements Hookable {
 			'decimalSeparator'  => (string) flyaffiliate_get_option( 'currency_decimal_separator', '.' ),
 			'thousandSeparator' => (string) flyaffiliate_get_option( 'currency_thousands_separator', ',' ),
 		];
-	}
-
-	/**
-	 * The `page` query argument of the current admin request.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return string
-	 */
-	protected function get_current_page(): string {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the page slug to decide what to enqueue changes nothing.
-		return isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 	}
 
 	/**

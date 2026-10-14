@@ -61,6 +61,33 @@ const PREVIEW_VIEW: DataViewState = {
 	},
 };
 
+// Unpaid commissions the selection caught that are still inside their hold period: earned, not payable yet.
+function HeldNote( { held }: { held: PayoutPreview[ 'held' ] } ) {
+	if ( held.count === 0 ) {
+		return null;
+	}
+
+	return (
+		<p
+			className="text-muted-foreground mb-4"
+			data-testid="flyaffiliate-payout-held"
+			data-count={ held.count }
+		>
+			{ sprintf(
+				/* translators: 1: number of commissions, 2: their total */
+				_n(
+					'%1$d unpaid commission worth %2$s is still inside its hold period, so it is not in this payout.',
+					'%1$d unpaid commissions worth %2$s are still inside their hold period, so they are not in this payout.',
+					held.count,
+					'flyaffiliate'
+				),
+				held.count,
+				formatMoney( held.amount )
+			) }
+		</p>
+	);
+}
+
 export default function NewPayoutPage() {
 	const navigate = useNavigate();
 	const { settings, currency } = getGlobals();
@@ -525,13 +552,15 @@ export default function NewPayoutPage() {
 											)
 										) }{ ' ' }
 										{ __(
-											'A commission becomes payable when its hold period ends, or when you mark it unpaid.',
+											'A commission becomes unpaid when its order is paid, or when you mark it unpaid.',
 											'flyaffiliate'
 										) }
 									</p>
 								) }
 							</div>
 						) }
+
+						{ preview && <HeldNote held={ preview.held } /> }
 
 						{ preview && preview.rows.length > 0 && (
 							<>

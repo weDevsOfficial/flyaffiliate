@@ -434,10 +434,7 @@ export default function CommissionFormPage() {
 		setValues( ( current ) => ( { ...current, [ key ]: value } ) );
 
 	const statusHint: Record< string, string > = {
-		pending: __(
-			'Waits for the hold period to end and for the order to be paid.',
-			'flyaffiliate'
-		),
+		pending: __( 'Waits for the order to be paid.', 'flyaffiliate' ),
 		unpaid: __( 'Ready to go out in the next payout.', 'flyaffiliate' ),
 		paid: __(
 			'Already paid outside FlyAffiliate. You can still edit it here.',
@@ -882,7 +879,7 @@ export default function CommissionFormPage() {
 											'flyaffiliate'
 									  )
 									: __(
-											'Where the commission comes from. A WooCommerce commission follows its order: unpaid once the order is paid, rejected if the order fails. A manual commission only follows the hold period.',
+											'Where the commission comes from. A WooCommerce commission follows its order: unpaid once the order is paid, rejected if the order fails. A manual commission only moves when you move it.',
 											'flyaffiliate'
 									  )
 							}

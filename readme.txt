@@ -23,14 +23,14 @@ Everything happens on your own site. FlyAffiliate makes no external requests, se
 1. **An affiliate joins.** Through the registration form on your site (email-only signup with a one-time activation link) or because you added them from the admin. Every affiliate is a WordPress user with the **Affiliate** role.
 2. **They share their link.** Each affiliate gets a referral link; add `?affiliate=ID` to any product URL to send visitors straight to it. A visit is recorded and a first-party cookie remembers who sent them.
 3. **An order comes in.** FlyAffiliate creates one **pending** commission per order item, at the product's rate or your default rate, clamped to the maximum you allow.
-4. **The commission follows the order.** It becomes **unpaid** once the hold period has passed and the order is paid; an order that fails, is cancelled or (optionally) refunded rejects it; an order that recovers puts it back.
+4. **The commission follows the order.** It becomes **unpaid** the moment the order is paid; an order that fails, is cancelled or (optionally) refunded rejects it; an order that recovers puts it back.
 5. **You pay in batches.** A payout turns every unpaid commission into one payment per affiliate. Send the money your way, mark each payment paid, export the batch as CSV.
 
 = For store owners =
 
 * **Per-item commissions**, not per order — a mixed cart pays the right amount on the right products.
 * **A rate hierarchy**: product → default, clamped to a maximum, with shipping and tax excluded unless you say otherwise.
-* **A hold period** that keeps a commission pending until the order has settled, matured by a daily background job.
+* **A hold period** that keeps an unpaid commission out of payouts until enough time has passed to be sure the order stays paid.
 * **Commission statuses that follow the order**, as in the affiliate tools you may already know: pending, unpaid, paid, rejected.
 * **Two-step payouts**: create a payout, send the money, mark it paid. A commission inside a payment is never deleted or moved by an order; you can still correct it, and an unpaid payment follows.
 * **Hand-entered commissions** for bonuses, corrections and offline sales, with the same fields you would expect: affiliate, amount, reference, origin, date, type and status.
@@ -84,7 +84,7 @@ A. Per order item. The rate is resolved from the product, then your global defau
 
 = Q. When does a commission become payable? =
 
-A. When two things are true: the hold period has passed since the order, and the order is processing or completed (cash on delivery: completed). With a hold period of zero the commission is payable the moment the order is paid.
+A. A commission becomes **unpaid** as soon as its order is processing or completed (cash on delivery: completed). A payout takes it once the hold period has passed since the order. With a hold period of zero it is payable the moment the order is paid.
 
 = Q. What happens when an order is refunded? =
 

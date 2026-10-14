@@ -276,7 +276,7 @@ export function CommissionsTable( {
 		},
 		{
 			id: 'matures_at',
-			label: __( 'Matures', 'flyaffiliate' ),
+			label: __( 'Payable from', 'flyaffiliate' ),
 			render: ( { item } ) => (
 				<Matures
 					maturesAt={ item.matures_at }
@@ -463,7 +463,7 @@ export default function CommissionsPage() {
 			<PageHeader
 				title={ __( 'Commissions', 'flyaffiliate' ) }
 				description={ __(
-					'Pending commissions become unpaid when the hold period ends. Unpaid commissions go into the next payout.',
+					'A commission becomes unpaid when its order is paid, and goes into a payout once its hold period is over.',
 					'flyaffiliate'
 				) }
 			/>
