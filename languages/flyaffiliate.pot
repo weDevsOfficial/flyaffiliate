@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-28T04:25:37+00:00\n"
+"POT-Creation-Date: 2026-10-14T12:16:12+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -46,7 +46,7 @@ msgstr ""
 
 #: flyaffiliate-class.php:289
 #: includes/Admin/Menu.php:78
-#: includes/Frontend/AffiliateDashboard.php:50
+#: includes/Frontend/AffiliateDashboard.php:51
 #: assets/js/admin.js:311
 #: assets/js/dashboard.js:281
 msgid "Settings"
@@ -93,7 +93,7 @@ msgid "Commissions"
 msgstr ""
 
 #: includes/Admin/Menu.php:76
-#: includes/Frontend/AffiliateDashboard.php:48
+#: includes/Frontend/AffiliateDashboard.php:49
 #: assets/js/admin.js:279
 #: assets/js/admin.js:284
 #: assets/js/admin.js:285
@@ -117,11 +117,11 @@ msgstr ""
 msgid "You are not allowed to view this page."
 msgstr ""
 
-#: includes/Admin/Notices/Manager.php:155
+#: includes/Admin/Notices/Manager.php:212
 msgid "Do not show this again"
 msgstr ""
 
-#: includes/Admin/Notices/Manager.php:168
+#: includes/Admin/Notices/Manager.php:225
 #: includes/Admin/PayoutExport.php:77
 msgid "You are not allowed to do that."
 msgstr ""
@@ -724,8 +724,8 @@ msgstr ""
 msgid "Affiliate"
 msgstr ""
 
-#: includes/Assets.php:290
-#: includes/Assets.php:296
+#: includes/Assets.php:300
+#: includes/Assets.php:306
 #: includes/Models/Affiliate.php:85
 #: includes/Models/Commission.php:145
 #: assets/js/admin.js:284
@@ -733,28 +733,28 @@ msgstr ""
 msgid "Pending"
 msgstr ""
 
-#: includes/Assets.php:291
+#: includes/Assets.php:301
 #: includes/Models/Affiliate.php:86
 msgid "Active"
 msgstr ""
 
-#: includes/Assets.php:292
+#: includes/Assets.php:302
 #: includes/Models/Affiliate.php:87
 msgid "Inactive"
 msgstr ""
 
-#: includes/Assets.php:293
+#: includes/Assets.php:303
 #: includes/Models/Affiliate.php:88
 msgid "Suspended"
 msgstr ""
 
-#: includes/Assets.php:297
+#: includes/Assets.php:307
 #: includes/Models/Commission.php:146
 #: assets/js/admin.js:284
 msgid "Unpaid"
 msgstr ""
 
-#: includes/Assets.php:298
+#: includes/Assets.php:308
 #: includes/Models/Commission.php:147
 #: assets/js/admin.js:284
 #: assets/js/admin.js:298
@@ -762,7 +762,7 @@ msgstr ""
 msgid "Paid"
 msgstr ""
 
-#: includes/Assets.php:299
+#: includes/Assets.php:309
 #: includes/Models/Commission.php:148
 msgid "Rejected"
 msgstr ""
@@ -772,7 +772,7 @@ msgid "Choose an affiliate."
 msgstr ""
 
 #: includes/Commission/Manager.php:138
-#: includes/Commission/Manager.php:245
+#: includes/Commission/Manager.php:246
 msgid "The commission amount must be more than zero."
 msgstr ""
 
@@ -781,7 +781,7 @@ msgid "Choose where the commission comes from. An origin is open only while its 
 msgstr ""
 
 #: includes/Commission/Manager.php:146
-#: includes/Commission/Manager.php:275
+#: includes/Commission/Manager.php:276
 msgid "Choose a commission type."
 msgstr ""
 
@@ -789,40 +789,40 @@ msgstr ""
 msgid "Choose a commission status."
 msgstr ""
 
-#: includes/Commission/Manager.php:186
-#: includes/Commission/Manager.php:292
-#: includes/Commission/Manager.php:450
+#: includes/Commission/Manager.php:187
+#: includes/Commission/Manager.php:293
+#: includes/Commission/Manager.php:451
 #: assets/js/admin.js:289
 msgid "The commission could not be saved."
 msgstr ""
 
-#: includes/Commission/Manager.php:236
-#: includes/Commission/Manager.php:425
-#: includes/REST/Controllers/CommissionsController.php:547
+#: includes/Commission/Manager.php:237
+#: includes/Commission/Manager.php:426
+#: includes/REST/Controllers/CommissionsController.php:589
 #: includes/REST/Controllers/MeController.php:209
 msgid "No commission with that ID."
 msgstr ""
 
-#: includes/Commission/Manager.php:261
+#: includes/Commission/Manager.php:262
 msgid "This commission came from an order item, so its reference cannot change."
 msgstr ""
 
 #. translators: %d: the order id given
-#: includes/Commission/Manager.php:388
+#: includes/Commission/Manager.php:389
 msgid "There is no WooCommerce order #%d. Enter the number of an existing order, or change the origin."
 msgstr ""
 
-#: includes/Commission/Manager.php:444
+#: includes/Commission/Manager.php:445
 msgid "That status change is not allowed."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:485
+#: includes/Commission/Manager.php:486
 msgid "This commission was paid in payment #%d, which keeps it."
 msgstr ""
 
 #. translators: %d: the payment id
-#: includes/Commission/Manager.php:488
+#: includes/Commission/Manager.php:489
 msgid "This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, first."
 msgstr ""
 
@@ -839,12 +839,24 @@ msgstr ""
 msgid "Something went wrong. Try again."
 msgstr ""
 
-#: includes/Install/Installer.php:339
+#: includes/Install/Installer.php:356
 msgid "Affiliate Dashboard"
 msgstr ""
 
-#: includes/Install/Installer.php:343
+#: includes/Install/Installer.php:360
 msgid "Affiliate Registration"
+msgstr ""
+
+#: includes/Integrations/WooCommerce/Analytics.php:117
+msgid "Affiliate Commissions"
+msgstr ""
+
+#: includes/Integrations/WooCommerce/Analytics.php:143
+msgid "Affiliate Commission"
+msgstr ""
+
+#: includes/Integrations/WooCommerce/Analytics.php:144
+msgid "Affiliate commission on the sales in the period, except rejected commissions."
 msgstr ""
 
 #: includes/Integrations/WooCommerce/Integration.php:76
@@ -1125,129 +1137,136 @@ msgid "Sort the result set by this field."
 msgstr ""
 
 #: includes/REST/Controllers/AffiliatesController.php:558
-#: includes/REST/Controllers/CommissionsController.php:530
-#: includes/REST/Controllers/MeController.php:407
+#: includes/REST/Controllers/CommissionsController.php:572
+#: includes/REST/Controllers/MeController.php:539
 #: includes/REST/Controllers/PayoutsController.php:705
+#: includes/REST/Controllers/ReferralLinksController.php:332
 #: includes/REST/Controllers/VisitsController.php:330
 msgid "Sort direction."
 msgstr ""
 
 #: includes/REST/Controllers/CommissionsController.php:71
-#: includes/REST/Controllers/CommissionsController.php:363
+#: includes/REST/Controllers/CommissionsController.php:398
 msgid "Unique identifier for the commission."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:369
+#: includes/REST/Controllers/CommissionsController.php:404
 msgid "The affiliate who earned it."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:375
+#: includes/REST/Controllers/CommissionsController.php:410
 msgid "The order it came from, if any. Under the WooCommerce origin it must be an existing order."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:381
+#: includes/REST/Controllers/CommissionsController.php:416
 #: includes/REST/Controllers/VisitsController.php:273
 msgid "The admin URL of that order, when it exists."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:387
+#: includes/REST/Controllers/CommissionsController.php:422
 msgid "The order item it came from. Null for a manual commission."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:394
+#: includes/REST/Controllers/CommissionsController.php:429
 msgid "The product."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:401
+#: includes/REST/Controllers/CommissionsController.php:436
 msgid "The vendor the item belongs to, or 0 on a single-merchant store."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:406
+#: includes/REST/Controllers/CommissionsController.php:441
 msgid "The amount the rate was applied to."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:407
+#: includes/REST/Controllers/CommissionsController.php:442
 msgid "The rate applied."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:410
+#: includes/REST/Controllers/CommissionsController.php:445
 msgid "Percentage or fixed."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:416
+#: includes/REST/Controllers/CommissionsController.php:451
 msgid "What the affiliate earns. Editable until the commission is paid or inside a payment."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:419
+#: includes/REST/Controllers/CommissionsController.php:454
 #: includes/REST/Controllers/PayoutsController.php:605
 msgid "Currency code."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:425
+#: includes/REST/Controllers/CommissionsController.php:460
 msgid "Where the commission came from: its origin. Set when it is created; a WooCommerce commission with an order follows that order."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:431
+#: includes/REST/Controllers/CommissionsController.php:466
 msgid "Commission type."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:437
+#: includes/REST/Controllers/CommissionsController.php:472
 msgid "Status. Any status can be given when the commission is created; afterwards paid is set by a payout, never here."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:444
+#: includes/REST/Controllers/CommissionsController.php:479
 msgid "The payout it was paid in, once paid."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:451
+#: includes/REST/Controllers/CommissionsController.php:486
 msgid "When the hold period ends and a payout can take it, in GMT."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:458
+#: includes/REST/Controllers/CommissionsController.php:493
 msgid "When it was created, in GMT. Can be given when the commission is created; fixed afterwards."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:465
+#: includes/REST/Controllers/CommissionsController.php:500
 msgid "When it last changed, in GMT."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:488
+#: includes/REST/Controllers/CommissionsController.php:508
+msgid "A sentence explaining where the commission comes from or who funds it, shown as an info tip. Empty when there is nothing to explain."
+msgstr ""
+
+#: includes/REST/Controllers/CommissionsController.php:530
 #: includes/REST/Controllers/PayoutsController.php:694
 msgid "Limit to a status."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:493
+#: includes/REST/Controllers/CommissionsController.php:535
 #: includes/REST/Controllers/PayoutsController.php:685
+#: includes/REST/Controllers/ReferralLinksController.php:322
 #: includes/REST/Controllers/VisitsController.php:306
 msgid "Limit to an affiliate."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:497
+#: includes/REST/Controllers/CommissionsController.php:539
 msgid "Limit to an order."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:501
+#: includes/REST/Controllers/CommissionsController.php:543
 msgid "Limit to a vendor."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:505
+#: includes/REST/Controllers/CommissionsController.php:547
 msgid "Limit to a source."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:510
+#: includes/REST/Controllers/CommissionsController.php:552
 msgid "Limit to the commissions of a payment."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:514
+#: includes/REST/Controllers/CommissionsController.php:556
 msgid "Created on or after this GMT datetime."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:519
+#: includes/REST/Controllers/CommissionsController.php:561
 msgid "Created on or before this GMT datetime."
 msgstr ""
 
-#: includes/REST/Controllers/CommissionsController.php:524
+#: includes/REST/Controllers/CommissionsController.php:566
 #: includes/REST/Controllers/PayoutsController.php:699
+#: includes/REST/Controllers/ReferralLinksController.php:326
 #: includes/REST/Controllers/VisitsController.php:324
 msgid "Sort field."
 msgstr ""
@@ -1558,7 +1577,7 @@ msgstr ""
 msgid "On or before this GMT datetime."
 msgstr ""
 
-#: templates/admin/app.php:23
+#: templates/admin/app.php:35
 msgid "Loading FlyAffiliate…"
 msgstr ""
 
@@ -2467,6 +2486,7 @@ msgid "All commissions"
 msgstr ""
 
 #: assets/js/admin.js:288
+#: assets/js/admin.js:312
 msgid "Back"
 msgstr ""
 
