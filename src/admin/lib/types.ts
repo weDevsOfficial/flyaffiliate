@@ -66,6 +66,19 @@ export type Visit = {
 	created_at: string | null;
 };
 
+/** A page an affiliate saved a referral link for, with the visits it brought. */
+export type ReferralLink = {
+	id: number;
+	affiliate_id: number;
+	affiliate_name: string;
+	url: string;
+	referral_url: string;
+	visits: number;
+	conversions: number;
+	last_visit_at: string | null;
+	created_at: string | null;
+};
+
 export type Payout = {
 	id: number;
 	batch_key: string;
@@ -171,6 +184,8 @@ export type PayoutPreview = {
 	count: number;
 	/** What the same selection holds that is still pending, so not payable. */
 	pending: { count: number; amount: number };
+	/** Unpaid commissions the selection caught that are still inside their hold period. */
+	held: { count: number; amount: number };
 };
 
 export type PayoutBatchResult = {

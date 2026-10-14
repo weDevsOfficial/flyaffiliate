@@ -102,7 +102,7 @@ export default function ProgramDetails() {
 					hint={
 						program.holdNote ||
 						__(
-							'How long a commission stays pending before it can be paid.',
+							'How long after the sale a commission waits before it can be paid out.',
 							'flyaffiliate'
 						)
 					}

@@ -302,3 +302,34 @@ $brand: #0d7377;
 		fill: none;
 	}
 }
+
+/*
+ * A list of URLs: the columns keep the widths the view gives them and a long
+ * address truncates (`TruncatedLine`), instead of the table growing past its
+ * card and pushing the figures out of sight.
+ */
+/* stylelint-disable selector-class-pattern -- WordPress DataViews' own classes. */
+.flyaffiliate-fixed-columns {
+
+	table.dataviews-view-table {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	.dataviews-view-table__cell-content-wrapper,
+	.dataviews-view-table__primary-column-content {
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	/*
+	 * A fixed layout sizes columns from DataViews' `<colgroup>`, where every
+	 * column but the first is 1% wide: the row menu would get 11px. This is
+	 * DataViews' own selector for that, one class stronger, sized for the
+	 * "Actions" heading and its padding.
+	 */
+	.dataviews-view-table col[class^="dataviews-view-table__col-"].dataviews-view-table__col-actions:not(.dataviews-view-table__col-expand) {
+		width: 88px;
+	}
+}
+/* stylelint-enable selector-class-pattern */

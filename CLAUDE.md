@@ -40,10 +40,11 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 > Phase 3 money loop: `Tracking\Tracker` (referral link → visit → signed
 > cookie), `Integrations\WooCommerce\OrderAttribution` (one pending commission
 > per order item at checkout, classic and block), `Commission\RateResolver`
-> (product → vendor filter → default, clamped) and `Commission\HoldPeriod` (the
-> daily maturation job) and `Integrations\WooCommerce\OrderStatusSync` (the
-> commission status follows the order, as in SliceWP, with the optional
-> `reject_commissions_on_refund` switch), and
+> (product → vendor filter → default, clamped), `Commission\HoldPeriod` (the
+> maturity date every commission carries; the hold gates payouts, not statuses,
+> ADR-0014) and `Integrations\WooCommerce\OrderStatusSync` (the commission
+> status follows the order, as in SliceWP: paid → unpaid at once, with the
+> optional `reject_commissions_on_refund` switch), and
 > `Integrations\WooCommerce\Analytics` (an "Affiliate Commission" box on
 > WooCommerce → Analytics → Overview, narrowed to a vendor through
 > `flyaffiliate_analytics_vendor_id`; it counts the orders the report counts —
@@ -116,6 +117,7 @@ flyaffiliate/
 │   │   └── WooCommerce/           # OrderAttribution (checkout), OrderStatusSync, HPOS-safe helpers
 │   ├── Models/                    # BaseModel + data stores over the custom tables
 │   ├── Payout/                    # Manager, Payout model, CsvExporter
+│   ├── ReferralLink/              # Manager: the affiliate's saved referral links and their visit counts
 │   ├── REST/                      # Manager, BaseController, AdminBaseController, controllers
 │   ├── Tracking/                  # Tracker (query var → cookie), Visit model, Hooks
 │   ├── Upgrade/                   # Manager + Upgrades/ versioned upgraders
@@ -141,7 +143,7 @@ flyaffiliate/
 ### Service Container
 Services are accessed via `flyaffiliate()->service_name` (magic getter) or `flyaffiliate()->get_container()->get( 'service_name' )`.
 
-Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Add a name here in the same commit that registers it.
+Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `referral_link`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Add a name here in the same commit that registers it.
 
 The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
 
@@ -168,7 +170,7 @@ Namespace `flyaffiliate/v1`. Controllers extend `FlyAffiliate\REST\AdminBaseCont
 - WordPress hooks for extensibility; every hook name starts with `flyaffiliate_`
 - Overridable templates (`templates/` → theme `flyaffiliate/`)
 - Custom tables via `dbDelta` in `Install\Installer`, versioned upgrades in `Upgrade\Manager`
-- Action Scheduler (bundled with WooCommerce) for the daily maturation job — not raw WP-Cron
+- Action Scheduler (bundled with WooCommerce) for the daily hook, WP-Cron only as the fallback; nothing listens to it today (ADR-0014)
 - HPOS-compatible: always go through `wc_get_order()` / `WC_Order` methods, never `post_meta` on orders
 
 ## Testing

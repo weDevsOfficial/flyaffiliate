@@ -29,7 +29,7 @@ class ControllersTest extends FlyAffiliateTestCase {
 	public function test_the_routes_are_registered(): void {
 		$routes = $this->server->get_routes();
 
-		foreach ( [ 'commissions', 'visits', 'payouts', 'payouts/preview', 'settings', 'setup/complete' ] as $route ) {
+		foreach ( [ 'commissions', 'visits', 'referral-links', 'payouts', 'payouts/preview', 'settings', 'setup/complete' ] as $route ) {
 			$this->assertArrayHasKey( '/flyaffiliate/v1/' . $route, $routes );
 		}
 	}
@@ -42,7 +42,7 @@ class ControllersTest extends FlyAffiliateTestCase {
 	public function test_collections_refuse_a_customer(): void {
 		$this->acting_as( $this->customer_id );
 
-		foreach ( [ 'commissions', 'visits', 'payouts', 'settings' ] as $route ) {
+		foreach ( [ 'commissions', 'visits', 'referral-links', 'payouts', 'settings' ] as $route ) {
 			$this->assertSame( 403, $this->get_request( '/' . $route )->get_status(), $route );
 		}
 	}
@@ -222,6 +222,7 @@ class ControllersTest extends FlyAffiliateTestCase {
 
 		$this->assertSame( 200, $preview->get_status() );
 		$this->assertSame( 1, $preview->get_data()['count'] );
+		$this->assertSame( [ 'count' => 0, 'amount' => 0.0 ], $preview->get_data()['held'], 'nothing is inside a hold period' );
 		$this->assertDatabaseCount( 'flyaffiliate_payouts', 0 );
 
 		$created = $this->post_request( '/payouts', [ 'minimum_amount' => 0, 'note' => 'API run' ] );

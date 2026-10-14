@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, PartyPopper } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, PartyPopper } from 'lucide-react';
 import {
 	Button,
 	Card,
@@ -630,6 +630,19 @@ export default function SetupPage() {
 										STEPS.length
 									) }
 								</span>
+								{ current > 0 && (
+									<Button
+										variant="outline"
+										onClick={ () =>
+											setCurrent( current - 1 )
+										}
+										disabled={ busy !== null }
+										data-testid="flyaffiliate-setup-back"
+									>
+										<ArrowLeft className="size-4" />
+										{ __( 'Back', 'flyaffiliate' ) }
+									</Button>
+								) }
 								<Button
 									onClick={ handleContinue }
 									disabled={ busy !== null || loading }

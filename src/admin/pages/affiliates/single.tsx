@@ -42,6 +42,7 @@ import { CommissionsTable } from '../commissions';
 import { VisitsTable } from '../visits';
 import { PaymentsTable } from '../payouts/payments';
 import AffiliateForm from './AffiliateForm';
+import { ReferralLinksTable } from './ReferralLinksTable';
 
 type Detail = Affiliate & {
 	visits?: { all: number; converted: number; not_converted: number };
@@ -200,7 +201,7 @@ export default function AffiliatePage() {
 					label={ __( 'Pending', 'flyaffiliate' ) }
 					value={ formatMoney( totals?.pending ?? 0 ) }
 					tooltip={ __(
-						'Commissions still inside their hold period.',
+						'Commissions waiting for their order to be paid.',
 						'flyaffiliate'
 					) }
 				/>
@@ -251,6 +252,9 @@ export default function AffiliatePage() {
 					<TabsTrigger value="payouts" className={ TAB_TRIGGER }>
 						{ __( 'Payouts', 'flyaffiliate' ) }
 					</TabsTrigger>
+					<TabsTrigger value="links" className={ TAB_TRIGGER }>
+						{ __( 'Referral links', 'flyaffiliate' ) }
+					</TabsTrigger>
 				</TabsList>
 				<TabsContent value="commissions">
 					<CommissionsTable
@@ -263,6 +267,9 @@ export default function AffiliatePage() {
 				</TabsContent>
 				<TabsContent value="payouts">
 					<PaymentsTable affiliateId={ numericId } />
+				</TabsContent>
+				<TabsContent value="links">
+					<ReferralLinksTable affiliateId={ numericId } />
 				</TabsContent>
 			</Tabs>
 

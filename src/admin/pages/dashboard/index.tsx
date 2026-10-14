@@ -679,7 +679,7 @@ export default function DashboardPage() {
 										tooltip={ sprintf(
 											/* translators: %s: amount still pending */
 											__(
-												'Approved commissions waiting to be paid out. Another %s is still in the hold period.',
+												'Commissions earned and waiting to be paid out. Another %s is waiting for its order to be paid.',
 												'flyaffiliate'
 											),
 											formatMoney(

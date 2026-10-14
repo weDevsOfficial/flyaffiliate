@@ -125,7 +125,9 @@ test.describe( 'Affiliates', () => {
 		await list.rows.first().getByRole( 'link' ).first().click();
 
 		await expect( page ).toHaveURL( /#\/affiliates\/\d+/ );
-		await expect( list.app.getByText( 'Referral link' ) ).toBeVisible();
+		await expect(
+			list.app.getByText( 'Referral link', { exact: true } )
+		).toBeVisible();
 		// The unpaid tile carries its explanation behind the info icon.
 		await expect(
 			list.app.getByRole( 'button', {
@@ -134,6 +136,14 @@ test.describe( 'Affiliates', () => {
 		).toBeVisible();
 		await expect(
 			list.app.getByRole( 'tab', { name: 'Commissions' } )
+		).toBeVisible();
+
+		// The links the affiliate saved: their list, or its empty state.
+		await list.app.getByRole( 'tab', { name: 'Referral links' } ).click();
+		await expect(
+			list.app
+				.getByRole( 'columnheader', { name: 'Page', exact: true } )
+				.or( list.app.getByText( 'No referral links saved' ) )
 		).toBeVisible();
 	} );
 } );

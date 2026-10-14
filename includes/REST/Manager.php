@@ -50,6 +50,7 @@ class Manager implements Hookable {
 			\FlyAffiliate\REST\Controllers\AffiliatesController::class,
 			\FlyAffiliate\REST\Controllers\CommissionsController::class,
 			\FlyAffiliate\REST\Controllers\VisitsController::class,
+			\FlyAffiliate\REST\Controllers\ReferralLinksController::class,
 			\FlyAffiliate\REST\Controllers\PayoutsController::class,
 			\FlyAffiliate\REST\Controllers\SettingsController::class,
 			\FlyAffiliate\REST\Controllers\SetupController::class,

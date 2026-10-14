@@ -22,8 +22,8 @@ use WP_Error;
  * edits a commission the way SliceWP allows — amount, reference, type, any of
  * the four statuses — whether or not a payment holds it; an unpaid payment
  * re-sums to follow, a paid one keeps the amount it was paid with. A payment
- * does keep its commission away from the automatic movers (the order status
- * sync and the maturation job pass `$automatic`) and from deletion. A
+ * does keep its commission away from the automatic mover (the order status
+ * sync passes `$automatic`) and from deletion. A
  * WooCommerce-origin commission refers to an order that exists; the reference
  * is checked on create and edit.
  *
@@ -101,11 +101,12 @@ class Manager {
 	 *
 	 * The origin decides who moves the commission later. One created under the
 	 * WooCommerce origin with an order id follows that order the way an
-	 * attributed commission does — it matures when the order is paid and is
-	 * rejected when the order fails — while one under the manual origin only
-	 * follows the hold period and the admin. Whatever the origin, the status it
-	 * is given is the status it keeps until the order, the job or the admin
-	 * changes it: a pending commission added by hand stays pending, as in SliceWP.
+	 * attributed commission does — it becomes unpaid when the order is paid and
+	 * is rejected when the order fails — while one under the manual origin only
+	 * moves when the admin moves it. Whatever the origin, the status it is given
+	 * is the status it keeps until the order or the admin changes it: a pending
+	 * commission added by hand stays pending, as in SliceWP. The hold period
+	 * counts from the date given, whatever the status (ADR-0014).
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -180,7 +181,7 @@ class Manager {
 			]
 		);
 
-		$commission->set( 'matures_at', Commission::STATUS_PENDING === $status ? $this->maturation_date( $created_at, $commission ) : $created_at );
+		$commission->set( 'matures_at', $this->maturation_date( $created_at, $commission ) );
 
 		if ( 0 === $commission->save() ) {
 			return new WP_Error( 'flyaffiliate_create_failed', __( 'The commission could not be saved.', 'flyaffiliate' ), [ 'status' => 500 ] );
@@ -412,10 +413,9 @@ class Manager {
 	 *
 	 * @param int    $commission_id Commission id.
 	 * @param string $status        The status to move to.
-	 * @param bool   $automatic     True when an order status change or the
-	 *                              maturation job asks, not an admin: a
-	 *                              commission inside a payment is then left
-	 *                              alone (CONTEXT.md money rule 7).
+	 * @param bool   $automatic     True when an order status change asks, not
+	 *                              an admin: a commission inside a payment is
+	 *                              then left alone (CONTEXT.md money rule 7).
 	 *
 	 * @return Commission|WP_Error
 	 */
@@ -434,9 +434,8 @@ class Manager {
 
 		/*
 		 * A commission inside a payment does not move on its own: a refunded
-		 * order or the maturation job would otherwise change a row whose amount
-		 * a payment is already promising. An admin may, as in SliceWP, and the
-		 * payment follows.
+		 * order would otherwise change a row whose amount a payment is already
+		 * promising. An admin may, as in SliceWP, and the payment follows.
 		 */
 		if ( $automatic && $commission->is_in_payout() ) {
 			return $this->in_payment_error( $commission );
@@ -747,7 +746,7 @@ class Manager {
 	}
 
 	/**
-	 * The date a commission created now would mature on.
+	 * The date a commission's hold period ends: when a payout may take it.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -763,7 +762,7 @@ class Manager {
 	}
 
 	/**
-	 * The days a commission waits before it can mature: the hold period.
+	 * The days a commission waits before a payout may take it: the hold period.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -783,7 +782,8 @@ class Manager {
 		 *
 		 * A marketplace gives its sellers' commissions their own hold. A
 		 * filter here must also follow `flyaffiliate_commissions_rescheduled`,
-		 * which moves every pending commission onto the hold period itself.
+		 * which moves every commission a payout may still take onto the hold
+		 * period itself.
 		 *
 		 * @since FLYAFFILIATE_SINCE
 		 *

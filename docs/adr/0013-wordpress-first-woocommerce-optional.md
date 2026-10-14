@@ -28,9 +28,9 @@ others follow, and none of them is special to the core.
   registers the services that act on the platform (checkout attribution, order
   status sync) only when `class_exists( 'WooCommerce' )`. Every other reference
   to a WooCommerce function is behind `function_exists()`.
-- The daily maturation job uses Action Scheduler when WooCommerce provides it
-  and WP-Cron otherwise; the hook is the same, so `Commission\HoldPeriod` does
-  not care which.
+- The daily hook (`Installer::MATURATION_HOOK`) uses Action Scheduler when
+  WooCommerce provides it and WP-Cron otherwise, the way Dokan schedules its
+  daily cron. Nothing listens to it since ADR-0014; jobs are added as needed.
 - The currency setting lists WooCommerce's currencies when WooCommerce is
   there and a built-in set of common ones otherwise.
 - The plugin header and the readme describe FlyAffiliate as affiliate marketing
