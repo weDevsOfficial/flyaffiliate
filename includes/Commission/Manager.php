@@ -22,8 +22,8 @@ use WP_Error;
  * edits a commission the way SliceWP allows — amount, reference, type, any of
  * the four statuses — whether or not a payment holds it; an unpaid payment
  * re-sums to follow, a paid one keeps the amount it was paid with. A payment
- * does keep its commission away from the automatic movers (the order status
- * sync and the maturation job pass `$automatic`) and from deletion. A
+ * does keep its commission away from the automatic mover (the order status
+ * sync passes `$automatic`) and from deletion. A
  * WooCommerce-origin commission refers to an order that exists; the reference
  * is checked on create and edit.
  *
@@ -101,11 +101,12 @@ class Manager {
 	 *
 	 * The origin decides who moves the commission later. One created under the
 	 * WooCommerce origin with an order id follows that order the way an
-	 * attributed commission does — it matures when the order is paid and is
-	 * rejected when the order fails — while one under the manual origin only
-	 * follows the hold period and the admin. Whatever the origin, the status it
-	 * is given is the status it keeps until the order, the job or the admin
-	 * changes it: a pending commission added by hand stays pending, as in SliceWP.
+	 * attributed commission does — it becomes unpaid when the order is paid and
+	 * is rejected when the order fails — while one under the manual origin only
+	 * moves when the admin moves it. Whatever the origin, the status it is given
+	 * is the status it keeps until the order or the admin changes it: a pending
+	 * commission added by hand stays pending, as in SliceWP. The hold period
+	 * counts from the date given, whatever the status (ADR-0014).
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -176,10 +177,11 @@ class Manager {
 				'source'        => $source,
 				'type'          => $type,
 				'status'        => $status,
-				'matures_at'    => Commission::STATUS_PENDING === $status ? $this->maturation_date( $created_at ) : $created_at,
 				'created_at'    => $created_at,
 			]
 		);
+
+		$commission->set( 'matures_at', $this->maturation_date( $created_at, $commission ) );
 
 		if ( 0 === $commission->save() ) {
 			return new WP_Error( 'flyaffiliate_create_failed', __( 'The commission could not be saved.', 'flyaffiliate' ), [ 'status' => 500 ] );
@@ -417,10 +419,9 @@ class Manager {
 	 *
 	 * @param int    $commission_id Commission id.
 	 * @param string $status        The status to move to.
-	 * @param bool   $automatic     True when an order status change or the
-	 *                              maturation job asks, not an admin: a
-	 *                              commission inside a payment is then left
-	 *                              alone (CONTEXT.md money rule 7).
+	 * @param bool   $automatic     True when an order status change asks, not
+	 *                              an admin: a commission inside a payment is
+	 *                              then left alone (CONTEXT.md money rule 7).
 	 *
 	 * @return Commission|WP_Error
 	 */
@@ -439,9 +440,8 @@ class Manager {
 
 		/*
 		 * A commission inside a payment does not move on its own: a refunded
-		 * order or the maturation job would otherwise change a row whose amount
-		 * a payment is already promising. An admin may, as in SliceWP, and the
-		 * payment follows.
+		 * order would otherwise change a row whose amount a payment is already
+		 * promising. An admin may, as in SliceWP, and the payment follows.
 		 */
 		if ( $automatic && $commission->is_in_payout() ) {
 			return $this->in_payment_error( $commission );
@@ -573,7 +573,27 @@ class Manager {
 			return false;
 		}
 
-		return $commission->delete();
+		// Deleting empties the model; the action gets the fields it had.
+		$deleted = clone $commission;
+
+		if ( ! $commission->delete() ) {
+			return false;
+		}
+
+		/**
+		 * Fires after a commission is deleted.
+		 *
+		 * The row is gone; the commission passed still carries the fields it
+		 * had, so whatever followed it (a marketplace's charge on the vendor,
+		 * say) can follow it out.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param Commission $commission The commission, as it was.
+		 */
+		do_action( 'flyaffiliate_commission_deleted', $deleted );
+
+		return true;
 	}
 
 	/**
@@ -768,18 +788,50 @@ class Manager {
 	}
 
 	/**
-	 * The date a commission created now would mature on.
+	 * The date a commission's hold period ends: when a payout may take it.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
-	 * @param string $created_at The creation time in GMT. Defaults to now.
+	 * @param string          $created_at The creation time in GMT. Defaults to now.
+	 * @param Commission|null $commission The commission being created, so its hold can be its own.
 	 *
 	 * @return string `Y-m-d H:i:s` in GMT.
 	 */
-	public function maturation_date( string $created_at = '' ): string {
-		$hold_days = absint( flyaffiliate_get_option( 'hold_days', 30 ) );
-		$base      = '' !== $created_at ? strtotime( $created_at . ' UTC' ) : time();
+	public function maturation_date( string $created_at = '', ?Commission $commission = null ): string {
+		$base = '' !== $created_at ? strtotime( $created_at . ' UTC' ) : time();
 
-		return gmdate( 'Y-m-d H:i:s', $base + $hold_days * DAY_IN_SECONDS );
+		return gmdate( 'Y-m-d H:i:s', $base + $this->get_hold_days( $commission ) * DAY_IN_SECONDS );
+	}
+
+	/**
+	 * The days a commission waits before a payout may take it: the hold period.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Commission|null $commission The commission; null for the hold period itself.
+	 *
+	 * @return int
+	 */
+	public function get_hold_days( ?Commission $commission = null ): int {
+		$hold_days = absint( flyaffiliate_get_option( 'hold_days', 30 ) );
+
+		if ( null === $commission ) {
+			return $hold_days;
+		}
+
+		/**
+		 * Filters the hold period of one commission, as it is created.
+		 *
+		 * A marketplace gives its sellers' commissions their own hold. A
+		 * filter here must also follow `flyaffiliate_commissions_rescheduled`,
+		 * which moves every commission a payout may still take onto the hold
+		 * period itself.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param int        $hold_days  The hold period, in days.
+		 * @param Commission $commission The commission, with its vendor and product.
+		 */
+		return absint( apply_filters( 'flyaffiliate_commission_hold_days', $hold_days, $commission ) );
 	}
 }

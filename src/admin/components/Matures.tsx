@@ -1,9 +1,9 @@
 /**
- * When a pending commission is due to become unpaid.
+ * When a commission's hold period ends, so a payout may take it.
  *
- * With the hold period set to zero the maturity is the moment the commission
- * was created, and printing that date twice in a row says nothing; the cell
- * says there is no wait instead.
+ * With the hold period set to zero that is the moment the commission was
+ * created, and printing that date twice in a row says nothing; the cell says
+ * there is no wait instead.
  */
 import { __ } from '@wordpress/i18n';
 import DateTime from './DateTime';

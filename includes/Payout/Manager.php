@@ -124,7 +124,13 @@ class Manager {
 	 *     @type array  $methods        Affiliate id => payout method id, for this payout only ("Switch to Manual").
 	 * }
 	 *
-	 * @return array{rows: array<int, array{affiliate: Affiliate, commissions: Commission[], amount: float, method: PayoutMethod, recipient: string, warning: string}>, total: float, count: int, groups: array<string, array{label: string, automatic: bool, count: int, total: float}>}
+	 * An unpaid commission is payable only once its hold period is over
+	 * (`Commission::is_matured()`, ADR-0014). The ones still inside it are
+	 * counted as `held`, and the pending ones the selection would otherwise
+	 * have caught as `pending`, so the screen can say why a commission is not
+	 * in the batch.
+	 *
+	 * @return array{rows: array<int, array{affiliate: Affiliate, commissions: Commission[], amount: float, method: PayoutMethod, recipient: string, warning: string}>, total: float, count: int, groups: array<string, array{label: string, automatic: bool, count: int, total: float}>, pending: array{count: int, amount: float}, held: array{count: int, amount: float}}
 	 */
 	public function preview( array $args ): array {
 		$args = wp_parse_args(
@@ -160,6 +166,9 @@ class Manager {
 		}
 
 		$by_affiliate = [];
+		$now          = current_time( 'mysql', true );
+		$held_count   = 0;
+		$held_cents   = 0;
 
 		foreach ( Commission::query( $query ) as $commission ) {
 			$affiliate_id = (int) $commission->get( 'affiliate_id' );
@@ -170,6 +179,13 @@ class Manager {
 
 			// A commission already in a batch is never paid twice, whatever its status says.
 			if ( (int) $commission->get( 'payout_id', 0 ) > 0 ) {
+				continue;
+			}
+
+			// The hold period: earned, but not payable yet.
+			if ( ! $commission->is_matured( $now ) ) {
+				++$held_count;
+				$held_cents += $commission->get_amount_in_cents();
 				continue;
 			}
 
@@ -235,6 +251,10 @@ class Manager {
 			'count'   => count( $rows ),
 			'groups'  => $groups,
 			'pending' => $this->count_pending( $args ),
+			'held'    => [
+				'count'  => $held_count,
+				'amount' => Money::from_cents( $held_cents ),
+			],
 		];
 	}
 
@@ -266,7 +286,7 @@ class Manager {
 	 * The commissions the same selection would have caught, were they unpaid.
 	 *
 	 * A payout only ever pays unpaid commissions. When the preview comes back
-	 * empty it is usually because the money is still pending, so the screen can
+	 * empty it is often because the order is not paid yet, so the screen can
 	 * say so instead of leaving the admin guessing.
 	 *
 	 * @since FLYAFFILIATE_SINCE

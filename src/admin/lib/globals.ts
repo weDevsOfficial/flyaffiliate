@@ -1,6 +1,8 @@
 /**
  * The data PHP hands the admin app as `window.flyaffiliate`.
  */
+import type { PayoutMethodInfo } from './types';
+
 export type CurrencyConfig = {
 	code: string;
 	symbol: string;
@@ -10,7 +12,26 @@ export type CurrencyConfig = {
 	thousandSeparator: string;
 };
 
-import type { PayoutMethodInfo } from './types';
+/** One of Pro's extensions, as a preview card while Pro is not active. */
+export type ProExtensionPreview = {
+	id: string;
+	name: string;
+	description: string;
+	/** `integration` or `payout_method`. */
+	category: string;
+	/** `available` in Pro today, or `coming_soon`. */
+	status: 'available' | 'coming_soon';
+	doc_url: string;
+};
+
+/** What the Extensions page shows while Pro is not active (`Admin\ProExtensions`). */
+export type ProExtensionsData = {
+	upgradeUrl: string;
+	pluginsUrl: string;
+	extensions: ProExtensionPreview[];
+	/** What Pro adds today, for the upgrade dialog. */
+	features: string[];
+};
 
 export type AdminGlobals = {
 	version: string;
@@ -53,6 +74,8 @@ export type AdminGlobals = {
 	payoutMethods: PayoutMethodInfo[];
 	/** Only on the affiliate dashboard page: the method an affiliate gets without choosing. */
 	payoutDefault?: string;
+	/** Only while FlyAffiliate Pro is not active: Pro's extensions as previews. */
+	proExtensions?: ProExtensionsData;
 	/** Only on the affiliate dashboard page. */
 	dashboard: {
 		tab: string;
@@ -64,6 +87,8 @@ export type AdminGlobals = {
 		rateType: 'percentage' | 'fixed' | string;
 		cookieDays: number;
 		holdDays: number;
+		/** A sentence on holds of its own (a marketplace's sellers); empty when every commission waits the hold period. */
+		holdNote?: string;
 		payoutMinimum: number;
 	};
 };

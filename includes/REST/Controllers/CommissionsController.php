@@ -280,11 +280,46 @@ class CommissionsController extends AdminBaseController {
 			'matures_at'    => $this->prepare_date( $item->get( 'matures_at' ) ),
 			'created_at'    => $this->prepare_date( $item->get( 'created_at' ) ),
 			'updated_at'    => $this->prepare_date( $item->get( 'updated_at' ) ),
+			'note'          => $this->get_note( $item, $request ),
 		];
 
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );
 
 		return $this->add_links( $response, $this->prepare_links( $item ) );
+	}
+
+	/**
+	 * The sentence the screens show beside a commission, as an info tip.
+	 *
+	 * The affiliate's own routes (`/me/…`) reuse this controller's shape, so
+	 * the route tells which screen is asking.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Commission           $item    The commission.
+	 * @param WP_REST_Request|null $request The request.
+	 *
+	 * @return string Empty when there is nothing to explain.
+	 */
+	protected function get_note( Commission $item, $request ): string {
+		$route    = $request instanceof WP_REST_Request ? (string) $request->get_route() : '';
+		$audience = 0 === strpos( $route, '/' . $this->namespace . '/me/' ) ? 'affiliate' : 'admin';
+
+		/**
+		 * Filters the note shown beside a commission.
+		 *
+		 * One plain sentence or two, saying where the commission comes from or
+		 * who funds it — a marketplace explains that a vendor's sale is paid
+		 * for out of the vendor's earning, say. The admin's screens and the
+		 * affiliate's dashboard show it as an info tip beside the amount.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param string     $note       Default empty: no tip.
+		 * @param Commission $commission The commission.
+		 * @param string     $audience   `admin` for the admin's screens, `affiliate` for the affiliate's own dashboard.
+		 */
+		return sanitize_text_field( (string) apply_filters( 'flyaffiliate_commission_note', '', $item, $audience ) );
 	}
 
 	/**
@@ -448,7 +483,7 @@ class CommissionsController extends AdminBaseController {
 				),
 				'matures_at'    => $ro(
 					[
-						'description' => __( 'When it can mature, in GMT.', 'flyaffiliate' ),
+						'description' => __( 'When the hold period ends and a payout can take it, in GMT.', 'flyaffiliate' ),
 						'type' => [ 'string', 'null' ],
 						'format' => 'date-time',
 						'context' => [ 'view', 'edit' ],
@@ -465,6 +500,13 @@ class CommissionsController extends AdminBaseController {
 						'description' => __( 'When it last changed, in GMT.', 'flyaffiliate' ),
 						'type' => [ 'string', 'null' ],
 						'format' => 'date-time',
+						'context' => [ 'view', 'edit' ],
+					]
+				),
+				'note'          => $ro(
+					[
+						'description' => __( 'A sentence explaining where the commission comes from or who funds it, shown as an info tip. Empty when there is nothing to explain.', 'flyaffiliate' ),
+						'type' => 'string',
 						'context' => [ 'view', 'edit' ],
 					]
 				),

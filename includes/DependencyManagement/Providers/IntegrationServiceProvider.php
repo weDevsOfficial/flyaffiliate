@@ -53,6 +53,7 @@ class IntegrationServiceProvider extends BaseServiceProvider {
 	protected array $platform_services = [
 		\FlyAffiliate\Integrations\WooCommerce\OrderAttribution::class,
 		\FlyAffiliate\Integrations\WooCommerce\OrderStatusSync::class,
+		\FlyAffiliate\Integrations\WooCommerce\Analytics::class,
 	];
 
 	/**

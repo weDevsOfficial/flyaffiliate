@@ -679,7 +679,7 @@ export default function DashboardPage() {
 										tooltip={ sprintf(
 											/* translators: %s: amount still pending */
 											__(
-												'Approved commissions waiting to be paid out. Another %s is still in the hold period.',
+												'Commissions earned and waiting to be paid out. Another %s is waiting for its order to be paid.',
 												'flyaffiliate'
 											),
 											formatMoney(
@@ -885,7 +885,11 @@ export default function DashboardPage() {
 							}
 						>
 							<div
-								className="flyaffiliate-dashboard-list"
+								className={ `flyaffiliate-dashboard-list${
+									( stats?.top_products ?? [] ).length === 0
+										? ' is-empty'
+										: ''
+								}` }
 								data-testid="flyaffiliate-dashboard-products"
 							>
 								<DataViews< TopProduct >
@@ -927,7 +931,9 @@ export default function DashboardPage() {
 							}
 						>
 							<div
-								className="flyaffiliate-dashboard-list"
+								className={ `flyaffiliate-dashboard-list${
+									visits.length === 0 ? ' is-empty' : ''
+								}` }
 								data-testid="flyaffiliate-dashboard-visits"
 							>
 								<DataViews< RecentVisit >

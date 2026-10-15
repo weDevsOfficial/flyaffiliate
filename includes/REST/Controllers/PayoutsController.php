@@ -630,6 +630,7 @@ class PayoutsController extends AdminBaseController {
 				'total'   => $preview['total'],
 				'count'   => $preview['count'],
 				'pending' => $preview['pending'],
+				'held'    => $preview['held'],
 			]
 		);
 	}

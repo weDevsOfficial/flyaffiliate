@@ -85,7 +85,7 @@ class Assets implements Hookable {
 		}
 
 		foreach ( $this->get_scripts() as $handle => $script ) {
-			wp_register_script( $handle, $script['src'], $script['deps'], $script['version'], true );
+			wp_register_script( $handle, $script['src'], $script['deps'], $script['version'], $script['in_footer'] ?? true );
 			wp_set_script_translations( $handle, 'flyaffiliate', FLYAFFILIATE_DIR . '/languages' );
 		}
 	}
@@ -137,7 +137,7 @@ class Assets implements Hookable {
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
-	 * @return array<string, array{src: string, deps: string[], version: string}>
+	 * @return array<string, array{src: string, deps: string[], version: string, in_footer?: bool}>
 	 */
 	public function get_scripts(): array {
 		$scripts = [
@@ -150,6 +150,14 @@ class Assets implements Hookable {
 				'src'     => FLYAFFILIATE_ASSETS_URL . '/js/dashboard.js',
 				'deps'    => $this->get_script_dependencies( '/assets/js/dashboard.asset.php' ),
 				'version' => $this->get_version( '/assets/js/dashboard.js', '/assets/js/dashboard.asset.php' ),
+			],
+			// The page WooCommerce Analytics' box opens (Integrations\WooCommerce\Analytics):
+			// in the header, so it is added before WooCommerce's app builds its routes.
+			self::HANDLE_PREFIX . 'analytics' => [
+				'src'       => FLYAFFILIATE_ASSETS_URL . '/js/analytics.js',
+				'deps'      => $this->get_script_dependencies( '/assets/js/analytics.asset.php' ),
+				'version'   => $this->get_version( '/assets/js/analytics.js', '/assets/js/analytics.asset.php' ),
+				'in_footer' => false,
 			],
 		];
 
@@ -171,9 +179,7 @@ class Assets implements Hookable {
 	 * @return void
 	 */
 	public function enqueue_admin_assets(): void {
-		$page = $this->get_current_page();
-
-		if ( Menu::PARENT_SLUG !== $page ) {
+		if ( ! Menu::is_plugin_screen() ) {
 			return;
 		}
 
@@ -245,6 +251,8 @@ class Assets implements Hookable {
 				'rateType'      => (string) flyaffiliate_get_option( 'rate_type', 'percentage' ),
 				'cookieDays'    => absint( flyaffiliate_get_option( 'cookie_duration', 30 ) ),
 				'holdDays'      => absint( flyaffiliate_get_option( 'hold_days', 30 ) ),
+				// A marketplace whose sellers set their own hold says so here (`flyaffiliate_dashboard_script_data`).
+				'holdNote'      => '',
 				'payoutMinimum' => (float) flyaffiliate_get_option( 'minimum_amount', 0 ),
 			],
 		];
@@ -358,18 +366,6 @@ class Assets implements Hookable {
 			'decimalSeparator'  => (string) flyaffiliate_get_option( 'currency_decimal_separator', '.' ),
 			'thousandSeparator' => (string) flyaffiliate_get_option( 'currency_thousands_separator', ',' ),
 		];
-	}
-
-	/**
-	 * The `page` query argument of the current admin request.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return string
-	 */
-	protected function get_current_page(): string {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the page slug to decide what to enqueue changes nothing.
-		return isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 	}
 
 	/**

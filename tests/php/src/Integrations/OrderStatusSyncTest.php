@@ -7,26 +7,28 @@
 
 namespace FlyAffiliate\Test\Integrations;
 
+use FlyAffiliate\Integrations\WooCommerce\OrderStatusSync;
 use FlyAffiliate\Models\Commission;
 use FlyAffiliate\Test\FlyAffiliateTestCase;
 
 /**
- * Failed, cancelled and trashed orders reject; an accepted or recovering order restores; a refund rejects only when the switch is on.
+ * A paid order makes commissions unpaid at once; failed, cancelled and trashed orders reject; a recovering order restores; a refund rejects only when the switch is on.
  */
 class OrderStatusSyncTest extends FlyAffiliateTestCase {
 
 	/**
 	 * An order with a pending, an unpaid and a paid WooCommerce commission, and a manual one.
 	 *
+	 * Every row is still inside a 30-day hold: the status must not care.
+	 *
 	 * @param string $status The order's starting status.
-	 * @param bool   $due    Whether the hold is already over.
 	 *
 	 * @return array{order: \WC_Order, pending: int, unpaid: int, paid: int, manual: int}
 	 */
-	private function referred_order( string $status = 'on-hold', bool $due = false ): array {
+	private function referred_order( string $status = 'on-hold' ): array {
 		$product    = $this->factory()->product->create();
 		$order      = wc_get_order( $this->factory()->order->create( [ 'items' => [ [ 'product_id' => $product ] ], 'status' => $status ] ) );
-		$matures_at = gmdate( 'Y-m-d H:i:s', time() + ( $due ? -HOUR_IN_SECONDS : 30 * DAY_IN_SECONDS ) );
+		$matures_at = gmdate( 'Y-m-d H:i:s', time() + 30 * DAY_IN_SECONDS );
 		$row        = static function ( array $args ) use ( $order, $matures_at ): array {
 			return array_merge(
 				[
@@ -59,6 +61,15 @@ class OrderStatusSyncTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * The sync the container built, with its hooks registered.
+	 *
+	 * @return OrderStatusSync
+	 */
+	private function sync(): OrderStatusSync {
+		return flyaffiliate()->get_container()->get( OrderStatusSync::class );
+	}
+
+	/**
 	 * A failed or cancelled order rejects what is not paid yet.
 	 *
 	 * @return void
@@ -77,7 +88,69 @@ class OrderStatusSyncTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * An order leaving failed restores its commissions; completing it with the hold over makes them unpaid.
+	 * A paid order makes its pending commissions unpaid on the spot, whatever the hold (ADR-0014).
+	 *
+	 * @return void
+	 */
+	public function test_a_paid_order_makes_its_commissions_unpaid_at_once(): void {
+		$rows = $this->referred_order( 'on-hold' );
+
+		$rows['order']->update_status( 'completed' );
+
+		$this->assertSame( Commission::STATUS_UNPAID, $this->status( $rows['pending'] ), 'the hold period does not delay the status' );
+		$this->assertSame( Commission::STATUS_UNPAID, $this->status( $rows['unpaid'] ) );
+		$this->assertSame( Commission::STATUS_PAID, $this->status( $rows['paid'] ), 'paid is never touched' );
+		$this->assertSame( Commission::STATUS_PENDING, $this->status( $rows['manual'] ), 'a manual commission is never touched' );
+		$this->assertFalse( flyaffiliate()->commission->get( $rows['pending'] )->is_matured(), 'still inside the hold, so a payout leaves it out' );
+
+		// Firing again changes nothing.
+		$this->assertSame( 0, $this->sync()->handle_status_change( $rows['order']->get_id(), 'on-hold', 'completed', $rows['order'] ) );
+
+		// Processing counts as paid too, except for cash on delivery, which waits for completed.
+		$card = $this->referred_order( 'on-hold' );
+		$card['order']->update_status( 'processing' );
+		$this->assertSame( Commission::STATUS_UNPAID, $this->status( $card['pending'] ) );
+
+		$cod = $this->referred_order( 'on-hold' );
+		$cod['order']->set_payment_method( 'cod' );
+		$cod['order']->save();
+		$cod['order']->update_status( 'processing' );
+		$this->assertSame( Commission::STATUS_PENDING, $this->status( $cod['pending'] ), 'cash on delivery in processing has not been paid' );
+		$cod['order']->update_status( 'completed' );
+		$this->assertSame( Commission::STATUS_UNPAID, $this->status( $cod['pending'] ) );
+	}
+
+	/**
+	 * An order that is already paid when its commissions are created makes them unpaid right after attribution.
+	 *
+	 * @return void
+	 */
+	public function test_attribution_on_an_order_already_paid_makes_the_commissions_unpaid(): void {
+		$paid    = $this->referred_order( 'processing' );
+		$waiting = $this->referred_order( 'on-hold' );
+
+		do_action( 'flyaffiliate_order_attributed', $paid['order'], null, [] );
+		do_action( 'flyaffiliate_order_attributed', $waiting['order'], null, [] );
+
+		$this->assertSame( Commission::STATUS_UNPAID, $this->status( $paid['pending'] ) );
+		$this->assertSame( Commission::STATUS_PENDING, $this->status( $paid['manual'] ) );
+		$this->assertSame( Commission::STATUS_PENDING, $this->status( $waiting['pending'] ), 'an unpaid order keeps its commissions pending' );
+	}
+
+	/**
+	 * A pending commission whose order cannot be found is never made unpaid.
+	 *
+	 * @return void
+	 */
+	public function test_a_commission_whose_order_cannot_be_found_stays_pending(): void {
+		$commission = $this->factory()->commission->create( [ 'order_id' => 999999, 'source' => Commission::SOURCE_WOOCOMMERCE, 'status' => Commission::STATUS_PENDING ] );
+
+		$this->assertSame( 0, $this->sync()->handle_status_change( 999999, 'on-hold', 'completed' ) );
+		$this->assertSame( Commission::STATUS_PENDING, $this->status( $commission ), 'no order to confirm, so the commission holds' );
+	}
+
+	/**
+	 * An order leaving failed for a status that is not paid restores its commissions to pending; paying it makes them unpaid.
 	 *
 	 * @return void
 	 */
@@ -91,9 +164,8 @@ class OrderStatusSyncTest extends FlyAffiliateTestCase {
 		$this->assertSame( Commission::STATUS_PENDING, $this->status( $rows['pending'] ) );
 		$this->assertSame( Commission::STATUS_PENDING, $this->status( $rows['unpaid'] ), 'restored to pending, as SliceWP does' );
 
-		// Cancelled, then straight to completed with the hold over: restored, then matured on the same change.
+		// Cancelled, then straight to completed: unpaid on the same change, hold or no hold.
 		$rows['order']->update_status( 'cancelled' );
-		flyaffiliate()->settings->save( [ 'hold_days' => 0 ] );
 		$rows['order']->update_status( 'completed' );
 
 		$this->assertSame( Commission::STATUS_UNPAID, $this->status( $rows['pending'] ) );
@@ -129,24 +201,24 @@ class OrderStatusSyncTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * An order being accepted restores a commission an admin rejected — SliceWP marks every
+	 * An order being paid restores a commission an admin rejected — SliceWP marks every
 	 * unpaid commission of an accepted order unpaid, whoever rejected it. Cash on delivery
-	 * waits for completed, as it does to mature.
+	 * waits for completed.
 	 *
 	 * @return void
 	 */
-	public function test_an_accepted_order_restores_an_admin_rejected_commission(): void {
-		$rows = $this->referred_order( 'on-hold', true );
+	public function test_a_paid_order_restores_an_admin_rejected_commission(): void {
+		$rows = $this->referred_order( 'on-hold' );
 		flyaffiliate()->commission->set_status( $rows['pending'], Commission::STATUS_REJECTED );
 		flyaffiliate()->commission->set_status( $rows['unpaid'], Commission::STATUS_REJECTED );
 
 		$rows['order']->update_status( 'completed' );
 
-		$this->assertSame( Commission::STATUS_UNPAID, $this->status( $rows['pending'] ), 'restored, then matured on the same change' );
+		$this->assertSame( Commission::STATUS_UNPAID, $this->status( $rows['pending'] ), 'straight to unpaid, whatever the hold' );
 		$this->assertSame( Commission::STATUS_UNPAID, $this->status( $rows['unpaid'] ) );
 		$this->assertSame( Commission::STATUS_PAID, $this->status( $rows['paid'] ) );
 
-		$cod = $this->referred_order( 'on-hold', true );
+		$cod = $this->referred_order( 'on-hold' );
 		$cod['order']->set_payment_method( 'cod' );
 		$cod['order']->save();
 		flyaffiliate()->commission->set_status( $cod['pending'], Commission::STATUS_REJECTED );
@@ -172,7 +244,6 @@ class OrderStatusSyncTest extends FlyAffiliateTestCase {
 		$this->assertSame( Commission::STATUS_REJECTED, $this->status( $rows['unpaid'] ) );
 		$this->assertSame( Commission::STATUS_PAID, $this->status( $rows['paid'] ) );
 
-		$sync = flyaffiliate()->get_container()->get( \FlyAffiliate\Integrations\WooCommerce\OrderStatusSync::class );
-		$this->assertSame( 0, $sync->handle_trash( $rows['order']->get_id() ) );
+		$this->assertSame( 0, $this->sync()->handle_trash( $rows['order']->get_id() ) );
 	}
 }

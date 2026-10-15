@@ -2,6 +2,10 @@
 
 **Status:** Accepted
 **Date:** 2026-10-05
+**Note (2026-10-15):** on the affiliate dashboard, the affiliate's own link
+and the generator moved to the Overview, between the figures and the
+programme's terms, where an affiliate looks first. The Referral links tab
+holds the list alone. Nothing about storage or tracking changed.
 
 ## Context
 

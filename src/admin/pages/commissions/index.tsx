@@ -35,6 +35,7 @@ import StatusBadge from '@/components/StatusBadge';
 import DateTime from '@/components/DateTime';
 import Matures from '@/components/Matures';
 import Money from '@/components/Money';
+import CommissionAmount from '@/components/CommissionAmount';
 import AffiliatePicker from '@/components/AffiliatePicker';
 import { useListView } from '@/hooks/useListView';
 import { useCounts } from '@/hooks/useCounts';
@@ -244,7 +245,7 @@ export function CommissionsTable( {
 			id: 'amount',
 			label: __( 'Amount', 'flyaffiliate' ),
 			render: ( { item } ) => (
-				<Money amount={ item.amount } className="font-semibold" />
+				<CommissionAmount amount={ item.amount } note={ item.note } />
 			),
 		},
 		{
@@ -276,7 +277,7 @@ export function CommissionsTable( {
 		},
 		{
 			id: 'matures_at',
-			label: __( 'Matures', 'flyaffiliate' ),
+			label: __( 'Payable from', 'flyaffiliate' ),
 			render: ( { item } ) => (
 				<Matures
 					maturesAt={ item.matures_at }
@@ -463,7 +464,7 @@ export default function CommissionsPage() {
 			<PageHeader
 				title={ __( 'Commissions', 'flyaffiliate' ) }
 				description={ __(
-					'Pending commissions become unpaid when the hold period ends. Unpaid commissions go into the next payout.',
+					'A commission becomes unpaid when its order is paid, and goes into a payout once its hold period is over.',
 					'flyaffiliate'
 				) }
 			/>

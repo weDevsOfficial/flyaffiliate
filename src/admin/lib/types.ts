@@ -54,6 +54,8 @@ export type Commission = {
 	matures_at: string | null;
 	created_at: string | null;
 	updated_at: string | null;
+	/** Where the commission comes from or who funds it, shown as an info tip; empty for none. */
+	note?: string;
 };
 
 export type Visit = {
@@ -270,6 +272,8 @@ export type PayoutPreview = {
 	count: number;
 	/** What the same selection holds that is still pending, so not payable. */
 	pending: { count: number; amount: number };
+	/** Unpaid commissions the selection caught that are still inside their hold period. */
+	held: { count: number; amount: number };
 };
 
 export type PayoutBatchResult = {

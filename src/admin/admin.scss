@@ -85,6 +85,13 @@
 		table-layout: fixed;
 	}
 
+	thead th {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		background: #fff;
+	}
+
 	/* stylelint-disable selector-class-pattern -- plugin-ui's own classes. */
 	.pui-root-dataviews {
 
@@ -107,19 +114,23 @@
 		}
 	}
 
-	thead th {
-		position: sticky;
-		top: 0;
-		z-index: 1;
-		background: #fff;
-	}
-
 	.dataviews-view-table__cell-content-wrapper,
 	.dataviews-view-table__primary-column-content {
 		min-width: 0;
 		max-width: 100%;
 	}
 	/* stylelint-enable selector-class-pattern */
+}
+
+/*
+ * An empty list has no rows to scroll: the empty state (its icon, title and
+ * line) stands taller than five rows' worth, so the cap would hand it a
+ * scrollbar around nothing.
+ */
+/* stylelint-disable-next-line selector-class-pattern -- plugin-ui's own class. */
+.flyaffiliate-dashboard-list.is-empty .dataviews-layout__container {
+	max-height: none;
+	overflow-y: visible;
 }
 
 /*

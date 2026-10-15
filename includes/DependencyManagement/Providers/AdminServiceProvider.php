@@ -36,6 +36,8 @@ class AdminServiceProvider extends BaseServiceProvider {
 	protected array $services = [
 		\FlyAffiliate\Admin\Menu::class,
 		\FlyAffiliate\Admin\PayoutExport::class,
+		\FlyAffiliate\Admin\ProExtensions::class,
+		\FlyAffiliate\Admin\SetupWizard::class,
 		\FlyAffiliate\Admin\UserProfile::class,
 	];
 

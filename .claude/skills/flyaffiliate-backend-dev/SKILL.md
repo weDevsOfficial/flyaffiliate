@@ -210,32 +210,36 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
   The unique key on `order_item_id` is the second idempotency net.
 - Rates: `RateResolver::resolve( $product_id, $vendor_id )` — product meta
   `_flyaffiliate_rate` (variation, then parent) → `flyaffiliate_vendor_rate`
-  filter → `default_rate`, clamped to `max_rate`; `flyaffiliate_commission_rate`
-  runs last and is clamped again.
-- `Commission\HoldPeriod` matures commissions: `pending` with `matures_at <= now`
-  becomes `unpaid` through `Manager::set_status()`; a WooCommerce commission also
-  needs its order `processing` or `completed` (`flyaffiliate_mature_order_statuses`;
-  cash on delivery waits for `completed`). It runs on the order status change,
-  on `flyaffiliate_order_attributed`, from the daily job on
-  `Installer::MATURATION_HOOK`, and after a `hold_days` save, which first
-  reschedules every pending row to `created_at + hold_days`.
-- `Integrations\WooCommerce\OrderStatusSync` mirrors SliceWP: an order that fails,
-  is cancelled or is trashed (`woocommerce_trash_order`) rejects its pending and
-  unpaid WooCommerce commissions; a refunded order does the same only behind the
-  `reject_commissions_on_refund` switch (off by default); an order the hold
-  period would accept (`HoldPeriod::order_can_mature()`: processing or
-  completed, cash on delivery completed) restores its rejected commissions to
-  pending whoever rejected them, and so does an order leaving
-  failed/cancelled/refunded (priority 10, before `HoldPeriod` matures them at
-  20). Paid and manual commissions are never touched.
+  filter → `default_rate`, clamped to `max_rate` (or what
+  `flyaffiliate_max_rate` returns for that product and vendor);
+  `flyaffiliate_commission_rate` runs last and is clamped again.
+- The status follows the order; the hold period gates payouts (ADR-0014).
+  `Integrations\WooCommerce\OrderStatusSync` is the only automatic mover, and
+  it mirrors SliceWP: an order reaching `processing` or `completed`
+  (`OrderStatusSync::order_is_paid()`, filter `flyaffiliate_paid_order_statuses`;
+  cash on delivery waits for `completed`) makes its pending and rejected
+  WooCommerce commissions `unpaid` on the spot, on the status change and on
+  `flyaffiliate_order_attributed` when the order is already paid; an order that
+  fails, is cancelled or is trashed (`woocommerce_trash_order`) rejects its
+  pending and unpaid commissions; a refunded order does the same only behind
+  the `reject_commissions_on_refund` switch (off by default); an order leaving
+  failed/cancelled/refunded for a status that is not paid restores its rejected
+  commissions to pending. Paid and manual commissions are never touched.
+- `Commission\HoldPeriod` owns `matures_at` (`created_at + hold_days`, on every
+  status): a `hold_days` save reschedules every pending, unpaid and rejected
+  row, then fires `flyaffiliate_commissions_rescheduled`. A commission's own
+  hold comes from `flyaffiliate_commission_hold_days` as it is created
+  (`Manager::maturation_date()`). `Payout\Manager::preview()` takes an unpaid
+  commission only when `Commission::is_matured()` (a row with no date has
+  nothing to wait for) and reports the rest as `held`.
 - Partial refunds are not rescaled (ADR-0011's rescaler was reverted): an
   admin handles them by hand through `Manager::update()`, which edits the
   amount, reference (only on an admin-created row), reference amount, type
   and status of any commission that is not paid and not inside a payment.
   `Manager::create()` is the admin's add form: origin (`source`), type, any
   status (default `unpaid`) and date; a pending commission created by hand
-  keeps its status until its order is paid or the job matures it — nothing
-  matures it on the spot.
+  keeps its status until its order is paid or the admin moves it — nothing
+  changes it on the spot. `matures_at` is the date given plus the hold.
 
 ## Payouts
 
@@ -300,6 +304,15 @@ contain no queries — the caller prepares the data.
 - A new list page: `useListView()` + `useCounts()` from `src/admin/hooks`, a
   `DataViewField[]`, `DataViewAction[]`, and a route in `App.tsx` plus a menu
   entry in `Menu::get_routes()`.
+- Pro is never looked for by class: `flyaffiliate_is_pro_active()` reads the
+  `flyaffiliate_is_pro_active` filter, which Pro returns true from at boot.
+  While it is false, `Admin\ProExtensions` adds the Extensions entry (before
+  Settings) and `window.flyaffiliate.proExtensions`, and `App.tsx` routes
+  `/extensions` to `pages/extensions`: Pro's extensions as preview cards whose
+  switch or Upgrade opens the upgrade dialog, as Dokan Lite's Modules page
+  shows Dokan Pro's modules (Pro ADR-0005). The cards come from PHP, so they
+  are translated there; only an extension Pro ships is listed (Dokan, for
+  now). With Pro running, Pro's own Extensions page owns the route.
 - The brand colour is the logo teal `#0d7377`: `src/admin/theme.ts` (plugin-ui
   tokens) and the `$brand` variable in `src/styles/base.scss` carry it.
   Use `text-foreground`/`text-muted-foreground`/`text-primary`, never
@@ -309,7 +322,8 @@ contain no queries — the caller prepares the data.
   hidden on our screen, as Dokan and WooCommerce hide them on theirs
   (ADR-0017, `Admin\Notices\Manager`); register FlyAffiliate's own notices
   through `flyaffiliate_admin_notices`, which renders them above the app on
-  `flyaffiliate_before_admin_app`, and only for our own screen.
+  `flyaffiliate_before_admin_app`, and only for our own screen. That is the
+  one place they print: a second renderer shows every notice twice.
 - Plural strings use `_n()`; never `thing(s)`. Zero or missing values render a
   dash or a muted label (`Unknown affiliate`), never a link to `#0`.
 - Styles are split the way Dokan splits them. `src/styles/tailwind.css` is the
@@ -344,11 +358,8 @@ contain no queries — the caller prepares the data.
   `window.flyaffiliate` through `wp_add_inline_script()` in `Assets.php`.
 - The setup wizard is `src/admin/pages/setup` (route `#/setup`): it renders
   fields from the settings schema, saves with `PUT /settings/{page}` and calls
-  `POST /setup/complete`; `Admin\SetupWizard` only owns the route URL and
-  the done flag. Nothing redirects to the wizard: the one-time
-  post-activation redirect is removed until WordPress.org approves the
-  plugin (Guideline 11), and Settings shows "Run the setup wizard" until it
-  is done. The one PHP-rendered admin page left (user profile) keeps
+  `POST /setup/complete`; `Admin\SetupWizard` only owns the one-time redirect
+  and the done flag. The one PHP-rendered admin page left (user profile) keeps
   the old rules: capability, `check_admin_referer()`, then sanitize.
 
 ## REST
@@ -368,8 +379,9 @@ sends `X-WP-Total` / `X-WP-TotalPages` on collection responses.
   `get_post_meta()` on an order id.
 - Declare compatibility in the bootstrap: `custom_order_tables` and
   `cart_checkout_blocks`.
-- Scheduled work uses Action Scheduler (`as_schedule_recurring_action`,
-  `as_unschedule_all_actions`), which WooCommerce bundles — not `wp_schedule_event`.
+- Scheduled work hangs off the installer's daily hook (`Installer::MATURATION_HOOK`),
+  which uses Action Scheduler (`as_schedule_recurring_action`, WooCommerce
+  bundles it) and falls back to WP-Cron. Nothing listens to it today.
 - Currency and rounding go through `wc_price()`, `wc_format_decimal()`,
   `wc_get_price_decimals()`.
 
@@ -396,8 +408,11 @@ A new platform gets its own `Integrations\{Platform}\Integration`, its own
 The marketplace (Dokan) integration is not on this branch. It lives on
 `feature/dokan-integration`, which is this branch plus that work; keep the
 neutral seams it plugs into — `vendor_id` on commissions, the
-`flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters —
-and add nothing Dokan-specific here.
+`flyaffiliate_vendor_rate`, `flyaffiliate_order_item_vendor_id`,
+`flyaffiliate_max_rate`, `flyaffiliate_commission_note` and
+`flyaffiliate_analytics_vendor_id` filters, the `flyaffiliate_commission_deleted`
+action — and add nothing Dokan-specific here. FlyAffiliate Pro's Dokan extension
+is the marketplace integration today (its ADR-0008).
 
 Verify any third-party hook signature against the installed source before
 using it. Never assume a version number or a function's availability.
@@ -413,8 +428,7 @@ Every write that touches money is keyed so a hook firing twice changes nothing:
 | Paid marking | `payout_id` on the commission, set when the payment is created; the payment's `status` says whether the money went |
 
 A commission inside a payment (`payout_id > 0`) is never moved by the order
-sync or the maturation job (they call `set_status( …, true )`) and never
-deleted; an admin still edits it, and an unpaid payment re-sums
+sync (it calls `set_status( …, true )`) and never deleted; an admin still edits it, and an unpaid payment re-sums
 (`Payout\Manager::resync()`) while a paid one keeps its amount. A `paid` row
 an admin recorded by hand has no payment and is a record like any other. A
 WooCommerce-origin commission's `order_id` must be an existing order;
