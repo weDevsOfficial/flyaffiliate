@@ -290,6 +290,15 @@ contain no queries — the caller prepares the data.
 - A new list page: `useListView()` + `useCounts()` from `src/admin/hooks`, a
   `DataViewField[]`, `DataViewAction[]`, and a route in `App.tsx` plus a menu
   entry in `Menu::get_routes()`.
+- Pro is never looked for by class: `flyaffiliate_is_pro_active()` reads the
+  `flyaffiliate_is_pro_active` filter, which Pro returns true from at boot.
+  While it is false, `Admin\ProExtensions` adds the Extensions entry (before
+  Settings) and `window.flyaffiliate.proExtensions`, and `App.tsx` routes
+  `/extensions` to `pages/extensions`: Pro's extensions as preview cards whose
+  switch or Upgrade opens the upgrade dialog, as Dokan Lite's Modules page
+  shows Dokan Pro's modules (Pro ADR-0005). The cards come from PHP, so they
+  are translated there; only an extension Pro ships is listed (Dokan, for
+  now). With Pro running, Pro's own Extensions page owns the route.
 - The brand colour is the logo teal `#0d7377`: `src/admin/theme.ts` (plugin-ui
   tokens) and the `$brand` variable in `src/styles/base.scss` carry it.
   Use `text-foreground`/`text-muted-foreground`/`text-primary`, never
@@ -299,10 +308,8 @@ contain no queries — the caller prepares the data.
   hidden on our screen, as Dokan and WooCommerce hide them on theirs
   (ADR-0017, `Admin\Notices\Manager`); register FlyAffiliate's own notices
   through `flyaffiliate_admin_notices`, which renders them above the app on
-  `flyaffiliate_before_admin_app`, and only for our own screen.
-  `Menu::hide_foreign_notices()` also keeps other plugins' notices off the
-  page — it removes their callbacks and puts `Admin\Notices\Manager` back
-  after the removal.
+  `flyaffiliate_before_admin_app`, and only for our own screen. That is the
+  one place they print: a second renderer shows every notice twice.
 - Plural strings use `_n()`; never `thing(s)`. Zero or missing values render a
   dash or a muted label (`Unknown affiliate`), never a link to `#0`.
 - Styles are split the way Dokan splits them. `src/styles/tailwind.css` is the
