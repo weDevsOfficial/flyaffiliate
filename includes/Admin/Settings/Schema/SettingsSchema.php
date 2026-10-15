@@ -382,7 +382,7 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'general',
 				'title'       => __( 'Affiliate area', 'flyaffiliate' ),
-				'description' => __( 'Who can join, and the pages affiliates use. The pages were created when the plugin was activated; to move one, paste its shortcode into another page.', 'flyaffiliate' ),
+				'description' => __( 'Who can join, and the pages affiliates use. The pages were created when the plugin was activated. To move one, paste its shortcode into another page.', 'flyaffiliate' ),
 				'priority'    => 20,
 			],
 			[
@@ -619,7 +619,7 @@ class SettingsSchema {
 				'type'        => 'page',
 				'title'       => __( 'Payouts', 'flyaffiliate' ),
 				'icon'        => 'Wallet',
-				'description' => __( 'FlyAffiliate shows who is owed what. Manual payments are sent by you and marked paid; an automatic payout method sends the money itself.', 'flyaffiliate' ),
+				'description' => __( 'FlyAffiliate shows who is owed what. You send manual payments and mark them paid. An automatic payout method sends the money itself.', 'flyaffiliate' ),
 				'priority'    => 30,
 			],
 			// Subpage: Rules. Every page has a subpage so the sidebar reads the
@@ -661,7 +661,7 @@ class SettingsSchema {
 				'variant'     => 'select',
 				'section_id'  => 'payout_settings',
 				'title'       => __( 'Default payout method', 'flyaffiliate' ),
-				'description' => __( 'How an affiliate who has not chosen a method is paid. A method that is switched off falls back to Manual.', 'flyaffiliate' ),
+				'description' => __( 'How an affiliate who has not chosen a method is paid. Manual means you pay outside WordPress and mark it paid here. A method that is switched off falls back to Manual.', 'flyaffiliate' ),
 				'default'     => 'manual',
 				// Every registered method, not only the enabled ones: asking a
 				// method whether it is on can read a setting, and reading a
@@ -672,7 +672,7 @@ class SettingsSchema {
 					foreach ( flyaffiliate()->payout_method->get_labels() as $id => $label ) {
 						$options[] = [
 							'value' => $id,
-							'label' => 'manual' === $id ? __( 'Manual: pay outside WordPress and record it here', 'flyaffiliate' ) : $label,
+							'label' => $label,
 						];
 					}
 

@@ -70,7 +70,7 @@ class MeController extends AffiliateBaseController {
 							'sanitize_callback' => 'sanitize_textarea_field',
 						],
 						'payout_method' => [
-							'description'       => __( 'The payout method the affiliate chose; empty for the default.', 'flyaffiliate' ),
+							'description'       => __( 'The payout method the affiliate chose. Empty for the default.', 'flyaffiliate' ),
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_key',
 						],

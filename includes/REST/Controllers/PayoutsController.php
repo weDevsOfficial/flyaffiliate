@@ -827,7 +827,7 @@ class PayoutsController extends AdminBaseController {
 				),
 				'status'       => $ro(
 					[
-						'description' => __( 'unpaid until the money is sent and the payment marked paid; paid after that.', 'flyaffiliate' ),
+						'description' => __( 'unpaid until the money is sent and the payment marked paid, paid after that.', 'flyaffiliate' ),
 						'type' => 'string',
 						'enum' => [ Payout::STATUS_UNPAID, Payout::STATUS_PAID ],
 					]

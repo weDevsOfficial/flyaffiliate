@@ -352,13 +352,13 @@ class Manager {
 		$preview = $this->preview( $args );
 
 		if ( 0 === $preview['count'] ) {
-			return new WP_Error( 'flyaffiliate_empty_payout', __( 'There is nothing to pay: no unpaid commission matches that selection.', 'flyaffiliate' ), [ 'status' => 400 ] );
+			return new WP_Error( 'flyaffiliate_empty_payout', __( 'There is nothing to pay. No unpaid commission matches that selection.', 'flyaffiliate' ), [ 'status' => 400 ] );
 		}
 
 		if ( ! empty( $args['expected'] ) && ! $this->matches_expected( $preview['rows'], (array) $args['expected'] ) ) {
 			return new WP_Error(
 				'flyaffiliate_payout_changed',
-				__( 'What is owed changed since the preview: another payout may have taken some of these commissions. Check the preview again before paying.', 'flyaffiliate' ),
+				__( 'What is owed changed since the preview, maybe because another payout took some of these commissions. Check the preview again before paying.', 'flyaffiliate' ),
 				[ 'status' => 409 ]
 			);
 		}
@@ -401,7 +401,7 @@ class Manager {
 
 					return new WP_Error(
 						'flyaffiliate_payout_attach_failed',
-						__( 'The payout could not be recorded: a commission is already in another payment, or would not attach. Nothing was saved; check the preview again.', 'flyaffiliate' ),
+						__( 'The payout could not be recorded because a commission is already in another payment or would not attach. Nothing was saved. Check the preview again.', 'flyaffiliate' ),
 						[ 'status' => 409 ]
 					);
 				}

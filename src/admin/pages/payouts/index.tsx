@@ -360,7 +360,7 @@ export default function PayoutsPage() {
 			<PageHeader
 				title={ __( 'Payouts', 'flyaffiliate' ) }
 				description={ __(
-					'A payout groups unpaid commissions into one payment per affiliate, each paid by their payout method. Send manual payments your usual way and mark them paid; automatic methods send theirs and settle on their own.',
+					'A payout groups unpaid commissions into one payment per affiliate, each paid by their payout method. Send manual payments your usual way and mark them paid. Automatic methods send theirs and settle on their own.',
 					'flyaffiliate'
 				) }
 				actions={

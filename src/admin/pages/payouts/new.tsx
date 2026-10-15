@@ -223,8 +223,8 @@ export default function NewPayoutPage() {
 				sprintf(
 					/* translators: %d: number of affiliates */
 					_n(
-						'Payout created: %d payment to make.',
-						'Payout created: %d payments to make.',
+						'Payout created with %d payment to make.',
+						'Payout created with %d payments to make.',
 						result.payouts.length,
 						'flyaffiliate'
 					),
@@ -252,7 +252,7 @@ export default function NewPayoutPage() {
 				} }
 				title={ __( 'New payout', 'flyaffiliate' ) }
 				description={ __(
-					'Only unpaid commissions are included. Each affiliate gets one payment, by their payout method. Manual payments are sent by you and marked paid; automatic methods send the money themselves.',
+					'Only unpaid commissions are included. Each affiliate gets one payment, by their payout method. You send manual payments and mark them paid. Automatic methods send the money themselves.',
 					'flyaffiliate'
 				) }
 			/>
