@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) today, Dokan and others later. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions, the `flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters).
+FlyAffiliate is a standalone affiliate-marketing plugin for WordPress, built by weDevs for distribution on WordPress.org. Requires PHP 8.1+ and WordPress 6.6+ (the built apps depend on the `react-jsx-runtime` script handle, which core registers from 6.6). Every platform integration is optional and loads only when its plugin is active (ADR-0013): WooCommerce (8.5+) today, Dokan and others later. This branch has no marketplace integration: everything Dokan-specific (the `dokan_loaded` provider, the vendor-program settings, the Dokan test leg) lives on the `feature/dokan-integration` branch, which is this branch plus that work. Keep it that way — the neutral seams stay here (`vendor_id` on commissions; the `flyaffiliate_vendor_rate`, `flyaffiliate_order_item_vendor_id`, `flyaffiliate_max_rate`, `flyaffiliate_commission_note`, `flyaffiliate_analytics_vendor_id` and `flyaffiliate_commission_hold_days` filters; the `flyaffiliate_commission_deleted` and `flyaffiliate_commissions_rescheduled` actions; the dashboard's optional `program.holdNote`). FlyAffiliate Pro's Dokan extension plugs into them.
 
 The architecture mirrors Dokan Lite (`getdokan/dokan`): DI container + service providers, `Hookable` classes, `Manager` facades, overridable templates, an `Installer`/`Upgrade` pair, `FlyAffiliateTestCase`-based PHPUnit tests. Anyone who knows the Dokan codebase should feel at home here.
 
@@ -44,7 +44,14 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 > maturity date every commission carries; the hold gates payouts, not statuses,
 > ADR-0014) and `Integrations\WooCommerce\OrderStatusSync` (the commission
 > status follows the order, as in SliceWP: paid → unpaid at once, with the
-> optional `reject_commissions_on_refund` switch). Not yet built: partial-refund
+> optional `reject_commissions_on_refund` switch), and
+> `Integrations\WooCommerce\Analytics` (an "Affiliate Commission" box on
+> WooCommerce → Analytics → Overview, narrowed to a vendor through
+> `flyaffiliate_analytics_vendor_id`; it counts the orders the report counts —
+> imported into `wc_order_stats`, by the report's date type, excluded
+> statuses left out). Commissions carry a `note`
+> (`flyaffiliate_commission_note`) the Commissions list and the affiliate
+> dashboard show as an info tip. Not yet built: partial-refund
 > rescaling and the optional Dashboard. The Dokan integration is on `feature/dokan-integration`.
 
 ```bash
@@ -138,7 +145,7 @@ Services are accessed via `flyaffiliate()->service_name` (magic getter) or `flya
 
 Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `tracking`, `referral_link`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Add a name here in the same commit that registers it.
 
-The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
+The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. While FlyAffiliate Pro is not active (`flyaffiliate_is_pro_active()`), `Admin\ProExtensions` adds an Extensions page that previews Pro's extensions with an upgrade dialog, as Dokan Lite shows Dokan Pro's modules; with Pro running, Pro's page takes its place (Pro's ADR-0005). See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
 
 Tagged groups resolved at boot: `common-service`, `admin-service`, `frontend-service`, `ajax-service`, `integration-service`, `container-service`, `cli-service`. A group with nothing in it yet is normal — read groups with `get_tagged()`, which returns an empty array, rather than `get()`, which throws for an unknown identifier.
 

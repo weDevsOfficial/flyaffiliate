@@ -233,4 +233,31 @@ class OrderAttributionTest extends FlyAffiliateTestCase {
 
 		$this->assertSame( 0, flyaffiliate()->commission->count() );
 	}
+
+	/**
+	 * A commission's hold can be its own: a seller's sale waits 7 days while
+	 * the hold period is 30.
+	 */
+	public function test_a_commission_can_have_its_own_hold(): void {
+		flyaffiliate_update_option( 'hold_days', 30 );
+
+		$vendor = static fn() => 9;
+		$hold   = static fn( $days, $commission ) => 9 === (int) $commission->get( 'vendor_id' ) ? 7 : $days;
+
+		add_filter( 'flyaffiliate_order_item_vendor_id', $vendor );
+		add_filter( 'flyaffiliate_commission_hold_days', $hold, 10, 2 );
+
+		$product = $this->factory()->product->create( [ 'regular_price' => 100 ] );
+		$created = $this->attribution->attribute( $this->order( [ $product => 1 ] ) );
+
+		remove_filter( 'flyaffiliate_commission_hold_days', $hold, 10 );
+		remove_filter( 'flyaffiliate_order_item_vendor_id', $vendor );
+
+		$commission = $created[0];
+
+		$this->assertSame(
+			7 * DAY_IN_SECONDS,
+			strtotime( (string) $commission->get( 'matures_at' ) ) - strtotime( (string) $commission->get( 'created_at' ) )
+		);
+	}
 }

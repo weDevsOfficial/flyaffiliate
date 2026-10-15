@@ -210,8 +210,9 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
   The unique key on `order_item_id` is the second idempotency net.
 - Rates: `RateResolver::resolve( $product_id, $vendor_id )` — product meta
   `_flyaffiliate_rate` (variation, then parent) → `flyaffiliate_vendor_rate`
-  filter → `default_rate`, clamped to `max_rate`; `flyaffiliate_commission_rate`
-  runs last and is clamped again.
+  filter → `default_rate`, clamped to `max_rate` (or what
+  `flyaffiliate_max_rate` returns for that product and vendor);
+  `flyaffiliate_commission_rate` runs last and is clamped again.
 - The status follows the order; the hold period gates payouts (ADR-0014).
   `Integrations\WooCommerce\OrderStatusSync` is the only automatic mover, and
   it mirrors SliceWP: an order reaching `processing` or `completed`
@@ -226,7 +227,9 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
   commissions to pending. Paid and manual commissions are never touched.
 - `Commission\HoldPeriod` owns `matures_at` (`created_at + hold_days`, on every
   status): a `hold_days` save reschedules every pending, unpaid and rejected
-  row. `Payout\Manager::preview()` takes an unpaid
+  row, then fires `flyaffiliate_commissions_rescheduled`. A commission's own
+  hold comes from `flyaffiliate_commission_hold_days` as it is created
+  (`Manager::maturation_date()`). `Payout\Manager::preview()` takes an unpaid
   commission only when `Commission::is_matured()` (a row with no date has
   nothing to wait for) and reports the rest as `held`.
 - Partial refunds are not rescaled (ADR-0011's rescaler was reverted): an
@@ -287,6 +290,15 @@ contain no queries — the caller prepares the data.
 - A new list page: `useListView()` + `useCounts()` from `src/admin/hooks`, a
   `DataViewField[]`, `DataViewAction[]`, and a route in `App.tsx` plus a menu
   entry in `Menu::get_routes()`.
+- Pro is never looked for by class: `flyaffiliate_is_pro_active()` reads the
+  `flyaffiliate_is_pro_active` filter, which Pro returns true from at boot.
+  While it is false, `Admin\ProExtensions` adds the Extensions entry (before
+  Settings) and `window.flyaffiliate.proExtensions`, and `App.tsx` routes
+  `/extensions` to `pages/extensions`: Pro's extensions as preview cards whose
+  switch or Upgrade opens the upgrade dialog, as Dokan Lite's Modules page
+  shows Dokan Pro's modules (Pro ADR-0005). The cards come from PHP, so they
+  are translated there; only an extension Pro ships is listed (Dokan, for
+  now). With Pro running, Pro's own Extensions page owns the route.
 - The brand colour is the logo teal `#0d7377`: `src/admin/theme.ts` (plugin-ui
   tokens) and the `$brand` variable in `src/styles/base.scss` carry it.
   Use `text-foreground`/`text-muted-foreground`/`text-primary`, never
@@ -296,10 +308,8 @@ contain no queries — the caller prepares the data.
   hidden on our screen, as Dokan and WooCommerce hide them on theirs
   (ADR-0017, `Admin\Notices\Manager`); register FlyAffiliate's own notices
   through `flyaffiliate_admin_notices`, which renders them above the app on
-  `flyaffiliate_before_admin_app`, and only for our own screen.
-  `Menu::hide_foreign_notices()` also keeps other plugins' notices off the
-  page — it removes their callbacks and puts `Admin\Notices\Manager` back
-  after the removal.
+  `flyaffiliate_before_admin_app`, and only for our own screen. That is the
+  one place they print: a second renderer shows every notice twice.
 - Plural strings use `_n()`; never `thing(s)`. Zero or missing values render a
   dash or a muted label (`Unknown affiliate`), never a link to `#0`.
 - Styles are split the way Dokan splits them. `src/styles/tailwind.css` is the
@@ -384,8 +394,11 @@ A new platform gets its own `Integrations\{Platform}\Integration`, its own
 The marketplace (Dokan) integration is not on this branch. It lives on
 `feature/dokan-integration`, which is this branch plus that work; keep the
 neutral seams it plugs into — `vendor_id` on commissions, the
-`flyaffiliate_vendor_rate` and `flyaffiliate_order_item_vendor_id` filters —
-and add nothing Dokan-specific here.
+`flyaffiliate_vendor_rate`, `flyaffiliate_order_item_vendor_id`,
+`flyaffiliate_max_rate`, `flyaffiliate_commission_note` and
+`flyaffiliate_analytics_vendor_id` filters, the `flyaffiliate_commission_deleted`
+action — and add nothing Dokan-specific here. FlyAffiliate Pro's Dokan extension
+is the marketplace integration today (its ADR-0008).
 
 Verify any third-party hook signature against the installed source before
 using it. Never assume a version number or a function's availability.

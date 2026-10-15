@@ -177,10 +177,11 @@ class Manager {
 				'source'        => $source,
 				'type'          => $type,
 				'status'        => $status,
-				'matures_at'    => $this->maturation_date( $created_at ),
 				'created_at'    => $created_at,
 			]
 		);
+
+		$commission->set( 'matures_at', $this->maturation_date( $created_at, $commission ) );
 
 		if ( 0 === $commission->save() ) {
 			return new WP_Error( 'flyaffiliate_create_failed', __( 'The commission could not be saved.', 'flyaffiliate' ), [ 'status' => 500 ] );
@@ -530,7 +531,27 @@ class Manager {
 			return false;
 		}
 
-		return $commission->delete();
+		// Deleting empties the model; the action gets the fields it had.
+		$deleted = clone $commission;
+
+		if ( ! $commission->delete() ) {
+			return false;
+		}
+
+		/**
+		 * Fires after a commission is deleted.
+		 *
+		 * The row is gone; the commission passed still carries the fields it
+		 * had, so whatever followed it (a marketplace's charge on the vendor,
+		 * say) can follow it out.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param Commission $commission The commission, as it was.
+		 */
+		do_action( 'flyaffiliate_commission_deleted', $deleted );
+
+		return true;
 	}
 
 	/**
@@ -729,14 +750,46 @@ class Manager {
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
-	 * @param string $created_at The creation time in GMT. Defaults to now.
+	 * @param string          $created_at The creation time in GMT. Defaults to now.
+	 * @param Commission|null $commission The commission being created, so its hold can be its own.
 	 *
 	 * @return string `Y-m-d H:i:s` in GMT.
 	 */
-	public function maturation_date( string $created_at = '' ): string {
-		$hold_days = absint( flyaffiliate_get_option( 'hold_days', 30 ) );
-		$base      = '' !== $created_at ? strtotime( $created_at . ' UTC' ) : time();
+	public function maturation_date( string $created_at = '', ?Commission $commission = null ): string {
+		$base = '' !== $created_at ? strtotime( $created_at . ' UTC' ) : time();
 
-		return gmdate( 'Y-m-d H:i:s', $base + $hold_days * DAY_IN_SECONDS );
+		return gmdate( 'Y-m-d H:i:s', $base + $this->get_hold_days( $commission ) * DAY_IN_SECONDS );
+	}
+
+	/**
+	 * The days a commission waits before a payout may take it: the hold period.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Commission|null $commission The commission; null for the hold period itself.
+	 *
+	 * @return int
+	 */
+	public function get_hold_days( ?Commission $commission = null ): int {
+		$hold_days = absint( flyaffiliate_get_option( 'hold_days', 30 ) );
+
+		if ( null === $commission ) {
+			return $hold_days;
+		}
+
+		/**
+		 * Filters the hold period of one commission, as it is created.
+		 *
+		 * A marketplace gives its sellers' commissions their own hold. A
+		 * filter here must also follow `flyaffiliate_commissions_rescheduled`,
+		 * which moves every commission a payout may still take onto the hold
+		 * period itself.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param int        $hold_days  The hold period, in days.
+		 * @param Commission $commission The commission, with its vendor and product.
+		 */
+		return absint( apply_filters( 'flyaffiliate_commission_hold_days', $hold_days, $commission ) );
 	}
 }

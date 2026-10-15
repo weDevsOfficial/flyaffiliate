@@ -282,10 +282,11 @@ class OrderAttribution implements Hookable {
 				'source'        => Commission::SOURCE_WOOCOMMERCE,
 				'type'          => Commission::TYPE_SALE,
 				'status'        => Commission::STATUS_PENDING,
-				'matures_at'    => flyaffiliate()->commission->maturation_date(),
 				'created_at'    => current_time( 'mysql', true ),
 			]
 		);
+
+		$commission->set( 'matures_at', flyaffiliate()->commission->maturation_date( (string) $commission->get( 'created_at' ), $commission ) );
 
 		// A second row for the same order item is refused by the unique key.
 		if ( 0 === $commission->save() ) {

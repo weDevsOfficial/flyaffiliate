@@ -1,6 +1,7 @@
 /**
- * Overview: the balance figures, then the terms of the programme in one card.
- * The referral link and the generator live on the Referral links tab.
+ * Overview: the balance figures, the affiliate's referral link and the
+ * generator, then the terms of the programme in one card. The links the
+ * generator saves are listed on the Referral links tab.
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Clock, MousePointerClick, Wallet, WalletCards } from 'lucide-react';
@@ -8,6 +9,7 @@ import StatCard, { StatCardSkeleton } from '@/components/StatCard';
 import { formatMoney } from '@/lib/format';
 import { getGlobals } from '@/lib/globals';
 import ProgramDetails from '../components/ProgramDetails';
+import ReferralLinkCards from '../components/ReferralLinkCards';
 import type { AffiliateProfile } from '../types';
 
 type Props = {
@@ -21,11 +23,14 @@ export default function OverviewPage( { profile, hasRange }: Props ) {
 
 	if ( ! profile ) {
 		return (
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				<StatCardSkeleton />
-				<StatCardSkeleton />
-				<StatCardSkeleton />
-				<StatCardSkeleton />
+			<div className="flex flex-col gap-6">
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+					<StatCardSkeleton />
+					<StatCardSkeleton />
+					<StatCardSkeleton />
+					<StatCardSkeleton />
+				</div>
+				<ReferralLinkCards profile={ null } />
 			</div>
 		);
 	}
@@ -96,6 +101,8 @@ export default function OverviewPage( { profile, hasRange }: Props ) {
 					) } ${ converted }` }
 				/>
 			</div>
+
+			<ReferralLinkCards profile={ profile } />
 
 			<ProgramDetails />
 		</div>

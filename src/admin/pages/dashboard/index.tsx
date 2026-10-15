@@ -885,7 +885,11 @@ export default function DashboardPage() {
 							}
 						>
 							<div
-								className="flyaffiliate-dashboard-list"
+								className={ `flyaffiliate-dashboard-list${
+									( stats?.top_products ?? [] ).length === 0
+										? ' is-empty'
+										: ''
+								}` }
 								data-testid="flyaffiliate-dashboard-products"
 							>
 								<DataViews< TopProduct >
@@ -927,7 +931,9 @@ export default function DashboardPage() {
 							}
 						>
 							<div
-								className="flyaffiliate-dashboard-list"
+								className={ `flyaffiliate-dashboard-list${
+									visits.length === 0 ? ' is-empty' : ''
+								}` }
 								data-testid="flyaffiliate-dashboard-visits"
 							>
 								<DataViews< RecentVisit >

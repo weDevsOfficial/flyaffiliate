@@ -2,7 +2,7 @@
  * Turn any page of this site into a referral link, as SliceWP's affiliate
  * account does: the pasted address must be on this site, and it gets the same
  * referral variable the affiliate's own link carries. The link is saved to the
- * list below it on the Referral links tab; the server checks the address again.
+ * list on the Referral links tab; the server checks the address again.
  */
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -89,10 +89,8 @@ export function buildReferralLink(
 
 export default function GenerateLink( {
 	referralUrl,
-	onSaved,
 }: {
 	referralUrl: string;
-	onSaved?: ( link: ReferralLink ) => void;
 } ) {
 	const [ input, setInput ] = useState( '' );
 	const [ result, setResult ] = useState< Result | null >( null );
@@ -118,7 +116,6 @@ export default function GenerateLink( {
 			);
 
 			setResult( { url: link.referral_url, error: '' } );
-			onSaved?.( link );
 		} catch ( error ) {
 			setResult( {
 				url: '',
@@ -148,7 +145,7 @@ export default function GenerateLink( {
 					</FieldLabel>
 					<FieldDescription>
 						{ __(
-							'Paste the address of any page on this site, a product for example, to get a link to it that earns you a commission. Each link you generate is kept in the list below.',
+							'Paste the address of any page on this site, a product for example, to get a link to it that earns you a commission. Each link you generate is kept on the Referral links tab.',
 							'flyaffiliate'
 						) }
 					</FieldDescription>

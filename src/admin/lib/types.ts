@@ -50,6 +50,8 @@ export type Commission = {
 	matures_at: string | null;
 	created_at: string | null;
 	updated_at: string | null;
+	/** Where the commission comes from or who funds it, shown as an info tip; empty for none. */
+	note?: string;
 };
 
 export type Visit = {

@@ -14,6 +14,7 @@ import StatusBadge from '@/components/StatusBadge';
 import DateTime from '@/components/DateTime';
 import Matures from '@/components/Matures';
 import Money from '@/components/Money';
+import CommissionAmount from '@/components/CommissionAmount';
 import { useListView } from '@/hooks/useListView';
 import { useCounts } from '@/hooks/useCounts';
 import { withIconLabels } from '@/lib/actions';
@@ -102,7 +103,7 @@ export default function CommissionsTable( { dates }: { dates: DateArgs } ) {
 			id: 'amount',
 			label: __( 'Amount', 'flyaffiliate' ),
 			render: ( { item } ) => (
-				<Money amount={ item.amount } className="font-semibold" />
+				<CommissionAmount amount={ item.amount } note={ item.note } />
 			),
 		},
 		{
