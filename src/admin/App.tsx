@@ -23,9 +23,11 @@ import PaymentsPage from './pages/payouts/payments';
 import PaymentPage from './pages/payouts/payment';
 import NewPayoutPage from './pages/payouts/new';
 import SettingsPage from './pages/settings';
+import ExtensionsPage from './pages/extensions';
 import SetupPage from './pages/setup';
 import NotFound from './components/NotFound';
 import { theme } from './theme';
+import { getGlobals } from './lib/globals';
 
 export type AdminRoute = {
 	id: string;
@@ -88,6 +90,16 @@ function getRoutes(): AdminRoute[] {
 		{ id: 'settings', path: '/settings', element: <SettingsPage /> },
 		{ id: 'setup', path: '/setup', element: <SetupPage /> },
 	];
+
+	// Pro's extensions as previews, only while Pro is not active: with Pro
+	// running, PHP sends no `proExtensions` and Pro's own page takes the route.
+	if ( getGlobals().proExtensions ) {
+		routes.push( {
+			id: 'extensions',
+			path: '/extensions',
+			element: <ExtensionsPage />,
+		} );
+	}
 
 	/**
 	 * Filters the admin app's routes.

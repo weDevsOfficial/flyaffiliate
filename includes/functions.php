@@ -351,3 +351,50 @@ if ( ! function_exists( 'flyaffiliate_get_currency_decimals' ) ) {
 		return (int) apply_filters( 'flyaffiliate_currency_decimals', $decimals, $code );
 	}
 }
+
+if ( ! function_exists( 'flyaffiliate_is_pro_active' ) ) {
+	/**
+	 * Whether FlyAffiliate Pro is running on this site.
+	 *
+	 * FlyAffiliate never looks for Pro's classes: Pro answers through the
+	 * filter when it boots. While it does not, FlyAffiliate shows what Pro adds
+	 * (`Admin\ProExtensions`), as Dokan Lite shows Dokan Pro's modules.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return bool
+	 */
+	function flyaffiliate_is_pro_active(): bool {
+		/**
+		 * Filters whether FlyAffiliate Pro is running. Pro returns true.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param bool $active Whether Pro is running. Default false.
+		 */
+		return (bool) apply_filters( 'flyaffiliate_is_pro_active', false );
+	}
+}
+
+if ( ! function_exists( 'flyaffiliate_get_pro_upgrade_url' ) ) {
+	/**
+	 * Where Upgrade to FlyAffiliate Pro leads: here, and on Pro's Extensions
+	 * page while its license is not active.
+	 *
+	 * TODO(upgrade): FlyAffiliate Pro's pricing page, once it is published.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return string
+	 */
+	function flyaffiliate_get_pro_upgrade_url(): string {
+		/**
+		 * Filters where Upgrade to FlyAffiliate Pro leads.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param string $url The URL.
+		 */
+		return (string) apply_filters( 'flyaffiliate_pro_upgrade_url', 'https://flyaffiliate.co/' );
+	}
+}

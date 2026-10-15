@@ -10,6 +10,27 @@ export type CurrencyConfig = {
 	thousandSeparator: string;
 };
 
+/** One of Pro's extensions, as a preview card while Pro is not active. */
+export type ProExtensionPreview = {
+	id: string;
+	name: string;
+	description: string;
+	/** `integration` or `payout_method`. */
+	category: string;
+	/** `available` in Pro today, or `coming_soon`. */
+	status: 'available' | 'coming_soon';
+	doc_url: string;
+};
+
+/** What the Extensions page shows while Pro is not active (`Admin\ProExtensions`). */
+export type ProExtensionsData = {
+	upgradeUrl: string;
+	pluginsUrl: string;
+	extensions: ProExtensionPreview[];
+	/** What Pro adds today, for the upgrade dialog. */
+	features: string[];
+};
+
 export type AdminGlobals = {
 	version: string;
 	restNonce: string;
@@ -43,6 +64,8 @@ export type AdminGlobals = {
 	availableSources: Record< string, string >;
 	types: Record< string, string >;
 	methods: Record< string, string >;
+	/** Only while FlyAffiliate Pro is not active: Pro's extensions as previews. */
+	proExtensions?: ProExtensionsData;
 	/** Only on the affiliate dashboard page. */
 	dashboard: {
 		tab: string;
