@@ -311,8 +311,8 @@ contain no queries — the caller prepares the data.
   `/extensions` to `pages/extensions`: Pro's extensions as preview cards whose
   switch or Upgrade opens the upgrade dialog, as Dokan Lite's Modules page
   shows Dokan Pro's modules (Pro ADR-0005). The cards come from PHP, so they
-  are translated there; only an extension Pro ships is listed (Dokan, for
-  now). With Pro running, Pro's own Extensions page owns the route.
+  are translated there; only an extension Pro ships is listed, never one
+  still to come. With Pro running, Pro's own Extensions page owns the route.
 - The brand colour is the logo teal `#0d7377`: `src/admin/theme.ts` (plugin-ui
   tokens) and the `$brand` variable in `src/styles/base.scss` carry it.
   Use `text-foreground`/`text-muted-foreground`/`text-primary`, never

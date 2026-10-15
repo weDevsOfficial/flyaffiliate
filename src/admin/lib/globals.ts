@@ -19,8 +19,6 @@ export type ProExtensionPreview = {
 	description: string;
 	/** `integration` or `payout_method`. */
 	category: string;
-	/** `available` in Pro today, or `coming_soon`. */
-	status: 'available' | 'coming_soon';
 	doc_url: string;
 };
 
