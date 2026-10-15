@@ -260,7 +260,7 @@ export default function App() {
 						/>
 					</TabsContent>
 					<TabsContent value="links">
-						<ReferralLinksPage profile={ profile } />
+						<ReferralLinksPage />
 					</TabsContent>
 					<TabsContent value="commissions">
 						<CommissionsTable dates={ dates } />
