@@ -204,6 +204,26 @@ class RegistrationTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * An affiliate the site owner suspended is not reopened by the link they were sent.
+	 *
+	 * @return void
+	 */
+	public function test_an_old_link_does_not_reopen_a_suspended_affiliate(): void {
+		flyaffiliate()->registration->register( 'suspended@example.org' );
+
+		$key       = $this->key_from_email();
+		$affiliate = flyaffiliate()->affiliate->get_by_activation_key( wp_hash( $key ) );
+
+		flyaffiliate()->affiliate->update( $affiliate->get_id(), [ 'status' => Affiliate::STATUS_SUSPENDED ] );
+
+		$result = flyaffiliate()->registration->activate( $key );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'account_not_active', $result->get_error_code() );
+		$this->assertSame( Affiliate::STATUS_SUSPENDED, flyaffiliate()->affiliate->get( $affiliate->get_id() )->get( 'status' ) );
+	}
+
+	/**
 	 * With the activation email off, no key is issued and nothing is sent.
 	 *
 	 * @return void
