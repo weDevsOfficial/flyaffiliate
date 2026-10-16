@@ -809,7 +809,7 @@ class PayoutsController extends AdminBaseController {
 				),
 				'transfer'     => $ro(
 					[
-						'description' => __( 'The latest transfer by an automatic payout method: status (queued, processing, pending, paid or failed), message, retryable, reference. Null when nothing was sent.', 'flyaffiliate' ),
+						'description' => __( 'The latest transfer by an automatic payout method: status (queued, processing, pending, paid or failed), message, retryable, reference, and any other keys the method adds. Null when nothing was sent.', 'flyaffiliate' ),
 						'type' => [ 'object', 'null' ],
 					]
 				),

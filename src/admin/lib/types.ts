@@ -116,6 +116,8 @@ export type PayoutTransfer = {
 	message?: string;
 	retryable?: boolean;
 	reference?: string;
+	/** Details of the method's own, for the columns it adds (`flyaffiliate_payment_columns`). */
+	[ key: string ]: unknown;
 };
 
 /** A payout method, from `window.flyaffiliate.payoutMethods`. */
@@ -164,6 +166,8 @@ export type PayoutSummary = {
 	in_flight: number;
 	status: 'processing' | 'needs_attention' | 'paid' | 'unpaid' | string;
 	methods: { id: string; label: string }[];
+	/** Figures payout methods add beside the totals (`flyaffiliate_payout_summary`). */
+	stats: { key: string; label: string; value: string; hint?: string }[];
 };
 
 /** The Dashboard figures, from `GET /dashboard`. */

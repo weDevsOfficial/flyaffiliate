@@ -265,7 +265,7 @@ class Manager {
 	 *
 	 * @param Payout[] $payouts Payments, any method.
 	 *
-	 * @return array<int, array{status: string, message: string, retryable: bool, reference: string}> Payment id => state.
+	 * @return array<int, array{status: string, message: string, retryable: bool, reference: string}> Payment id => state, with any detail of the method's own.
 	 */
 	public function get_states( array $payouts ): array {
 		$by_method = [];
@@ -532,11 +532,12 @@ class Manager {
 			return null;
 		}
 
+		// A method's own details pass through as it wrote them.
 		return [
 			'status'    => (string) $state['status'],
 			'message'   => (string) ( $state['message'] ?? '' ),
 			'retryable' => ! empty( $state['retryable'] ),
 			'reference' => (string) ( $state['reference'] ?? '' ),
-		];
+		] + $state;
 	}
 }

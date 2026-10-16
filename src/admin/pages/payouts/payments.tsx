@@ -6,6 +6,7 @@
  * is on its way, and can be sent again when the transfer failed.
  */
 import { useEffect, useMemo, useState } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Link, useNavigate } from 'react-router-dom';
 import { Check, Download, Eye, Layers, RotateCw, Trash2 } from 'lucide-react';
@@ -22,6 +23,7 @@ import PageHeader from '@/components/PageHeader';
 import DateTime from '@/components/DateTime';
 import Money from '@/components/Money';
 import Truncated from '@/components/Truncated';
+import Hint from '@/components/Hint';
 import PaymentStatus from '@/components/PaymentStatus';
 import { useCounts } from '@/hooks/useCounts';
 import { useListView } from '@/hooks/useListView';
@@ -69,7 +71,127 @@ const DEFAULT_VIEW: DataViewState = {
 	},
 };
 
+/**
+ * One payout's payments, on the payout's own page: no Payout column, which
+ * would only link back to the page it is on.
+ */
+const BATCH_VIEW: DataViewState = {
+	...DEFAULT_VIEW,
+	fields: DEFAULT_VIEW.fields?.filter( ( field ) => field !== 'batch' ),
+	layout: {
+		styles: {
+			id: { width: '8%' },
+			affiliate: { width: '14%' },
+			amount: { width: '10%' },
+			commissions: { width: '10%' },
+			payment_email: { width: '15%' },
+			reference: { width: '10%' },
+			status: { width: '12%' },
+			method: { width: '9%' },
+			created_at: { width: '12%' },
+		},
+	},
+};
+
 const STATUSES = [ 'unpaid', 'paid' ];
+
+/**
+ * A column a payout method adds to the payments table, drawn with
+ * FlyAffiliate's own cells: its text, and an info tip when it explains it.
+ * Added through the `flyaffiliate_payment_columns` filter; it reads what the
+ * method put in each payment's `transfer`.
+ */
+export type PaymentColumn = {
+	id: string;
+	label: string;
+	/** Its width, as the other columns give theirs (`'9%'`). */
+	width?: string;
+	text: ( item: Payout ) => string;
+	hint?: ( item: Payout ) => string;
+	/** Whether the page's rows need the column at all; always when absent. */
+	isVisible?: ( items: Payout[] ) => boolean;
+};
+
+/**
+ * The columns payout methods add, read once: the filter is registered before FlyAffiliate's app runs.
+ *
+ * @return {PaymentColumn[]} The columns.
+ */
+function getExtraColumns(): PaymentColumn[] {
+	const columns = applyFilters( 'flyaffiliate_payment_columns', [] );
+
+	return Array.isArray( columns )
+		? columns.filter(
+				( column ): column is PaymentColumn =>
+					!! column?.id && typeof column.text === 'function'
+		  )
+		: [];
+}
+
+/**
+ * The view with the added columns that the rows need, after Status. The
+ * columns' widths shrink in proportion to make room, so the table keeps its
+ * width and no column is cut short.
+ *
+ * @param {DataViewState}   view    The view.
+ * @param {PaymentColumn[]} columns The added columns that show.
+ * @return {DataViewState} The view.
+ */
+function withColumns(
+	view: DataViewState,
+	columns: PaymentColumn[]
+): DataViewState {
+	if ( ! columns.length ) {
+		return view;
+	}
+
+	const fields = ( view.fields ?? [] ).filter(
+		( field ) => ! columns.some( ( column ) => column.id === field )
+	);
+	const at = fields.indexOf( 'status' ) + 1 || fields.length;
+	const styles: Record< string, { width?: string } > =
+		( view.layout as { styles?: Record< string, { width?: string } > } )
+			?.styles ?? {};
+	const widths: Record< string, number > = Object.fromEntries( [
+		...fields.map( ( field ) => [
+			field,
+			parseFloat( styles[ field ]?.width ?? '' ) || 0,
+		] ),
+		...columns.map( ( column ) => [
+			column.id,
+			parseFloat( column.width ?? '9%' ),
+		] ),
+	] );
+	const total = Object.values( widths ).reduce( ( a, b ) => a + b, 0 );
+	const before = total - columns.reduce( ( a, c ) => a + widths[ c.id ], 0 );
+
+	fields.splice( at, 0, ...columns.map( ( column ) => column.id ) );
+
+	return {
+		...view,
+		fields,
+		layout: {
+			...view.layout,
+			styles: {
+				...styles,
+				...Object.fromEntries(
+					Object.entries( widths )
+						.filter( ( [ , width ] ) => width > 0 )
+						.map( ( [ id, width ] ) => [
+							id,
+							{
+								...styles[ id ],
+								width: `${ (
+									( width * before ) /
+									total
+								).toFixed( 2 ) }%`,
+							},
+						] )
+				),
+			},
+		},
+	} as DataViewState;
+}
 
 type TableProps = {
 	affiliateId?: number;
@@ -107,10 +229,14 @@ export function PaymentsTable( {
 	);
 	const list = useListView< Payout >( {
 		path: '/payouts',
-		defaultView: DEFAULT_VIEW,
+		defaultView: batchKey ? BATCH_VIEW : DEFAULT_VIEW,
 		filters,
 	} );
 	const counts = useCounts( '/payouts', 'status', STATUSES, baseFilters );
+	const extraColumns = useMemo( getExtraColumns, [] );
+	const shownColumns = extraColumns.filter(
+		( column ) => ! column.isVisible || column.isVisible( list.items )
+	);
 
 	const refresh = () => {
 		setSelection( [] );
@@ -300,7 +426,7 @@ export function PaymentsTable( {
 			render: ( { item } ) => (
 				<Truncated
 					className="text-muted-foreground"
-					text={ item.reference || '—' }
+					text={ item.reference || item.transfer?.reference || '—' }
 					max={ 18 }
 				/>
 			),
@@ -329,6 +455,25 @@ export function PaymentsTable( {
 				<DateTime value={ item.created_at } withTime />
 			),
 		},
+		...extraColumns.map(
+			( column ): DataViewField< Payout > => ( {
+				id: column.id,
+				label: column.label,
+				enableSorting: false,
+				render: ( { item } ) => {
+					const hint = column.hint?.( item ) ?? '';
+
+					return (
+						<span className="inline-flex items-center gap-1.5 tabular-nums">
+							{ column.text( item ) || (
+								<span className="text-muted-foreground">—</span>
+							) }
+							{ hint && <Hint text={ hint } /> }
+						</span>
+					);
+				},
+			} )
+		),
 	];
 
 	const actions: DataViewAction< Payout >[] = [
@@ -438,7 +583,7 @@ export function PaymentsTable( {
 			namespace="flyaffiliate-payments"
 			data={ list.items }
 			fields={ fields }
-			view={ list.view }
+			view={ withColumns( list.view, shownColumns ) }
 			onChangeView={ list.setView }
 			actions={ withIconLabels( actions ) }
 			selection={ selection }

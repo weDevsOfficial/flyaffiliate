@@ -265,7 +265,12 @@ commissions with a conditional write, and calls each automatic method's
 `resync()`, and commission edits under the payment — checks
 `payout_method->get_lock()` first and returns 409 `flyaffiliate_payout_locked`.
 `pay_batch()` marks only payments a non-automatic method pays; `retry()`
-re-sums, then asks the method to send again.
+re-sums, then asks the method to send again. A method's state may carry
+keys of its own (passed through). It shows them in a payments-table column
+(`flyaffiliate_payment_columns`, JS) and payout-wide figures as cards
+(`summarize()`'s `stats`, through `flyaffiliate_payout_summary`).
+FlyAffiliate never interprets them: a method's own concepts stay in the
+plugin that adds the method.
 
 ## The affiliate role
 

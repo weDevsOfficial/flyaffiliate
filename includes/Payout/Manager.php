@@ -872,7 +872,7 @@ class Manager {
 	 * @param Payout[]   $payouts The payout's payments.
 	 * @param array|null $states  Payment id => transfer state, when already loaded.
 	 *
-	 * @return array{affiliates: int, total: float, paid_total: float, paid: int, counts: array<string, int>, in_flight: int, status: string, methods: string[]}
+	 * @return array{affiliates: int, total: float, paid_total: float, paid: int, counts: array<string, int>, in_flight: int, status: string, methods: string[], stats: array<int, array{key: string, label: string, value: string, hint?: string}>}
 	 */
 	public function summarize( array $payouts, ?array $states = null ): array {
 		$states = $states ?? $this->methods()->get_states( $payouts );
@@ -933,7 +933,7 @@ class Manager {
 			$status = 'unpaid';
 		}
 
-		return [
+		$summary = [
 			'affiliates' => count( $payouts ),
 			'total'      => Money::from_cents( $total_cents ),
 			'paid_total' => Money::from_cents( $paid_cents ),
@@ -942,7 +942,24 @@ class Manager {
 			'in_flight'  => $in_flight,
 			'status'     => $status,
 			'methods'    => array_keys( $methods ),
+			'stats'      => [],
 		];
+
+		/**
+		 * Filters a payout's summary, as its page and the payouts list show it.
+		 *
+		 * A payout method adds a figure only it knows to `stats`, each
+		 * `['key' => string, 'label' => string, 'value' => string, 'hint' => string]`,
+		 * translated and formatted: the payout's page shows it as one more
+		 * card beside its totals, the hint behind the card's info icon.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param array    $summary The summary.
+		 * @param Payout[] $payouts The payout's payments.
+		 * @param array    $states  Payment id => transfer state (`PayoutMethod::get_states()`).
+		 */
+		return (array) apply_filters( 'flyaffiliate_payout_summary', $summary, $payouts, $states );
 	}
 
 	/**

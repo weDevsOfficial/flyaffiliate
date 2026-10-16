@@ -39,6 +39,14 @@ installed.
   `Payout\Manager` moves it (ADR-0012). An automatic method keeps its own record
   of each attempt — a *transfer* — and reports its state through
   `get_states()`: `queued`, `processing`, `pending`, `paid` or `failed`.
+  A state may carry keys of the method's own, which FlyAffiliate passes
+  through untouched. The method shows them through two hooks, without
+  FlyAffiliate knowing what they mean (amended 2026-10-16): a column in the
+  payments table (`flyaffiliate_payment_columns`, a JS filter returning
+  `{ id, label, text( payment ), hint?( payment ), isVisible?( payments ) }`,
+  drawn with FlyAffiliate's own cells, after Status, the other columns
+  narrowing to make room) and a card beside a payout's totals (`stats` in
+  the summary, through `flyaffiliate_payout_summary`).
   `create()` hands each automatic method its payments (`pay()`) right after the
   payout is recorded; the method marks a payment paid with
   `mark_paid( $id, true )` once the money has arrived, and unpaid with
