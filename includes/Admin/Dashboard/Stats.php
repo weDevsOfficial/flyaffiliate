@@ -172,7 +172,7 @@ class Stats {
 	/**
 	 * Visits and conversions per day, for the sparkline.
 	 *
-	 * Without a range, the last 30 days.
+	 * Without a range (All time), from the first day with a visit to today.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -184,20 +184,12 @@ class Stats {
 	public function get_trend( string $after = '', string $before = '' ): array {
 		global $wpdb;
 
-		if ( '' === $after && '' === $before ) {
-			$after = gmdate( 'Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS );
-		}
-
 		list( $where, $values ) = $this->range_where( 'created_at', $after, $before );
 		$table                  = Visit::get_table();
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter -- FlyAffiliate's own tables: the only interpolations are their names and a WHERE built from placeholders, whose values follow.
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT DATE( created_at ) AS day, COUNT(*) AS visits, COALESCE( SUM( converted ), 0 ) AS converted FROM {$table} {$where} GROUP BY DATE( created_at ) ORDER BY day ASC",
-				$values
-			)
-		);
+		$sql  = "SELECT DATE( created_at ) AS day, COUNT(*) AS visits, COALESCE( SUM( converted ), 0 ) AS converted FROM {$table} {$where} GROUP BY DATE( created_at ) ORDER BY day ASC";
+		$rows = $wpdb->get_results( [] === $values ? $sql : $wpdb->prepare( $sql, $values ) ); // All time has no placeholder to fill.
 		// phpcs:enable
 
 		$by_day = [];

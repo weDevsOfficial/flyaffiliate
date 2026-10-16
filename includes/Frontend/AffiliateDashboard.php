@@ -65,7 +65,8 @@ class AffiliateDashboard extends Shortcode {
 		wp_enqueue_style( 'flyaffiliate-frontend' );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading a status flag from a redirect for display.
-		$notice = isset( $_GET['flyaffiliate_activated'] ) ? 'activated' : ( isset( $_GET['flyaffiliate_error'] ) ? sanitize_key( wp_unslash( $_GET['flyaffiliate_error'] ) ) : '' );
+		$notice  = isset( $_GET['flyaffiliate_activated'] ) ? 'activated' : ( isset( $_GET['flyaffiliate_error'] ) ? sanitize_key( wp_unslash( $_GET['flyaffiliate_error'] ) ) : '' );
+		$message = $this->get_notice_message( $notice );
 
 		if ( ! is_user_logged_in() ) {
 			return $this->template(
@@ -73,6 +74,7 @@ class AffiliateDashboard extends Shortcode {
 				[
 					'login_url' => wp_login_url( get_permalink() ),
 					'notice'    => $notice,
+					'message'   => $message,
 				]
 			);
 		}
@@ -85,6 +87,7 @@ class AffiliateDashboard extends Shortcode {
 				[
 					'register_url' => flyaffiliate_get_page_url( 'affiliate_register' ),
 					'notice'       => $notice,
+					'message'      => $message,
 				]
 			);
 		}
@@ -95,6 +98,7 @@ class AffiliateDashboard extends Shortcode {
 				[
 					'affiliate' => $affiliate,
 					'notice'    => $notice,
+					'message'   => $message,
 				]
 			);
 		}
@@ -112,6 +116,33 @@ class AffiliateDashboard extends Shortcode {
 				'tab'       => $tab,
 			]
 		);
+	}
+
+	/**
+	 * What an activation link's result says, for the screens before the dashboard.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param string $notice `activated`, or the error code the activation link redirected with.
+	 *
+	 * @return array{type: string, text: string}|null
+	 */
+	protected function get_notice_message( string $notice ): ?array {
+		$messages = [
+			'activated'          => [ 'success', __( 'Your affiliate account is active. Log in to open your dashboard.', 'flyaffiliate' ) ],
+			'invalid_key'        => [ 'error', __( 'That activation link is not valid, or has already been used.', 'flyaffiliate' ) ],
+			'expired_key'        => [ 'error', __( 'That activation link has expired. Ask the site owner for a new one.', 'flyaffiliate' ) ],
+			'account_not_active' => [ 'error', __( 'This affiliate account is not active, so the link cannot open it. Contact the site owner.', 'flyaffiliate' ) ],
+		];
+
+		if ( ! isset( $messages[ $notice ] ) ) {
+			return null;
+		}
+
+		return [
+			'type' => $messages[ $notice ][0],
+			'text' => $messages[ $notice ][1],
+		];
 	}
 
 	/**

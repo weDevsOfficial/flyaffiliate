@@ -125,6 +125,12 @@ export default function AffiliatePage() {
 		not_converted: 0,
 	};
 	const numericId = Number( id );
+	// The link's own query, e.g. "?affiliate=5": the referral variable may have been renamed.
+	let referralQuery = '';
+
+	try {
+		referralQuery = new URL( affiliate.referral_url ).search;
+	} catch {}
 
 	return (
 		<>
@@ -172,12 +178,18 @@ export default function AffiliatePage() {
 					>
 						{ __( 'Referral link', 'flyaffiliate' ) }
 					</label>
-					<span className="text-xs text-muted-foreground">
-						{ __(
-							'Add ?affiliate=ID to any product URL to link straight to it.',
-							'flyaffiliate'
-						) }
-					</span>
+					{ referralQuery && (
+						<span className="text-xs text-muted-foreground">
+							{ sprintf(
+								/* translators: %s: the referral link's query, e.g. ?affiliate=5 */
+								__(
+									'Add %s to any product URL to link straight to it.',
+									'flyaffiliate'
+								),
+								referralQuery
+							) }
+						</span>
+					) }
 				</div>
 				<CopyField
 					id="flyaffiliate-referral-link"

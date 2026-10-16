@@ -221,7 +221,7 @@ export default function SettingsPage() {
 			<PageHeader
 				title={ __( 'Settings', 'flyaffiliate' ) }
 				description={ __(
-					'Rates, the hold period, payouts and the affiliate area. Changes apply to new orders only. Existing commissions keep their numbers.',
+					'Rates, the hold period, payouts and the affiliate area. A new rate applies to new orders only. A new hold period also moves the payable date of commissions not paid yet.',
 					'flyaffiliate'
 				) }
 				actions={

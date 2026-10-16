@@ -237,6 +237,12 @@ class Manager {
 			return new WP_Error( 'flyaffiliate_commission_not_found', __( 'No commission with that ID.', 'flyaffiliate' ), [ 'status' => 404 ] );
 		}
 
+		$locked = $this->locked_payment_error( $commission );
+
+		if ( null !== $locked ) {
+			return $locked;
+		}
+
 		$changed = false;
 
 		if ( isset( $args['amount'] ) ) {
@@ -441,6 +447,12 @@ class Manager {
 			return $this->in_payment_error( $commission );
 		}
 
+		$locked = $this->locked_payment_error( $commission );
+
+		if ( null !== $locked ) {
+			return $locked;
+		}
+
 		if ( ! $this->can_transition( $from, $status ) ) {
 			return new WP_Error( 'flyaffiliate_locked_commission', __( 'That status change is not allowed.', 'flyaffiliate' ), [ 'status' => 409 ] );
 		}
@@ -488,6 +500,36 @@ class Manager {
 			/* translators: %d: the payment id */
 			$message = sprintf( __( 'This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, first.', 'flyaffiliate' ), $payout_id );
 		}
+
+		return new WP_Error( 'flyaffiliate_commission_in_payout', $message, [ 'status' => 409 ] );
+	}
+
+	/**
+	 * The error for editing a commission whose payment is locked, or null when it is not.
+	 *
+	 * While an automatic payout method sends a payment, the amount it was
+	 * given is the amount that moves: the commissions under it hold still
+	 * until the transfer settles (ADR-0016).
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Commission $commission The commission.
+	 *
+	 * @return WP_Error|null
+	 */
+	protected function locked_payment_error( Commission $commission ): ?WP_Error {
+		if ( ! $commission->is_in_payout() ) {
+			return null;
+		}
+
+		$payout = flyaffiliate()->payout->get( (int) $commission->get( 'payout_id' ) );
+
+		if ( null === $payout || ! flyaffiliate()->payout->is_locked( $payout ) ) {
+			return null;
+		}
+
+		/* translators: %d: the payment id */
+		$message = sprintf( __( 'Payment #%d is being sent, so its commissions cannot change until the transfer settles.', 'flyaffiliate' ), $payout->get_id() );
 
 		return new WP_Error( 'flyaffiliate_commission_in_payout', $message, [ 'status' => 409 ] );
 	}

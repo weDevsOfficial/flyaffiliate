@@ -66,6 +66,7 @@ class Affiliate extends BaseModel {
 		'user_id'               => 'int',
 		'status'                => 'string',
 		'payment_email'         => 'string',
+		'payout_method'         => 'string',
 		'promo_method'          => 'string',
 		'activation_key'        => 'string',
 		'activation_expires_at' => 'datetime',
@@ -170,6 +171,20 @@ class Affiliate extends BaseModel {
 		$user = $this->get_user();
 
 		return null === $user ? '' : $user->user_email;
+	}
+
+	/**
+	 * The payout method this affiliate chose, or an empty string for the default.
+	 *
+	 * The choice only: `flyaffiliate()->payout_method->resolve_for()` says which
+	 * method actually pays them, since a chosen method can be switched off.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return string
+	 */
+	public function get_payout_method(): string {
+		return (string) $this->get( 'payout_method', '' );
 	}
 
 	/**

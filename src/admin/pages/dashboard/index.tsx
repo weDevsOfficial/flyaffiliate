@@ -1065,10 +1065,7 @@ export default function DashboardPage() {
 					>
 						{ ( stats?.recent_commissions ?? [] ).length === 0 ? (
 							<p className="m-0 px-5 py-3 text-sm text-muted-foreground">
-								{ __(
-									'No commissions in these dates.',
-									'flyaffiliate'
-								) }
+								{ __( 'No commissions yet.', 'flyaffiliate' ) }
 							</p>
 						) : (
 							<ul

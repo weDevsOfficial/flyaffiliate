@@ -4,7 +4,13 @@
  * DataViews owns the view (page, per page, sort, search); this hook turns it
  * into REST query arguments, fetches, and exposes the rows with their totals.
  */
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import type { DataViewState } from '@wedevs/plugin-ui';
 import { fetchList } from '@/lib/api';
 
@@ -29,6 +35,8 @@ export function useListView< Item >( {
 	const [ totalPages, setTotalPages ] = useState( 1 );
 	const [ loading, setLoading ] = useState( true );
 	const [ version, setVersion ] = useState( 0 );
+	// A silent refresh (polling) keeps the rows on screen while it fetches.
+	const silent = useRef( false );
 
 	const filterKey = JSON.stringify( filters );
 
@@ -56,7 +64,11 @@ export function useListView< Item >( {
 	useEffect( () => {
 		let cancelled = false;
 
-		setLoading( true );
+		if ( ! silent.current ) {
+			setLoading( true );
+		}
+
+		silent.current = false;
 
 		fetchList< Item >( path, args )
 			.then( ( result ) => {
@@ -93,7 +105,10 @@ export function useListView< Item >( {
 		);
 	}, [ filterKey ] );
 
-	const refresh = useCallback( () => setVersion( ( v ) => v + 1 ), [] );
+	const refresh = useCallback( ( options?: { silent?: boolean } ) => {
+		silent.current = !! options?.silent;
+		setVersion( ( v ) => v + 1 );
+	}, [] );
 
 	return {
 		view,

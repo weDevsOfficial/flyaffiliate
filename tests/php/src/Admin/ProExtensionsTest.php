@@ -56,8 +56,7 @@ class ProExtensionsTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * Every card names one extension by Pro's id, with its kind and whether
-	 * Pro ships it today. Only Dokan is listed for now.
+	 * Every card names one extension Pro ships, by Pro's id, with its kind.
 	 *
 	 * @return void
 	 */
@@ -66,12 +65,13 @@ class ProExtensionsTest extends FlyAffiliateTestCase {
 		$by_id      = array_column( $extensions, null, 'id' );
 
 		foreach ( $extensions as $extension ) {
-			$this->assertSame( [ 'id', 'name', 'description', 'category', 'status', 'doc_url' ], array_keys( $extension ) );
+			$this->assertSame( [ 'id', 'name', 'description', 'category', 'doc_url' ], array_keys( $extension ) );
 			$this->assertContains( $extension['category'], [ 'integration', 'payout_method' ] );
 		}
 
-		$this->assertSame( [ 'dokan' ], array_keys( $by_id ), 'Only what Pro ships is listed.' );
-		$this->assertSame( ProExtensions::STATUS_AVAILABLE, $by_id['dokan']['status'] );
+		$this->assertSame( [ 'dokan', 'paypal' ], array_keys( $by_id ), 'Only what Pro ships is listed.' );
+		$this->assertSame( 'integration', $by_id['dokan']['category'] );
+		$this->assertSame( 'payout_method', $by_id['paypal']['category'] );
 	}
 
 	/**

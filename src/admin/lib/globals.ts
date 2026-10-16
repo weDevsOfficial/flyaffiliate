@@ -1,6 +1,8 @@
 /**
  * The data PHP hands the admin app as `window.flyaffiliate`.
  */
+import type { PayoutMethodInfo } from './types';
+
 export type CurrencyConfig = {
 	code: string;
 	symbol: string;
@@ -17,8 +19,6 @@ export type ProExtensionPreview = {
 	description: string;
 	/** `integration` or `payout_method`. */
 	category: string;
-	/** `available` in Pro today, or `coming_soon`. */
-	status: 'available' | 'coming_soon';
 	doc_url: string;
 };
 
@@ -58,12 +58,20 @@ export type AdminGlobals = {
 	statuses: {
 		affiliate: Record< string, string >;
 		commission: Record< string, string >;
+		/** What an automatic payout method reports about a payment. */
+		transfer: Record< string, string >;
+		/** Where a payout stands. */
+		batch: Record< string, string >;
 	};
 	sources: Record< string, string >;
 	/** The origins a new commission may be given: manual, plus each active integration's. */
 	availableSources: Record< string, string >;
 	types: Record< string, string >;
 	methods: Record< string, string >;
+	/** Every payout method (admin), or the ones an affiliate can choose (dashboard). */
+	payoutMethods: PayoutMethodInfo[];
+	/** Only on the affiliate dashboard page: the method an affiliate gets without choosing. */
+	payoutDefault?: string;
 	/** Only while FlyAffiliate Pro is not active: Pro's extensions as previews. */
 	proExtensions?: ProExtensionsData;
 	/** Only on the affiliate dashboard page. */
@@ -112,11 +120,12 @@ const fallback: AdminGlobals = {
 		orders: '',
 		products: '',
 	},
-	statuses: { affiliate: {}, commission: {} },
+	statuses: { affiliate: {}, commission: {}, transfer: {}, batch: {} },
 	sources: {},
 	availableSources: { manual: 'Manual' },
 	types: {},
 	methods: {},
+	payoutMethods: [],
 	dashboard: { tab: 'overview', notice: '' },
 	program: {
 		rate: 0,

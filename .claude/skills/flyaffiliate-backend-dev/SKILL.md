@@ -253,6 +253,25 @@ payment is paid. `preview()` skips every commission with a `payout_id`. Only
 the payout manager moves a commission to or from `paid` —
 `Commission\Manager::can_transition()` never allows it.
 
+Payout methods (ADR-0016): `flyaffiliate()->payout_method` lists Manual plus
+whatever the `flyaffiliate_payout_methods` filter adds (instances of
+`Contracts\PayoutMethod`). `preview()` resolves each affiliate's method
+(`resolve_for()`: override → their choice → the `method` setting → Manual);
+`create()` writes it on the row, refuses a stale `expected` map, attaches
+commissions with a conditional write, and calls each automatic method's
+`pay()`. An automatic method settles with `mark_paid( $id, true )` /
+`mark_unpaid( $id, true )`. Every hand-made change — `mark_paid()`,
+`mark_unpaid()`, `delete()`, `delete_batch()`, `remove_commission()`,
+`resync()`, and commission edits under the payment — checks
+`payout_method->get_lock()` first and returns 409 `flyaffiliate_payout_locked`.
+`pay_batch()` marks only payments a non-automatic method pays; `retry()`
+re-sums, then asks the method to send again. A method's state may carry
+keys of its own (passed through). It shows them in a payments-table column
+(`flyaffiliate_payment_columns`, JS) and payout-wide figures as cards
+(`summarize()`'s `stats`, through `flyaffiliate_payout_summary`).
+FlyAffiliate never interprets them: a method's own concepts stay in the
+plugin that adds the method.
+
 ## The affiliate role
 
 `Affiliate\Role` keeps the `flyaffiliate_affiliate` role (label "Affiliate",
@@ -297,8 +316,8 @@ contain no queries — the caller prepares the data.
   `/extensions` to `pages/extensions`: Pro's extensions as preview cards whose
   switch or Upgrade opens the upgrade dialog, as Dokan Lite's Modules page
   shows Dokan Pro's modules (Pro ADR-0005). The cards come from PHP, so they
-  are translated there; only an extension Pro ships is listed (Dokan, for
-  now). With Pro running, Pro's own Extensions page owns the route.
+  are translated there; only an extension Pro ships is listed, never one
+  still to come. With Pro running, Pro's own Extensions page owns the route.
 - The brand colour is the logo teal `#0d7377`: `src/admin/theme.ts` (plugin-ui
   tokens) and the `$brand` variable in `src/styles/base.scss` carry it.
   Use `text-foreground`/`text-muted-foreground`/`text-primary`, never
@@ -329,7 +348,8 @@ contain no queries — the caller prepares the data.
   in `FormDialog` (bordered title bar and footer); the commission form is a
   page instead (`#/commissions/new`, `#/commissions/:id/edit`), as SliceWP's is,
   and lists link to it from the commission ID and an Edit action. Figures use `StatCard`,
-  nothing-yet states use `EmptyState`, detail pages pass `backTo` and `badge`
+  a page's messages `NoticeCard` (a white card with a tinted icon, never a
+  grey or coloured box on the page's grey), nothing-yet states use `EmptyState`, detail pages pass `backTo` and `badge`
   to `PageHeader`. Icons are lucide only; the wp-admin menu icon is the one
   SVG, because WordPress requires a data URI there.
 - The affiliate dashboard (`src/dashboard`) reuses `src/admin/components`,

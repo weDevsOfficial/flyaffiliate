@@ -22,6 +22,10 @@ export type Affiliate = {
 	totals?: CommissionTotals;
 	status: string;
 	payment_email: string;
+	/** The payout method the affiliate chose; empty for the default. */
+	payout_method?: string;
+	/** Method id => field id => value. Only with context=edit (and on `/me`). */
+	payout_details?: Record< string, Record< string, string > >;
 	promo_method: string;
 	website: string;
 	referral_url: string;
@@ -88,14 +92,82 @@ export type Payout = {
 	amount: number;
 	currency: string;
 	method: string;
+	method_label: string;
 	status: string;
+	/** What an automatic payout method reports about sending it; null when nothing was sent. */
+	transfer: PayoutTransfer | null;
+	/** Locked against changes by hand while its method sends it, or after it did. */
+	locked?: boolean;
+	/** Whether it can be sent again through its method. */
+	can_retry?: boolean;
 	reference: string;
 	note: string;
 	period_start: string | null;
 	period_end: string | null;
 	created_by: number;
 	created_at: string | null;
+	paid_at: string | null;
 	commissions: number[];
+};
+
+/** A transfer by an automatic payout method, as `Payout\Manager` reports it. */
+export type PayoutTransfer = {
+	status: 'queued' | 'processing' | 'pending' | 'paid' | 'failed' | string;
+	message?: string;
+	retryable?: boolean;
+	reference?: string;
+	/** Details of the method's own, for the columns it adds (`flyaffiliate_payment_columns`). */
+	[ key: string ]: unknown;
+};
+
+/** A payout method, from `window.flyaffiliate.payoutMethods`. */
+export type PayoutMethodField = {
+	id: string;
+	type: 'email' | 'text' | 'select' | string;
+	label: string;
+	description: string;
+	placeholder: string;
+	required: boolean;
+	options: Record< string, string >;
+};
+
+export type PayoutMethodInfo = {
+	id: string;
+	label: string;
+	automatic: boolean;
+	enabled: boolean;
+	fields: PayoutMethodField[];
+};
+
+/** Payments counted by what is happening to them. */
+export type PayoutCounts = {
+	paid: number;
+	manual_unpaid: number;
+	not_sent: number;
+	queued: number;
+	processing: number;
+	pending: number;
+	failed: number;
+	unavailable: number;
+};
+
+/** Where a payout stands, from `GET /payouts/batch/{key}`. */
+export type PayoutSummary = {
+	batch_key: string;
+	note: string;
+	reference: string;
+	created_at: string | null;
+	created_by: number;
+	affiliates: number;
+	total: number;
+	paid_total: number;
+	paid: number;
+	counts: PayoutCounts;
+	in_flight: number;
+	status: 'processing' | 'needs_attention' | 'paid' | 'unpaid' | string;
+	methods: { id: string; label: string }[];
+	/** Figures payout methods add beside the totals (`flyaffiliate_payout_summary`). */
+	stats: { key: string; label: string; value: string; hint?: string }[];
 };
 
 /** The Dashboard figures, from `GET /dashboard`. */
@@ -168,6 +240,10 @@ export type PayoutBatch = {
 	paid: number;
 	total: number;
 	paid_total: number;
+	counts?: PayoutCounts;
+	in_flight?: number;
+	status?: PayoutSummary[ 'status' ];
+	methods?: { id: string; label: string }[];
 };
 
 export type PayoutPreviewRow = {
@@ -176,10 +252,26 @@ export type PayoutPreviewRow = {
 	payment_email: string;
 	commissions: number[];
 	amount: number;
+	method: string;
+	method_label: string;
+	automatic: boolean;
+	/** Where the money goes, by this method. */
+	recipient: string;
+	/** Why this method cannot pay the affiliate now; empty when it can. */
+	warning: string;
+};
+
+export type PayoutPreviewGroup = {
+	method: string;
+	label: string;
+	automatic: boolean;
+	count: number;
+	total: number;
 };
 
 export type PayoutPreview = {
 	rows: PayoutPreviewRow[];
+	groups: PayoutPreviewGroup[];
 	total: number;
 	count: number;
 	/** What the same selection holds that is still pending, so not payable. */

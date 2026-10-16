@@ -3,8 +3,7 @@
  * it (its logo, name, what it does, its kind as a badge, Docs) so the page
  * looks the same before and after the upgrade. Its switch cannot turn it on
  * here: like a Pro module's switch on Dokan Lite's Modules page, it opens
- * the upgrade dialog. An extension Pro does not ship yet says Coming soon
- * and has no switch.
+ * the upgrade dialog.
  */
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -18,13 +17,7 @@ import {
 } from 'lucide-react';
 import { Badge, Button, Card, Switch, cn } from '@wedevs/plugin-ui';
 import type { ProExtensionPreview } from '@/lib/globals';
-import {
-	dokanLogo,
-	fluentCartLogo,
-	payPalLogo,
-	stripeLogo,
-	sureCartLogo,
-} from '@/assets/logos';
+import { dokanLogo, payPalLogo } from '@/assets/logos';
 
 export type ExtensionView = 'grid' | 'list';
 
@@ -35,13 +28,10 @@ type Props = {
 	onCategory: ( category: string ) => void;
 };
 
-/** Each card's mark, by the id Pro's extension uses. */
+/** Each card's mark, by the id Pro's extension uses. Any other shows its kind's icon. */
 const LOGOS: Record< string, string > = {
 	dokan: dokanLogo,
-	fluentcart: fluentCartLogo,
 	paypal: payPalLogo,
-	stripe: stripeLogo,
-	surecart: sureCartLogo,
 };
 
 const CATEGORY_ICONS: Record< string, LucideIcon > = {
@@ -76,11 +66,10 @@ export default function PreviewCard( {
 	onUpgrade,
 	onCategory,
 }: Props ) {
-	const { id, name, description, category, status } = extension;
-	const available = 'available' === status;
+	const { id, name, description, category } = extension;
 	const isList = 'list' === view;
 
-	const toggle = available ? (
+	const toggle = (
 		<div className="flex items-center gap-2.5">
 			<ProBadge />
 			<Switch
@@ -94,14 +83,6 @@ export default function PreviewCard( {
 				data-testid={ `flyaffiliate-extension-${ id }-switch` }
 			/>
 		</div>
-	) : (
-		<Badge
-			variant="secondary"
-			className="h-6 rounded-full px-2.5"
-			data-testid={ `flyaffiliate-extension-${ id }-soon` }
-		>
-			{ __( 'Coming soon', 'flyaffiliate' ) }
-		</Badge>
 	);
 
 	const title = (
@@ -119,7 +100,7 @@ export default function PreviewCard( {
 		</Badge>
 	);
 
-	const docs = available && (
+	const docs = (
 		<a
 			href={ extension.doc_url }
 			target="_blank"
@@ -132,7 +113,7 @@ export default function PreviewCard( {
 		</a>
 	);
 
-	const upgrade = available && (
+	const upgrade = (
 		<Button
 			variant="outline"
 			size="sm"
@@ -191,12 +172,10 @@ export default function PreviewCard( {
 				</div>
 				<div className="mt-auto">{ badge }</div>
 			</div>
-			{ available && (
-				<div className="flex items-center justify-between gap-3 rounded-b-xl border-t border-border bg-muted/40 px-5 py-3">
-					{ docs }
-					{ upgrade }
-				</div>
-			) }
+			<div className="flex items-center justify-between gap-3 rounded-b-xl border-t border-border bg-muted/40 px-5 py-3">
+				{ docs }
+				{ upgrade }
+			</div>
 		</Card>
 	);
 }

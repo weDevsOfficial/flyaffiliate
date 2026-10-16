@@ -61,6 +61,8 @@ class RegistrationForm extends Shortcode {
 				'affiliate'     => $affiliate,
 				'dashboard_url' => flyaffiliate_get_page_url( 'affiliate_dashboard' ),
 				'email'         => $current_user->exists() ? $current_user->user_email : '',
+				'logged_in'     => $current_user->exists(),
+				'emails_link'   => flyaffiliate_option_enabled( 'activation_email_enabled' ),
 				'redirect_to'   => get_permalink(),
 			]
 		);
