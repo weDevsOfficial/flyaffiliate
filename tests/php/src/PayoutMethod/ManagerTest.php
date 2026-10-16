@@ -194,6 +194,41 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * Where a payment goes: the address its transfer used once one was sent,
+	 * otherwise where its method pays the affiliate.
+	 *
+	 * @return void
+	 */
+	public function test_the_payment_recipient_follows_the_transfer(): void {
+		$affiliate = Affiliate::find( $this->factory()->affiliate->create( [ 'payment_email' => 'hand@example.org' ] ) );
+		$manual    = Payout::find( $this->factory()->payout->create( [ 'affiliate_id' => $affiliate->get_id() ] ) );
+		$sent      = Payout::find(
+			$this->factory()->payout->create(
+				[
+					'affiliate_id' => $affiliate->get_id(),
+					'method'       => 'fake',
+				]
+			)
+		);
+
+		$this->assertSame( 'hand@example.org', $this->methods()->get_payment_recipient( $manual, $affiliate ) );
+		$this->assertSame( '', $this->methods()->get_payment_recipient( $sent, $affiliate ), 'nothing sent yet, and no address for the method' );
+
+		$this->fake->save_affiliate_details( $affiliate, [ 'email' => 'fake@example.org' ] );
+
+		$this->assertSame( 'fake@example.org', $this->methods()->get_payment_recipient( $sent, $affiliate ), 'nothing sent yet: where the method pays them' );
+
+		$this->fake->states[ $sent->get_id() ] = [
+			'status'    => PayoutMethod::STATE_PAID,
+			'recipient' => 'paypal@example.org',
+		];
+
+		$this->assertSame( 'paypal@example.org', $this->methods()->get_payment_recipient( $sent, $affiliate ) );
+		$this->assertSame( 'paypal@example.org', $this->methods()->get_state( $sent )['recipient'] );
+		$this->assertSame( '', $this->methods()->get_payment_recipient( $manual, null ) );
+	}
+
+	/**
 	 * A payment whose method is not registered is locked, until a site releases it on purpose.
 	 *
 	 * @return void

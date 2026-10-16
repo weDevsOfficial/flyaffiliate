@@ -525,7 +525,7 @@ class Manager {
 	 *
 	 * @param mixed $state What the method returned for one payment.
 	 *
-	 * @return array{status: string, message: string, retryable: bool, reference: string}|null
+	 * @return array{status: string, message: string, retryable: bool, reference: string, recipient: string}|null
 	 */
 	protected function normalize_state( $state ): ?array {
 		if ( ! is_array( $state ) || ! in_array( $state['status'] ?? '', self::STATES, true ) ) {
@@ -538,6 +538,36 @@ class Manager {
 			'message'   => (string) ( $state['message'] ?? '' ),
 			'retryable' => ! empty( $state['retryable'] ),
 			'reference' => (string) ( $state['reference'] ?? '' ),
+			'recipient' => (string) ( $state['recipient'] ?? '' ),
 		] + $state;
+	}
+
+	/**
+	 * Where a payment goes: where its transfer sent the money, or, before
+	 * anything was sent, where its payout method pays this affiliate (the
+	 * PayPal email for PayPal, the payment email for Manual).
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Payout         $payout    The payment.
+	 * @param Affiliate|null $affiliate Its affiliate, when known.
+	 * @param array|null     $states    The payments' states, from `get_states()`, when already read.
+	 *
+	 * @return string An empty string when nobody can be named.
+	 */
+	public function get_payment_recipient( Payout $payout, ?Affiliate $affiliate, ?array $states = null ): string {
+		$state = null === $states ? $this->get_state( $payout ) : ( $states[ $payout->get_id() ] ?? null );
+
+		if ( '' !== ( $state['recipient'] ?? '' ) ) {
+			return (string) $state['recipient'];
+		}
+
+		if ( null === $affiliate ) {
+			return '';
+		}
+
+		$method = $this->get( (string) $payout->get( 'method' ) );
+
+		return null === $method ? $affiliate->get_payment_email() : $method->get_recipient( $affiliate );
 	}
 }

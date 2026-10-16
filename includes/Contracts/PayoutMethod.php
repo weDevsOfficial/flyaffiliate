@@ -213,10 +213,11 @@ interface PayoutMethod {
 	 *
 	 * @param Payout[] $payouts Payments that use this method.
 	 *
-	 * @return array<int, array{status: string, message?: string, retryable?: bool, reference?: string}>
-	 *         Payment id => state, `status` one of the `STATE_*` constants. A payment with
-	 *         no transfer is left out. A method may add keys of its own, passed through as
-	 *         they are, for the columns it adds to the payments table.
+	 * @return array<int, array{status: string, message?: string, retryable?: bool, reference?: string, recipient?: string}>
+	 *         Payment id => state, `status` one of the `STATE_*` constants; `recipient`
+	 *         is where the transfer sent the money (an email, an account id). A payment
+	 *         with no transfer is left out. A method may add keys of its own, passed
+	 *         through as they are, for the columns it adds to the payments table.
 	 */
 	public function get_states( array $payouts ): array;
 }

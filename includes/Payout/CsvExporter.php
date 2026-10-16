@@ -54,7 +54,8 @@ class CsvExporter {
 	 * @return array<int, array<int, string>>
 	 */
 	public function get_rows( array $payouts ): array {
-		$rows = [];
+		$rows   = [];
+		$states = flyaffiliate()->payout_method->get_states( $payouts );
 
 		foreach ( $payouts as $payout ) {
 			$affiliate = flyaffiliate()->affiliate->get( (int) $payout->get( 'affiliate_id' ) );
@@ -65,7 +66,7 @@ class CsvExporter {
 					(string) $payout->get_id(),
 					(string) $payout->get( 'affiliate_id' ),
 					null === $affiliate ? '' : $affiliate->get_display_name(),
-					null === $affiliate ? '' : $affiliate->get_payment_email(),
+					flyaffiliate()->payout_method->get_payment_recipient( $payout, $affiliate, $states ),
 					number_format( (float) $payout->get( 'amount', 0 ), 2, '.', '' ),
 					(string) $payout->get( 'currency', '' ),
 					(string) count( $payout->get_commissions() ),

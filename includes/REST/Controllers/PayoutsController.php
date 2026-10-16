@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use FlyAffiliate\Models\Affiliate;
 use FlyAffiliate\Models\Payout;
 use FlyAffiliate\REST\AdminBaseController;
 use WP_Error;
@@ -674,6 +675,28 @@ class PayoutsController extends AdminBaseController {
 	}
 
 	/**
+	 * Where a payment goes, its affiliate read once per request.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Payout $payout The payment.
+	 * @param array  $states The payments' transfer states.
+	 *
+	 * @return string
+	 */
+	protected function get_payment_recipient( Payout $payout, array $states ): string {
+		static $affiliates = [];
+
+		$id = (int) $payout->get( 'affiliate_id' );
+
+		if ( ! array_key_exists( $id, $affiliates ) ) {
+			$affiliates[ $id ] = Affiliate::find( $id );
+		}
+
+		return flyaffiliate()->payout_method->get_payment_recipient( $payout, $affiliates[ $id ], $states );
+	}
+
+	/**
 	 * Turn a payout row into a response.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -692,7 +715,7 @@ class PayoutsController extends AdminBaseController {
 			'batch_key'    => (string) $item->get( 'batch_key' ),
 			'affiliate_id' => (int) $item->get( 'affiliate_id' ),
 			'affiliate_name' => $this->get_affiliate_name( (int) $item->get( 'affiliate_id' ) ),
-			'payment_email'  => $this->get_affiliate_payment_email( (int) $item->get( 'affiliate_id' ) ),
+			'payment_email'  => $this->get_payment_recipient( $item, $states ),
 			'amount'       => (float) $item->get( 'amount', 0 ),
 			'currency'     => (string) $item->get( 'currency', '' ),
 			'method'       => (string) $item->get( 'method' ),
@@ -779,7 +802,7 @@ class PayoutsController extends AdminBaseController {
 				),
 				'payment_email' => $ro(
 					[
-						'description' => __( 'Where this affiliate is paid.', 'flyaffiliate' ),
+						'description' => __( 'Where this payment goes: where its payout method sent it, or where that method pays this affiliate.', 'flyaffiliate' ),
 						'type' => 'string',
 					]
 				),
