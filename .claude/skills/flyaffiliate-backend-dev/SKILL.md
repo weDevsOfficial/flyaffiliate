@@ -348,7 +348,8 @@ contain no queries — the caller prepares the data.
   in `FormDialog` (bordered title bar and footer); the commission form is a
   page instead (`#/commissions/new`, `#/commissions/:id/edit`), as SliceWP's is,
   and lists link to it from the commission ID and an Edit action. Figures use `StatCard`,
-  nothing-yet states use `EmptyState`, detail pages pass `backTo` and `badge`
+  a page's messages `NoticeCard` (a white card with a tinted icon, never a
+  grey or coloured box on the page's grey), nothing-yet states use `EmptyState`, detail pages pass `backTo` and `badge`
   to `PageHeader`. Icons are lucide only; the wp-admin menu icon is the one
   SVG, because WordPress requires a data URI there.
 - The affiliate dashboard (`src/dashboard`) reuses `src/admin/components`,

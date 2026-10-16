@@ -14,17 +14,17 @@ import {
 	ClipboardList,
 	ExternalLink,
 	Hash,
+	LoaderCircle,
+	Lock,
 	MinusCircle,
 	Pencil,
 	RotateCw,
 	Trash2,
+	TriangleAlert,
 	UserRound,
 	Wallet,
 } from 'lucide-react';
 import {
-	Alert,
-	AlertDescription,
-	AlertTitle,
 	Button,
 	DataViews,
 	toast,
@@ -35,6 +35,7 @@ import {
 import ConfirmDialog from '@/components/ConfirmDialog';
 import DateTime from '@/components/DateTime';
 import Money from '@/components/Money';
+import NoticeCard from '@/components/NoticeCard';
 import PageHeader from '@/components/PageHeader';
 import Reference from '@/components/Reference';
 import {
@@ -334,7 +335,9 @@ export default function PaymentPage() {
 					__( 'Payment #%d', 'flyaffiliate' ),
 					paymentId
 				) }
-				badge={ payment && <PaymentStatus item={ payment } /> }
+				badge={
+					payment && <PaymentStatus item={ payment } badgeOnly />
+				}
 				description={
 					payment
 						? sprintf(
@@ -385,58 +388,66 @@ export default function PaymentPage() {
 			/>
 
 			{ payment && ! isPaid && payment.transfer?.status === 'failed' && (
-				<Alert variant="destructive" className="mb-6">
-					<AlertTitle>
-						{ sprintf(
-							/* translators: %s: payout method */
-							__(
-								'%s could not send this payment',
+				<NoticeCard
+					icon={ TriangleAlert }
+					tone="destructive"
+					className="mb-6"
+					title={ sprintf(
+						/* translators: %s: payout method */
+						__( '%s could not send this payment', 'flyaffiliate' ),
+						payment.method_label
+					) }
+				>
+					{ payment.transfer.message ||
+						__( 'The transfer failed.', 'flyaffiliate' ) }{ ' ' }
+					{ payment.can_retry
+						? __(
+								'Fix the cause, then send it again, or pay it another way and mark it paid.',
 								'flyaffiliate'
-							),
-							payment.method_label
-						) }
-					</AlertTitle>
-					<AlertDescription>
-						{ payment.transfer.message ||
-							__(
-								'The transfer failed.',
+						  )
+						: __(
+								'Pay it another way and mark it paid, or delete it.',
 								'flyaffiliate'
-							) }{ ' ' }
-						{ payment.can_retry
-							? __(
-									'Fix the cause, then send it again, or pay it another way and mark it paid.',
-									'flyaffiliate'
-							  )
-							: __(
-									'Pay it another way and mark it paid, or delete it.',
-									'flyaffiliate'
-							  ) }
-					</AlertDescription>
-				</Alert>
+						  ) }
+				</NoticeCard>
 			) }
 
 			{ payment && ! isPaid && locked && (
-				<Alert variant="info" className="mb-6">
-					<AlertDescription>
-						{ payment.transfer
+				<NoticeCard
+					icon={ payment.transfer ? LoaderCircle : Lock }
+					spin={ !! payment.transfer }
+					className="mb-6"
+					title={
+						payment.transfer
 							? sprintf(
 									/* translators: %s: payout method */
 									__(
-										'%s is sending this payment. It can change once the transfer settles.',
+										'%s is sending this payment',
 										'flyaffiliate'
 									),
 									payment.method_label
 							  )
 							: sprintf(
 									/* translators: %s: payout method */
-									__(
-										'This payment was sent by %s, which is not available right now. It cannot change until that method is back.',
-										'flyaffiliate'
-									),
+									__( '%s is not available', 'flyaffiliate' ),
 									payment.method_label
-							  ) }
-					</AlertDescription>
-				</Alert>
+							  )
+					}
+				>
+					{ payment.transfer
+						? __(
+								'It can change once the transfer settles.',
+								'flyaffiliate'
+						  )
+						: sprintf(
+								/* translators: %s: payout method */
+								__(
+									'This payment was sent by %s. It cannot change until that method is back.',
+									'flyaffiliate'
+								),
+								payment.method_label
+						  ) }
+				</NoticeCard>
 			) }
 
 			<div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

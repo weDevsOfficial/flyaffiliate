@@ -28,6 +28,7 @@ import { getGlobals } from '@/lib/globals';
 import { withIconLabels } from '@/lib/actions';
 import { BRAND_OUTLINE } from '@/lib/ui';
 import type { PayoutBatch } from '@/lib/types';
+import { paymentParts, type PaymentPart } from './parts';
 
 const DEFAULT_VIEW: DataViewState = {
 	type: 'table',
@@ -70,61 +71,27 @@ export const unpaidCount = ( batch: PayoutBatch ) =>
 	batch.affiliates - batch.paid;
 
 /**
- * "6 paid · 1 pending · 1 failed" for a payout's payments list cell.
+ * "6 paid · 1 on the way · 1 failed" for a payout's Payments cell, "0 paid"
+ * while nothing has moved.
  *
- * @param {PayoutBatch} batch The batch.
- * @return {Array} The parts, each with whether it is a failure.
+ * @param {PayoutBatch} batch The payout.
+ * @return {PaymentPart[]} The parts.
  */
-function paymentParts(
-	batch: PayoutBatch
-): { text: string; failed: boolean }[] {
-	const counts = batch.counts;
-	const parts: { text: string; failed: boolean }[] = [];
-	const add = (
-		count: number,
-		text: ( n: number ) => string,
-		failed = false
-	) => {
-		if ( count > 0 ) {
-			parts.push( { text: text( count ), failed } );
-		}
-	};
-	const paid = ( n: number ) =>
-		/* translators: %d: number of paid payments */
-		sprintf( __( '%d paid', 'flyaffiliate' ), n );
+function paymentText( batch: PayoutBatch ): PaymentPart[] {
+	const parts = paymentParts( batch );
 
-	add( batch.paid, paid );
-
-	if ( counts ) {
-		add( batch.in_flight ?? 0, ( n ) =>
-			/* translators: %d: number of payments */
-			sprintf( __( '%d pending', 'flyaffiliate' ), n )
-		);
-		add(
-			counts.failed,
-			( n ) =>
-				/* translators: %d: number of payments */
-				sprintf( __( '%d failed', 'flyaffiliate' ), n ),
-			true
-		);
-		add(
-			counts.not_sent,
-			( n ) =>
-				/* translators: %d: number of payments */
-				sprintf( __( '%d not sent', 'flyaffiliate' ), n ),
-			true
-		);
-		add( counts.manual_unpaid, ( n ) =>
-			/* translators: %d: number of payments */
-			sprintf( __( '%d to pay by hand', 'flyaffiliate' ), n )
-		);
-	}
-
-	if ( parts.length === 0 ) {
-		parts.push( { text: paid( 0 ), failed: false } );
-	}
-
-	return parts;
+	return parts.length > 0
+		? parts
+		: [
+				{
+					key: 'paid',
+					tone: '',
+					count: 0,
+					/* translators: %d: number of payments */
+					text: sprintf( __( '%d paid', 'flyaffiliate' ), 0 ),
+					trouble: false,
+				},
+		  ];
 }
 
 export default function PayoutsPage() {
@@ -211,11 +178,11 @@ export default function PayoutsPage() {
 						className="text-xs text-muted-foreground"
 						data-testid="flyaffiliate-batch-payments"
 					>
-						{ paymentParts( item ).map( ( part, index ) => (
+						{ paymentText( item ).map( ( part, index ) => (
 							<span
-								key={ part.text }
+								key={ part.key }
 								className={
-									part.failed ? 'text-destructive' : ''
+									part.trouble ? 'text-destructive' : ''
 								}
 							>
 								{ index > 0 && ' · ' }

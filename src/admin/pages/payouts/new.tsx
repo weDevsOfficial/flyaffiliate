@@ -7,7 +7,7 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, X } from 'lucide-react';
+import { ClipboardList, Clock, Hourglass, WalletCards, X } from 'lucide-react';
 import {
 	Badge,
 	Button,
@@ -52,6 +52,36 @@ function payable( preview: PayoutPreview ): Set< number > {
 	);
 }
 
+/** A line under the preview about commissions it leaves out, and why. */
+const NOTE_CLASS =
+	'flex items-start gap-2 rounded-md bg-muted/60 px-3 py-2.5 text-sm text-muted-foreground';
+
+// Commissions the selection caught that are still pending: their orders are not paid yet.
+function PendingNote( { pending }: { pending: PayoutPreview[ 'pending' ] } ) {
+	if ( pending.count === 0 ) {
+		return null;
+	}
+
+	return (
+		<p className={ NOTE_CLASS } data-testid="flyaffiliate-payout-pending">
+			<Hourglass className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+			<span>
+				{ sprintf(
+					/* translators: 1: number of commissions, 2: their total */
+					_n(
+						'%1$d commission worth %2$s is still pending. It becomes payable once its order is paid, or when you mark it unpaid.',
+						'%1$d commissions worth %2$s are still pending. They become payable once their orders are paid, or when you mark them unpaid.',
+						pending.count,
+						'flyaffiliate'
+					),
+					pending.count,
+					formatMoney( pending.amount )
+				) }
+			</span>
+		</p>
+	);
+}
+
 // Unpaid commissions the selection caught that are still inside their hold period: earned, not payable yet.
 function HeldNote( { held }: { held: PayoutPreview[ 'held' ] } ) {
 	if ( held.count === 0 ) {
@@ -60,15 +90,16 @@ function HeldNote( { held }: { held: PayoutPreview[ 'held' ] } ) {
 
 	return (
 		<p
-			className="text-muted-foreground mb-4"
+			className={ NOTE_CLASS }
 			data-testid="flyaffiliate-payout-held"
 			data-count={ held.count }
 		>
+			<Clock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
 			{ sprintf(
 				/* translators: 1: number of commissions, 2: their total */
 				_n(
-					'%1$d unpaid commission worth %2$s is still inside its hold period, so it is not in this payout.',
-					'%1$d unpaid commissions worth %2$s are still inside their hold period, so they are not in this payout.',
+					'%1$d commission worth %2$s is still in its hold period. It waits for a later payout.',
+					'%1$d commissions worth %2$s are still in their hold period. They wait for a later payout.',
 					held.count,
 					'flyaffiliate'
 				),
@@ -191,6 +222,56 @@ export default function NewPayoutPage() {
 		( sum, row ) => sum + Math.round( row.amount * 100 ),
 		0
 	);
+	const payingLabel = formatMoney( payingTotal / 100 );
+	const commissionCount = ( preview?.rows ?? [] ).reduce(
+		( sum, row ) => sum + row.commissions.length,
+		0
+	);
+	// The automatic methods the ticked payments go through, to say what happens on Pay.
+	const payingAutomatic = Array.from(
+		new Set(
+			payingRows
+				.filter( ( row ) => row.automatic )
+				.map( ( row ) => row.method_label )
+		)
+	);
+
+	// The preview's one-line summary: who and how much, or that nobody is owed.
+	let previewSummary: string = __(
+		'Every affiliate owed, with their payout method. Pick who to pay, then pay them in one go.',
+		'flyaffiliate'
+	);
+
+	if ( preview && preview.rows.length === 0 ) {
+		previewSummary = __(
+			'Nobody to pay with these filters.',
+			'flyaffiliate'
+		);
+	} else if ( preview ) {
+		previewSummary = [
+			sprintf(
+				/* translators: %d: number of affiliates */
+				_n(
+					'%d affiliate',
+					'%d affiliates',
+					preview.rows.length,
+					'flyaffiliate'
+				),
+				preview.rows.length
+			),
+			sprintf(
+				/* translators: %d: number of commissions */
+				_n(
+					'%d commission',
+					'%d commissions',
+					commissionCount,
+					'flyaffiliate'
+				),
+				commissionCount
+			),
+			formatMoney( preview.total ),
+		].join( ' · ' );
+	}
 
 	const create = async () => {
 		if ( payingRows.length === 0 ) {
@@ -494,37 +575,7 @@ export default function NewPayoutPage() {
 						<CardTitle className="text-base font-semibold">
 							{ __( 'Preview', 'flyaffiliate' ) }
 						</CardTitle>
-						<CardDescription>
-							{ preview
-								? sprintf(
-										/* translators: 1: affiliate count with unit, 2: commission count with unit */
-										__( '%1$s, %2$s', 'flyaffiliate' ),
-										sprintf(
-											/* translators: %d: number of affiliates */
-											_n(
-												'%d affiliate',
-												'%d affiliates',
-												preview.rows.length,
-												'flyaffiliate'
-											),
-											preview.rows.length
-										),
-										sprintf(
-											/* translators: %d: number of commissions */
-											_n(
-												'%d commission',
-												'%d commissions',
-												preview.count,
-												'flyaffiliate'
-											),
-											preview.count
-										)
-								  )
-								: __(
-										'Every affiliate owed, with their payout method. Pick who to pay, then pay them in one go.',
-										'flyaffiliate'
-								  ) }
-						</CardDescription>
+						<CardDescription>{ previewSummary }</CardDescription>
 					</CardHeader>
 					<CardContent>
 						{ ! preview && busy === 'preview' && (
@@ -548,39 +599,30 @@ export default function NewPayoutPage() {
 							/>
 						) }
 
-						{ preview && preview.rows.length === 0 && (
-							<div className="flex flex-col gap-2">
-								<p className="text-muted-foreground">
-									{ __(
-										'No affiliate has unpaid commissions above the minimum.',
-										'flyaffiliate'
-									) }
-								</p>
-								{ preview.pending.count > 0 && (
-									<p className="text-muted-foreground">
-										{ sprintf(
-											/* translators: 1: number of commissions, 2: their total */
-											_n(
-												'%1$d commission worth %2$s is still pending, so it is not in this payout.',
-												'%1$d commissions worth %2$s are still pending, so they are not in this payout.',
-												preview.pending.count,
-												'flyaffiliate'
-											),
-											preview.pending.count,
-											formatMoney(
-												preview.pending.amount
-											)
-										) }{ ' ' }
-										{ __(
-											'A commission becomes unpaid when its order is paid, or when you mark it unpaid.',
-											'flyaffiliate'
-										) }
-									</p>
+						{ preview && (
+							<div className="mb-4 flex flex-col gap-2 empty:hidden">
+								<HeldNote held={ preview.held } />
+								{ preview.rows.length === 0 && (
+									<PendingNote pending={ preview.pending } />
 								) }
 							</div>
 						) }
 
-						{ preview && <HeldNote held={ preview.held } /> }
+						{ preview && preview.rows.length === 0 && (
+							<EmptyState
+								compact
+								icon={ WalletCards }
+								title={ __(
+									'Nobody to pay right now',
+									'flyaffiliate'
+								) }
+								description={ __(
+									'No affiliate has unpaid commissions above the minimum.',
+									'flyaffiliate'
+								) }
+								className="py-10"
+							/>
+						) }
 
 						{ preview && preview.rows.length > 0 && (
 							<>
@@ -594,29 +636,41 @@ export default function NewPayoutPage() {
 
 								{ /* The card is padded by 24px; the rule runs edge to edge. */ }
 								<div className="-mx-6 mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border px-6 pt-4">
-									<p
-										className="text-muted-foreground"
-										data-testid="flyaffiliate-payout-paying"
-									>
-										{ payingRows.length > 0
-											? sprintf(
-													/* translators: 1: total amount, 2: number of affiliates */
-													_n(
-														'Paying %1$s to %2$d affiliate',
-														'Paying %1$s to %2$d affiliates',
-														payingRows.length,
+									<div className="min-w-0">
+										<p
+											className="font-medium text-foreground"
+											data-testid="flyaffiliate-payout-paying"
+										>
+											{ payingRows.length > 0
+												? sprintf(
+														/* translators: 1: total amount, 2: number of affiliates */
+														_n(
+															'Paying %1$s to %2$d affiliate',
+															'Paying %1$s to %2$d affiliates',
+															payingRows.length,
+															'flyaffiliate'
+														),
+														payingLabel,
+														payingRows.length
+												  )
+												: __(
+														'Tick the affiliates to pay.',
+														'flyaffiliate'
+												  ) }
+										</p>
+										{ payingAutomatic.length > 0 && (
+											<p className="mt-0.5 text-xs text-muted-foreground">
+												{ sprintf(
+													/* translators: %s: the payout methods that send money themselves. */
+													__(
+														'%s sends the money as soon as you confirm. You can follow each payment on the payout page.',
 														'flyaffiliate'
 													),
-													formatMoney(
-														payingTotal / 100
-													),
-													payingRows.length
-											  )
-											: __(
-													'Tick the affiliates to pay.',
-													'flyaffiliate'
-											  ) }
-									</p>
+													payingAutomatic.join( ', ' )
+												) }
+											</p>
+										) }
+									</div>
 									<Button
 										onClick={ create }
 										disabled={
@@ -628,14 +682,16 @@ export default function NewPayoutPage() {
 										{ busy === 'create' && (
 											<Spinner className="size-4 mr-2" />
 										) }
-										{ sprintf(
-											/* translators: %d: number of affiliates ticked */
-											__(
-												'Pay %d selected',
-												'flyaffiliate'
-											),
-											payingRows.length
-										) }
+										{ payingRows.length > 0
+											? sprintf(
+													/* translators: %s: the total to pay, e.g. $25.00. */
+													__(
+														'Pay %s',
+														'flyaffiliate'
+													),
+													payingLabel
+											  )
+											: __( 'Pay', 'flyaffiliate' ) }
 									</Button>
 								</div>
 							</>

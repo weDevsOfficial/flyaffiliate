@@ -13,14 +13,27 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
 	Check,
 	Download,
+	Hand,
 	Layers,
+	LoaderCircle,
+	Receipt,
 	Trash2,
+	TriangleAlert,
 	Wallet,
 	WalletCards,
+	type LucideIcon,
 } from 'lucide-react';
-import { Button, Card, CardContent, Progress, toast } from '@wedevs/plugin-ui';
+import {
+	Button,
+	Progress,
+	ProgressIndicator,
+	ProgressTrack,
+	cn,
+	toast,
+} from '@wedevs/plugin-ui';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import NotFound from '@/components/NotFound';
+import NoticeCard from '@/components/NoticeCard';
 import PageHeader from '@/components/PageHeader';
 import {
 	HeaderSkeleton,
@@ -34,62 +47,141 @@ import { errorMessage, fetchOne, send } from '@/lib/api';
 import { formatDate, formatMoney } from '@/lib/format';
 import { getGlobals } from '@/lib/globals';
 import { BRAND_OUTLINE } from '@/lib/ui';
-import type { PayoutBatch, PayoutSummary } from '@/lib/types';
+import type { PayoutSummary } from '@/lib/types';
 import { csvUrl } from './index';
 import { PaymentsTable } from './payments';
 
 /** How often a payout with money on its way asks again. */
 const POLL_MS = 5000;
 
-/**
- * "6 of 8 settled · 5 paid · 1 on the way · 1 failed": the counts that are not zero.
- *
- * @param {PayoutSummary|PayoutBatch} summary The payout.
- * @return {string} The line.
- */
-export function progressLine( summary: PayoutSummary | PayoutBatch ): string {
-	const counts = summary.counts;
+/** How each state reads: its icon and the icon's tone. */
+const PROGRESS_TONES: Record<
+	string,
+	{ icon: LucideIcon; tone: 'default' | 'destructive' }
+> = {
+	processing: { icon: LoaderCircle, tone: 'default' },
+	needs_attention: { icon: TriangleAlert, tone: 'destructive' },
+	unpaid: { icon: Hand, tone: 'default' },
+};
 
-	if ( ! counts ) {
-		return '';
+/**
+ * What a payout that is not fully paid is waiting for, in a card like the
+ * figures above it: the icon, a headline from the payout's status and what
+ * to do. While payments are on their way it also shows how many are paid,
+ * on plugin-ui's progress bar. A paid payout needs none of it: its badge
+ * and totals say so.
+ *
+ * @param {Object}        props         The props.
+ * @param {PayoutSummary} props.summary The payout.
+ * @return {JSX.Element|null} The card.
+ */
+function TransferProgress( { summary }: { summary: PayoutSummary } ) {
+	const { counts } = summary;
+	const tone = PROGRESS_TONES[ summary.status ];
+
+	if ( ! tone ) {
+		return null;
 	}
 
-	const inFlight = summary.in_flight ?? 0;
-	const parts: string[] = [
-		sprintf(
-			/* translators: 1: payments settled, 2: payments in the payout */
-			__( '%1$d of %2$d settled', 'flyaffiliate' ),
-			counts.paid + counts.failed,
-			summary.affiliates
-		),
-	];
-	const add = ( count: number, text: ( n: number ) => string ) => {
-		if ( count > 0 ) {
-			parts.push( text( count ) );
-		}
-	};
+	const sending = 'processing' === summary.status;
+	const trouble = counts.failed + counts.not_sent + counts.unavailable;
+	let title: string;
+	let description: string;
 
-	/* translators: %d: number of payments */
-	add( counts.paid, ( n ) => sprintf( __( '%d paid', 'flyaffiliate' ), n ) );
-	add( inFlight, ( n ) =>
-		/* translators: %d: number of payments */
-		sprintf( __( '%d on the way', 'flyaffiliate' ), n )
-	);
-	add( counts.failed, ( n ) =>
-		/* translators: %d: number of payments */
-		sprintf( __( '%d failed', 'flyaffiliate' ), n )
-	);
-	add( counts.not_sent, ( n ) =>
-		/* translators: %d: number of payments */
-		sprintf( __( '%d not sent', 'flyaffiliate' ), n )
-	);
-	add( counts.manual_unpaid, ( n ) =>
-		/* translators: %d: number of payments */
-		sprintf( __( '%d to pay by hand', 'flyaffiliate' ), n )
-	);
+	if ( sending ) {
+		title = sprintf(
+			/* translators: %d: number of payments on their way */
+			_n(
+				'Sending %d payment',
+				'Sending %d payments',
+				summary.in_flight,
+				'flyaffiliate'
+			),
+			summary.in_flight
+		);
+		description = __(
+			'Transfers can take a few minutes to settle. They carry on in the background, so you can leave this page and come back.',
+			'flyaffiliate'
+		);
+	} else if ( 'needs_attention' === summary.status ) {
+		title = sprintf(
+			/* translators: %d: number of payments */
+			_n(
+				'%d payment needs attention',
+				'%d payments need attention',
+				trouble,
+				'flyaffiliate'
+			),
+			trouble
+		);
+		description = __(
+			'Open a payment below to see why. Send it again, or pay it another way and mark it paid.',
+			'flyaffiliate'
+		);
+	} else {
+		title = sprintf(
+			/* translators: %d: number of payments */
+			_n(
+				'%d payment to pay by hand',
+				'%d payments to pay by hand',
+				counts.manual_unpaid,
+				'flyaffiliate'
+			),
+			counts.manual_unpaid
+		);
+		description = __(
+			'Send the money your usual way, then mark the payments paid.',
+			'flyaffiliate'
+		);
+	}
 
-	return parts.join( ' · ' );
+	return (
+		<NoticeCard
+			icon={ tone.icon }
+			tone={ tone.tone }
+			spin={ sending }
+			title={ title }
+			className="mb-6"
+			testId="flyaffiliate-batch-progress"
+			state={ summary.status }
+			aside={
+				sending && (
+					<span
+						className="text-sm tabular-nums text-muted-foreground"
+						data-testid="flyaffiliate-batch-settled"
+					>
+						{ sprintf(
+							/* translators: 1: payments paid, 2: payments in the payout */
+							__( '%1$d of %2$d paid', 'flyaffiliate' ),
+							counts.paid,
+							summary.affiliates
+						) }
+					</span>
+				)
+			}
+		>
+			<p>{ description }</p>
+			{ sending && (
+				<Progress
+					value={ counts.paid }
+					max={ Math.max( 1, summary.affiliates ) }
+					className="mt-3"
+					aria-label={ title }
+				>
+					<ProgressTrack size="sm">
+						<ProgressIndicator />
+					</ProgressTrack>
+				</Progress>
+			) }
+		</NoticeCard>
+	);
 }
+
+/** Grid columns by card count: literal class names, so Tailwind generates them. */
+const GRID_COLUMNS: Record< number, string > = {
+	5: 'lg:grid-cols-5',
+	6: 'lg:grid-cols-6',
+};
 
 export default function PayoutBatchPage() {
 	const { batchKey = '' } = useParams();
@@ -210,7 +302,6 @@ export default function PayoutBatchPage() {
 			counts.not_sent +
 			counts.unavailable >
 			0 || summary.methods.some( ( method ) => method.id !== 'manual' );
-	const settled = counts.paid + counts.failed;
 	const canDelete =
 		summary.paid === 0 &&
 		summary.in_flight === 0 &&
@@ -278,7 +369,12 @@ export default function PayoutBatchPage() {
 				}
 			/>
 
-			<div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div
+				className={ cn(
+					'mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4',
+					GRID_COLUMNS[ 4 + summary.stats.length ]
+				) }
+			>
 				<StatCard
 					icon={ Wallet }
 					label={ __( 'Total', 'flyaffiliate' ) }
@@ -335,42 +431,18 @@ export default function PayoutBatchPage() {
 						summary.affiliates
 					) }
 				/>
+				{ summary.stats.map( ( stat ) => (
+					<StatCard
+						key={ stat.key }
+						icon={ Receipt }
+						label={ stat.label }
+						value={ stat.value }
+						tooltip={ stat.hint }
+					/>
+				) ) }
 			</div>
 
-			{ automatic && (
-				<Card
-					className="mb-6 gap-3 rounded-md shadow ring-0"
-					data-testid="flyaffiliate-batch-progress"
-				>
-					<CardContent className="flex flex-col gap-3">
-						{ inFlight && (
-							<p className="text-muted-foreground">
-								{ __(
-									'Automatic transfers can take a few minutes to settle. They carry on in the background, so it is safe to leave this page and come back.',
-									'flyaffiliate'
-								) }
-							</p>
-						) }
-						<Progress
-							value={
-								summary.affiliates > 0
-									? Math.round(
-											( settled / summary.affiliates ) *
-												100
-									  )
-									: 0
-							}
-							variant={
-								counts.failed > 0 ? 'warning' : 'success'
-							}
-							aria-label={ __( 'Settled', 'flyaffiliate' ) }
-						/>
-						<p className="tabular-nums text-foreground">
-							{ progressLine( summary ) }
-						</p>
-					</CardContent>
-				</Card>
-			) }
+			{ automatic && <TransferProgress summary={ summary } /> }
 
 			<PaymentsTable
 				batchKey={ batchKey }
