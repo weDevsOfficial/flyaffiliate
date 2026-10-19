@@ -6,11 +6,13 @@
  *
  * @var string                              $action        The admin-post action.
  * @var bool                                $enabled       Whether registration is open.
- * @var string                              $registered    `active`, `pending` or empty, after a signup.
+ * @var string                              $registered    `active`, `pending` (link emailed), `review` (no email: the site owner activates) or empty, after a signup.
  * @var string                              $error         An error message, or empty.
  * @var \FlyAffiliate\Models\Affiliate|null $affiliate     The logged-in user's affiliate record, if any.
  * @var string                              $dashboard_url The affiliate dashboard page.
  * @var string                              $email         The logged-in user's email, to prefill.
+ * @var bool                                $logged_in     Whether the visitor is logged in: they join with their own account's email.
+ * @var bool                                $emails_link   Whether an activation link is emailed on signup.
  * @var string                              $redirect_to   Where to return after the post.
  */
 
@@ -32,6 +34,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="flyaffiliate-state flyaffiliate-state--success">
 			<h2 class="flyaffiliate-state__title"><?php esc_html_e( 'Check your email', 'flyaffiliate' ); ?></h2>
 			<p class="flyaffiliate-state__text"><?php esc_html_e( 'We sent you an activation link. Follow it to open your dashboard.', 'flyaffiliate' ); ?></p>
+		</div>
+	<?php elseif ( 'review' === $registered ) : ?>
+		<div class="flyaffiliate-state flyaffiliate-state--success">
+			<h2 class="flyaffiliate-state__title"><?php esc_html_e( 'Thanks for signing up', 'flyaffiliate' ); ?></h2>
+			<p class="flyaffiliate-state__text"><?php esc_html_e( 'The site owner reviews new affiliates. You can open your dashboard once your account is active.', 'flyaffiliate' ); ?></p>
 		</div>
 	<?php elseif ( null !== $affiliate ) : ?>
 		<div class="flyaffiliate-state">
@@ -60,7 +67,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<p>
 				<label for="flyaffiliate-register-email"><?php esc_html_e( 'Email address', 'flyaffiliate' ); ?></label>
-				<input type="email" id="flyaffiliate-register-email" name="email" value="<?php echo esc_attr( $email ); ?>" required />
+				<input type="email" id="flyaffiliate-register-email" name="email" value="<?php echo esc_attr( $email ); ?>" required<?php echo $logged_in ? ' readonly' : ''; ?> />
+				<?php if ( $logged_in ) : ?>
+					<span class="flyaffiliate-muted"><?php esc_html_e( 'You join with your account’s email.', 'flyaffiliate' ); ?></span>
+				<?php endif; ?>
 			</p>
 			<p>
 				<label for="flyaffiliate-register-promo"><?php esc_html_e( 'How will you promote us?', 'flyaffiliate' ); ?></label>
@@ -73,7 +83,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<p>
 				<button type="submit" class="flyaffiliate-button"><?php esc_html_e( 'Join the affiliate programme', 'flyaffiliate' ); ?></button>
 			</p>
-			<p class="flyaffiliate-muted"><?php esc_html_e( 'We will email you a link to activate your account. No password needed.', 'flyaffiliate' ); ?></p>
+			<p class="flyaffiliate-muted">
+				<?php
+				if ( $emails_link ) {
+					esc_html_e( 'We will email you a link to activate your account. No password needed.', 'flyaffiliate' );
+				} else {
+					esc_html_e( 'The site owner reviews each signup before your account is active.', 'flyaffiliate' );
+				}
+				?>
+			</p>
 		</form>
 	<?php endif; ?>
 </div>

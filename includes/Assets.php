@@ -15,6 +15,7 @@ use FlyAffiliate\Admin\Menu;
 use FlyAffiliate\Admin\PayoutExport;
 use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Contracts\Hookable;
+use FlyAffiliate\Contracts\PayoutMethod;
 use FlyAffiliate\Models\Affiliate;
 use FlyAffiliate\Models\Commission;
 use FlyAffiliate\Models\Payout;
@@ -238,6 +239,9 @@ class Assets implements Hookable {
 			'statuses'   => $admin['statuses'],
 			'sources'    => $admin['sources'],
 			'types'      => $admin['types'],
+			// Only the methods an affiliate can choose now, and the one they get without choosing.
+			'payoutMethods' => flyaffiliate()->payout_method->get_script_data( true ),
+			'payoutDefault' => flyaffiliate()->payout_method->get_default()->get_id(),
 			'dashboard'  => [
 				'tab'    => $tab,
 				'notice' => $notice,
@@ -308,12 +312,30 @@ class Assets implements Hookable {
 					Commission::STATUS_PAID     => __( 'Paid', 'flyaffiliate' ),
 					Commission::STATUS_REJECTED => __( 'Rejected', 'flyaffiliate' ),
 				],
+				// What an automatic payout method reports about a payment's transfer.
+				'transfer'   => [
+					PayoutMethod::STATE_QUEUED     => __( 'Queued', 'flyaffiliate' ),
+					PayoutMethod::STATE_PROCESSING => __( 'Processing', 'flyaffiliate' ),
+					PayoutMethod::STATE_PENDING    => __( 'Pending', 'flyaffiliate' ),
+					PayoutMethod::STATE_PAID       => __( 'Paid', 'flyaffiliate' ),
+					PayoutMethod::STATE_FAILED     => __( 'Failed', 'flyaffiliate' ),
+					'not_sent'                     => __( 'Not sent', 'flyaffiliate' ),
+					'unavailable'                  => __( 'Method unavailable', 'flyaffiliate' ),
+				],
+				// Where a payout stands, from Payout\Manager::summarize().
+				'batch'      => [
+					'processing'      => __( 'Processing', 'flyaffiliate' ),
+					'needs_attention' => __( 'Needs attention', 'flyaffiliate' ),
+					'paid'            => __( 'Paid', 'flyaffiliate' ),
+					'unpaid'          => __( 'Awaiting payment', 'flyaffiliate' ),
+				],
 			],
 			'sources'    => Commission::get_sources(),
 			// The origins open to a new commission: manual, plus whatever integration is active.
 			'availableSources' => Commission::get_available_sources(),
 			'types'      => Commission::get_types(),
 			'methods'    => Payout::get_methods(),
+			'payoutMethods' => flyaffiliate()->payout_method->get_script_data(),
 		];
 
 		/**

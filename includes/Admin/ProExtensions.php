@@ -38,14 +38,6 @@ class ProExtensions implements Hookable {
 	const ROUTE = 'extensions';
 
 	/**
-	 * The extension states a card can show.
-	 *
-	 * @var string
-	 */
-	const STATUS_AVAILABLE   = 'available';
-	const STATUS_COMING_SOON = 'coming_soon';
-
-	/**
 	 * {@inheritDoc}
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -106,15 +98,15 @@ class ProExtensions implements Hookable {
 	}
 
 	/**
-	 * Pro's extensions, as cards: the ones Pro ships. Only Dokan for now; one
-	 * on its way can be listed as `STATUS_COMING_SOON` once it is announced.
+	 * Pro's extensions, as cards. An extension is listed once Pro ships it,
+	 * never before.
 	 *
 	 * The ids are the ones Pro's extensions use, so a card and the extension it
 	 * stands for can be matched later. Brand names are not translated.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
-	 * @return array<int, array{id: string, name: string, description: string, category: string, status: string, doc_url: string}>
+	 * @return array<int, array{id: string, name: string, description: string, category: string, doc_url: string}>
 	 */
 	public function get_extensions(): array {
 		$extensions = [
@@ -123,7 +115,14 @@ class ProExtensions implements Hookable {
 				'name'        => 'Dokan',
 				'description' => __( 'Let Dokan vendors run their own affiliate programs. Each vendor opts in and pays the commission on their own products.', 'flyaffiliate' ),
 				'category'    => 'integration',
-				'status'      => self::STATUS_AVAILABLE,
+				// TODO(docs): the extension's documentation, once it is published.
+				'doc_url'     => 'https://flyaffiliate.co/',
+			],
+			[
+				'id'          => 'paypal',
+				'name'        => 'PayPal Payouts',
+				'description' => __( 'Pay affiliates straight to their PayPal account in one batch. Connect your PayPal Business account once and FlyAffiliate sends the money.', 'flyaffiliate' ),
+				'category'    => 'payout_method',
 				// TODO(docs): the extension's documentation, once it is published.
 				'doc_url'     => 'https://flyaffiliate.co/',
 			],
@@ -152,6 +151,7 @@ class ProExtensions implements Hookable {
 			__( 'Vendors set their own rate and hold period', 'flyaffiliate' ),
 			__( 'Commission taken from the vendor’s earning', 'flyaffiliate' ),
 			__( 'Affiliate figures in Dokan’s reports', 'flyaffiliate' ),
+			__( 'Pay affiliates through PayPal in one batch', 'flyaffiliate' ),
 			__( 'New extensions as they are released', 'flyaffiliate' ),
 		];
 	}

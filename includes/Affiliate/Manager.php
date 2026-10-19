@@ -98,6 +98,8 @@ class Manager {
 	 *     @type string $status         Default `pending`.
 	 *     @type string $payment_email  Default the user's own email.
 	 *     @type string $promo_method   How the affiliate plans to promote the store.
+	 *     @type string $payout_method  The payout method they chose; empty for the default.
+	 *     @type array  $payout_details Method id => field id => value, for `PayoutMethod::save_affiliate_details()`.
 	 *     @type string $website        The affiliate's website; stored on the user, as SliceWP does.
 	 *     @type bool   $send_welcome_email Email the new affiliate a welcome with their referral link. Default false.
 	 *     @type string $activation_key The **stored** form of the key — its hash, not the key.
@@ -127,6 +129,12 @@ class Manager {
 			);
 		}
 
+		$payout_method = $this->sanitize_payout_method( $args['payout_method'] ?? '' );
+
+		if ( is_wp_error( $payout_method ) ) {
+			return $payout_method;
+		}
+
 		$affiliate = new Affiliate();
 
 		$affiliate->fill(
@@ -134,11 +142,19 @@ class Manager {
 				'user_id'               => $user_id,
 				'status'                => $this->sanitize_status( $args['status'] ?? Affiliate::STATUS_PENDING ),
 				'payment_email'         => $this->sanitize_email( $args['payment_email'] ?? '', $user_id ),
+				'payout_method'         => $payout_method,
 				'promo_method'          => sanitize_textarea_field( (string) ( $args['promo_method'] ?? '' ) ),
 				'activation_key'        => sanitize_text_field( (string) ( $args['activation_key'] ?? '' ) ),
 				'activation_expires_at' => $this->sanitize_expiry( $args['activation_expires_at'] ?? null ),
 			]
 		);
+
+		// The details live on the user, so they can be checked and stored before the row exists.
+		$details = $this->save_payout_details( $affiliate, $args['payout_details'] ?? null );
+
+		if ( is_wp_error( $details ) ) {
+			return $details;
+		}
 
 		if ( 0 === $affiliate->save() ) {
 			return new WP_Error(
@@ -204,6 +220,22 @@ class Manager {
 
 		if ( isset( $args['promo_method'] ) ) {
 			$affiliate->set( 'promo_method', sanitize_textarea_field( (string) $args['promo_method'] ) );
+		}
+
+		if ( isset( $args['payout_method'] ) ) {
+			$payout_method = $this->sanitize_payout_method( $args['payout_method'], $affiliate->get_payout_method() );
+
+			if ( is_wp_error( $payout_method ) ) {
+				return $payout_method;
+			}
+
+			$affiliate->set( 'payout_method', $payout_method );
+		}
+
+		$details = $this->save_payout_details( $affiliate, $args['payout_details'] ?? null );
+
+		if ( is_wp_error( $details ) ) {
+			return $details;
 		}
 
 		if ( array_key_exists( 'activation_key', $args ) ) {
@@ -405,6 +437,64 @@ class Manager {
 		$status = sanitize_key( (string) $status );
 
 		return array_key_exists( $status, Affiliate::get_statuses() ) ? $status : Affiliate::STATUS_PENDING;
+	}
+
+	/**
+	 * Reduce a value to a payout method an affiliate may choose.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param mixed  $method  The method id given; empty for the default.
+	 * @param string $current The affiliate's current choice, which may be kept.
+	 *
+	 * @return string|WP_Error
+	 */
+	protected function sanitize_payout_method( $method, string $current = '' ) {
+		$method = sanitize_key( (string) $method );
+
+		// Empty is "the default"; keeping a choice whose method was switched off
+		// since is allowed, so saving the rest of a profile never trips on it.
+		if ( '' === $method || $method === $current || flyaffiliate()->payout_method->is_enabled( $method ) ) {
+			return $method;
+		}
+
+		return new WP_Error(
+			'flyaffiliate_invalid_payout_method',
+			__( 'That payout method is not available.', 'flyaffiliate' ),
+			[ 'status' => 400 ]
+		);
+	}
+
+	/**
+	 * Store an affiliate's details for the payout methods they were given for.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Affiliate $affiliate The affiliate (saved or not; the details live on its user).
+	 * @param mixed     $details   Method id => field id => value, or null when not given.
+	 *
+	 * @return true|WP_Error
+	 */
+	protected function save_payout_details( Affiliate $affiliate, $details ) {
+		if ( ! is_array( $details ) ) {
+			return true;
+		}
+
+		foreach ( $details as $method_id => $values ) {
+			$method = flyaffiliate()->payout_method->get( sanitize_key( (string) $method_id ) );
+
+			if ( null === $method || ! is_array( $values ) ) {
+				continue;
+			}
+
+			$saved = $method->save_affiliate_details( $affiliate, $values );
+
+			if ( is_wp_error( $saved ) ) {
+				return $saved;
+			}
+		}
+
+		return true;
 	}
 
 	/**

@@ -2,7 +2,8 @@
 
 **Status:** Accepted
 **Date:** 2026-09-15
-**Amends:** ADR-0006 (which still holds: payouts are manual and recorded, never automated)
+**Amends:** ADR-0006 (which still holds for Manual payments)
+**Amended by:** ADR-0016 (an automatic payout method marks its payments paid itself; a payment in flight is locked)
 
 ## Context
 

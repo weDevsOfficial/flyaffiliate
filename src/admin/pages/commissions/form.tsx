@@ -22,9 +22,6 @@ import {
 } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, ReceiptText, Wallet } from 'lucide-react';
 import {
-	Alert,
-	AlertDescription,
-	AlertTitle,
 	Button,
 	Card,
 	CardContent,
@@ -53,6 +50,7 @@ import {
 import AffiliatePicker from '@/components/AffiliatePicker';
 import EmptyState from '@/components/EmptyState';
 import Hint from '@/components/Hint';
+import NoticeCard from '@/components/NoticeCard';
 import PageHeader from '@/components/PageHeader';
 import { FormCardSkeleton, HeaderSkeleton } from '@/components/PageSkeleton';
 import StatusBadge from '@/components/StatusBadge';
@@ -301,22 +299,20 @@ function PaymentNotice( {
 	}
 
 	return (
-		<Alert data-testid="flyaffiliate-commission-payment">
-			<Wallet className="size-4" />
-			<AlertTitle>{ title }</AlertTitle>
-			<AlertDescription>
-				<span>
-					{ text }
-					{ text && ' ' }
-					<Link
-						to={ `/payouts/payment/${ paymentId }` }
-						className="font-medium text-primary hover:underline"
-					>
-						{ __( 'View payment', 'flyaffiliate' ) }
-					</Link>
-				</span>
-			</AlertDescription>
-		</Alert>
+		<NoticeCard
+			icon={ Wallet }
+			title={ title }
+			testId="flyaffiliate-commission-payment"
+		>
+			{ text }
+			{ text && ' ' }
+			<Link
+				to={ `/payouts/payment/${ paymentId }` }
+				className="font-medium text-primary hover:underline"
+			>
+				{ __( 'View payment', 'flyaffiliate' ) }
+			</Link>
+		</NoticeCard>
 	);
 }
 

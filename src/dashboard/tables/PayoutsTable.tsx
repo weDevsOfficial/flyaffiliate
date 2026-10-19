@@ -11,7 +11,7 @@ import {
 	type DataViewField,
 	type DataViewState,
 } from '@wedevs/plugin-ui';
-import StatusBadge from '@/components/StatusBadge';
+import PaymentStatus from '@/components/PaymentStatus';
 import DateTime from '@/components/DateTime';
 import Money from '@/components/Money';
 import Truncated from '@/components/Truncated';
@@ -108,7 +108,9 @@ export default function PayoutsTable( { dates }: { dates: DateArgs } ) {
 			id: 'status',
 			label: __( 'Status', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) => <StatusBadge status={ item.status } />,
+			render: ( { item } ) => (
+				<PaymentStatus item={ item } forAffiliate />
+			),
 		},
 	];
 

@@ -100,6 +100,11 @@ class Registration implements Hookable {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.
 		$email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+
+		// A logged-in visitor joins with their own account, never with someone else's address.
+		if ( is_user_logged_in() ) {
+			$email = (string) wp_get_current_user()->user_email;
+		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified just above.
 		$promo = isset( $_POST['promo_method'] ) ? sanitize_textarea_field( wp_unslash( $_POST['promo_method'] ) ) : '';
 
@@ -110,7 +115,10 @@ class Registration implements Hookable {
 			exit;
 		}
 
-		wp_safe_redirect( add_query_arg( 'flyaffiliate_registered', $result->is_active() ? 'active' : 'pending', $redirect ) );
+		// Pending with a link on its way, or pending until the site owner activates them by hand.
+		$state = $result->is_active() ? 'active' : ( flyaffiliate_option_enabled( 'activation_email_enabled' ) ? 'pending' : 'review' );
+
+		wp_safe_redirect( add_query_arg( 'flyaffiliate_registered', $state, $redirect ) );
 		exit;
 	}
 
@@ -215,6 +223,11 @@ class Registration implements Hookable {
 
 		if ( $this->key_has_expired( $affiliate ) ) {
 			return new WP_Error( 'expired_key', __( 'That activation link has expired. Ask the site owner for a new one.', 'flyaffiliate' ) );
+		}
+
+		// The site owner decided first: an affiliate they made inactive or suspended is not reopened by an old link.
+		if ( Affiliate::STATUS_PENDING !== $affiliate->get( 'status' ) && ! $affiliate->is_active() ) {
+			return new WP_Error( 'account_not_active', __( 'This affiliate account is not active, so the link cannot open it. Contact the site owner.', 'flyaffiliate' ) );
 		}
 
 		return flyaffiliate()->affiliate->update(

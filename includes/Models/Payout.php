@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * payout, as SliceWP does). A row is created `unpaid` — the money has not
  * left yet — and its commissions link to it through their own `payout_id`,
  * which keeps them out of the next batch. Marking the row paid, once the
- * store has sent the money by hand, is what marks its commissions paid
- * (ADR-0012; there is no automated transfer, ADR-0006).
+ * money has been sent — by hand, or by an automatic payout method once its
+ * transfer settles — is what marks its commissions paid (ADR-0012, ADR-0016).
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -41,20 +41,25 @@ class Payout extends BaseModel {
 	const STATUS_PAID = 'paid';
 
 	/**
-	 * Paid by hand, outside the plugin. The only Phase 1 method.
+	 * Paid by hand, outside the plugin. Always available; other methods come
+	 * through the `flyaffiliate_payout_methods` filter (`PayoutMethod\Manager`).
 	 *
 	 * @var string
 	 */
 	const METHOD_MANUAL = 'manual';
 
 	/**
-	 * Every payout method, labelled.
+	 * Every payout method, labelled: Manual and any other plugin registers.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @return array<string, string> Method => translated label.
 	 */
 	public static function get_methods(): array {
+		if ( function_exists( 'flyaffiliate' ) && isset( flyaffiliate()->payout_method ) ) {
+			return flyaffiliate()->payout_method->get_labels();
+		}
+
 		return [
 			self::METHOD_MANUAL => __( 'Manual', 'flyaffiliate' ),
 		];

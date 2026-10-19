@@ -52,6 +52,7 @@ class DashboardStatsTest extends FlyAffiliateTestCase {
 		$this->assertSame( 3, $all['performance']['visits'] );
 		$this->assertSame( 1, $all['performance']['converted'] );
 		$this->assertSame( 33.3, $all['performance']['conversion_rate'] );
+		$this->assertSame( '2026-01-01', $all['trend'][0]['date'], 'All time starts at the first visit, not 30 days ago.' );
 		$this->assertSame(
 			[
 				'total'          => 2,

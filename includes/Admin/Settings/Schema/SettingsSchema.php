@@ -382,7 +382,7 @@ class SettingsSchema {
 				'type'        => 'subpage',
 				'page_id'     => 'general',
 				'title'       => __( 'Affiliate area', 'flyaffiliate' ),
-				'description' => __( 'Who can join, and the pages affiliates use. The pages were created when the plugin was activated; to move one, paste its shortcode into another page.', 'flyaffiliate' ),
+				'description' => __( 'Who can join, and the pages affiliates use. The pages were created when the plugin was activated. To move one, paste its shortcode into another page.', 'flyaffiliate' ),
 				'priority'    => 20,
 			],
 			[
@@ -619,7 +619,7 @@ class SettingsSchema {
 				'type'        => 'page',
 				'title'       => __( 'Payouts', 'flyaffiliate' ),
 				'icon'        => 'Wallet',
-				'description' => __( 'Payouts are recorded by hand. FlyAffiliate shows who is owed what, you send the money, then mark the payment paid.', 'flyaffiliate' ),
+				'description' => __( 'FlyAffiliate shows who is owed what. You send manual payments and mark them paid. An automatic payout method sends the money itself.', 'flyaffiliate' ),
 				'priority'    => 30,
 			],
 			// Subpage: Rules. Every page has a subpage so the sidebar reads the
@@ -660,15 +660,24 @@ class SettingsSchema {
 				'type'        => 'field',
 				'variant'     => 'select',
 				'section_id'  => 'payout_settings',
-				'title'       => __( 'Payout method', 'flyaffiliate' ),
-				'description' => __( 'How affiliates are paid. Automatic methods are coming in a later version.', 'flyaffiliate' ),
+				'title'       => __( 'Default payout method', 'flyaffiliate' ),
+				'description' => __( 'How an affiliate who has not chosen a method is paid. Manual means you pay outside WordPress and mark it paid here. A method that is switched off falls back to Manual.', 'flyaffiliate' ),
 				'default'     => 'manual',
-				'options'     => [
-					[
-						'value' => 'manual',
-						'label' => __( 'Manual: pay outside WordPress and record it here', 'flyaffiliate' ),
-					],
-				],
+				// Every registered method, not only the enabled ones: asking a
+				// method whether it is on can read a setting, and reading a
+				// setting that is not stored builds this schema again.
+				'options'     => static function (): array {
+					$options = [];
+
+					foreach ( flyaffiliate()->payout_method->get_labels() as $id => $label ) {
+						$options[] = [
+							'value' => $id,
+							'label' => $label,
+						];
+					}
+
+					return $options;
+				},
 				'validations' => [
 					self::rule( 'required', __( 'Choose a payout method.', 'flyaffiliate' ) ),
 				],
