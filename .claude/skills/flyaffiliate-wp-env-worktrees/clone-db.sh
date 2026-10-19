@@ -159,9 +159,15 @@ fi
 mounted="$( dst_wp plugin list --field=name 2>/dev/null | tr -d '\r' )"
 for p in woocommerce dokan-lite dokan dokan-pro flyaffiliate flyaffiliate-pro; do
   if grep -qx "$p" <<<"$mounted"; then
-    docker exec "$dst_cli" wp plugin activate "$p" --quiet || echo "clone-db: could not activate $p"
+    out="$( docker exec "$dst_cli" wp plugin activate "$p" --quiet 2>&1 )" \
+      || echo "clone-db: could not activate $p: $( grep -E 'Error|Warning|Fatal' <<<"$out" | head -1 )"
   fi
 done
+
+# A source with pretty permalinks on nginx (Herd, Valet) has no .htaccess for
+# wp-env's Apache to read: every /wp-json/ and pretty URL would 404.
+docker exec "$dst_cli" wp rewrite flush --hard --quiet 2>/dev/null \
+  || echo "clone-db: could not write the rewrite rules; run 'wp rewrite flush --hard' in the cli container"
 
 dst_wp option update "$MARKER" "$LABEL" --autoload=no --quiet
 echo "clone-db: done, $dst_url now has the data from $LABEL"

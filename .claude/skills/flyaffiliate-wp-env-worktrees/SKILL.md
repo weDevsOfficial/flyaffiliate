@@ -141,6 +141,10 @@ both.
   script: `printf 'y\n' | npx wp-env destroy`).
 - wp-env shows the `afterStart` hook's output only with `--debug` or on failure.
   `docker volume ls | grep mysql` shows leftovers from deleted worktrees.
+- A clone from Herd or Valet (nginx) has pretty permalinks but no `.htaccess`
+  for wp-env's Apache: `clone-db.sh` runs `wp rewrite flush --hard` after the
+  import, or `/wp-json/` answers 404. The clone keeps the source's accounts and
+  passwords, so `admin / password` only works on a fresh site.
 - Open the site from a phone: set `WP_HOME` and `WP_SITEURL` to
   `http://<lan-ip>` (no port) under `env.development.config` in the override,
   then start again. Pro's skill has the details.
