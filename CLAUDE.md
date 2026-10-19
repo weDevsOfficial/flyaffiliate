@@ -23,6 +23,7 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 - **`flyaffiliate-wporg-compliance`** — WordPress.org submission rules and the Plugin Check gate. **Invoke before every commit that touches PHP, assets, readme.txt, or the plugin header, and before any release.**
 - **`flyaffiliate-code-review`** — Review standards: security, money-rule, and architecture violations to flag; severity levels; output format.
 - **`flyaffiliate-git`** — Branching, commit format, PR template, CI checks.
+- **`flyaffiliate-wp-env-worktrees`** — A branch or PR in its own worktree and wp-env: ports, an isolated or cloned database. A change that also touches Pro uses Pro's `flyaffiliate-pro-wp-env-worktrees`.
 
 ## Build & Development Commands
 
@@ -75,6 +76,7 @@ npm run env:start           # wp-env: WordPress + WooCommerce in Docker
 npm run env:stop
 npm run phpunit             # PHPUnit inside wp-env's tests environment
 npm run test:phpunit        # env:start → phpunit → env:stop
+# .wp-env.json is the shared base CI reads; local settings go in the gitignored .wp-env.override.json
 
 # WordPress.org gate
 npm run release             # Builds build/flyaffiliate-v<version>.zip honouring .distignore
