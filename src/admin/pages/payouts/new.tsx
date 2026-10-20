@@ -4,7 +4,11 @@
  * one go. Manual payments wait to be marked paid; an automatic method starts
  * sending its payments at once, and the payout's page follows them.
  */
-import { useEffect, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Clock, Hourglass, WalletCards, X } from 'lucide-react';
@@ -638,20 +642,30 @@ export default function NewPayoutPage() {
 								<div className="-mx-6 mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border px-6 pt-4">
 									<div className="min-w-0">
 										<p
-											className="font-medium text-foreground"
+											className="text-sm text-muted-foreground"
 											data-testid="flyaffiliate-payout-paying"
 										>
 											{ payingRows.length > 0
-												? sprintf(
-														/* translators: 1: total amount, 2: number of affiliates */
-														_n(
-															'Paying %1$s to %2$d affiliate',
-															'Paying %1$s to %2$d affiliates',
-															payingRows.length,
-															'flyaffiliate'
+												? createInterpolateElement(
+														sprintf(
+															/* translators: 1: total amount, 2: number of affiliates. Keep the <amount> and <count> tags. */
+															_n(
+																'Paying <amount>%1$s</amount> to <count>%2$d affiliate</count>',
+																'Paying <amount>%1$s</amount> to <count>%2$d affiliates</count>',
+																payingRows.length,
+																'flyaffiliate'
+															),
+															payingLabel,
+															payingRows.length
 														),
-														payingLabel,
-														payingRows.length
+														{
+															amount: (
+																<span className="text-base font-semibold text-foreground" />
+															),
+															count: (
+																<span className="font-semibold text-foreground" />
+															),
+														}
 												  )
 												: __(
 														'Tick the affiliates to pay.',
@@ -659,7 +673,7 @@ export default function NewPayoutPage() {
 												  ) }
 										</p>
 										{ payingAutomatic.length > 0 && (
-											<p className="mt-0.5 text-xs text-muted-foreground">
+											<p className="mt-0.5 text-sm text-muted-foreground">
 												{ sprintf(
 													/* translators: %s: the payout methods that send money themselves. */
 													__(
@@ -680,7 +694,7 @@ export default function NewPayoutPage() {
 										data-testid="flyaffiliate-payout-confirm"
 									>
 										{ busy === 'create' && (
-											<Spinner className="size-4 mr-2" />
+											<Spinner className="size-4" />
 										) }
 										{ payingRows.length > 0
 											? sprintf(

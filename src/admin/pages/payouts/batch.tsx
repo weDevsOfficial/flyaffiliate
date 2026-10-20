@@ -12,15 +12,16 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
 	Check,
+	CircleCheck,
+	Coins,
 	Download,
 	Hand,
+	Hourglass,
 	Layers,
 	LoaderCircle,
 	Receipt,
 	Trash2,
 	TriangleAlert,
-	Wallet,
-	WalletCards,
 	type LucideIcon,
 } from 'lucide-react';
 import {
@@ -32,6 +33,7 @@ import {
 	toast,
 } from '@wedevs/plugin-ui';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import MethodName, { methodLogo } from '@/components/MethodName';
 import NotFound from '@/components/NotFound';
 import NoticeCard from '@/components/NoticeCard';
 import PageHeader from '@/components/PageHeader';
@@ -376,7 +378,7 @@ export default function PayoutBatchPage() {
 				) }
 			>
 				<StatCard
-					icon={ Wallet }
+					icon={ Coins }
 					label={ __( 'Total', 'flyaffiliate' ) }
 					value={ formatMoney( summary.total ) }
 					tooltip={ __(
@@ -385,7 +387,7 @@ export default function PayoutBatchPage() {
 					) }
 				/>
 				<StatCard
-					icon={ WalletCards }
+					icon={ CircleCheck }
 					label={ __( 'Paid', 'flyaffiliate' ) }
 					value={ formatMoney( summary.paid_total ) }
 					tooltip={ __(
@@ -394,7 +396,7 @@ export default function PayoutBatchPage() {
 					) }
 				/>
 				<StatCard
-					icon={ Wallet }
+					icon={ Hourglass }
 					label={ __( 'Still to pay', 'flyaffiliate' ) }
 					value={ formatMoney(
 						( Math.round( summary.total * 100 ) -
@@ -414,11 +416,32 @@ export default function PayoutBatchPage() {
 				/>
 				<StatCard
 					icon={ Layers }
+					// One method with a logo: its logo stands in for the icon.
+					image={
+						1 === summary.methods.length
+							? methodLogo( summary.methods[ 0 ].id )
+							: undefined
+					}
 					label={ __( 'Paid via', 'flyaffiliate' ) }
 					value={
-						summary.methods
-							.map( ( method ) => method.label )
-							.join( ' · ' ) || '—'
+						summary.methods.length ? (
+							<span className="inline-flex flex-wrap items-center gap-x-3">
+								{ summary.methods.map( ( method ) => (
+									<MethodName
+										key={ method.id }
+										id={ method.id }
+										label={ method.label }
+										logoClassName={
+											1 === summary.methods.length
+												? 'hidden'
+												: 'size-5'
+										}
+									/>
+								) ) }
+							</span>
+						) : (
+							'—'
+						)
 					}
 					tooltip={ sprintf(
 						/* translators: %d: number of affiliates */
