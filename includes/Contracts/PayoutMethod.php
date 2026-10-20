@@ -96,6 +96,16 @@ interface PayoutMethod {
 	public function get_label(): string;
 
 	/**
+	 * The method's logo, shown beside its name wherever a payment says how it
+	 * is paid. Empty for none: the name stands alone.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return string An image URL, or an empty string.
+	 */
+	public function get_logo_url(): string;
+
+	/**
 	 * Whether the method sends the money itself.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -168,6 +178,21 @@ interface PayoutMethod {
 	 * @return string An empty string when the affiliate has not said.
 	 */
 	public function get_recipient( Affiliate $affiliate ): string;
+
+	/**
+	 * An account this affiliate is paid to without entering anything, because
+	 * they connected it elsewhere (a vendor's store account). The affiliate
+	 * dashboard shows it in place of the method's fields. One they could
+	 * connect there but have not (`connected` false) is offered beside the
+	 * fields, with a link to connect it.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Affiliate $affiliate The affiliate.
+	 *
+	 * @return array{label: string, detail: string, url: string, connected?: bool}|array{} What it is ("Your store's PayPal account"), which one (its email), where they change or connect it, and whether it is connected (true when left out); empty for none.
+	 */
+	public function get_connected_account( Affiliate $affiliate ): array;
 
 	/**
 	 * Start sending a payout's payments that use this method.

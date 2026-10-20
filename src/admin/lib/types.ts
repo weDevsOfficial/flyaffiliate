@@ -26,11 +26,25 @@ export type Affiliate = {
 	payout_method?: string;
 	/** Method id => field id => value. Only with context=edit (and on `/me`). */
 	payout_details?: Record< string, Record< string, string > >;
+	/** Method id => an account they are paid to without entering anything. Only with context=edit (and on `/me`). */
+	connected_accounts?: Record< string, ConnectedAccount >;
 	promo_method: string;
 	website: string;
 	referral_url: string;
 	created_at: string | null;
 	updated_at: string | null;
+};
+
+/** An account a payout method pays an affiliate to without them entering anything. */
+export type ConnectedAccount = {
+	/** What it is: "Your store's PayPal account". */
+	label: string;
+	/** Which one (its email); empty when unknown. */
+	detail: string;
+	/** Where they change it, or connect it; empty for nowhere. */
+	url: string;
+	/** False for one they could connect there but have not: it is offered, not used. */
+	connected: boolean;
 };
 
 export type Commission = {
@@ -134,6 +148,8 @@ export type PayoutMethodField = {
 export type PayoutMethodInfo = {
 	id: string;
 	label: string;
+	/** The method's logo; empty for none. */
+	logo?: string;
 	automatic: boolean;
 	enabled: boolean;
 	fields: PayoutMethodField[];

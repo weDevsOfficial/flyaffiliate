@@ -255,7 +255,12 @@ the payout manager moves a commission to or from `paid` —
 
 Payout methods (ADR-0016): `flyaffiliate()->payout_method` lists Manual plus
 whatever the `flyaffiliate_payout_methods` filter adds (instances of
-`Contracts\PayoutMethod`). `preview()` resolves each affiliate's method
+`Contracts\PayoutMethod`; a method may give a logo through
+`get_logo_url()`, which the apps show beside its name wherever a payment says
+how it is paid, `MethodName`; and, through `get_connected_account()`, an
+account it already pays an affiliate to without them entering anything,
+which the affiliate dashboard shows in place of the method's fields, with a
+Change link). `preview()` resolves each affiliate's method
 (`resolve_for()`: override → their choice → the `method` setting → Manual);
 `create()` writes it on the row, refuses a stale `expected` map, attaches
 commissions with a conditional write, and calls each automatic method's
