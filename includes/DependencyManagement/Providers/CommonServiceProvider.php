@@ -37,7 +37,6 @@ class CommonServiceProvider extends BaseServiceProvider {
 	protected array $services = [
 		\FlyAffiliate\Affiliate\Role::class,
 		\FlyAffiliate\Tracking\Tracker::class,
-		\FlyAffiliate\Commission\HoldPeriod::class,
 	];
 
 	/**

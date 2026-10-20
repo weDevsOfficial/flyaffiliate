@@ -7,15 +7,13 @@
 
 namespace FlyAffiliate\Test\Commission;
 
-use FlyAffiliate\Commission\HoldPeriod;
 use FlyAffiliate\Commission\RateResolver;
 use FlyAffiliate\Models\Commission;
 use FlyAffiliate\Test\FlyAffiliateTestCase;
 
 /**
  * `flyaffiliate_max_rate`, `flyaffiliate_commission_deleted`,
- * `flyaffiliate_commission_note`, `flyaffiliate_commission_hold_days` and
- * `flyaffiliate_commissions_rescheduled`.
+ * `flyaffiliate_commission_note` and `flyaffiliate_commission_hold_days`.
  */
 class IntegrationSeamsTest extends FlyAffiliateTestCase {
 
@@ -97,13 +95,10 @@ class IntegrationSeamsTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * A manual pending commission takes its own hold, and moving every
-	 * pending commission onto a new hold period announces it, so that hold
-	 * can be put back before anything matures.
+	 * A commission takes the hold in force when it is created, its own when a
+	 * filter gives one, and keeps it when the hold period changes later.
 	 */
-	public function test_a_hold_of_its_own_survives_a_new_hold_period(): void {
-		global $wpdb;
-
+	public function test_a_hold_is_fixed_when_the_commission_is_created(): void {
 		flyaffiliate_update_option( 'hold_days', 30 );
 
 		$affiliate  = $this->factory()->affiliate->create();
@@ -119,20 +114,10 @@ class IntegrationSeamsTest extends FlyAffiliateTestCase {
 
 		$this->assertSame( 7 * DAY_IN_SECONDS, $this->hold( $own->get_id() ) );
 
-		$seen     = null;
-		$listener = static function ( $days ) use ( &$seen, $own, $wpdb ) {
-			$seen = $days;
+		// A new hold period applies to new orders: both keep the hold they were created with.
+		flyaffiliate()->settings->save( [ 'hold_days' => 14 ] );
 
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the listener puts its own hold back, as an integration would.
-			$wpdb->query( $wpdb->prepare( 'UPDATE ' . Commission::get_table() . ' SET matures_at = DATE_ADD( created_at, INTERVAL 7 DAY ) WHERE id = %d', $own->get_id() ) );
-		};
-
-		add_action( 'flyaffiliate_commissions_rescheduled', $listener );
-		( new HoldPeriod() )->reschedule( 14 );
-		remove_action( 'flyaffiliate_commissions_rescheduled', $listener );
-
-		$this->assertSame( 14, $seen );
-		$this->assertSame( 14 * DAY_IN_SECONDS, $this->hold( $commission->get_id() ) );
+		$this->assertSame( 30 * DAY_IN_SECONDS, $this->hold( $commission->get_id() ) );
 		$this->assertSame( 7 * DAY_IN_SECONDS, $this->hold( $own->get_id() ) );
 	}
 

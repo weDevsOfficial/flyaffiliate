@@ -69,13 +69,13 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$this->assertCentsEquals( 1000, $batch['total'] );
 		$this->assertSame( 0, (int) flyaffiliate()->commission->get( $held )->get( 'payout_id', 0 ), 'the held commission is in no payment' );
 
-		// A hold of zero reschedules the held commission to its creation date, and the next preview takes it.
+		// A hold of zero applies to new orders: the held commission keeps the date it was created with.
 		flyaffiliate()->settings->save( [ 'hold_days' => 0 ] );
 		$preview = flyaffiliate()->payout->preview( [ 'minimum_amount' => 0 ] );
 
-		$this->assertSame( 1, $preview['count'] );
-		$this->assertCentsEquals( 2000, $preview['total'] );
-		$this->assertSame( 0, $preview['held']['count'] );
+		$this->assertSame( 0, $preview['count'] );
+		$this->assertSame( 1, $preview['held']['count'] );
+		$this->assertCentsEquals( 2000, $preview['held']['amount'] );
 	}
 
 	/**

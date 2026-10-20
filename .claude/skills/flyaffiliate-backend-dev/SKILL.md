@@ -225,11 +225,11 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
   the `reject_commissions_on_refund` switch (off by default); an order leaving
   failed/cancelled/refunded for a status that is not paid restores its rejected
   commissions to pending. Paid and manual commissions are never touched.
-- `Commission\HoldPeriod` owns `matures_at` (`created_at + hold_days`, on every
-  status): a `hold_days` save reschedules every pending, unpaid and rejected
-  row, then fires `flyaffiliate_commissions_rescheduled`. A commission's own
-  hold comes from `flyaffiliate_commission_hold_days` as it is created
-  (`Manager::maturation_date()`). `Payout\Manager::preview()` takes an unpaid
+- `matures_at` is `created_at + hold_days`, set once when the commission is
+  created (`Manager::maturation_date()`), on every status; a commission's own
+  hold comes from `flyaffiliate_commission_hold_days` at that moment. Nothing
+  moves it afterwards: a `hold_days` save, or a vendor's new hold, applies to
+  new orders only (money rule 4, ADR-0014's note of 2026-10-20). `Payout\Manager::preview()` takes an unpaid
   commission only when `Commission::is_matured()` (a row with no date has
   nothing to wait for) and reports the rest as `held`.
 - Partial refunds are not rescaled (ADR-0011's rescaler was reverted): an
