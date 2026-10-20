@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-16T11:56:37+00:00\n"
+"POT-Creation-Date: 2026-10-20T11:38:28+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -66,27 +66,27 @@ msgid "FlyAffiliate is missing its autoloader. Run \"composer install\" in the p
 msgstr ""
 
 #. translators: 1: the field, e.g. "PayPal email"; 2: the payout method.
-#: includes/Abstracts/PayoutMethod.php:143
+#: includes/Abstracts/PayoutMethod.php:154
 msgid "Enter your %1$s to be paid by %2$s."
 msgstr ""
 
 #. translators: %s: the missing detail, e.g. "PayPal email".
-#: includes/Abstracts/PayoutMethod.php:173
+#: includes/Abstracts/PayoutMethod.php:184
 msgid "%s missing."
 msgstr ""
 
 #. translators: %s: the payout method.
-#: includes/Abstracts/PayoutMethod.php:231
+#: includes/Abstracts/PayoutMethod.php:257
 msgid "%s payments are paid by hand, so there is nothing to send again."
 msgstr ""
 
 #. translators: %s: the field, e.g. "PayPal email".
-#: includes/Abstracts/PayoutMethod.php:296
+#: includes/Abstracts/PayoutMethod.php:322
 msgid "Enter a valid %s."
 msgstr ""
 
 #. translators: %s: the field.
-#: includes/Abstracts/PayoutMethod.php:310
+#: includes/Abstracts/PayoutMethod.php:336
 msgid "Choose a %s from the list."
 msgstr ""
 
@@ -125,7 +125,6 @@ msgstr ""
 #: assets/js/admin.js:297
 #: assets/js/admin.js:300
 #: assets/js/dashboard.js:279
-#: assets/js/dashboard.js:280
 #: assets/js/dashboard.js:282
 msgid "Visits"
 msgstr ""
@@ -503,7 +502,7 @@ msgid "Hold period"
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:547
-msgid "How long a commission waits before it can be paid out. This leaves time to reject it if the order is returned."
+msgid "How long a commission waits before it can be paid out. This leaves time to reject it if the order is returned. A change applies to new orders, and existing commissions keep their date."
 msgstr ""
 
 #: includes/Admin/Settings/Schema/SettingsSchema.php:553
@@ -707,7 +706,7 @@ msgstr ""
 
 #: includes/Affiliate/Manager.php:206
 #: includes/ReferralLink/Manager.php:124
-#: includes/REST/Controllers/AffiliatesController.php:619
+#: includes/REST/Controllers/AffiliatesController.php:666
 msgid "No affiliate with that ID."
 msgstr ""
 
@@ -823,7 +822,7 @@ msgstr ""
 #: assets/js/admin.js:279
 #: assets/js/admin.js:291
 #: assets/js/admin.js:292
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Unpaid"
 msgstr ""
 
@@ -1018,7 +1017,7 @@ msgstr ""
 #: includes/Models/Commission.php:201
 #: assets/js/admin.js:279
 #: assets/js/admin.js:313
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Sale"
 msgstr ""
 
@@ -1034,7 +1033,7 @@ msgstr ""
 #: includes/Payout/CsvExporter.php:36
 #: assets/js/admin.js:276
 #: assets/js/admin.js:288
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Payment email"
 msgstr ""
 
@@ -1045,8 +1044,8 @@ msgstr ""
 #: assets/js/admin.js:297
 #: assets/js/admin.js:313
 #: assets/js/admin.js:320
+#: assets/js/dashboard.js:279
 #: assets/js/dashboard.js:280
-#: assets/js/dashboard.js:281
 msgid "Amount"
 msgstr ""
 
@@ -1060,9 +1059,8 @@ msgstr ""
 #: assets/js/admin.js:297
 #: assets/js/admin.js:313
 #: assets/js/admin.js:322
+#: assets/js/dashboard.js:279
 #: assets/js/dashboard.js:280
-#: assets/js/dashboard.js:281
-#: assets/js/dashboard.js:282
 msgid "Reference"
 msgstr ""
 
@@ -1073,8 +1071,8 @@ msgstr ""
 #: assets/js/admin.js:297
 #: assets/js/admin.js:298
 #: assets/js/admin.js:313
+#: assets/js/dashboard.js:279
 #: assets/js/dashboard.js:280
-#: assets/js/dashboard.js:281
 msgid "Date"
 msgstr ""
 
@@ -1084,8 +1082,8 @@ msgstr ""
 #: assets/js/admin.js:288
 #: assets/js/admin.js:297
 #: assets/js/admin.js:313
+#: assets/js/dashboard.js:279
 #: assets/js/dashboard.js:280
-#: assets/js/dashboard.js:281
 #: assets/js/dashboard.js:282
 msgid "Status"
 msgstr ""
@@ -1198,7 +1196,7 @@ msgid "The last day of the range, as Y-m-d in the site timezone."
 msgstr ""
 
 #: includes/REST/Controllers/AffiliatesController.php:69
-#: includes/REST/Controllers/AffiliatesController.php:446
+#: includes/REST/Controllers/AffiliatesController.php:475
 msgid "Unique identifier for the affiliate."
 msgstr ""
 
@@ -1211,88 +1209,92 @@ msgstr ""
 msgid "The affiliate could not be deleted."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:452
+#: includes/REST/Controllers/AffiliatesController.php:481
 msgid "The WordPress user this affiliate is. One user is one affiliate, sitewide."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:458
+#: includes/REST/Controllers/AffiliatesController.php:487
 msgid "The affiliate's display name."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:464
+#: includes/REST/Controllers/AffiliatesController.php:493
 msgid "The WordPress username behind the affiliate."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:470
+#: includes/REST/Controllers/AffiliatesController.php:499
 msgid "The account email of the user behind the affiliate."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:476
+#: includes/REST/Controllers/AffiliatesController.php:505
 msgid "Affiliate status."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:482
+#: includes/REST/Controllers/AffiliatesController.php:511
 msgid "Where payouts for this affiliate are sent. Empty means the account email."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:492
+#: includes/REST/Controllers/AffiliatesController.php:521
 msgid "How the affiliate plans to promote the store."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:497
+#: includes/REST/Controllers/AffiliatesController.php:526
 msgid "The payout method the affiliate chose. Empty means the default."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:505
+#: includes/REST/Controllers/AffiliatesController.php:534
 msgid "The details each payout method needs, method id => field id => value. Only with context=edit."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:514
+#: includes/REST/Controllers/AffiliatesController.php:543
+msgid "Method id => an account the affiliate is paid to without entering anything: what it is, which one, and where they change it. Only with context=edit."
+msgstr ""
+
+#: includes/REST/Controllers/AffiliatesController.php:561
 msgid "The affiliate's website. Kept on their WordPress user."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:522
+#: includes/REST/Controllers/AffiliatesController.php:569
 msgid "When creating: email the affiliate a welcome with their referral link."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:528
+#: includes/REST/Controllers/AffiliatesController.php:575
 msgid "The affiliate's referral link."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:535
+#: includes/REST/Controllers/AffiliatesController.php:582
 msgid "Commission totals by status: amounts and counts."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:541
+#: includes/REST/Controllers/AffiliatesController.php:588
 msgid "Visit counts by result. Only with context=edit."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:547
+#: includes/REST/Controllers/AffiliatesController.php:594
 msgid "When the affiliate was created, in GMT."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:554
+#: includes/REST/Controllers/AffiliatesController.php:601
 msgid "When the affiliate was last changed, in GMT."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:577
+#: includes/REST/Controllers/AffiliatesController.php:624
 msgid "Limit the result set to affiliates with a given status."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:583
+#: includes/REST/Controllers/AffiliatesController.php:630
 msgid "Limit the result set to the affiliate belonging to a WordPress user."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:588
+#: includes/REST/Controllers/AffiliatesController.php:635
 msgid "Match the affiliate's name, login, email or payment email."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:593
+#: includes/REST/Controllers/AffiliatesController.php:640
 #: includes/REST/Controllers/MeController.php:570
 msgid "Sort the result set by this field."
 msgstr ""
 
-#: includes/REST/Controllers/AffiliatesController.php:600
+#: includes/REST/Controllers/AffiliatesController.php:647
 #: includes/REST/Controllers/CommissionsController.php:572
 #: includes/REST/Controllers/MeController.php:575
 #: includes/REST/Controllers/PayoutsController.php:948
@@ -1489,7 +1491,7 @@ msgid "No referral link with that ID."
 msgstr ""
 
 #: includes/REST/Controllers/MeController.php:487
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "The link could not be removed."
 msgstr ""
 
@@ -1988,7 +1990,7 @@ msgstr ""
 
 #: assets/js/admin.js:276
 #: assets/js/admin.js:297
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Save"
 msgstr ""
 
@@ -2094,13 +2096,13 @@ msgstr ""
 
 #: assets/js/admin.js:278
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Referral link copied."
 msgstr ""
 
 #: assets/js/admin.js:278
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "The link could not be copied."
 msgstr ""
 
@@ -2145,7 +2147,7 @@ msgstr ""
 #: assets/js/admin.js:291
 #: assets/js/admin.js:302
 #: assets/js/admin.js:305
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "All"
 msgstr ""
 
@@ -2172,7 +2174,7 @@ msgid "Copied"
 msgstr ""
 
 #: assets/js/admin.js:278
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Immediately"
 msgstr ""
 
@@ -2216,7 +2218,7 @@ msgid "Platform"
 msgstr ""
 
 #: assets/js/admin.js:279
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Payable from"
 msgstr ""
 
@@ -2263,7 +2265,7 @@ msgid "The commission could not be deleted."
 msgstr ""
 
 #: assets/js/admin.js:279
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "No commissions"
 msgstr ""
 
@@ -2296,13 +2298,13 @@ msgstr ""
 #: assets/js/admin.js:279
 #: assets/js/admin.js:297
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Converted"
 msgstr ""
 
 #: assets/js/admin.js:279
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Not converted"
 msgstr ""
 
@@ -2319,18 +2321,18 @@ msgid "Referrer URL"
 msgstr ""
 
 #: assets/js/admin.js:279
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Direct"
 msgstr ""
 
 #: assets/js/admin.js:279
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Result"
 msgstr ""
 
 #: assets/js/admin.js:279
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Order"
 msgstr ""
 
@@ -2380,15 +2382,15 @@ msgstr ""
 #: assets/js/admin.js:288
 #: assets/js/admin.js:310
 #: assets/js/admin.js:321
+#: assets/js/dashboard.js:280
 #: assets/js/dashboard.js:281
-#: assets/js/dashboard.js:282
 msgid "Payout"
 msgstr ""
 
 #: assets/js/admin.js:286
 #: assets/js/admin.js:288
 #: assets/js/admin.js:321
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:281
 msgid "Untitled payout"
 msgstr ""
 
@@ -2588,17 +2590,17 @@ msgstr ""
 
 #: assets/js/admin.js:291
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Page"
 msgstr ""
 
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Referral link"
 msgstr ""
 
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Conversions"
 msgstr ""
 
@@ -2607,12 +2609,12 @@ msgid "Last visit"
 msgstr ""
 
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Created"
 msgstr ""
 
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Open page"
 msgstr ""
 
@@ -2862,7 +2864,7 @@ msgid "All time"
 msgstr ""
 
 #: assets/js/admin.js:297
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Product"
 msgstr ""
 
@@ -3016,7 +3018,7 @@ msgid "Recent visits"
 msgstr ""
 
 #: assets/js/admin.js:302
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "No visits yet"
 msgstr ""
 
@@ -3045,7 +3047,7 @@ msgstr ""
 #: assets/js/admin.js:304
 #: assets/js/admin.js:328
 #: assets/js/admin.js:332
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:281
 msgid "%d commission"
 msgid_plural "%d commissions"
 msgstr[0] ""
@@ -3457,10 +3459,10 @@ msgstr ""
 msgid "No affiliate has unpaid commissions above the minimum."
 msgstr ""
 
-#. translators: 1: total amount, 2: number of affiliates
+#. translators: 1: total amount, 2: number of affiliates. Keep the <amount> and <count> tags.
 #: assets/js/admin.js:333
-msgid "Paying %1$s to %2$d affiliate"
-msgid_plural "Paying %1$s to %2$d affiliates"
+msgid "Paying <amount>%1$s</amount> to <count>%2$d affiliate</count>"
+msgid_plural "Paying <amount>%1$s</amount> to <count>%2$d affiliates</count>"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -3494,7 +3496,7 @@ msgid "Could not load the settings."
 msgstr ""
 
 #: assets/js/admin.js:336
-msgid "Rates, the hold period, payouts and the affiliate area. A new rate applies to new orders only. A new hold period also moves the payable date of commissions not paid yet."
+msgid "Rates, the hold period, payouts and the affiliate area. A new rate or hold period applies to new orders only."
 msgstr ""
 
 #: assets/js/admin.js:336
@@ -3855,6 +3857,30 @@ msgid "Clicks on your referral links."
 msgstr ""
 
 #: assets/js/dashboard.js:279
+msgid "Where you get paid"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Your payouts are sent to this account, so there is nothing to enter."
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Connect it and your payouts are sent there, with nothing to enter. Until then they go to the details below."
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Not connected yet"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Change"
+msgstr ""
+
+#: assets/js/dashboard.js:279
+msgid "Connect"
+msgstr ""
+
+#: assets/js/dashboard.js:279
 msgid "Your details"
 msgstr ""
 
@@ -3866,102 +3892,102 @@ msgstr ""
 msgid "How you get paid"
 msgstr ""
 
-#. translators: %s: payout method
-#: assets/js/dashboard.js:280
-msgid "Your payouts are sent by %s."
-msgstr ""
-
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Where payouts made by hand are sent."
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "How do you promote us?"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Copy link"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Remove from list"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "The link leaves this list only. Wherever you have shared it, it keeps working and earning, and its visits and commissions stay."
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Link removed from the list."
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "No referral links yet"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Generate a link to any page of this site on the Overview. It shows up here with the visits it brings."
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "The commission could not be loaded."
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Commission for order"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Commission"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Item"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Visit"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Landing page"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Referrer"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "This commission did not come from a tracked visit."
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Details"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "No commissions yet"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "Every sale made through your link shows up here."
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "A visit is recorded every time someone follows your link."
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:279
 msgid "This payout has no commissions attached."
 msgstr ""
 
 #. translators: %s: the payout amount
-#: assets/js/dashboard.js:281
+#: assets/js/dashboard.js:280
 msgid "Payout of %s"
 msgstr ""
 
-#: assets/js/dashboard.js:281
+#: assets/js/dashboard.js:280
 msgid "The following commissions have been included in this payout."
+msgstr ""
+
+#. translators: %s: the payment's reference, e.g. a bank transfer id
+#: assets/js/dashboard.js:282
+msgid "Reference %s"
 msgstr ""
 
 #: assets/js/dashboard.js:282
