@@ -5,6 +5,15 @@
  */
 @use "../styles/base";
 
+/*
+ * WordPress's toolbar moves the page down with a margin on <html>, which
+ * the popups (tooltips, menus) measure from the wrong origin: they open
+ * 32px above their trigger. Placing them from <body> puts them back.
+ */
+body.admin-bar:has(.flyaffiliate-dashboard-app) {
+	position: relative;
+}
+
 /* The mount point, before and after React takes over. */
 .flyaffiliate-dashboard-app {
 	min-height: 200px;
@@ -17,6 +26,16 @@
 	/* On a white theme background the shadow alone does not draw the box. */
 	.pui-root-dataviews {
 		border: 1px solid var(--border);
+	}
+
+	/*
+	 * A theme's content column is narrower than wp-admin: DataViews' 15ch
+	 * column floor would push the last columns past the card's edge, under
+	 * the row menu. The columns share the width the view gives them.
+	 */
+	/* stylelint-disable-next-line selector-class-pattern -- WordPress DataViews' own class. */
+	.dataviews-view-table__cell-content-wrapper {
+		min-width: 0;
 	}
 
 	/*
@@ -37,6 +56,11 @@
 
 		a:not([class*="text-"]) {
 			color: inherit;
+		}
+
+		/* A link drawn as a button keeps the button's look, not the theme's underline. */
+		a[data-slot="button"] {
+			text-decoration: none;
 		}
 	}
 }
