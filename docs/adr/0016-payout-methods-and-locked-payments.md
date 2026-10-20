@@ -35,6 +35,16 @@ installed.
   only while switched on. The setting lists every registered method, never only
   the enabled ones: asking a method whether it is on may read a setting, and
   reading an unstored setting builds the settings schema again.
+  *Note (2026-10-20).* Two optional parts of the contract, empty by default:
+  `get_logo_url()`, shown beside the method's name wherever a payment says
+  how it is paid (`MethodName`: the payout's "Paid via" card, the payments
+  table, the preview's groups, the affiliate's method picker); and
+  `get_connected_account()`, an account the method already pays an
+  affiliate to without them entering anything (a vendor's store account),
+  returned on the affiliate as `connected_accounts`. The affiliate dashboard
+  shows it in place of the method's fields, with Change, or, with
+  `connected` false, offers it with Connect above them. A payment's
+  transfer message is a tooltip beside its status.
 - **The ledger does not move.** A payment is still `unpaid` or `paid`, and only
   `Payout\Manager` moves it (ADR-0012). An automatic method keeps its own record
   of each attempt — a *transfer* — and reports its state through
