@@ -314,6 +314,27 @@ class PayoutsControllerTest extends FlyAffiliateTestCase {
 		$this->assertSame( 'fake', $saved->get_data()['payout_method'] );
 		$this->assertSame( [ 'email' => 'me@paypal.test' ], $saved->get_data()['payout_details']['fake'] );
 
+		$this->assertSame( [], $saved->get_data()['connected_accounts'] );
+
+		// An account connected elsewhere stands in for the details.
+		$this->fake->connected = [
+			'label'  => 'Your store\'s account',
+			'detail' => 'store@paypal.test',
+			'url'    => 'https://example.test/store/payment',
+		];
+
+		$this->assertSame(
+			[
+				'fake' => [
+					'label'     => 'Your store\'s account',
+					'detail'    => 'store@paypal.test',
+					'url'       => 'https://example.test/store/payment',
+					'connected' => true,
+				],
+			],
+			$this->get_request( '/me' )->get_data()['connected_accounts']
+		);
+
 		// Switched off since: keeping the choice is fine, choosing it anew is not.
 		$this->fake->enabled = false;
 

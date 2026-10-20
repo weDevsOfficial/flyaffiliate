@@ -28,16 +28,16 @@ const DEFAULT_VIEW: DataViewState = {
 	search: '',
 	sort: { field: 'created_at', direction: 'desc' },
 	// Column order follows the prototype's affiliate area: topic, amount,
-	// reference, status, date.
-	fields: [ 'amount', 'reference', 'status', 'created_at' ],
+	// status, date. The reference sits under the topic, so the table fits a
+	// theme's content column without scrolling.
+	fields: [ 'amount', 'status', 'created_at' ],
 	titleField: 'note',
 	layout: {
 		styles: {
-			note: { width: '26%' },
-			amount: { width: '18%' },
-			reference: { width: '20%' },
-			status: { width: '14%' },
-			created_at: { width: '22%' },
+			note: { width: '34%' },
+			amount: { width: '22%' },
+			status: { width: '20%' },
+			created_at: { width: '24%' },
 		},
 	},
 };
@@ -54,9 +54,7 @@ export default function PayoutsTable( { dates }: { dates: DateArgs } ) {
 		{
 			id: 'created_at',
 			label: __( 'Date', 'flyaffiliate' ),
-			render: ( { item } ) => (
-				<DateTime value={ item.created_at } withTime />
-			),
+			render: ( { item } ) => <DateTime value={ item.created_at } />,
 		},
 		{
 			id: 'amount',
@@ -84,24 +82,25 @@ export default function PayoutsTable( { dates }: { dates: DateArgs } ) {
 			label: __( 'Payout', 'flyaffiliate' ),
 			enableSorting: false,
 			render: ( { item } ) => (
-				<Truncated
-					text={
-						item.note || __( 'Untitled payout', 'flyaffiliate' )
-					}
-					max={ 26 }
-				/>
-			),
-		},
-		{
-			id: 'reference',
-			label: __( 'Reference', 'flyaffiliate' ),
-			enableSorting: false,
-			render: ( { item } ) => (
-				<Truncated
-					className="text-muted-foreground"
-					text={ item.reference || '—' }
-					max={ 22 }
-				/>
+				<div>
+					<Truncated
+						text={
+							item.note || __( 'Untitled payout', 'flyaffiliate' )
+						}
+						max={ 26 }
+					/>
+					{ item.reference && (
+						<Truncated
+							className="block text-xs text-muted-foreground"
+							text={ sprintf(
+								/* translators: %s: the payment's reference, e.g. a bank transfer id */
+								__( 'Reference %s', 'flyaffiliate' ),
+								item.reference
+							) }
+							max={ 30 }
+						/>
+					) }
+				</div>
 			),
 		},
 		{

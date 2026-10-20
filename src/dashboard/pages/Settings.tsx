@@ -3,7 +3,7 @@
  * paid, where, and how they promote the store.
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import {
 	Button,
 	Card,
@@ -12,7 +12,6 @@ import {
 	CardHeader,
 	CardTitle,
 	Field,
-	FieldDescription,
 	FieldLabel,
 	Input,
 	LabeledRadio,
@@ -22,10 +21,41 @@ import {
 	Textarea,
 	toast,
 } from '@wedevs/plugin-ui';
+import Hint from '@/components/Hint';
+import MethodName, { methodLogo } from '@/components/MethodName';
 import { errorMessage, send } from '@/lib/api';
 import { getGlobals } from '@/lib/globals';
-import type { PayoutMethodField } from '@/lib/types';
+import type {
+	ConnectedAccount as ConnectedAccountData,
+	PayoutMethodField,
+} from '@/lib/types';
 import type { AffiliateProfile } from '../types';
+
+/**
+ * A field's label, with its help text in a tooltip beside it.
+ *
+ * @param {Object} props         The props.
+ * @param {string} props.label   The label.
+ * @param {string} props.hint    The help text; none for no icon.
+ * @param {string} props.htmlFor The input it labels.
+ * @return {JSX.Element} The label.
+ */
+function HintedLabel( {
+	label,
+	hint,
+	htmlFor,
+}: {
+	label: string;
+	hint?: string;
+	htmlFor?: string;
+} ) {
+	return (
+		<span className="flex items-center gap-1.5">
+			<FieldLabel htmlFor={ htmlFor }>{ label }</FieldLabel>
+			{ hint && <Hint text={ hint } /> }
+		</span>
+	);
+}
 
 /**
  * One detail a payout method asks for.
@@ -53,7 +83,7 @@ function DetailField( {
 	if ( field.type === 'select' ) {
 		return (
 			<Field>
-				<FieldLabel>{ field.label }</FieldLabel>
+				<HintedLabel label={ field.label } hint={ field.description } />
 				<RadioGroup value={ value } onValueChange={ onChange }>
 					{ Object.entries( field.options ).map(
 						( [ option, label ] ) => (
@@ -65,16 +95,17 @@ function DetailField( {
 						)
 					) }
 				</RadioGroup>
-				{ field.description && (
-					<FieldDescription>{ field.description }</FieldDescription>
-				) }
 			</Field>
 		);
 	}
 
 	return (
 		<Field>
-			<FieldLabel htmlFor={ id }>{ field.label }</FieldLabel>
+			<HintedLabel
+				label={ field.label }
+				hint={ field.description }
+				htmlFor={ id }
+			/>
 			<Input
 				id={ id }
 				type={ field.type === 'email' ? 'email' : 'text' }
@@ -83,9 +114,90 @@ function DetailField( {
 				value={ value }
 				onChange={ ( e ) => onChange( e.target.value ) }
 			/>
-			{ field.description && (
-				<FieldDescription>{ field.description }</FieldDescription>
-			) }
+		</Field>
+	);
+}
+
+/**
+ * The account a method pays the affiliate to without asking them for
+ * anything (a vendor's store account), in place of the method's fields;
+ * or, not connected yet, offered with Connect above them.
+ *
+ * @param {Object} props         The props.
+ * @param {string} props.method  The method's id.
+ * @param {Object} props.account The account.
+ * @return {JSX.Element} The account.
+ */
+function ConnectedAccount( {
+	method,
+	account,
+}: {
+	method: string;
+	account: ConnectedAccountData;
+} ) {
+	const logo = methodLogo( method );
+	const isConnected = false !== account.connected;
+
+	return (
+		<Field
+			data-testid={ `flyaffiliate-payout-${ method }-${
+				isConnected ? 'connected' : 'offered'
+			}` }
+		>
+			<HintedLabel
+				label={ __( 'Where you get paid', 'flyaffiliate' ) }
+				hint={
+					isConnected
+						? __(
+								'Your payouts are sent to this account, so there is nothing to enter.',
+								'flyaffiliate'
+						  )
+						: __(
+								'Connect it and your payouts are sent there, with nothing to enter. Until then they go to the details below.',
+								'flyaffiliate'
+						  )
+				}
+			/>
+			<div className="flex items-center gap-3 rounded-md border border-border p-3">
+				{ logo && (
+					<div className="flex size-10 shrink-0 items-center justify-center rounded bg-primary/10">
+						<img
+							src={ logo }
+							alt=""
+							aria-hidden="true"
+							className="size-5 object-contain"
+						/>
+					</div>
+				) }
+				<div className="grid min-w-0 flex-1 gap-0.5">
+					<span className="text-sm font-medium text-foreground">
+						{ account.label }
+					</span>
+					<span className="truncate text-sm text-muted-foreground">
+						{ isConnected
+							? account.detail
+							: __( 'Not connected yet', 'flyaffiliate' ) }
+					</span>
+				</div>
+				{ account.url && (
+					<Button
+						variant={ isConnected ? 'secondary' : 'default' }
+						size="sm"
+						className="shrink-0"
+						render={
+							// eslint-disable-next-line jsx-a11y/anchor-has-content
+							<a href={ account.url } />
+						}
+						data-testid={ `flyaffiliate-payout-${ method }-${
+							isConnected ? 'change' : 'connect'
+						}` }
+					>
+						{ isConnected
+							? __( 'Change', 'flyaffiliate' )
+							: __( 'Connect', 'flyaffiliate' ) }
+					</Button>
+				) }
+			</div>
 		</Field>
 	);
 }
@@ -111,6 +223,16 @@ export default function SettingsPage( { profile, onSaved }: Props ) {
 		choosable.find( ( method ) => method.id === payoutMethod ) ??
 		choosable.find( ( method ) => method.id === payoutDefault ) ??
 		choosable[ 0 ];
+	// The payment email is where Manual pays; another method has its own
+	// details, so it only shows while they are paid by hand.
+	const paidByHand = ! chosen || chosen.id === 'manual';
+	// An account the method already pays them to stands in for its fields;
+	// one they could connect is offered above them.
+	const account = chosen
+		? profile?.connected_accounts?.[ chosen.id ]
+		: undefined;
+	const connected =
+		account && false !== account.connected ? account : undefined;
 
 	useEffect( () => {
 		if ( profile ) {
@@ -140,7 +262,7 @@ export default function SettingsPage( { profile, onSaved }: Props ) {
 					: {} ),
 				// Only the chosen method's details: another method's empty
 				// required field is not this save's business.
-				...( chosen && chosen.fields.length > 0
+				...( chosen && chosen.fields.length > 0 && ! connected
 					? {
 							payout_details: {
 								[ chosen.id ]: details[ chosen.id ] ?? {},
@@ -203,56 +325,63 @@ export default function SettingsPage( { profile, onSaved }: Props ) {
 										<LabeledRadio
 											key={ method.id }
 											value={ method.id }
-											label={ method.label }
+											label={
+												<MethodName
+													id={ method.id }
+													label={ method.label }
+												/>
+											}
 										/>
 									) ) }
 								</RadioGroup>
-								<FieldDescription>
-									{ sprintf(
-										/* translators: %s: payout method */
-										__(
-											'Your payouts are sent by %s.',
-											'flyaffiliate'
-										),
-										chosen.label
-									) }
-								</FieldDescription>
 							</Field>
 						) }
 
-						{ chosen?.fields.map( ( field ) => (
-							<DetailField
-								key={ `${ chosen.id }-${ field.id }` }
+						{ chosen && account && (
+							<ConnectedAccount
 								method={ chosen.id }
-								field={ field }
-								value={
-									details[ chosen.id ]?.[ field.id ] ?? ''
-								}
-								onChange={ ( value ) =>
-									setDetail( chosen.id, field.id, value )
-								}
+								account={ account }
 							/>
-						) ) }
+						) }
 
-						<Field>
-							<FieldLabel htmlFor="flyaffiliate-payment-email">
-								{ __( 'Payment email', 'flyaffiliate' ) }
-							</FieldLabel>
-							<Input
-								id="flyaffiliate-payment-email"
-								type="email"
-								value={ paymentEmail }
-								onChange={ ( e ) =>
-									setPaymentEmail( e.target.value )
-								}
-							/>
-							<FieldDescription>
-								{ __(
-									'Where payouts made by hand are sent.',
-									'flyaffiliate'
-								) }
-							</FieldDescription>
-						</Field>
+						{ ! connected &&
+							chosen?.fields.map( ( field ) => (
+								<DetailField
+									key={ `${ chosen.id }-${ field.id }` }
+									method={ chosen.id }
+									field={ field }
+									value={
+										details[ chosen.id ]?.[ field.id ] ?? ''
+									}
+									onChange={ ( value ) =>
+										setDetail( chosen.id, field.id, value )
+									}
+								/>
+							) ) }
+
+						{ paidByHand && (
+							<Field>
+								<HintedLabel
+									label={ __(
+										'Payment email',
+										'flyaffiliate'
+									) }
+									hint={ __(
+										'Where payouts made by hand are sent.',
+										'flyaffiliate'
+									) }
+									htmlFor="flyaffiliate-payment-email"
+								/>
+								<Input
+									id="flyaffiliate-payment-email"
+									type="email"
+									value={ paymentEmail }
+									onChange={ ( e ) =>
+										setPaymentEmail( e.target.value )
+									}
+								/>
+							</Field>
+						) }
 						<Field>
 							<FieldLabel htmlFor="flyaffiliate-promo-method">
 								{ __(

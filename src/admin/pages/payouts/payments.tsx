@@ -25,6 +25,7 @@ import Money from '@/components/Money';
 import Truncated from '@/components/Truncated';
 import Hint from '@/components/Hint';
 import PaymentStatus from '@/components/PaymentStatus';
+import MethodName from '@/components/MethodName';
 import { useCounts } from '@/hooks/useCounts';
 import { useListView } from '@/hooks/useListView';
 import { errorMessage, send } from '@/lib/api';
@@ -443,8 +444,12 @@ export function PaymentsTable( {
 			enableSorting: false,
 			getValue: ( { item } ) => item.method,
 			render: ( { item } ) => (
-				<Badge variant="secondary">
-					{ item.method_label || item.method || '—' }
+				<Badge variant="secondary" className="px-2.5">
+					<MethodName
+						id={ item.method }
+						label={ item.method_label || item.method || '—' }
+						logoClassName="size-3.5"
+					/>
 				</Badge>
 			),
 		},

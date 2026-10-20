@@ -74,3 +74,16 @@ not in the status lifecycle SliceWP already defines.
   `flyaffiliate_mature_order_statuses` filter are gone (never released).
 - CONTEXT.md money rule 4 and the glossary entries for *Hold period* and
   *Mature* are rewritten to match.
+
+## Note, 2026-10-20: a commission keeps the hold it was created with
+
+Decision 3 is reversed at the product owner's request. A commission's
+`matures_at` is fixed when it is created, from the hold in force for its
+order (`hold_days`, or an integration's own hold through
+`flyaffiliate_commission_hold_days`). Changing the hold period applies to
+new orders only: pending, unpaid and rejected commissions keep their dates,
+as paid ones always did. `Commission\HoldPeriod` (the reschedule and its
+settings hook) and the `flyaffiliate_commissions_rescheduled` action are
+removed; FlyAffiliate Pro's Dokan extension stops moving a vendor's
+commissions when the vendor's hold changes, for the same reason. The
+Settings screen says that a change applies to new orders.

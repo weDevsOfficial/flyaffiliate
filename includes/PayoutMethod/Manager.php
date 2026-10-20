@@ -463,6 +463,7 @@ class Manager {
 			$data[] = [
 				'id'        => $id,
 				'label'     => $method->get_label(),
+				'logo'      => esc_url_raw( $method->get_logo_url() ),
 				'automatic' => $method->is_automatic(),
 				'enabled'   => isset( $enabled[ $id ] ),
 				'fields'    => array_values( $this->normalize_fields( $method->get_affiliate_fields() ) ),

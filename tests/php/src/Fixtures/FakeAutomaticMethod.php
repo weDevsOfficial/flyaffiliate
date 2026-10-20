@@ -68,6 +68,13 @@ class FakeAutomaticMethod extends PayoutMethod {
 	public string $state_on_pay = '';
 
 	/**
+	 * What `get_connected_account()` answers.
+	 *
+	 * @var array
+	 */
+	public array $connected = [];
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * @return string
@@ -117,6 +124,17 @@ class FakeAutomaticMethod extends PayoutMethod {
 				'required' => true,
 			],
 		];
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param \FlyAffiliate\Models\Affiliate $affiliate The affiliate.
+	 *
+	 * @return array
+	 */
+	public function get_connected_account( \FlyAffiliate\Models\Affiliate $affiliate ): array {
+		return $this->connected;
 	}
 
 	/**

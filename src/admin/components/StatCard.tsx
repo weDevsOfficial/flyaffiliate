@@ -10,6 +10,8 @@ import Hint from './Hint';
 
 type Props = {
 	icon: LucideIcon;
+	/** An image in the icon's place: a payout method's logo. */
+	image?: string;
 	label: string;
 	value: ReactNode;
 	/** What the figure means, behind an info icon beside the label, as on Dokan's report cards. */
@@ -19,6 +21,7 @@ type Props = {
 
 export default function StatCard( {
 	icon: Icon,
+	image,
 	label,
 	value,
 	tooltip,
@@ -32,7 +35,16 @@ export default function StatCard( {
 			) }
 		>
 			<div className="flex size-10 items-center justify-center rounded bg-primary/10 text-primary">
-				<Icon className="size-5" aria-hidden="true" />
+				{ image ? (
+					<img
+						src={ image }
+						alt=""
+						aria-hidden="true"
+						className="size-5 object-contain"
+					/>
+				) : (
+					<Icon className="size-5" aria-hidden="true" />
+				) }
 			</div>
 			<div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
 				{ label }

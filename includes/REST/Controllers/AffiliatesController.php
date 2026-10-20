@@ -343,7 +343,8 @@ class AffiliatesController extends AdminBaseController {
 		if ( 'edit' === ( $request['context'] ?? 'view' ) ) {
 			$data['totals']         = flyaffiliate()->commission->get_affiliate_totals( $item->get_id() );
 			$data['visits']         = flyaffiliate()->tracking->count_by_result( [ 'where' => [ 'affiliate_id' => $item->get_id() ] ] );
-			$data['payout_details'] = $this->get_payout_details( $item );
+			$data['payout_details']     = $this->get_payout_details( $item );
+			$data['connected_accounts'] = $this->get_connected_accounts( $item );
 		}
 
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );
@@ -423,6 +424,34 @@ class AffiliatesController extends AdminBaseController {
 		}
 
 		return $details;
+	}
+
+	/**
+	 * The accounts an affiliate is paid to without entering anything, by method.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Affiliate $affiliate The affiliate.
+	 *
+	 * @return array<string, array{label: string, detail: string, url: string, connected: bool}> Method id => the account.
+	 */
+	protected function get_connected_accounts( Affiliate $affiliate ): array {
+		$accounts = [];
+
+		foreach ( flyaffiliate()->payout_method->all() as $id => $method ) {
+			$account = $method->get_connected_account( $affiliate );
+
+			if ( '' !== (string) ( $account['label'] ?? '' ) ) {
+				$accounts[ $id ] = [
+					'label'     => (string) $account['label'],
+					'detail'    => (string) ( $account['detail'] ?? '' ),
+					'url'       => esc_url_raw( (string) ( $account['url'] ?? '' ) ),
+					'connected' => false !== ( $account['connected'] ?? true ),
+				];
+			}
+		}
+
+		return $accounts;
 	}
 
 	/**
@@ -508,6 +537,24 @@ class AffiliatesController extends AdminBaseController {
 					'additionalProperties' => [
 						'type'                 => 'object',
 						'additionalProperties' => [ 'type' => 'string' ],
+					],
+				],
+				'connected_accounts' => [
+					'description'          => __( 'Method id => an account the affiliate is paid to without entering anything: what it is, which one, and where they change it. Only with context=edit.', 'flyaffiliate' ),
+					'type'                 => 'object',
+					'context'              => [ 'edit' ],
+					'readonly'             => true,
+					'additionalProperties' => [
+						'type'       => 'object',
+						'properties' => [
+							'label'     => [ 'type' => 'string' ],
+							'detail'    => [ 'type' => 'string' ],
+							'url'       => [
+								'type'   => 'string',
+								'format' => 'uri',
+							],
+							'connected' => [ 'type' => 'boolean' ],
+						],
 					],
 				],
 				'website'       => [

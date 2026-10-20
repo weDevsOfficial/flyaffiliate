@@ -2,12 +2,15 @@
  * Where a payment stands: paid, the state of the transfer its payout method
  * is making, not sent, its method gone, or unpaid — waiting to be paid by hand.
  *
- * Under the pill, for a payment not paid yet, one line from its method: why
- * the transfer failed (in red), or what a transfer on its way waits for.
+ * Beside the pill, for a payment not paid yet, an info icon whose tooltip is
+ * the line from its method: why the transfer failed (the icon in red), or
+ * what a transfer on its way waits for. The affiliate's view keeps the
+ * method, with its logo, under the pill.
  */
 import { __ } from '@wordpress/i18n';
+import Hint from '@/components/Hint';
+import MethodName from '@/components/MethodName';
 import StatusBadge from '@/components/StatusBadge';
-import TruncatedLine from '@/components/TruncatedLine';
 import { getGlobals } from '@/lib/globals';
 import type { Payout } from '@/lib/types';
 
@@ -60,33 +63,33 @@ export default function PaymentStatus( {
 	const label =
 		statuses.transfer?.[ state ] ??
 		( state === 'unpaid' ? __( 'Unpaid', 'flyaffiliate' ) : undefined );
-	let note = '';
-
-	if ( badgeOnly ) {
-		note = '';
-	} else if ( forAffiliate ) {
-		note = item.method_label;
-	} else if ( item.status !== 'paid' ) {
-		note = item.transfer?.message ?? '';
-	}
+	const method = forAffiliate && ! badgeOnly ? item.method_label : '';
+	const message =
+		! forAffiliate && ! badgeOnly && item.status !== 'paid'
+			? item.transfer?.message ?? ''
+			: '';
 
 	// Only a failure is an error; a transfer on its way is information.
 	const failed = ! forAffiliate && state === 'failed';
 
 	return (
 		<div className="flex min-w-0 flex-col items-start gap-1">
-			<StatusBadge status={ state } label={ label } />
-			{ note && (
-				<TruncatedLine
-					tooltip={ note }
-					className={
-						failed
-							? 'text-xs text-destructive'
-							: 'text-xs text-muted-foreground'
-					}
-				>
-					{ note }
-				</TruncatedLine>
+			<span className="inline-flex items-center gap-1.5">
+				<StatusBadge status={ state } label={ label } />
+				{ message && (
+					<Hint
+						text={ message }
+						className={ failed ? 'text-destructive' : undefined }
+					/>
+				) }
+			</span>
+			{ method && (
+				<MethodName
+					id={ item.method }
+					label={ method }
+					className="text-xs text-muted-foreground"
+					logoClassName="size-3"
+				/>
 			) }
 		</div>
 	);

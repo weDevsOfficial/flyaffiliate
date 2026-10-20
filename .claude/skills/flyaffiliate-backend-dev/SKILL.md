@@ -225,11 +225,11 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
   the `reject_commissions_on_refund` switch (off by default); an order leaving
   failed/cancelled/refunded for a status that is not paid restores its rejected
   commissions to pending. Paid and manual commissions are never touched.
-- `Commission\HoldPeriod` owns `matures_at` (`created_at + hold_days`, on every
-  status): a `hold_days` save reschedules every pending, unpaid and rejected
-  row, then fires `flyaffiliate_commissions_rescheduled`. A commission's own
-  hold comes from `flyaffiliate_commission_hold_days` as it is created
-  (`Manager::maturation_date()`). `Payout\Manager::preview()` takes an unpaid
+- `matures_at` is `created_at + hold_days`, set once when the commission is
+  created (`Manager::maturation_date()`), on every status; a commission's own
+  hold comes from `flyaffiliate_commission_hold_days` at that moment. Nothing
+  moves it afterwards: a `hold_days` save, or a vendor's new hold, applies to
+  new orders only (money rule 4, ADR-0014's note of 2026-10-20). `Payout\Manager::preview()` takes an unpaid
   commission only when `Commission::is_matured()` (a row with no date has
   nothing to wait for) and reports the rest as `held`.
 - Partial refunds are not rescaled (ADR-0011's rescaler was reverted): an
@@ -255,7 +255,12 @@ the payout manager moves a commission to or from `paid` —
 
 Payout methods (ADR-0016): `flyaffiliate()->payout_method` lists Manual plus
 whatever the `flyaffiliate_payout_methods` filter adds (instances of
-`Contracts\PayoutMethod`). `preview()` resolves each affiliate's method
+`Contracts\PayoutMethod`; a method may give a logo through
+`get_logo_url()`, which the apps show beside its name wherever a payment says
+how it is paid, `MethodName`; and, through `get_connected_account()`, an
+account it already pays an affiliate to without them entering anything,
+which the affiliate dashboard shows in place of the method's fields, with a
+Change link). `preview()` resolves each affiliate's method
 (`resolve_for()`: override → their choice → the `method` setting → Manual);
 `create()` writes it on the row, refuses a stale `expected` map, attaches
 commissions with a conditional write, and calls each automatic method's

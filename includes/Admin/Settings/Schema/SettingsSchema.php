@@ -544,7 +544,7 @@ class SettingsSchema {
 				'type'       => 'section',
 				'subpage_id' => 'rules',
 				'title'      => __( 'Hold period', 'flyaffiliate' ),
-				'description' => __( 'How long a commission waits before it can be paid out. This leaves time to reject it if the order is returned.', 'flyaffiliate' ),
+				'description' => __( 'How long a commission waits before it can be paid out. This leaves time to reject it if the order is returned. A change applies to new orders, and existing commissions keep their date.', 'flyaffiliate' ),
 			],
 			self::days_field(
 				'hold_days',

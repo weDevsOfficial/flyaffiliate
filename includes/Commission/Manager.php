@@ -822,10 +822,10 @@ class Manager {
 		/**
 		 * Filters the hold period of one commission, as it is created.
 		 *
-		 * A marketplace gives its sellers' commissions their own hold. A
-		 * filter here must also follow `flyaffiliate_commissions_rescheduled`,
-		 * which moves every commission a payout may still take onto the hold
-		 * period itself.
+		 * A marketplace gives its sellers' commissions their own hold. The
+		 * answer is fixed into the commission's `matures_at` when it is
+		 * created: a later change of any hold applies to new orders only
+		 * (money rule 4).
 		 *
 		 * @since FLYAFFILIATE_SINCE
 		 *

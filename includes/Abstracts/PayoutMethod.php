@@ -53,6 +53,17 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
+	 * @return string
+	 */
+	public function get_logo_url(): string {
+		return '';
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
 	 * @return bool
 	 */
 	public function is_enabled(): bool {
@@ -201,6 +212,21 @@ abstract class PayoutMethod implements PayoutMethodContract {
 		}
 
 		return '';
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * None: the affiliate gives their own details.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Affiliate $affiliate The affiliate.
+	 *
+	 * @return array
+	 */
+	public function get_connected_account( Affiliate $affiliate ): array {
+		return [];
 	}
 
 	/**

@@ -6,13 +6,8 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Link } from 'react-router-dom';
 import { Hand, TriangleAlert, Zap } from 'lucide-react';
-import {
-	Badge,
-	Button,
-	Checkbox,
-	LabeledCheckbox,
-	cn,
-} from '@wedevs/plugin-ui';
+import { Button, Checkbox, LabeledCheckbox, cn } from '@wedevs/plugin-ui';
+import MethodName from '@/components/MethodName';
 import Money from '@/components/Money';
 import type { PayoutPreview, PayoutPreviewRow } from '@/lib/types';
 
@@ -122,12 +117,18 @@ export default function PreviewList( {
 								</td>
 								<td className="py-3">
 									<div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-										<span className="font-semibold text-foreground">
-											{ group.label }
-										</span>
-										<Badge
-											variant="secondary"
-											className="gap-1 font-normal"
+										<MethodName
+											id={ group.method }
+											label={ group.label }
+											className="font-semibold text-foreground"
+										/>
+										<span
+											className={ cn(
+												'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium leading-4',
+												group.automatic
+													? 'border-primary/40 bg-primary/10 text-primary'
+													: 'border-border bg-muted text-foreground'
+											) }
 										>
 											{ group.automatic ? (
 												<Zap
@@ -149,7 +150,7 @@ export default function PreviewList( {
 														'Paid by hand',
 														'flyaffiliate'
 												  ) }
-										</Badge>
+										</span>
 										<span className="text-muted-foreground">
 											{ sprintf(
 												/* translators: %d: number of affiliates */
@@ -232,9 +233,13 @@ export default function PreviewList( {
 												) }
 											</span>
 										</div>
-										<div className="mt-1 truncate text-muted-foreground">
-											{ row.recipient || '—' }
-										</div>
+										{ /* With a warning, the warning says what is missing. */ }
+										{ ( row.recipient ||
+											! row.warning ) && (
+											<div className="mt-1 truncate text-muted-foreground">
+												{ row.recipient || '—' }
+											</div>
+										) }
 										{ row.warning && (
 											<div
 												className="mt-2 flex flex-wrap items-center gap-3 text-destructive"
