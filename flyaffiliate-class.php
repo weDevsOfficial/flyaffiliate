@@ -31,6 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @property FlyAffiliate\Upgrade\Manager          $upgrades      Schema and data upgrades.
  * @property FlyAffiliate\Payout\Manager           $payout        Payouts and their payments.
  * @property FlyAffiliate\PayoutMethod\Manager     $payout_method The payout methods: Manual, and any other plugin adds.
+ * @property FlyAffiliate\Tracker                  $tracker       Usage data for Appsero, opt-in.
  */
 final class FlyAffiliate_Plugin {
 
@@ -325,6 +326,8 @@ final class FlyAffiliate_Plugin {
 		require_once FLYAFFILIATE_INC_DIR . '/functions.php';
 
 		( new Installer() )->do_install();
+
+		$this->tracker->activate();
 	}
 
 	/**

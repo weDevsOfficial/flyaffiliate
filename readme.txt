@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. Integrates with WooCommerce; nothing leaves your site.
+Affiliate marketing for WordPress: referral links, commissions, hold periods and payouts. Integrates with WooCommerce and more.
 
 == Description ==
 
@@ -16,7 +16,7 @@ Affiliate marketing for WordPress: referral links, commissions, hold periods and
 
 [FlyAffiliate](https://github.com/weDevsOfficial/flyaffiliate) is a standalone affiliate-marketing plugin for WordPress that integrates with the platforms you sell on, WooCommerce first, made by [weDevs](https://wedevs.com/) — the team behind Dokan, WP User Frontend and weMail. It runs an affiliate programme the way a store owner actually runs one: someone applies, you approve them, they share a link, orders come in, commissions mature once the order has settled, and you pay people in batches through whatever channel you already use.
 
-Everything happens on your own site. FlyAffiliate makes no external requests, sends no analytics anywhere, and stores nothing that identifies a visitor: a visit keeps only a salted hash of the IP address and user agent (see Privacy below).
+Everything happens on your own site. FlyAffiliate sends nothing anywhere unless you choose to share usage data, and stores nothing that identifies a visitor: a visit keeps only a salted hash of the IP address and user agent (see Privacy below).
 
 = How it works =
 
@@ -53,7 +53,15 @@ FlyAffiliate stores no personal data about a visitor. A visit record keeps a **h
 
 Attribution uses one first-party cookie, `flyaffiliate_ref`, which holds two numbers: the affiliate id and the visit id. It is `HttpOnly`, it is never shared with anyone, and its lifetime is the attribution window you configure — 30 days by default.
 
-The plugin makes no external requests, contains no analytics, and phones nothing home.
+= Usage data (Appsero) =
+
+FlyAffiliate uses the [Appsero](https://appsero.com) SDK to collect usage data, **only once you allow it**. This helps us troubleshoot problems faster and make product improvements.
+
+The SDK **sends nothing by default.** It starts only when an administrator turns on **Share Essentials** in the setup wizard or clicks **Allow** on its admin notice. From then on it sends, once a week, to Appsero (`api.appsero.com`): your site's name and URL, the first administrator's name and the site's admin email address, the server environment (PHP, MySQL, server and WordPress versions, memory limit, debug mode), the site language, the active theme, the number of users per role and of active and inactive plugins, and how many affiliates and commissions you have. Nothing about your affiliates or your visitors is sent. To include the server's public IP address, the SDK first asks [icanhazip.com](https://icanhazip.com/), a service run by Cloudflare ([privacy policy](https://www.cloudflare.com/privacypolicy/)).
+
+Choosing **No thanks**, or leaving Share Essentials off, tells Appsero only that this site declined. When you deactivate the plugin, a form asks why: **Submit & Deactivate** sends your answer with the data above, **Skip & Deactivate** sends nothing.
+
+Learn more about [how Appsero collects and uses this data](https://appsero.com/privacy-policy/).
 
 = Contribute =
 
@@ -104,7 +112,7 @@ A. Not by default. Self-referral is blocked, and you can allow it in Settings if
 
 = Q. Does this plugin use cookies? =
 
-A. One: `flyaffiliate_ref`. It is set when someone arrives through a referral link and holds the affiliate id and the visit id, so that a purchase made later in the same browser can be credited to the affiliate who sent them. It is a first-party cookie, it is `HttpOnly`, and it lasts for the attribution window you configure (30 days by default). No third-party cookie is set and no data leaves your site.
+A. One: `flyaffiliate_ref`. It is set when someone arrives through a referral link and holds the affiliate id and the visit id, so that a purchase made later in the same browser can be credited to the affiliate who sent them. It is a first-party cookie, it is `HttpOnly`, and it lasts for the attribution window you configure (30 days by default). No third-party cookie is set, and what the cookie holds never leaves your site.
 
 = Q. Can I override the templates? =
 

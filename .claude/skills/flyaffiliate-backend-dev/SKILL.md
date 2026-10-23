@@ -25,7 +25,10 @@ here.
   `FlyAffiliate\Commission\Manager` → `includes/Commission/Manager.php`.
 - Autoloading is Composer's (`vendor/autoload.php`, PSR-4 in `composer.json`).
   The zip carries a production `vendor/` with that loader and nothing else
-  (ADR-0002). Do not add a runtime Composer package.
+  (ADR-0002). Do not add a runtime Composer package. The one bundled package
+  is the Appsero SDK, Mozart-prefixed into `FlyAffiliate\Dependencies\` under
+  `vendor-prefixed/` (committed, never edited), behind `FlyAffiliate\Tracker`
+  (ADR-0018).
 - Procedural helpers live in `includes/functions.php` and are prefixed
   `flyaffiliate_`.
 

@@ -126,6 +126,7 @@ flyaffiliate/
 │   ├── Upgrade/                   # Manager + Upgrades/ versioned upgraders
 │   ├── Utilities/
 │   ├── Assets.php
+│   ├── Tracker.php                # Appsero Insights, opt-in, as Dokan Lite's Tracker (ADR-0018)
 │   └── functions.php              # flyaffiliate_get_option(), flyaffiliate_get_template_part(), helpers
 ├── templates/                     # Overridable templates: admin/ (app mount, profile), affiliate-dashboard/, registration/
 ├── assets/                        # css/, js/ (built output only; plain sources in assets/src/)
@@ -147,7 +148,7 @@ flyaffiliate/
 ### Service Container
 Services are accessed via `flyaffiliate()->service_name` (magic getter) or `flyaffiliate()->get_container()->get( 'service_name' )`.
 
-Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `payout_method`, `tracking`, `referral_link`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Add a name here in the same commit that registers it.
+Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `payout_method`, `tracking`, `referral_link`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`, `tracker`. Add a name here in the same commit that registers it.
 
 The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. While FlyAffiliate Pro is not active (`flyaffiliate_is_pro_active()`), `Admin\ProExtensions` adds an Extensions page that previews Pro's extensions with an upgrade dialog, as Dokan Lite shows Dokan Pro's modules; with Pro running, Pro's page takes its place (Pro's ADR-0005). See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
 
@@ -170,7 +171,8 @@ Namespace `flyaffiliate/v1`. Controllers extend `FlyAffiliate\REST\AdminBaseCont
 
 ## Key Patterns
 
-- Service-based architecture with an in-house, League-shaped DI container (no third-party runtime packages ship in the zip)
+- Service-based architecture with an in-house, League-shaped DI container (no third-party runtime packages ship in the zip, except the Mozart-prefixed Appsero SDK in `vendor-prefixed/`, ADR-0018)
+- Appsero Insights, opt-in as in Dokan Lite (`FlyAffiliate\Tracker`, as Dokan Lite's; not `Tracking\Tracker`, the referral tracker; ADR-0018): nothing is sent until an admin allows it through Share Essentials in the setup wizard or the SDK's notice
 - WordPress hooks for extensibility; every hook name starts with `flyaffiliate_`
 - Overridable templates (`templates/` → theme `flyaffiliate/`)
 - Custom tables via `dbDelta` in `Install\Installer`, versioned upgrades in `Upgrade\Manager`

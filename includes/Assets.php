@@ -283,21 +283,23 @@ class Assets implements Hookable {
 				'payoutMinimum' => (float) flyaffiliate_get_option( 'minimum_amount', 0 ),
 			],
 			'urls'       => [
-				'app'       => Menu::get_route_url(),
-				'wizard'    => SetupWizard::get_url(),
-				'docs'      => 'https://flyaffiliate.co/',
-				'support'   => 'https://wedevs.com/support/',
-				'payoutCsv' => PayoutExport::get_url(),
-				'users'     => admin_url( 'user-edit.php?user_id=' ),
-				'orders'    => admin_url( 'admin.php?page=wc-orders&action=edit&id=' ),
-				'products'  => admin_url( 'post.php?action=edit&post=' ),
+				'app'            => Menu::get_route_url(),
+				'wizard'         => SetupWizard::get_url(),
+				'insightsPolicy' => 'https://appsero.com/privacy-policy/',
+				'docs'           => 'https://flyaffiliate.co/',
+				'support'        => 'https://wedevs.com/support/',
+				'payoutCsv'      => PayoutExport::get_url(),
+				'users'          => admin_url( 'user-edit.php?user_id=' ),
+				'orders'         => admin_url( 'admin.php?page=wc-orders&action=edit&id=' ),
+				'products'       => admin_url( 'post.php?action=edit&post=' ),
 			],
 			'setup'      => [
-				'done'  => SetupWizard::is_done(),
-				'pages' => [
+				'done'            => SetupWizard::is_done(),
+				'pages'           => [
 					'register'  => flyaffiliate_get_page_url( 'affiliate_register' ),
 					'dashboard' => flyaffiliate_get_page_url( 'affiliate_dashboard' ),
 				],
+				'shareEssentials' => flyaffiliate()->tracker->is_allowed(),
 			],
 			'statuses'   => [
 				'affiliate'  => [

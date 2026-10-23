@@ -2,6 +2,9 @@
 
 **Status:** Accepted
 **Date:** 2026-09-07
+**Note (2026-10-23):** divergence 3 is superseded and divergence 4 amended by
+[ADR-0018](0018-appsero-insights-opt-in.md): Appsero Insights, opt-in, as
+Dokan Lite has it, with the SDK Mozart-prefixed under `vendor-prefixed/`.
 
 ## Context
 
@@ -34,9 +37,11 @@ Divergences in force:
    Only style-only sniffs are silenced, and each has a comment saying why.
 2. **No `load_plugin_textdomain()`.** The text domain is `flyaffiliate`, equal to
    the plugin slug; WordPress.org serves the translations.
-3. **No telemetry.** Dokan bundles Appsero. FlyAffiliate collects nothing, so
-   there is no opt-in notice to write and no privacy disclosure to maintain.
+3. ~~**No telemetry.** Dokan bundles Appsero. FlyAffiliate collects nothing, so
+   there is no opt-in notice to write and no privacy disclosure to maintain.~~
+   Superseded by [ADR-0018](0018-appsero-insights-opt-in.md).
 4. **No bundled runtime dependencies.** See [ADR-0002](0002-in-house-container.md).
+   The one exception is the Appsero SDK, prefixed ([ADR-0018](0018-appsero-insights-opt-in.md)).
 5. **Direct database queries are allowed, unprepared ones are not.** Every table
    FlyAffiliate queries directly is one of its own custom tables, which no
    WordPress API can reach, so `WordPress.DB.DirectDatabaseQuery.DirectQuery`

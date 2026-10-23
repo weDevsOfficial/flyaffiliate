@@ -2,6 +2,10 @@
 
 **Status:** Accepted
 **Date:** 2026-09-07
+**Note (2026-10-23):** one third-party package now ships: the Appsero SDK,
+prefixed by Mozart into `vendor-prefixed/` and committed, not installed by
+Composer ([ADR-0018](0018-appsero-insights-opt-in.md)). The rule below holds
+for everything else.
 
 ## Context
 

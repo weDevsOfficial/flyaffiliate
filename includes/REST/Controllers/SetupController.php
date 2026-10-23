@@ -20,8 +20,9 @@ use WP_REST_Server;
 /**
  * `POST /setup/complete` records that the wizard was finished or skipped.
  *
- * The wizard's settings go through the settings endpoint; this is the one
- * thing it needs that is not a setting.
+ * The wizard's settings go through the settings endpoint; this takes the
+ * two things it needs that are not settings: the done flag, and Share
+ * Essentials, the Appsero opt-in Dokan Lite's wizard asks for.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -50,6 +51,12 @@ class SetupController extends AdminBaseController {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => [ $this, 'complete' ],
 					'permission_callback' => [ $this, 'check_admin_permission' ],
+					'args'                => [
+						'share_essentials' => [
+							'description' => __( 'Whether to share usage data with Appsero. Left out, the current choice stands.', 'flyaffiliate' ),
+							'type'        => 'boolean',
+						],
+					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
@@ -57,7 +64,8 @@ class SetupController extends AdminBaseController {
 	}
 
 	/**
-	 * Mark the wizard done.
+	 * Mark the wizard done, and opt in to Appsero or out of it as Share
+	 * Essentials says.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -68,7 +76,21 @@ class SetupController extends AdminBaseController {
 	public function complete( $request ) {
 		SetupWizard::mark_done();
 
-		return $this->prepare_item_for_response( [ 'done' => true ], $request );
+		if ( $request->has_param( 'share_essentials' ) ) {
+			if ( $request->get_param( 'share_essentials' ) ) {
+				flyaffiliate()->tracker->optin();
+			} else {
+				flyaffiliate()->tracker->optout();
+			}
+		}
+
+		return $this->prepare_item_for_response(
+			[
+				'done'             => true,
+				'share_essentials' => flyaffiliate()->tracker->is_allowed(),
+			],
+			$request
+		);
 	}
 
 	/**
@@ -118,8 +140,14 @@ class SetupController extends AdminBaseController {
 			'title'      => 'flyaffiliate_setup',
 			'type'       => 'object',
 			'properties' => [
-				'done' => [
+				'done'             => [
 					'description' => __( 'Whether the setup wizard has been completed or dismissed.', 'flyaffiliate' ),
+					'type'        => 'boolean',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'share_essentials' => [
+					'description' => __( 'Whether the site shares usage data with Appsero.', 'flyaffiliate' ),
 					'type'        => 'boolean',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,

@@ -44,10 +44,14 @@ export type AdminGlobals = {
 			register: string;
 			dashboard: string;
 		};
+		/** Whether the site shares usage data with Appsero (Share Essentials). */
+		shareEssentials: boolean;
 	};
 	urls: {
 		app: string;
 		wizard: string;
+		/** Appsero's privacy policy, linked from Share Essentials. */
+		insightsPolicy: string;
 		docs: string;
 		support: string;
 		payoutCsv: string;
@@ -109,10 +113,15 @@ const fallback: AdminGlobals = {
 		thousandSeparator: ',',
 	},
 	settings: { payoutMinimum: 0 },
-	setup: { done: false, pages: { register: '', dashboard: '' } },
+	setup: {
+		done: false,
+		pages: { register: '', dashboard: '' },
+		shareEssentials: false,
+	},
 	urls: {
 		app: '',
 		wizard: '',
+		insightsPolicy: '',
 		docs: '',
 		support: '',
 		payoutCsv: '',
