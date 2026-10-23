@@ -54,6 +54,7 @@ class ServiceProvider extends BootableServiceProvider {
 		'payout_method' => \FlyAffiliate\PayoutMethod\Manager::class,
 		'tracking'      => \FlyAffiliate\Tracking\Manager::class,
 		'referral_link' => \FlyAffiliate\ReferralLink\Manager::class,
+		'tracker'       => \FlyAffiliate\Tracker::class,
 	];
 
 	/**

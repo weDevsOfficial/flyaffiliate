@@ -70,3 +70,4 @@
 
 # Screenshots dropped into the plugin root while reviewing.
 /img*.png
+/CleanShot*.png

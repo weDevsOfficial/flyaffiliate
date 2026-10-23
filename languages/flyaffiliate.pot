@@ -9,16 +9,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T11:38:28+00:00\n"
+"POT-Creation-Date: 2026-10-23T06:32:13+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
 
 #. Plugin Name of the plugin
-#. translators: %d: Number of fields that need attention
 #: flyaffiliate.php
-#: includes/Admin/Menu.php:131
-#: includes/Admin/Menu.php:132
+#: includes/Admin/Menu.php:133
+#: includes/Admin/Menu.php:134
 #: templates/admin/user-profile.php:17
 #: assets/js/admin.js:275
 msgid "FlyAffiliate"
@@ -44,8 +43,8 @@ msgstr ""
 msgid "https://wedevs.com/"
 msgstr ""
 
-#: flyaffiliate-class.php:291
-#: includes/Admin/Menu.php:77
+#: flyaffiliate-class.php:292
+#: includes/Admin/Menu.php:79
 #: includes/Frontend/AffiliateDashboard.php:51
 #: assets/js/admin.js:336
 #: assets/js/dashboard.js:282
@@ -53,11 +52,11 @@ msgid "Settings"
 msgstr ""
 
 #. translators: 1: required PHP version, 2: the PHP version running.
-#: flyaffiliate-class.php:313
+#: flyaffiliate-class.php:314
 msgid "FlyAffiliate needs PHP %1$s or newer. This site runs PHP %2$s."
 msgstr ""
 
-#: flyaffiliate-class.php:318
+#: flyaffiliate-class.php:319
 msgid "Plugin activation failed"
 msgstr ""
 
@@ -90,19 +89,19 @@ msgstr ""
 msgid "Choose a %s from the list."
 msgstr ""
 
-#: includes/Admin/Menu.php:72
+#: includes/Admin/Menu.php:74
 #: assets/js/admin.js:298
 msgid "Dashboard"
 msgstr ""
 
-#: includes/Admin/Menu.php:73
+#: includes/Admin/Menu.php:75
 #: assets/js/admin.js:278
 #: assets/js/admin.js:301
 #: assets/js/admin.js:332
 msgid "Affiliates"
 msgstr ""
 
-#: includes/Admin/Menu.php:74
+#: includes/Admin/Menu.php:76
 #: includes/Admin/Settings/Schema/SettingsSchema.php:473
 #: includes/Frontend/AffiliateDashboard.php:48
 #: includes/Payout/CsvExporter.php:39
@@ -116,7 +115,7 @@ msgstr ""
 msgid "Commissions"
 msgstr ""
 
-#: includes/Admin/Menu.php:75
+#: includes/Admin/Menu.php:77
 #: includes/Frontend/AffiliateDashboard.php:49
 #: assets/js/admin.js:279
 #: assets/js/admin.js:291
@@ -129,7 +128,7 @@ msgstr ""
 msgid "Visits"
 msgstr ""
 
-#: includes/Admin/Menu.php:76
+#: includes/Admin/Menu.php:78
 #: includes/Admin/Settings/Schema/SettingsSchema.php:620
 #: includes/Frontend/AffiliateDashboard.php:50
 #: assets/js/admin.js:288
@@ -138,7 +137,7 @@ msgstr ""
 msgid "Payouts"
 msgstr ""
 
-#: includes/Admin/Menu.php:162
+#: includes/Admin/Menu.php:164
 msgid "You are not allowed to view this page."
 msgstr ""
 
@@ -792,9 +791,21 @@ msgstr ""
 msgid "Affiliate"
 msgstr ""
 
-#: includes/Assets.php:304
-#: includes/Assets.php:310
-#: includes/Assets.php:319
+#: includes/Assets.php:282
+msgid "Changelog"
+msgstr ""
+
+#: includes/Assets.php:289
+msgid "Documentation"
+msgstr ""
+
+#: includes/Assets.php:296
+msgid "Request a feature"
+msgstr ""
+
+#: includes/Assets.php:356
+#: includes/Assets.php:362
+#: includes/Assets.php:371
 #: includes/Models/Affiliate.php:86
 #: includes/Models/Commission.php:145
 #: assets/js/admin.js:292
@@ -802,22 +813,22 @@ msgstr ""
 msgid "Pending"
 msgstr ""
 
-#: includes/Assets.php:305
+#: includes/Assets.php:357
 #: includes/Models/Affiliate.php:87
 msgid "Active"
 msgstr ""
 
-#: includes/Assets.php:306
+#: includes/Assets.php:358
 #: includes/Models/Affiliate.php:88
 msgid "Inactive"
 msgstr ""
 
-#: includes/Assets.php:307
+#: includes/Assets.php:359
 #: includes/Models/Affiliate.php:89
 msgid "Suspended"
 msgstr ""
 
-#: includes/Assets.php:311
+#: includes/Assets.php:363
 #: includes/Models/Commission.php:146
 #: assets/js/admin.js:279
 #: assets/js/admin.js:291
@@ -826,9 +837,9 @@ msgstr ""
 msgid "Unpaid"
 msgstr ""
 
-#: includes/Assets.php:312
-#: includes/Assets.php:320
-#: includes/Assets.php:329
+#: includes/Assets.php:364
+#: includes/Assets.php:372
+#: includes/Assets.php:381
 #: includes/Models/Commission.php:147
 #: assets/js/admin.js:291
 #: assets/js/admin.js:292
@@ -837,37 +848,37 @@ msgstr ""
 msgid "Paid"
 msgstr ""
 
-#: includes/Assets.php:313
+#: includes/Assets.php:365
 #: includes/Models/Commission.php:148
 msgid "Rejected"
 msgstr ""
 
-#: includes/Assets.php:317
+#: includes/Assets.php:369
 msgid "Queued"
 msgstr ""
 
-#: includes/Assets.php:318
-#: includes/Assets.php:327
+#: includes/Assets.php:370
+#: includes/Assets.php:379
 msgid "Processing"
 msgstr ""
 
-#: includes/Assets.php:321
+#: includes/Assets.php:373
 msgid "Failed"
 msgstr ""
 
-#: includes/Assets.php:322
+#: includes/Assets.php:374
 msgid "Not sent"
 msgstr ""
 
-#: includes/Assets.php:323
+#: includes/Assets.php:375
 msgid "Method unavailable"
 msgstr ""
 
-#: includes/Assets.php:328
+#: includes/Assets.php:380
 msgid "Needs attention"
 msgstr ""
 
-#: includes/Assets.php:330
+#: includes/Assets.php:382
 msgid "Awaiting payment"
 msgstr ""
 
@@ -1724,8 +1735,16 @@ msgstr ""
 msgid "The stored value, or the default."
 msgstr ""
 
-#: includes/REST/Controllers/SetupController.php:122
+#: includes/REST/Controllers/SetupController.php:56
+msgid "Whether to share usage data with Appsero. Left out, the current choice stands."
+msgstr ""
+
+#: includes/REST/Controllers/SetupController.php:144
 msgid "Whether the setup wizard has been completed or dismissed."
+msgstr ""
+
+#: includes/REST/Controllers/SetupController.php:150
+msgid "Whether the site shares usage data with Appsero."
 msgstr ""
 
 #: includes/REST/Controllers/VisitsController.php:63
@@ -1927,17 +1946,18 @@ msgstr ""
 msgid "The site owner reviews each signup before your account is active."
 msgstr ""
 
+#. translators: %d: Number of fields that need attention
+#: assets/js/admin.js:275
+msgid "Help"
+msgstr ""
+
 #. translators: %s: plugin version
 #: assets/js/admin.js:276
 msgid "Version %s"
 msgstr ""
 
 #: assets/js/admin.js:276
-msgid "Documentation"
-msgstr ""
-
-#: assets/js/admin.js:276
-msgid "Get support"
+msgid "Get Support"
 msgstr ""
 
 #: assets/js/admin.js:276
@@ -3699,6 +3719,22 @@ msgstr ""
 
 #: assets/js/admin.js:339
 msgid "Setup"
+msgstr ""
+
+#: assets/js/admin.js:339
+msgid "Share Essentials"
+msgstr ""
+
+#: assets/js/admin.js:339
+msgid "Help make FlyAffiliate better: allow it to collect non-sensitive diagnostic data and usage information."
+msgstr ""
+
+#: assets/js/admin.js:339
+msgid "What we collect"
+msgstr ""
+
+#: assets/js/admin.js:339
+msgid "Server environment details (PHP, MySQL, server and WordPress versions), the number of users on your site, the site language, the active theme, the number of active and inactive plugins, the site name, URL and IP address, your name and email address, and how many affiliates and commissions you have. No data about your affiliates or visitors is sent. We use Appsero to collect it: <a>learn how Appsero handles your data</a>."
 msgstr ""
 
 #: assets/js/admin.js:339

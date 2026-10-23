@@ -34,23 +34,24 @@ export default function StatCard( {
 				className
 			) }
 		>
-			<div className="flex size-10 items-center justify-center rounded bg-primary/10 text-primary">
+			{ /* Dokan's tile: a 40px box in a 5% tint of the brand, a 24px line icon. */ }
+			<div className="flex size-10 items-center justify-center rounded bg-primary/5 text-primary">
 				{ image ? (
 					<img
 						src={ image }
 						alt=""
 						aria-hidden="true"
-						className="size-5 object-contain"
+						className="size-6 object-contain"
 					/>
 				) : (
-					<Icon className="size-5" aria-hidden="true" />
+					<Icon className="size-6" aria-hidden="true" />
 				) }
 			</div>
 			<div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
 				{ label }
 				{ tooltip && <Hint text={ tooltip } /> }
 			</div>
-			<div className="-mt-1 whitespace-nowrap text-2xl font-bold leading-tight text-foreground tabular-nums">
+			<div className="-mt-1 whitespace-nowrap text-3xl font-bold leading-tight text-foreground tabular-nums">
 				{ value }
 			</div>
 		</Card>

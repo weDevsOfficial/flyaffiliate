@@ -14,12 +14,13 @@ zip** — `.distignore` excludes the whole directory.
 | `banner-772x250.png` | 772 × 250 | Header banner, standard |
 | `screenshot-1.png` | any, 1280 × 800 recommended | Numbered to match the `== Screenshots ==` list in `readme.txt` |
 
-## Status: placeholders
+## Status
 
-The PNGs currently in this directory are **flat teal placeholders generated at
-the correct dimensions**. They exist so the deploy path and the dimension
-requirements are verifiable now. They must be replaced with real artwork before
-the first submission — see `RELEASE.md`.
+The icons are the real artwork; `assets/images/flyaffiliate-icon.png`, which
+the admin's top bar shows, is the 128 × 128 one. The banners and the
+screenshot are still **flat teal placeholders generated at the correct
+dimensions**, there so the deploy path and the dimension requirements are
+verifiable. They must be replaced with real artwork.
 
 Screenshots must be captured from a real install with real data, and each one
 needs a matching caption in `readme.txt` under `== Screenshots ==`, in order.

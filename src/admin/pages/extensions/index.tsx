@@ -41,14 +41,7 @@ import {
 import EmptyState from '@/components/EmptyState';
 import PageHeader from '@/components/PageHeader';
 import { getGlobals, type ProExtensionsData } from '@/lib/globals';
-import {
-	dokanLogo,
-	fluentCartLogo,
-	payPalLogo,
-	stripeLogo,
-	sureCartLogo,
-	wooCommerceLogo,
-} from '@/assets/logos';
+import { dokanLogo, payPalLogo, wooCommerceLogo } from '@/assets/logos';
 import PreviewCard, { categoryLabel, type ExtensionView } from './PreviewCard';
 import UpgradeDialog from './UpgradeDialog';
 
@@ -407,13 +400,10 @@ const BANNER_TILES: BannerTile[][] = [
 	[
 		{ name: 'WooCommerce', src: wooCommerceLogo },
 		{ name: 'Dokan', src: dokanLogo },
-		{ name: 'SureCart', src: sureCartLogo },
-		{ name: 'FluentCart', src: fluentCartLogo },
 		{ name: __( 'Referral links', 'flyaffiliate' ), icon: Link2 },
 	],
 	[
 		{ name: 'PayPal', src: payPalLogo },
-		{ name: 'Stripe', src: stripeLogo },
 		{ name: __( 'Bank transfer', 'flyaffiliate' ), icon: Landmark },
 		{ name: __( 'Commissions', 'flyaffiliate' ), icon: BadgePercent },
 	],

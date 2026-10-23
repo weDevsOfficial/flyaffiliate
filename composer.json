@@ -15,14 +15,16 @@
         "php": ">=8.1"
     },
     "require-dev": {
-        "wp-coding-standards/wpcs": "^3.1",
+        "appsero/client": "^v2.0.6",
+        "brain/monkey": "^2.6",
+        "coenjacobs/mozart": "^0.7.1",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "mockery/mockery": "^1.6",
         "phpcompatibility/phpcompatibility-wp": "^2.1",
         "phpunit/phpunit": "^9.6",
+        "wp-coding-standards/wpcs": "^3.1",
         "wp-phpunit/wp-phpunit": "^6.4",
-        "yoast/phpunit-polyfills": "^1.1",
-        "brain/monkey": "^2.6",
-        "mockery/mockery": "^1.6"
+        "yoast/phpunit-polyfills": "^1.1"
     },
     "config": {
         "platform": {
@@ -36,7 +38,8 @@
     },
     "autoload": {
         "psr-4": {
-            "FlyAffiliate\\": "includes/"
+            "FlyAffiliate\\": "includes/",
+            "FlyAffiliate\\Dependencies\\": "vendor-prefixed/"
         }
     },
     "autoload-dev": {
@@ -45,6 +48,14 @@
         }
     },
     "scripts": {
+        "post-install-cmd": [
+            "[ $COMPOSER_DEV_MODE -eq 0 ] || \"vendor/bin/mozart\" compose",
+            "[ $COMPOSER_DEV_MODE -eq 0 ] || composer dump-autoload"
+        ],
+        "post-update-cmd": [
+            "[ $COMPOSER_DEV_MODE -eq 0 ] || \"vendor/bin/mozart\" compose",
+            "[ $COMPOSER_DEV_MODE -eq 0 ] || composer dump-autoload"
+        ],
         "phpcs": [
             "phpcs -p -s"
         ],
@@ -69,5 +80,17 @@
         "phpcbf": "Auto-fix the code style violations PHPCS can fix.",
         "test": "Run the PHPUnit suite (requires a provisioned WP test install or wp-env).",
         "release": "Build build/flyaffiliate-v<version>.zip honouring .distignore."
+    },
+    "extra": {
+        "mozart": {
+            "dep_namespace": "FlyAffiliate\\Dependencies\\",
+            "dep_directory": "/vendor-prefixed/",
+            "classmap_directory": "/vendor-prefixed/classes/",
+            "classmap_prefix": "FlyAffiliate_",
+            "packages": [
+                "appsero/client"
+            ],
+            "delete_vendor_directories": true
+        }
     }
 }

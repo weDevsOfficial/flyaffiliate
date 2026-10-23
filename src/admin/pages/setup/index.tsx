@@ -3,9 +3,16 @@
  *
  * Every field is rendered from the same schema the settings screen uses, so
  * labels, descriptions and validation are the ones the admin meets later.
- * Nothing is written until a step is continued.
+ * Nothing is written until a step is continued. The last step also asks for
+ * Share Essentials, the Appsero opt-in Dokan Lite's wizard asks for; it is
+ * not a setting and goes with `POST /setup/complete`.
  */
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useMemo,
+	useState,
+} from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, PartyPopper } from 'lucide-react';
@@ -183,6 +190,10 @@ export default function SetupPage() {
 	const [ values, setValues ] = useState< Record< string, unknown > >( {} );
 	const [ errors, setErrors ] = useState< Record< string, string > >( {} );
 	const [ busy, setBusy ] = useState< 'continue' | 'skip' | null >( null );
+	const [ shareEssentials, setShareEssentials ] = useState(
+		setup.shareEssentials
+	);
+	const [ showCollected, setShowCollected ] = useState( false );
 
 	const step = STEPS[ current ];
 
@@ -272,7 +283,9 @@ export default function SetupPage() {
 	};
 
 	const complete = async () => {
-		await send( '/setup/complete', 'POST' );
+		await send( '/setup/complete', 'POST', {
+			share_essentials: shareEssentials,
+		} );
 		markSetupDone();
 	};
 
@@ -498,7 +511,75 @@ export default function SetupPage() {
 					</div>
 				);
 			case 'email':
-				return renderSwitch( 'activation_email_enabled' );
+				return (
+					<div className="grid gap-5">
+						{ renderSwitch( 'activation_email_enabled' ) }
+						<div className="border-t border-border pt-5">
+							<LabeledSwitch
+								id="flyaffiliate-setup-share-essentials"
+								label={ __(
+									'Share Essentials',
+									'flyaffiliate'
+								) }
+								description={
+									<>
+										{ __(
+											'Help make FlyAffiliate better: allow it to collect non-sensitive diagnostic data and usage information.',
+											'flyaffiliate'
+										) }{ ' ' }
+										<button
+											type="button"
+											className="cursor-pointer border-0 bg-transparent p-0 text-primary hover:underline"
+											aria-expanded={ showCollected }
+											aria-controls="flyaffiliate-setup-collected"
+											onClick={ () =>
+												setShowCollected(
+													! showCollected
+												)
+											}
+										>
+											{ __(
+												'What we collect',
+												'flyaffiliate'
+											) }
+										</button>
+										{ showCollected && (
+											<span
+												id="flyaffiliate-setup-collected"
+												className="mt-2 block text-xs"
+											>
+												{ createInterpolateElement(
+													__(
+														'Server environment details (PHP, MySQL, server and WordPress versions), the number of users on your site, the site language, the active theme, the number of active and inactive plugins, the site name, URL and IP address, your name and email address, and how many affiliates and commissions you have. No data about your affiliates or visitors is sent. We use Appsero to collect it: <a>learn how Appsero handles your data</a>.',
+														'flyaffiliate'
+													),
+													{
+														a: (
+															// eslint-disable-next-line jsx-a11y/anchor-has-content
+															<a
+																href={
+																	urls.insightsPolicy
+																}
+																target="_blank"
+																rel="noopener noreferrer"
+																className="text-primary hover:underline"
+															/>
+														),
+													}
+												) }
+											</span>
+										) }
+									</>
+								}
+								checked={ shareEssentials }
+								onCheckedChange={ ( checked: boolean ) =>
+									setShareEssentials( checked )
+								}
+								data-testid="flyaffiliate-setup-share-essentials"
+							/>
+						</div>
+					</div>
+				);
 			case 'done':
 				return (
 					<div className="grid gap-4">

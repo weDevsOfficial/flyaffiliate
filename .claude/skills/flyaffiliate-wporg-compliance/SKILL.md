@@ -97,8 +97,12 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
   setup wizard redirect fires once, records that it fired, and the wizard has a
   visible skip.
 - No admin notice that cannot be dismissed, and none outside the plugin's own
-  screens.
-- No telemetry, no phone-home, no external API call the user did not ask for.
+  screens — except the Appsero SDK's opt-in, which shows elsewhere in wp-admin
+  until it is answered, as Dokan Lite's does (ADR-0018).
+- No telemetry without consent, no phone-home, no external API call the user
+  did not ask for. Appsero Insights sends nothing until an administrator
+  allows it (Share Essentials or the SDK's notice), and the readme's Privacy
+  section names every service it reaches; keep both true (ADR-0018).
 - Uninstall removes data only when the "clear data on uninstall" setting says so,
   and `uninstall.php` starts with the `WP_UNINSTALL_PLUGIN` guard.
 

@@ -6,7 +6,7 @@
  */
 
 .flyaffiliate-area {
-	--flyaffiliate-accent: #0d7377;
+	--flyaffiliate-accent: #0043da;
 	--flyaffiliate-text: #1f2937;
 	--flyaffiliate-muted: #6b7280;
 	--flyaffiliate-border: #e5e7eb;
@@ -37,7 +37,7 @@
 
 .flyaffiliate-button:hover,
 .flyaffiliate-button:focus {
-	background: #0a5c5f;
+	background: #0036ae;
 	color: #fff;
 	text-decoration: none;
 }

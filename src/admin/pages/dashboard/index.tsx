@@ -64,6 +64,7 @@ import { errorMessage, fetchOne, send } from '@/lib/api';
 import { formatDate, formatMoney, toYmd } from '@/lib/format';
 import { getGlobals } from '@/lib/globals';
 import type { DashboardStats } from '@/lib/types';
+import { BRAND } from '@/theme';
 
 const { Area, AreaChart, CartesianGrid, XAxis } = recharts;
 
@@ -366,15 +367,20 @@ export default function DashboardPage() {
 		presets.push( { value: 'custom', label: customLabel } );
 	}
 
-	// Two hues of their own, the way Dokan's chart tells its series apart.
+	// Both series in the brand's blues, the logo's two: visits in its light
+	// blue, the conversions they led to in the brand blue, drawn on top. Each
+	// area is filled with a solid tint of its own colour, not a see-through
+	// one, which blended the two into a colour the legend does not show.
 	const chartConfig = {
 		visits: {
 			label: __( 'Visits', 'flyaffiliate' ),
-			color: '#7047eb',
+			color: '#99c8ed',
+			tint: '#eff6fd',
 		},
 		converted: {
 			label: __( 'Converted', 'flyaffiliate' ),
-			color: '#12b76a',
+			color: BRAND,
+			tint: '#e0e8fb',
 		},
 	};
 
@@ -835,16 +841,18 @@ export default function DashboardPage() {
 										<Area
 											dataKey="visits"
 											type="monotone"
-											fill="var(--color-visits)"
-											fillOpacity={ 0.15 }
+											fill={ chartConfig.visits.tint }
+											fillOpacity={ 1 }
 											stroke="var(--color-visits)"
+											strokeWidth={ 2 }
 										/>
 										<Area
 											dataKey="converted"
 											type="monotone"
-											fill="var(--color-converted)"
-											fillOpacity={ 0.25 }
+											fill={ chartConfig.converted.tint }
+											fillOpacity={ 1 }
 											stroke="var(--color-converted)"
+											strokeWidth={ 2 }
 										/>
 									</AreaChart>
 								</ChartContainer>

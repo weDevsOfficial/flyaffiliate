@@ -62,6 +62,11 @@ $flyaffiliate_options = [
 	FlyAffiliate\Install\Installer::DB_VERSION_OPTION,
 	FlyAffiliate\Install\Installer::PAGES_OPTION,
 	'flyaffiliate_setup_wizard_done',
+	// The Appsero SDK's, named after the plugin's directory (FlyAffiliate\Tracker).
+	'flyaffiliate_allow_tracking',
+	'flyaffiliate_tracking_notice',
+	'flyaffiliate_tracking_last_send',
+	'flyaffiliate_tracking_skipped',
 ];
 
 foreach ( $flyaffiliate_options as $flyaffiliate_option ) {

@@ -45,16 +45,18 @@ class Menu implements Hookable {
 	}
 
 	/**
-	 * The menu icon: a paper plane, as an inline SVG.
+	 * The menu icon: FlyAffiliate's mark, as an inline SVG.
 	 *
 	 * A single fill lets wp-admin recolour it for every admin colour scheme.
+	 * The view box leaves a margin round the mark, so at wp-admin's 20px it
+	 * draws 17px wide, as wide as Dokan's menu icon.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
 	 * @return string
 	 */
 	public static function get_menu_icon(): string {
-		return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZmlsbD0iI2E3YWFhZCIgZD0iTTI1LjYgNi43IDYuNyAxMy45Yy0uNjIuMjQtLjYgMS4xMy4wMyAxLjM0TDEzIDE3LjNsMi40IDYuM2MuMjIuNiAxLjA2LjYyIDEuMzIuMDNMMjYuNiA3LjljLjI4LS42Mi0uMzctMS4yNi0xLTEuMloiLz48L3N2Zz4=';
+		return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEzNy41IDEzNiAzMDQgMzA0IiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiPjxwYXRoIGZpbGw9IiNhN2FhYWQiIGQ9Ik0xODUgMTUySDM0N0MzNDAgMjMwIDI5MCAyODIgMjIwIDI4MkgxNjBWMTc3UTE2MCAxNTIgMTg1IDE1MlpNMTg1IDI5M0g0MTlDNDEyIDM4MCAzNTAgNDI0IDI2MCA0MjRIMTkwUTE2MCA0MjQgMTYwIDM5NFYzMThRMTYwIDI5MyAxODUgMjkzWiIvPjwvc3ZnPg==';
 	}
 
 	/**

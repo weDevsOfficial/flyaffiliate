@@ -31,6 +31,17 @@ export type ProExtensionsData = {
 	features: string[];
 };
 
+/** One link in the top bar's help menu. */
+export type HelpMenuItem = {
+	id: string;
+	title: string;
+	url: string;
+	/** A key `HelpMenu` maps to an icon. */
+	icon: string;
+	/** Opens in a new tab. */
+	external: boolean;
+};
+
 export type AdminGlobals = {
 	version: string;
 	restNonce: string;
@@ -44,10 +55,16 @@ export type AdminGlobals = {
 			register: string;
 			dashboard: string;
 		};
+		/** Whether the site shares usage data with Appsero (Share Essentials). */
+		shareEssentials: boolean;
 	};
 	urls: {
 		app: string;
 		wizard: string;
+		/** FlyAffiliate's icon, for the top bar. */
+		logo: string;
+		/** Appsero's privacy policy, linked from Share Essentials. */
+		insightsPolicy: string;
 		docs: string;
 		support: string;
 		payoutCsv: string;
@@ -55,6 +72,8 @@ export type AdminGlobals = {
 		orders: string;
 		products: string;
 	};
+	/** The top bar's help menu. */
+	helpMenu: HelpMenuItem[];
 	statuses: {
 		affiliate: Record< string, string >;
 		commission: Record< string, string >;
@@ -109,10 +128,16 @@ const fallback: AdminGlobals = {
 		thousandSeparator: ',',
 	},
 	settings: { payoutMinimum: 0 },
-	setup: { done: false, pages: { register: '', dashboard: '' } },
+	setup: {
+		done: false,
+		pages: { register: '', dashboard: '' },
+		shareEssentials: false,
+	},
 	urls: {
 		app: '',
 		wizard: '',
+		logo: '',
+		insightsPolicy: '',
 		docs: '',
 		support: '',
 		payoutCsv: '',
@@ -120,6 +145,7 @@ const fallback: AdminGlobals = {
 		orders: '',
 		products: '',
 	},
+	helpMenu: [],
 	statuses: { affiliate: {}, commission: {}, transfer: {}, batch: {} },
 	sources: {},
 	availableSources: { manual: 'Manual' },

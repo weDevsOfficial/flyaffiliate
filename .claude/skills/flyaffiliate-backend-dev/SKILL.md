@@ -25,7 +25,10 @@ here.
   `FlyAffiliate\Commission\Manager` → `includes/Commission/Manager.php`.
 - Autoloading is Composer's (`vendor/autoload.php`, PSR-4 in `composer.json`).
   The zip carries a production `vendor/` with that loader and nothing else
-  (ADR-0002). Do not add a runtime Composer package.
+  (ADR-0002). Do not add a runtime Composer package. The one bundled package
+  is the Appsero SDK, Mozart-prefixed into `FlyAffiliate\Dependencies\` under
+  `vendor-prefixed/` (committed, never edited), behind `FlyAffiliate\Tracker`
+  (ADR-0018).
 - Procedural helpers live in `includes/functions.php` and are prefixed
   `flyaffiliate_`.
 
@@ -323,12 +326,22 @@ contain no queries — the caller prepares the data.
   shows Dokan Pro's modules (Pro ADR-0005). The cards come from PHP, so they
   are translated there; only an extension Pro ships is listed, never one
   still to come. With Pro running, Pro's own Extensions page owns the route.
-- The brand colour is the logo teal `#0d7377`: `src/admin/theme.ts` (plugin-ui
-  tokens) and the `$brand` variable in `src/styles/base.scss` carry it.
+- The brand colour is the logo blue `#0043da`: `src/admin/theme.ts` (plugin-ui
+  tokens, with its 8% tint and focus ring), the `$brand` variable in
+  `src/styles/base.scss`, `--flyaffiliate-accent` in `assets/src/css/frontend.css`
+  and Pro's own `src/admin/theme.ts` carry it.
   Use `text-foreground`/`text-muted-foreground`/`text-primary`, never
   `text-gray-*` or a hex colour, so a token change reaches every page.
-- `components/Layout.tsx` wraps every page in plugin-ui's `<TopBar>`; page
-  content starts with `<PageHeader>`. Other plugins' admin notices are
+  The wp-admin menu icon is the logo's mark (`Menu::get_menu_icon()`), its
+  view box padded so it draws 17px wide at wp-admin's 20px, as Dokan's does.
+- `components/Layout.tsx` wraps every page in plugin-ui's `<TopBar>`, edge to
+  edge under the admin bar as Dokan's header is (the screen drops wp-admin's
+  content gutter and `.flyaffiliate-admin-content` takes it back): the icon
+  (`assets/images/flyaffiliate-icon.png`, `urls.logo`), the version, Get
+  support (`urls.support`: WordPress.org's forum; Pro sends its customers to
+  weDevs) and the help menu (`HelpMenu`, from `Assets::get_help_menu_items()`
+  and `flyaffiliate_admin_help_menu_items`). Page content starts with
+  `<PageHeader>`. Other plugins' admin notices are
   hidden on our screen, as Dokan and WooCommerce hide them on theirs
   (ADR-0017, `Admin\Notices\Manager`); register FlyAffiliate's own notices
   through `flyaffiliate_admin_notices`, which renders them above the app on
