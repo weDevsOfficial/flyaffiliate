@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T06:32:13+00:00\n"
+"POT-Creation-Date: 2026-10-23T08:28:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -47,7 +47,7 @@ msgstr ""
 #: includes/Admin/Menu.php:79
 #: includes/Frontend/AffiliateDashboard.php:51
 #: assets/js/admin.js:336
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Settings"
 msgstr ""
 
@@ -111,7 +111,7 @@ msgstr ""
 #: assets/js/admin.js:298
 #: assets/js/admin.js:300
 #: assets/js/admin.js:339
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Commissions"
 msgstr ""
 
@@ -124,7 +124,8 @@ msgstr ""
 #: assets/js/admin.js:297
 #: assets/js/admin.js:300
 #: assets/js/dashboard.js:279
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:283
 msgid "Visits"
 msgstr ""
 
@@ -133,7 +134,7 @@ msgstr ""
 #: includes/Frontend/AffiliateDashboard.php:50
 #: assets/js/admin.js:288
 #: assets/js/admin.js:293
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Payouts"
 msgstr ""
 
@@ -260,7 +261,7 @@ msgstr ""
 #: includes/Frontend/AffiliateDashboard.php:47
 #: assets/js/admin.js:293
 #: assets/js/admin.js:339
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Referral links"
 msgstr ""
 
@@ -833,7 +834,7 @@ msgstr ""
 #: assets/js/admin.js:279
 #: assets/js/admin.js:291
 #: assets/js/admin.js:292
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Unpaid"
 msgstr ""
 
@@ -947,7 +948,7 @@ msgid "Payment #%d is being sent, so its commissions cannot change until the tra
 msgstr ""
 
 #: includes/Frontend/AffiliateDashboard.php:46
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Overview"
 msgstr ""
 
@@ -1028,7 +1029,7 @@ msgstr ""
 #: includes/Models/Commission.php:201
 #: assets/js/admin.js:279
 #: assets/js/admin.js:313
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Sale"
 msgstr ""
 
@@ -1044,7 +1045,7 @@ msgstr ""
 #: includes/Payout/CsvExporter.php:36
 #: assets/js/admin.js:276
 #: assets/js/admin.js:288
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Payment email"
 msgstr ""
 
@@ -1055,8 +1056,8 @@ msgstr ""
 #: assets/js/admin.js:297
 #: assets/js/admin.js:313
 #: assets/js/admin.js:320
-#: assets/js/dashboard.js:279
 #: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:281
 msgid "Amount"
 msgstr ""
 
@@ -1070,8 +1071,8 @@ msgstr ""
 #: assets/js/admin.js:297
 #: assets/js/admin.js:313
 #: assets/js/admin.js:322
-#: assets/js/dashboard.js:279
 #: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:281
 msgid "Reference"
 msgstr ""
 
@@ -1082,8 +1083,8 @@ msgstr ""
 #: assets/js/admin.js:297
 #: assets/js/admin.js:298
 #: assets/js/admin.js:313
-#: assets/js/dashboard.js:279
 #: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:281
 msgid "Date"
 msgstr ""
 
@@ -1093,9 +1094,9 @@ msgstr ""
 #: assets/js/admin.js:288
 #: assets/js/admin.js:297
 #: assets/js/admin.js:313
-#: assets/js/dashboard.js:279
 #: assets/js/dashboard.js:280
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:281
+#: assets/js/dashboard.js:283
 msgid "Status"
 msgstr ""
 
@@ -1502,7 +1503,7 @@ msgid "No referral link with that ID."
 msgstr ""
 
 #: includes/REST/Controllers/MeController.php:487
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "The link could not be removed."
 msgstr ""
 
@@ -2004,13 +2005,13 @@ msgstr ""
 #: assets/js/admin.js:276
 #: assets/js/admin.js:298
 #: assets/js/admin.js:306
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Cancel"
 msgstr ""
 
 #: assets/js/admin.js:276
 #: assets/js/admin.js:297
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Save"
 msgstr ""
 
@@ -2116,13 +2117,13 @@ msgstr ""
 
 #: assets/js/admin.js:278
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Referral link copied."
 msgstr ""
 
 #: assets/js/admin.js:278
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "The link could not be copied."
 msgstr ""
 
@@ -2167,7 +2168,7 @@ msgstr ""
 #: assets/js/admin.js:291
 #: assets/js/admin.js:302
 #: assets/js/admin.js:305
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "All"
 msgstr ""
 
@@ -2194,7 +2195,7 @@ msgid "Copied"
 msgstr ""
 
 #: assets/js/admin.js:278
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Immediately"
 msgstr ""
 
@@ -2238,7 +2239,7 @@ msgid "Platform"
 msgstr ""
 
 #: assets/js/admin.js:279
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Payable from"
 msgstr ""
 
@@ -2285,7 +2286,7 @@ msgid "The commission could not be deleted."
 msgstr ""
 
 #: assets/js/admin.js:279
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "No commissions"
 msgstr ""
 
@@ -2318,13 +2319,13 @@ msgstr ""
 #: assets/js/admin.js:279
 #: assets/js/admin.js:297
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Converted"
 msgstr ""
 
 #: assets/js/admin.js:279
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Not converted"
 msgstr ""
 
@@ -2341,18 +2342,18 @@ msgid "Referrer URL"
 msgstr ""
 
 #: assets/js/admin.js:279
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Direct"
 msgstr ""
 
 #: assets/js/admin.js:279
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Result"
 msgstr ""
 
 #: assets/js/admin.js:279
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Order"
 msgstr ""
 
@@ -2402,15 +2403,15 @@ msgstr ""
 #: assets/js/admin.js:288
 #: assets/js/admin.js:310
 #: assets/js/admin.js:321
-#: assets/js/dashboard.js:280
 #: assets/js/dashboard.js:281
+#: assets/js/dashboard.js:282
 msgid "Payout"
 msgstr ""
 
 #: assets/js/admin.js:286
 #: assets/js/admin.js:288
 #: assets/js/admin.js:321
-#: assets/js/dashboard.js:281
+#: assets/js/dashboard.js:282
 msgid "Untitled payout"
 msgstr ""
 
@@ -2500,7 +2501,7 @@ msgid "New payout"
 msgstr ""
 
 #: assets/js/admin.js:288
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "No payouts yet"
 msgstr ""
 
@@ -2610,17 +2611,17 @@ msgstr ""
 
 #: assets/js/admin.js:291
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Page"
 msgstr ""
 
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Referral link"
 msgstr ""
 
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Conversions"
 msgstr ""
 
@@ -2629,12 +2630,12 @@ msgid "Last visit"
 msgstr ""
 
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Created"
 msgstr ""
 
 #: assets/js/admin.js:291
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Open page"
 msgstr ""
 
@@ -2879,12 +2880,12 @@ msgid "This year"
 msgstr ""
 
 #: assets/js/admin.js:297
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "All time"
 msgstr ""
 
 #: assets/js/admin.js:297
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Product"
 msgstr ""
 
@@ -2910,12 +2911,12 @@ msgid "Pick dates"
 msgstr ""
 
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Apply"
 msgstr ""
 
 #: assets/js/admin.js:298
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Pick a date range"
 msgstr ""
 
@@ -3038,7 +3039,7 @@ msgid "Recent visits"
 msgstr ""
 
 #: assets/js/admin.js:302
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "No visits yet"
 msgstr ""
 
@@ -3067,7 +3068,7 @@ msgstr ""
 #: assets/js/admin.js:304
 #: assets/js/admin.js:328
 #: assets/js/admin.js:332
-#: assets/js/dashboard.js:281
+#: assets/js/dashboard.js:282
 msgid "%d commission"
 msgid_plural "%d commissions"
 msgstr[0] ""
@@ -3524,12 +3525,12 @@ msgid "Run the setup wizard"
 msgstr ""
 
 #: assets/js/admin.js:336
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Settings saved."
 msgstr ""
 
 #: assets/js/admin.js:336
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "The settings could not be saved."
 msgstr ""
 
@@ -3893,155 +3894,164 @@ msgid "Clicks on your referral links."
 msgstr ""
 
 #: assets/js/dashboard.js:279
+msgid "Until you connect it, your payouts go to the details below."
+msgstr ""
+
+#. translators: %s: the detail the affiliate enters, e.g. "PayPal email".
+#: assets/js/dashboard.js:280
+msgid "Until you connect it, your payouts go to the %s below."
+msgstr ""
+
+#: assets/js/dashboard.js:280
 msgid "Where you get paid"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Your payouts are sent to this account, so there is nothing to enter."
 msgstr ""
 
-#: assets/js/dashboard.js:279
-msgid "Connect it and your payouts are sent there, with nothing to enter. Until then they go to the details below."
+#: assets/js/dashboard.js:280
+msgid "Connect it and your payouts are sent there, with nothing to enter."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Not connected yet"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Change"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Connect"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Your details"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Where payouts go, and how you tell people about us."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "How you get paid"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Where payouts made by hand are sent."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "How do you promote us?"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Copy link"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Remove from list"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "The link leaves this list only. Wherever you have shared it, it keeps working and earning, and its visits and commissions stay."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Link removed from the list."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "No referral links yet"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Generate a link to any page of this site on the Overview. It shows up here with the visits it brings."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "The commission could not be loaded."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Commission for order"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Commission"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Item"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Visit"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Landing page"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Referrer"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "This commission did not come from a tracked visit."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Details"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "No commissions yet"
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "Every sale made through your link shows up here."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "A visit is recorded every time someone follows your link."
 msgstr ""
 
-#: assets/js/dashboard.js:279
+#: assets/js/dashboard.js:280
 msgid "This payout has no commissions attached."
 msgstr ""
 
 #. translators: %s: the payout amount
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:281
 msgid "Payout of %s"
 msgstr ""
 
-#: assets/js/dashboard.js:280
+#: assets/js/dashboard.js:281
 msgid "The following commissions have been included in this payout."
 msgstr ""
 
 #. translators: %s: the payment's reference, e.g. a bank transfer id
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Reference %s"
 msgstr ""
 
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "View commissions"
 msgstr ""
 
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Once your unpaid balance is paid out, the record appears here."
 msgstr ""
 
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Your dashboard could not be loaded."
 msgstr ""
 
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Your affiliate account is active. Welcome aboard."
 msgstr ""
 
-#: assets/js/dashboard.js:282
+#: assets/js/dashboard.js:283
 msgid "Show all time"
 msgstr ""

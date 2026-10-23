@@ -3,7 +3,7 @@
  * paid, where, and how they promote the store.
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
 	Card,
@@ -12,6 +12,7 @@ import {
 	CardHeader,
 	CardTitle,
 	Field,
+	FieldDescription,
 	FieldLabel,
 	Input,
 	LabeledRadio,
@@ -121,22 +122,45 @@ function DetailField( {
 /**
  * The account a method pays the affiliate to without asking them for
  * anything (a vendor's store account), in place of the method's fields;
- * or, not connected yet, offered with Connect above them.
+ * or, not connected yet, offered with Connect above them, saying that
+ * they are paid to those fields until then.
  *
  * @param {Object} props         The props.
  * @param {string} props.method  The method's id.
  * @param {Object} props.account The account.
+ * @param {Array}  props.fields  The method's fields, shown below it while it is offered.
  * @return {JSX.Element} The account.
  */
 function ConnectedAccount( {
 	method,
 	account,
+	fields,
 }: {
 	method: string;
 	account: ConnectedAccountData;
+	fields: PayoutMethodField[];
 } ) {
 	const logo = methodLogo( method );
 	const isConnected = false !== account.connected;
+	// Offered, it is not where the money goes yet: the fields below are.
+	// Said in plain sight, or the two read as two things to fill in.
+	let paidUntilConnected = '';
+
+	if ( ! isConnected && 1 === fields.length ) {
+		paidUntilConnected = sprintf(
+			/* translators: %s: the detail the affiliate enters, e.g. "PayPal email". */
+			__(
+				'Until you connect it, your payouts go to the %s below.',
+				'flyaffiliate'
+			),
+			fields[ 0 ].label
+		);
+	} else if ( ! isConnected && fields.length > 1 ) {
+		paidUntilConnected = __(
+			'Until you connect it, your payouts go to the details below.',
+			'flyaffiliate'
+		);
+	}
 
 	return (
 		<Field
@@ -153,7 +177,7 @@ function ConnectedAccount( {
 								'flyaffiliate'
 						  )
 						: __(
-								'Connect it and your payouts are sent there, with nothing to enter. Until then they go to the details below.',
+								'Connect it and your payouts are sent there, with nothing to enter.',
 								'flyaffiliate'
 						  )
 				}
@@ -198,6 +222,13 @@ function ConnectedAccount( {
 					</Button>
 				) }
 			</div>
+			{ paidUntilConnected && (
+				<FieldDescription
+					data-testid={ `flyaffiliate-payout-${ method }-until-connected` }
+				>
+					{ paidUntilConnected }
+				</FieldDescription>
+			) }
 		</Field>
 	);
 }
@@ -341,6 +372,7 @@ export default function SettingsPage( { profile, onSaved }: Props ) {
 							<ConnectedAccount
 								method={ chosen.id }
 								account={ account }
+								fields={ chosen.fields }
 							/>
 						) }
 
