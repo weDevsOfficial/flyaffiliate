@@ -326,10 +326,14 @@ contain no queries — the caller prepares the data.
   shows Dokan Pro's modules (Pro ADR-0005). The cards come from PHP, so they
   are translated there; only an extension Pro ships is listed, never one
   still to come. With Pro running, Pro's own Extensions page owns the route.
-- The brand colour is the logo teal `#0d7377`: `src/admin/theme.ts` (plugin-ui
-  tokens) and the `$brand` variable in `src/styles/base.scss` carry it.
+- The brand colour is the logo blue `#0043da`: `src/admin/theme.ts` (plugin-ui
+  tokens, with its 8% tint and focus ring), the `$brand` variable in
+  `src/styles/base.scss`, `--flyaffiliate-accent` in `assets/src/css/frontend.css`
+  and Pro's own `src/admin/theme.ts` carry it.
   Use `text-foreground`/`text-muted-foreground`/`text-primary`, never
   `text-gray-*` or a hex colour, so a token change reaches every page.
+  The wp-admin menu icon is the logo's mark (`Menu::get_menu_icon()`), its
+  view box padded so it draws 17px wide at wp-admin's 20px, as Dokan's does.
 - `components/Layout.tsx` wraps every page in plugin-ui's `<TopBar>`; page
   content starts with `<PageHeader>`. Other plugins' admin notices are
   hidden on our screen, as Dokan and WooCommerce hide them on theirs

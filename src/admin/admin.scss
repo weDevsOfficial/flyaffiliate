@@ -56,7 +56,7 @@
  */
 /* stylelint-disable selector-class-pattern, selector-id-pattern -- WordPress' own selectors. */
 .toplevel_page_flyaffiliate [id^="portal/:"] {
-	--wp-components-color-accent: #e7f1f1;
+	--wp-components-color-accent: #e6ecfb;
 	--wp-components-color-accent-inverted: #{base.$brand};
 
 	div[role="menu"] {

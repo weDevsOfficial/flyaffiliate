@@ -4,7 +4,7 @@
  * No brand colour on the frontend: the dashboard sits inside whatever theme
  * the site runs, so it keeps plugin-ui's neutral palette — a near-black
  * primary, grey rings and muted greys — which reads as part of any theme.
- * The admin app carries the brand teal in `src/admin/theme.ts`.
+ * The admin app carries the brand blue in `src/admin/theme.ts`.
  */
 import type { ThemeTokens } from '@wedevs/plugin-ui';
 

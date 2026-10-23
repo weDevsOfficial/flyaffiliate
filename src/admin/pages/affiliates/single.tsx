@@ -48,7 +48,7 @@ type Detail = Affiliate & {
 	visits?: { all: number; converted: number; not_converted: number };
 };
 
-// Inactive tabs stay readable on the grey track; the active one is the brand teal.
+// Inactive tabs stay readable on the grey track; the active one is the brand blue.
 const TAB_TRIGGER =
 	'px-4 text-foreground/80 hover:text-foreground data-active:text-primary';
 

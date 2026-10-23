@@ -4,8 +4,8 @@
  * each app imports first; each app's stylesheet then `@use`s this file.
  */
 
-/* The logo teal, and the tint its hovers sit on. Keep in step with src/admin/theme.ts. */
-$brand: #0d7377;
+/* The logo blue. Keep in step with src/admin/theme.ts. */
+$brand: #0043da;
 
 /* ─── Shared reset ─── */
 
@@ -201,7 +201,7 @@ $brand: #0d7377;
 	/*
 	 * WordPress's own components (the DataViews checkboxes, for one) read
 	 * their accent from these variables. They follow each app's plugin-ui
-	 * theme — the brand teal in the admin, plugin-ui's neutral near-black on
+	 * theme — the brand blue in the admin, plugin-ui's neutral near-black on
 	 * the frontend — and are set on `.pui-root`, the only place `--primary`
 	 * exists.
 	 */

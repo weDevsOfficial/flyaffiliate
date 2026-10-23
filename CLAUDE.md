@@ -129,7 +129,7 @@ flyaffiliate/
 │   ├── Tracker.php                # Appsero Insights, opt-in, as Dokan Lite's Tracker (ADR-0018)
 │   └── functions.php              # flyaffiliate_get_option(), flyaffiliate_get_template_part(), helpers
 ├── templates/                     # Overridable templates: admin/ (app mount, profile), affiliate-dashboard/, registration/
-├── assets/                        # css/, js/ (built output only; plain sources in assets/src/)
+├── assets/                        # css/, js/ (built output only; plain sources in assets/src/), images/ (the plugin icon)
 ├── vendor-prefixed/               # Mozart output: the Appsero SDK as FlyAffiliate\Dependencies\ — committed, never edited
 ├── src/admin/                     # The React admin app: App.tsx (routes), pages/, components/, hooks/, lib/, tailwind.css + admin.scss
 ├── src/dashboard/                 # The affiliate dashboard app (frontend): App.tsx (tabs), pages/, tables/, tailwind.css + dashboard.scss
