@@ -57,7 +57,7 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 
 ```bash
 # PHP
-composer install            # Dev dependencies only — nothing from vendor/ ships
+composer install            # Dev tools; Mozart re-prefixes the Appsero SDK into vendor-prefixed/ — nothing from vendor/ ships
 composer phpcs              # PHP CodeSniffer (WordPress-Extra + PHPCompatibilityWP)
 composer phpcbf             # Auto-fix code style
 composer test               # PHPUnit (needs a provisioned WP test install or wp-env)
@@ -129,6 +129,7 @@ flyaffiliate/
 │   └── functions.php              # flyaffiliate_get_option(), flyaffiliate_get_template_part(), helpers
 ├── templates/                     # Overridable templates: admin/ (app mount, profile), affiliate-dashboard/, registration/
 ├── assets/                        # css/, js/ (built output only; plain sources in assets/src/)
+├── vendor-prefixed/               # Mozart output: the Appsero SDK as FlyAffiliate\Dependencies\ — committed, never edited
 ├── src/admin/                     # The React admin app: App.tsx (routes), pages/, components/, hooks/, lib/, tailwind.css + admin.scss
 ├── src/dashboard/                 # The affiliate dashboard app (frontend): App.tsx (tabs), pages/, tables/, tailwind.css + dashboard.scss
 ├── src/styles/tailwind.css        # The Tailwind entry both apps import: plugin-ui tokens, scoped preflight and utilities

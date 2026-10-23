@@ -20,7 +20,7 @@ find out early.
 ## Setup, once
 
 ```bash
-composer install        # dev dependencies only — nothing from vendor/ ships
+composer install        # dev tools; Mozart re-prefixes the Appsero SDK into vendor-prefixed/ — nothing from vendor/ ships
 npm install
 npm run env:start       # WordPress + WooCommerce in Docker
 ```
