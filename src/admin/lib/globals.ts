@@ -31,6 +31,17 @@ export type ProExtensionsData = {
 	features: string[];
 };
 
+/** One link in the top bar's help menu. */
+export type HelpMenuItem = {
+	id: string;
+	title: string;
+	url: string;
+	/** A key `HelpMenu` maps to an icon. */
+	icon: string;
+	/** Opens in a new tab. */
+	external: boolean;
+};
+
 export type AdminGlobals = {
 	version: string;
 	restNonce: string;
@@ -50,6 +61,8 @@ export type AdminGlobals = {
 	urls: {
 		app: string;
 		wizard: string;
+		/** FlyAffiliate's icon, for the top bar. */
+		logo: string;
 		/** Appsero's privacy policy, linked from Share Essentials. */
 		insightsPolicy: string;
 		docs: string;
@@ -59,6 +72,8 @@ export type AdminGlobals = {
 		orders: string;
 		products: string;
 	};
+	/** The top bar's help menu. */
+	helpMenu: HelpMenuItem[];
 	statuses: {
 		affiliate: Record< string, string >;
 		commission: Record< string, string >;
@@ -121,6 +136,7 @@ const fallback: AdminGlobals = {
 	urls: {
 		app: '',
 		wizard: '',
+		logo: '',
 		insightsPolicy: '',
 		docs: '',
 		support: '',
@@ -129,6 +145,7 @@ const fallback: AdminGlobals = {
 		orders: '',
 		products: '',
 	},
+	helpMenu: [],
 	statuses: { affiliate: {}, commission: {}, transfer: {}, batch: {} },
 	sources: {},
 	availableSources: { manual: 'Manual' },

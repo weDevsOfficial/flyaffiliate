@@ -268,6 +268,53 @@ class Assets implements Hookable {
 	}
 
 	/**
+	 * The top bar's help menu, as Dokan's: the changelog, the documentation
+	 * and the feature board.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @return array<int, array{id: string, title: string, url: string, icon: string, external: bool}>
+	 */
+	public function get_help_menu_items(): array {
+		$items = [
+			[
+				'id'       => 'changelog',
+				'title'    => __( 'Changelog', 'flyaffiliate' ),
+				'url'      => 'https://flyaffiliate.co/changelog',
+				'icon'     => 'changelog',
+				'external' => true,
+			],
+			[
+				'id'       => 'documentation',
+				'title'    => __( 'Documentation', 'flyaffiliate' ),
+				'url'      => 'https://docs.flyaffiliate.co/',
+				'icon'     => 'documentation',
+				'external' => true,
+			],
+			[
+				'id'       => 'feature-request',
+				'title'    => __( 'Request a feature', 'flyaffiliate' ),
+				'url'      => 'https://feedback.wedevs.com/b/flyaffiliate',
+				'icon'     => 'feature-request',
+				'external' => true,
+			],
+		];
+
+		/**
+		 * Filters the links in the admin top bar's help menu.
+		 *
+		 * Each item has an `id`, a translated `title`, a `url`, an `icon` key
+		 * (`changelog`, `documentation`, `feature-request`; anything else
+		 * draws a circle) and `external`, true to open it in a new tab.
+		 *
+		 * @since FLYAFFILIATE_SINCE
+		 *
+		 * @param array $items The items, in order.
+		 */
+		return array_values( (array) apply_filters( 'flyaffiliate_admin_help_menu_items', $items ) );
+	}
+
+	/**
 	 * The data the admin app needs before it can render.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -285,9 +332,11 @@ class Assets implements Hookable {
 			'urls'       => [
 				'app'            => Menu::get_route_url(),
 				'wizard'         => SetupWizard::get_url(),
+				'logo'           => FLYAFFILIATE_ASSETS_URL . '/images/flyaffiliate-icon.png',
 				'insightsPolicy' => 'https://appsero.com/privacy-policy/',
-				'docs'           => 'https://flyaffiliate.co/',
-				'support'        => 'https://wedevs.com/support/',
+				'docs'           => 'https://docs.flyaffiliate.co/',
+				// WordPress.org's forum, as Dokan Lite's Get Support; FlyAffiliate Pro sends its customers to weDevs.
+				'support'        => 'https://wordpress.org/support/plugin/flyaffiliate/',
 				'payoutCsv'      => PayoutExport::get_url(),
 				'users'          => admin_url( 'user-edit.php?user_id=' ),
 				'orders'         => admin_url( 'admin.php?page=wc-orders&action=edit&id=' ),
@@ -301,6 +350,7 @@ class Assets implements Hookable {
 				],
 				'shareEssentials' => flyaffiliate()->tracker->is_allowed(),
 			],
+			'helpMenu'   => $this->get_help_menu_items(),
 			'statuses'   => [
 				'affiliate'  => [
 					Affiliate::STATUS_PENDING   => __( 'Pending', 'flyaffiliate' ),

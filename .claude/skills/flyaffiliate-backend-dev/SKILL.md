@@ -334,8 +334,14 @@ contain no queries — the caller prepares the data.
   `text-gray-*` or a hex colour, so a token change reaches every page.
   The wp-admin menu icon is the logo's mark (`Menu::get_menu_icon()`), its
   view box padded so it draws 17px wide at wp-admin's 20px, as Dokan's does.
-- `components/Layout.tsx` wraps every page in plugin-ui's `<TopBar>`; page
-  content starts with `<PageHeader>`. Other plugins' admin notices are
+- `components/Layout.tsx` wraps every page in plugin-ui's `<TopBar>`, edge to
+  edge under the admin bar as Dokan's header is (the screen drops wp-admin's
+  content gutter and `.flyaffiliate-admin-content` takes it back): the icon
+  (`assets/images/flyaffiliate-icon.png`, `urls.logo`), the version, Get
+  support (`urls.support`: WordPress.org's forum; Pro sends its customers to
+  weDevs) and the help menu (`HelpMenu`, from `Assets::get_help_menu_items()`
+  and `flyaffiliate_admin_help_menu_items`). Page content starts with
+  `<PageHeader>`. Other plugins' admin notices are
   hidden on our screen, as Dokan and WooCommerce hide them on theirs
   (ADR-0017, `Admin\Notices\Manager`); register FlyAffiliate's own notices
   through `flyaffiliate_admin_notices`, which renders them above the app on

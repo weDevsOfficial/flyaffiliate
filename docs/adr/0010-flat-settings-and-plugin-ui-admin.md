@@ -2,6 +2,12 @@
 
 **Status:** Accepted — amended by ADR-0017 (other plugins' notices are hidden on FlyAffiliate's screen)
 **Date:** 2026-09-08
+**Note (2026-10-23):** the logo changed. The brand is now its blue, `#0043da`,
+in both plugins' theme tokens and the frontend stylesheet; the menu icon is
+its mark, drawn 17px wide like Dokan's; the header bar runs edge to edge as
+Dokan's does, with Get support (WordPress.org's forum, weDevs' help desk when
+Pro is active) and Dokan's help menu (Changelog, Documentation, Request a
+feature) in place of the Documentation button.
 
 ## Context
 

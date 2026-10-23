@@ -5,14 +5,28 @@
 @use "../styles/base";
 
 /*
- * The mount point, before and after React takes over. The same gap on every
- * side, matching wp-admin's 20px content gutter.
+ * The header bar runs edge to edge under the admin bar, as Dokan's does: the
+ * screen drops wp-admin's content gutter, and the page under the bar (and a
+ * notice above it) takes the gutter back.
  */
+/* stylelint-disable-next-line selector-class-pattern, selector-id-pattern -- WordPress' own selectors. */
+.toplevel_page_flyaffiliate #wpcontent {
+	padding-left: 0;
+}
+
 .flyaffiliate-wrap {
-	margin: 20px 20px 0 0;
+	margin: 0;
+
+	> .notice {
+		margin: 20px 20px 0;
+	}
+}
+
+.flyaffiliate-admin-content {
+	padding: 24px 20px 0;
 
 	@media screen and (max-width: 782px) {
-		margin: 10px 10px 0 0;
+		padding: 16px 10px 0;
 	}
 }
 
@@ -20,7 +34,7 @@
 
 	&__loading {
 		color: #646970;
-		padding: 24px 0;
+		padding: 24px 20px;
 	}
 
 	/*
