@@ -14,6 +14,18 @@ body.admin-bar:has(.flyaffiliate-dashboard-app) {
 	position: relative;
 }
 
+/*
+ * Themes lift their header over the page (Storefront's sits at z-index
+ * 999), and plugin-ui's dialogs and popups stack at 50, so a payout's
+ * dialog opened near the top hid its title under the header. Each popup
+ * is portalled to <body>; stacking the portal itself puts the backdrop
+ * and the dialog over the theme and under WordPress's toolbar (99999).
+ */
+body:has(.flyaffiliate-dashboard-app) > [data-slot$="portal"] {
+	position: relative;
+	z-index: 99990;
+}
+
 /* The mount point, before and after React takes over. */
 .flyaffiliate-dashboard-app {
 	min-height: 200px;
