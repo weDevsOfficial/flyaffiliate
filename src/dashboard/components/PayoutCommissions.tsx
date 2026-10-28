@@ -11,11 +11,14 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
+	cn,
 	type DataViewField,
 	type DataViewState,
 } from '@wedevs/plugin-ui';
 import DateTime from '@/components/DateTime';
+import MethodName from '@/components/MethodName';
 import Money from '@/components/Money';
+import PaymentStatus from '@/components/PaymentStatus';
 import StatusBadge from '@/components/StatusBadge';
 import { useListView } from '@/hooks/useListView';
 import { formatMoney } from '@/lib/format';
@@ -191,16 +194,45 @@ export default function PayoutCommissions( { payout, onClose }: Props ) {
 
 				<div className="flex flex-col gap-4 px-6 py-5">
 					{ shown && (
-						<dl className="m-0 grid grid-cols-1 gap-4 sm:grid-cols-3">
+						// The same facts as the payout's row, and the
+						// reference only when the payment has one.
+						<dl
+							className={ cn(
+								'm-0 grid grid-cols-2 gap-4',
+								shown.reference
+									? 'sm:grid-cols-4'
+									: 'sm:grid-cols-3'
+							) }
+						>
 							<Fact label={ __( 'Date', 'flyaffiliate' ) }>
 								<DateTime value={ shown.created_at } withTime />
 							</Fact>
+							<Fact label={ __( 'Method', 'flyaffiliate' ) }>
+								{ shown.method_label ? (
+									<MethodName
+										id={ shown.method }
+										label={ shown.method_label }
+									/>
+								) : (
+									'—'
+								) }
+							</Fact>
 							<Fact label={ __( 'Status', 'flyaffiliate' ) }>
-								<StatusBadge status={ shown.status } />
+								<PaymentStatus
+									item={ shown }
+									forAffiliate
+									badgeOnly
+								/>
 							</Fact>
-							<Fact label={ __( 'Reference', 'flyaffiliate' ) }>
-								{ shown.reference || '—' }
-							</Fact>
+							{ shown.reference && (
+								<Fact
+									label={ __( 'Reference', 'flyaffiliate' ) }
+								>
+									<span title={ shown.reference }>
+										{ shown.reference }
+									</span>
+								</Fact>
+							) }
 						</dl>
 					) }
 					<p className="m-0 text-sm text-muted-foreground">
