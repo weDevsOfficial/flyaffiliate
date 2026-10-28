@@ -27,6 +27,11 @@ export default function StatCard( {
 	tooltip,
 	className,
 }: Props ) {
+	// A figure (an amount, a count, a rate) takes Dokan's 30px; a name, a
+	// link or a list of methods reads at a calmer size, or a long one
+	// crowds the tile.
+	const isFigure = 'string' === typeof value || 'number' === typeof value;
+
 	return (
 		<Card
 			className={ cn(
@@ -51,7 +56,14 @@ export default function StatCard( {
 				{ label }
 				{ tooltip && <Hint text={ tooltip } /> }
 			</div>
-			<div className="-mt-1 whitespace-nowrap text-3xl font-bold leading-tight text-foreground tabular-nums">
+			<div
+				className={ cn(
+					'min-w-0 leading-tight text-foreground',
+					isFigure
+						? '-mt-1 whitespace-nowrap text-3xl font-bold tabular-nums'
+						: 'text-lg font-semibold'
+				) }
+			>
 				{ value }
 			</div>
 		</Card>

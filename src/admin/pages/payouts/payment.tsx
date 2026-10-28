@@ -46,7 +46,7 @@ import {
 import StatCard, { StatCardSkeleton } from '@/components/StatCard';
 import StatusBadge from '@/components/StatusBadge';
 import PaymentStatus from '@/components/PaymentStatus';
-import Truncated from '@/components/Truncated';
+import TruncatedLine from '@/components/TruncatedLine';
 import { useListView } from '@/hooks/useListView';
 import { errorMessage, fetchOne, send } from '@/lib/api';
 import { withIconLabels } from '@/lib/actions';
@@ -460,15 +460,17 @@ export default function PaymentPage() {
 								payment.affiliate_id > 0 ? (
 									<Link
 										to={ `/affiliates/${ payment.affiliate_id }` }
-										className="block truncate text-primary hover:underline"
+										className="block min-w-0 text-primary hover:underline"
 									>
-										<Truncated
-											text={
+										<TruncatedLine
+											tooltip={
 												payment.affiliate_name ||
 												`#${ payment.affiliate_id }`
 											}
-											max={ 24 }
-										/>
+										>
+											{ payment.affiliate_name ||
+												`#${ payment.affiliate_id }` }
+										</TruncatedLine>
 									</Link>
 								) : (
 									<span className="text-muted-foreground">
@@ -513,19 +515,24 @@ export default function PaymentPage() {
 							value={
 								<Link
 									to={ `/payouts/batch/${ payment.batch_key }` }
-									className="block truncate text-primary hover:underline"
+									className="block min-w-0 text-primary hover:underline"
 								>
-									{ /* The whole name on hover when the tile cuts it, as the lists do. */ }
-									<Truncated
-										text={
+									{ /* Cut by the tile's width, whole on hover, as the lists do. */ }
+									<TruncatedLine
+										tooltip={
 											payment.note ||
 											__(
 												'Untitled payout',
 												'flyaffiliate'
 											)
 										}
-										max={ 24 }
-									/>
+									>
+										{ payment.note ||
+											__(
+												'Untitled payout',
+												'flyaffiliate'
+											) }
+									</TruncatedLine>
 								</Link>
 							}
 							tooltip={ sprintf(

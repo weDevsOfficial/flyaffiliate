@@ -25,6 +25,7 @@ import {
 	type LucideIcon,
 } from 'lucide-react';
 import {
+	Badge,
 	Button,
 	Progress,
 	ProgressIndicator,
@@ -33,7 +34,7 @@ import {
 	toast,
 } from '@wedevs/plugin-ui';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import MethodName, { methodLogo } from '@/components/MethodName';
+import MethodName from '@/components/MethodName';
 import NotFound from '@/components/NotFound';
 import NoticeCard from '@/components/NoticeCard';
 import PageHeader from '@/components/PageHeader';
@@ -416,31 +417,27 @@ export default function PayoutBatchPage() {
 				/>
 				<StatCard
 					icon={ Layers }
-					// One method with a logo: its logo stands in for the icon.
-					image={
-						1 === summary.methods.length
-							? methodLogo( summary.methods[ 0 ].id )
-							: undefined
-					}
 					label={ __( 'Paid via', 'flyaffiliate' ) }
 					value={
 						summary.methods.length ? (
-							<span className="inline-flex flex-wrap items-center gap-x-3">
+							// The payments table's chips: each method on its
+							// own, with its logo, so two read as two.
+							<span className="flex flex-wrap items-center gap-2">
 								{ summary.methods.map( ( method ) => (
-									<MethodName
+									<Badge
 										key={ method.id }
-										id={ method.id }
-										label={ method.label }
-										logoClassName={
-											1 === summary.methods.length
-												? 'hidden'
-												: 'size-5'
-										}
-									/>
+										variant="secondary"
+										className="h-7 px-3 text-sm"
+									>
+										<MethodName
+											id={ method.id }
+											label={ method.label }
+										/>
+									</Badge>
 								) ) }
 							</span>
 						) : (
-							'—'
+							<span className="text-muted-foreground">—</span>
 						)
 					}
 					tooltip={ sprintf(
