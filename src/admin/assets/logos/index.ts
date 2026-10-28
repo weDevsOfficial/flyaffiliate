@@ -5,8 +5,5 @@
  * files as Pro's, so a preview card looks like the extension it stands for.
  */
 export { default as dokanLogo } from './dokan.svg';
-export { default as fluentCartLogo } from './fluentcart.svg';
 export { default as payPalLogo } from './paypal.svg';
-export { default as stripeLogo } from './stripe.svg';
-export { default as sureCartLogo } from './surecart.svg';
 export { default as wooCommerceLogo } from './woocommerce.svg';
