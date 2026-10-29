@@ -17,6 +17,7 @@ import {
 	TabsTrigger,
 	ThemeProvider,
 	Toaster,
+	cn,
 	toast,
 	type DateRange,
 } from '@wedevs/plugin-ui';
@@ -211,11 +212,14 @@ export default function App() {
 										'Cancel',
 										'flyaffiliate'
 									) }
+									// The picker's own trigger is the button; a Button here would nest one inside it.
 									trigger={ ( { value, open } ) => (
-										<Button
-											variant="outline"
-											className={ `${ CONTROL_HEIGHT } gap-2 px-4 font-normal` }
-											aria-expanded={ open }
+										<span
+											className={ cn(
+												CONTROL_HEIGHT,
+												'inline-flex items-center gap-2 rounded-md border border-primary bg-transparent px-4 text-sm font-normal text-primary transition-all hover:bg-muted',
+												open && 'bg-muted'
+											) }
 											aria-label={ __(
 												'Pick a date range',
 												'flyaffiliate'
@@ -230,7 +234,7 @@ export default function App() {
 													'All time',
 													'flyaffiliate'
 												) }
-										</Button>
+										</span>
 									) }
 								/>
 								{ range?.from && (
