@@ -21,9 +21,9 @@ The first release.
 - **Commissions** — one commission per order item at checkout (classic and
   block), a product → default rate hierarchy clamped to a maximum, shipping
   and tax excluded by choice, and self-referral blocked by default.
-- **Hold period** — a commission matures when the hold has passed and the
-  order is paid, from the order status change or the daily background job;
-  changing the hold reschedules every pending commission.
+- **Hold period** — every commission carries the date its hold ends, fixed
+  when it is created from the hold at that moment; a payout takes a
+  commission only once that date has passed.
 - **Order sync** — commissions follow the order: failed, cancelled and
   (optionally) refunded orders reject them, a recovered order restores them,
   a paid one is never reversed.

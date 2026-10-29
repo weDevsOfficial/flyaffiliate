@@ -171,7 +171,8 @@ class Seeder implements Hookable {
 		}
 
 		if ( $commission_failures > 0 ) {
-			WP_CLI::warning( sprintf( '%d commission(s) could not be created.', $commission_failures ) );
+			/* translators: %d: how many commissions the seeder could not create. */
+			WP_CLI::warning( sprintf( _n( '%d commission could not be created.', '%d commissions could not be created.', $commission_failures, 'flyaffiliate' ), $commission_failures ) );
 		}
 
 		WP_CLI::success( sprintf( 'Created %d affiliates, %d commissions and %d visits.', count( $affiliate_ids ), $commissions_created, $visit_count ) );
