@@ -19,10 +19,8 @@ zip** — `.distignore` excludes the whole directory.
 The icons are the real artwork; `assets/images/flyaffiliate-icon.png`, which
 the admin's top bar shows, is the 128 × 128 one. The seven screenshots are the
 real listing art: Dashboard, Affiliates, Commissions, Visits, Payouts,
-Extensions and Settings, captured from a real install. The banners are still
-**flat teal placeholders generated at the correct dimensions**, there so the
-deploy path and the dimension requirements are verifiable. They must be
-replaced with real artwork.
+Extensions and Settings, captured from a real install. The two banners are the
+real artwork too, in the logo blue.
 
 Each screenshot needs a matching caption in `readme.txt` under
 `== Screenshots ==`, in order: `screenshot-N.png` is caption `N.`. Adding,
