@@ -1,8 +1,7 @@
-# Publishes a tagged release to the WordPress.org plugin repository.
+# Publishes a tagged release to the WordPress.org plugin repository and
+# attaches the deployed zip to a GitHub release, as Dokan Lite's deploy does.
 #
-# Gated: every job runs only while the repository variable WPORG_DEPLOY_ENABLED
-# is the string "true". Set that variable (and the SVN_USERNAME / SVN_PASSWORD
-# secrets) once the first version is in the directory. See RELEASE.md.
+# Needs the SVN_USERNAME / SVN_PASSWORD repository secrets. See RELEASE.md.
 name: Deploy to WordPress.org
 
 on:
@@ -15,8 +14,10 @@ jobs:
   deploy:
     name: Build and deploy
     runs-on: ubuntu-latest
-    if: vars.WPORG_DEPLOY_ENABLED == 'true'
     environment: wordpress-org
+    permissions:
+      # The GitHub release is created with the workflow's token.
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,10 +42,20 @@ jobs:
         run: npm run release
 
       - name: WordPress.org plugin deploy
+        id: deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
+        with:
+          generate-zip: true
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: flyaffiliate
           BUILD_DIR: ./build/flyaffiliate
           ASSETS_DIR: .wordpress-org
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.deploy.outputs.zip-path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

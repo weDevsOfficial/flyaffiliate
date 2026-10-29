@@ -25,10 +25,10 @@ the built zip (`flyaffiliate-wporg-compliance`).
 
 ## Publish
 
-`deploy.yml` runs on a `v*` tag and pushes `build/flyaffiliate` to the
-WordPress.org SVN with `.wordpress-org/` as the listing's assets. It runs only
-while the repository variable `WPORG_DEPLOY_ENABLED` is `true` and the
-`SVN_USERNAME` / `SVN_PASSWORD` secrets are set in the `wordpress-org`
-environment. The review took its zip through the plugin directory's upload
+`deploy.yml` runs on a `v*` tag (or by hand on one) and pushes
+`build/flyaffiliate` to the WordPress.org SVN with `.wordpress-org/` as the
+listing's assets, then attaches the deployed zip to a GitHub release for the
+tag, as Dokan Lite's deploy does. It reads the `SVN_USERNAME` /
+`SVN_PASSWORD` repository secrets. The review took its zip through the plugin directory's upload
 form; since its approval every version, the first included, is an SVN commit,
 made by this action on the tag or by hand from `build/flyaffiliate`.
