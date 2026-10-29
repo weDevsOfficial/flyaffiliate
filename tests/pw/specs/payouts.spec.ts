@@ -39,7 +39,8 @@ test.describe( 'Payouts', () => {
 		await list.expectToast( /Payout created/ );
 		await expect( page ).toHaveURL( /#\/payouts\/batch\// );
 		const batchUrl = page.url();
-		await expect( list.heading ).toHaveText( 'Playwright payout' );
+		// The heading carries the batch's status badge beside the title.
+		await expect( list.heading ).toContainText( 'Playwright payout' );
 		await expect(
 			page.getByTestId( 'flyaffiliate-batch-csv' )
 		).toHaveAttribute( 'href', /flyaffiliate_payout_csv/ );
@@ -51,7 +52,7 @@ test.describe( 'Payouts', () => {
 		// Marking the whole payout paid is what pays them. (`open()` passes
 		// through about:blank, so going back would land there, not here.)
 		await list.goto( batchUrl );
-		await expect( list.heading ).toHaveText( 'Playwright payout' );
+		await expect( list.heading ).toContainText( 'Playwright payout' );
 		await page.getByTestId( 'flyaffiliate-batch-pay' ).click();
 		await page.getByTestId( 'flyaffiliate-confirm' ).click();
 		await list.expectToast( /marked paid/ );
