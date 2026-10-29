@@ -12,7 +12,7 @@
         "lint:js": "wp-scripts lint-js",
         "lint:css": "wp-scripts lint-style",
         "packages-update": "wp-scripts packages-update",
-        "makepot": "wp i18n make-pot --domain=flyaffiliate --exclude=node_modules,vendor,vendor-prefixed,tests,bin,docs,build,assets/src,src --headers='{\"Report-Msgid-Bugs-To\":\"https://wedevs.com/support/\"}' . languages/flyaffiliate.pot",
+        "makepot": "php -d memory_limit=1G \"$(command -v wp)\" i18n make-pot --domain=flyaffiliate --exclude=node_modules,vendor,vendor-prefixed,tests,bin,docs,build,assets/src,src --headers='{\"Report-Msgid-Bugs-To\":\"https://wedevs.com/support/\"}' . languages/flyaffiliate.pot",
         "release": "npm run build && npm run makepot && php bin/build-zip.php",
         "wp-env": "wp-env",
         "env:start": "wp-env start",
