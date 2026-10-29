@@ -438,11 +438,9 @@ class Manager {
 			return $commission;
 		}
 
-		/*
-		 * A commission inside a payment does not move on its own: a refunded
-		 * order would otherwise change a row whose amount a payment is already
-		 * promising. An admin may, as in SliceWP, and the payment follows.
-		 */
+		// A commission inside a payment does not move on its own: a refunded
+		// order would otherwise change a row whose amount a payment is already
+		// promising. An admin may, as in SliceWP, and the payment follows.
 		if ( $automatic && $commission->is_in_payout() ) {
 			return $this->in_payment_error( $commission );
 		}

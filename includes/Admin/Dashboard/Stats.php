@@ -67,10 +67,8 @@ class Stats {
 			'earnings'           => $this->get_earnings( $after, $before ),
 			'performance'        => $this->get_performance( $after, $before ),
 			'trend'              => $this->get_trend( $after, $before ),
-			/*
-			 * The lists stand apart from the range: they answer "who and what
-			 * is doing the work", which is an all-time question.
-			 */
+			// The lists stand apart from the range: they answer "who and what
+			// is doing the work", which is an all-time question.
 			'top_affiliates'     => $this->get_top_affiliates(),
 			'top_products'       => $this->get_top_products(),
 			'recent_visits'      => $this->get_recent_visits(),
@@ -202,11 +200,9 @@ class Stats {
 			];
 		}
 
-		/*
-		 * One point per day of the range, zero where nothing happened, so the
-		 * chart's axis spans the dates asked for rather than the days with
-		 * visits. A range wider than a year is left to the days that have rows.
-		 */
+		// One point per day of the range, zero where nothing happened, so the
+		// chart's axis spans the dates asked for rather than the days with
+		// visits. A range wider than a year is left to the days that have rows.
 		$start = strtotime( ( '' !== $after ? $after : ( array_key_first( $by_day ) ?? gmdate( 'Y-m-d' ) ) ) . ' UTC' );
 		$end   = strtotime( ( '' !== $before ? $before : gmdate( 'Y-m-d H:i:s' ) ) . ' UTC' );
 

@@ -377,10 +377,8 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$payout = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0];
 
-		/*
-		 * A row rejected while the payment waited: the lock keeps this from
-		 * happening now, and rows written before it must not be paid either.
-		 */
+		// A row rejected while the payment waited: the lock keeps this from
+		// happening now, and rows written before it must not be paid either.
 		$rejected = flyaffiliate()->commission->get( $dead );
 		$rejected->set( 'status', Commission::STATUS_REJECTED );
 		$rejected->save();
