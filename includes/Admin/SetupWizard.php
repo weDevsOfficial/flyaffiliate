@@ -119,7 +119,8 @@ class SetupWizard implements Hookable {
 	 * @return void
 	 */
 	public function maybe_redirect(): void {
-		if ( ! get_transient( self::REDIRECT_TRANSIENT ) ) {
+		// The done flag is an autoloaded option; the transient is read only until setup is done.
+		if ( self::is_done() || ! get_transient( self::REDIRECT_TRANSIENT ) ) {
 			return;
 		}
 
