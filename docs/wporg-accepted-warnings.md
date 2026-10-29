@@ -59,3 +59,9 @@ table this plugin created itself.
 | Lines | Checks | Why it stands |
 |---|---|---|
 | `apply_filters( $element['hook_key'], … )` | `WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound` | The hook name is dynamic by design — one filter per structural node, so an extension can inject fields under exactly one section — but `generate_keys()` builds every key as `flyaffiliate_settings_{path}_children`, so the prefix rule is met; the sniff just cannot see it through the variable. |
+
+### WooCommerce Analytics — `includes/Integrations/WooCommerce/Analytics.php`
+
+| Lines | Checks | Why it stands |
+|---|---|---|
+| `apply_filters( 'woocommerce_analytics_excluded_order_statuses', … )` | `WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound` | The box on WooCommerce → Analytics counts the orders the report counts, so it leaves out the statuses the report leaves out: the ones picked in WooCommerce's settings plus whatever WooCommerce's own filter adds (its checkout-draft status, for one). WooCommerce applies that filter from a protected method, so the only way to read the same list is to apply its filter. The plugin declares no hook of its own without the `flyaffiliate_` prefix. |

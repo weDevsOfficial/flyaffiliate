@@ -365,7 +365,8 @@ class Analytics implements Hookable {
 	 * @return string[] With the `wc-` prefix, as `wc_order_stats` stores them.
 	 */
 	protected function get_excluded_statuses(): array {
-		$picked   = (array) get_option( 'woocommerce_excluded_report_order_statuses', [ 'pending', 'failed', 'cancelled' ] );
+		$picked = (array) get_option( 'woocommerce_excluded_report_order_statuses', [ 'pending', 'failed', 'cancelled' ] );
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce's own filter, applied as its report data stores apply it, so the box leaves out the orders the report leaves out.
 		$statuses = (array) apply_filters( 'woocommerce_analytics_excluded_order_statuses', array_merge( [ 'auto-draft', 'trash' ], $picked ) );
 
 		return array_values(
