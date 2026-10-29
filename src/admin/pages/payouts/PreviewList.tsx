@@ -3,7 +3,7 @@
  * them, each with a checkbox. A row the method cannot pay says why before any
  * money moves, and can be switched to Manual for this payout.
  */
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import { Link } from 'react-router-dom';
 import { Hand, TriangleAlert, Zap } from 'lucide-react';
 import { Button, Checkbox, LabeledCheckbox, cn } from '@wedevs/plugin-ui';
@@ -207,7 +207,11 @@ export default function PreviewList( {
 											}
 											aria-label={ sprintf(
 												/* translators: %s: affiliate name */
-												__( 'Pay %s', 'flyaffiliate' ),
+												_x(
+													'Pay %s',
+													'an affiliate',
+													'flyaffiliate'
+												),
 												row.name
 											) }
 										/>
