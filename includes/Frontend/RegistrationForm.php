@@ -20,7 +20,7 @@ use FlyAffiliate\Affiliate\Registration;
  * A logged-in user who is already an affiliate is sent to the dashboard
  * instead of a form they cannot use.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class RegistrationForm extends Shortcode {
 
@@ -34,7 +34,7 @@ class RegistrationForm extends Shortcode {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array|string $atts Shortcode attributes.
 	 *
@@ -61,6 +61,8 @@ class RegistrationForm extends Shortcode {
 				'affiliate'     => $affiliate,
 				'dashboard_url' => flyaffiliate_get_page_url( 'affiliate_dashboard' ),
 				'email'         => $current_user->exists() ? $current_user->user_email : '',
+				'logged_in'     => $current_user->exists(),
+				'emails_link'   => flyaffiliate_option_enabled( 'activation_email_enabled' ),
 				'redirect_to'   => get_permalink(),
 			]
 		);
@@ -69,7 +71,7 @@ class RegistrationForm extends Shortcode {
 	/**
 	 * A message for an error code from the redirect.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $code Error code.
 	 *

@@ -16,7 +16,7 @@ use FlyAffiliate\DependencyManagement\BaseServiceProvider;
 /**
  * Registers the admin-ajax handlers.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class AjaxServiceProvider extends BaseServiceProvider {
 
@@ -37,7 +37,7 @@ class AjaxServiceProvider extends BaseServiceProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

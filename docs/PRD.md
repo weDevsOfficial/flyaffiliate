@@ -241,7 +241,7 @@ flyaffiliate_gateway_transfer_amount         // adjust transfer for gateway payo
 - WordPress 6.2+
 - WooCommerce 7.0+
 - Dokan 5.0+ (tested against 5.0.10+)
-- PHP 7.4+
+- PHP 8.1+
 - Multisite: supported (vendor meta + commissions per site)
 
 ---

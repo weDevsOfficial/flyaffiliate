@@ -40,9 +40,21 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 ### Nonces and capabilities
 
 - Every state-changing request checks a capability **and** a nonce, in that
-  order, before it does anything: `current_user_can( 'manage_woocommerce' )`,
+  order, before it does anything: `current_user_can( flyaffiliate_admin_capability() )`,
   then `check_admin_referer()` / `wp_verify_nonce()`.
-- `manage_options` is not used. Admin screens are `manage_woocommerce`.
+- Admin screens use `flyaffiliate_admin_capability()`: `manage_options`, unless
+  a site filters it to `manage_woocommerce` (ADR-0008, ADR-0013). Never a literal.
+- The shipped CSS and JS must name no external host: WordPress.org's scanner
+  reads any `http://` in a stylesheet as a remote file, **and** it matches the
+  host names of placeholder-image services and CDNs as bare substrings, with no
+  word boundary and no `url(` around them. Review round 2 flagged
+  `.components-placeholder.components-placeholder` in every stylesheet because
+  the middle of that selector spells `placeholder.com`. `webpack.config.js`
+  (`RemoveRemoteUrlsPlugin`) strips the library leftovers and renames those
+  rules to `.section-content` (neither app renders that component).
+  Before a release, confirm on the built files with a boundary-free grep:
+  `grep -ciE 'https?://|placeholder\.com|placehold\.it|w3\.org|googleapis' assets/css/*.css assets/js/*.js`
+  (expect 0 for every file). A `\b`-anchored grep passes and proves nothing.
 - Every REST route has a real `permission_callback`. `__return_true` is a
   finding, not a shortcut.
 
@@ -64,7 +76,8 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
 - No `load_plugin_textdomain()` — WordPress.org loads translations. The text
   domain is `flyaffiliate` and must equal the slug in every `__()` call.
 - Plugin header carries: `Plugin Name`, `Plugin URI`, `Description`, `Version`,
-  `Requires at least`, `Requires PHP`, `Requires Plugins: woocommerce`,
+  `Requires at least`, `Requires PHP` (no `Requires Plugins`: the plugin is
+  standalone and every integration is optional, ADR-0013),
   `Author`, `Author URI`, `License: GPLv2 or later`, `License URI`,
   `Text Domain: flyaffiliate`, `Domain Path: /languages`.
 - `readme.txt` `Stable tag` **equals** the header `Version` equals
@@ -84,8 +97,12 @@ Reference: [`references/plugin-check-checks.md`](./references/plugin-check-check
   setup wizard redirect fires once, records that it fired, and the wizard has a
   visible skip.
 - No admin notice that cannot be dismissed, and none outside the plugin's own
-  screens.
-- No telemetry, no phone-home, no external API call the user did not ask for.
+  screens — except the Appsero SDK's opt-in, which shows elsewhere in wp-admin
+  until it is answered, as Dokan Lite's does (ADR-0018).
+- No telemetry without consent, no phone-home, no external API call the user
+  did not ask for. Appsero Insights sends nothing until an administrator
+  allows it (Share Essentials or the SDK's notice), and the readme's Privacy
+  section names every service it reaches; keep both true (ADR-0018).
 - Uninstall removes data only when the "clear data on uninstall" setting says so,
   and `uninstall.php` starts with the `WP_UNINSTALL_PLUGIN` guard.
 

@@ -18,12 +18,12 @@ use FlyAffiliate\Install\Installer;
  * Decides whether the installed schema is behind the code, and runs the
  * upgraders that close the gap.
  *
- * An upgrader is a class under `Upgrade\Upgrades` keyed by the schema version it
- * brings the site **to**. They run in version order, each exactly once, and the
+ * An upgrader is a class the `flyaffiliate_upgraders` filter lists, keyed by the
+ * schema version it brings the site **to**. They run in version order, each exactly once, and the
  * stored version is only advanced after the whole set succeeds — a run that dies
  * halfway is retried on the next request rather than skipped.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager implements Hookable {
 
@@ -37,7 +37,7 @@ class Manager implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -51,7 +51,7 @@ class Manager implements Hookable {
 	 * A site with tables but no version option predates the option; it is treated
 	 * as 0.0.0 so every upgrader runs.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -62,7 +62,7 @@ class Manager implements Hookable {
 	/**
 	 * Whether the installed schema is behind the code.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -73,7 +73,7 @@ class Manager implements Hookable {
 	/**
 	 * The upgraders, keyed by the version each brings the site to.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, class-string>
 	 */
@@ -81,7 +81,7 @@ class Manager implements Hookable {
 		/**
 		 * Filters the list of FlyAffiliate schema upgraders.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<string, class-string> $upgraders Version => upgrader class name.
 		 */
@@ -91,7 +91,7 @@ class Manager implements Hookable {
 	/**
 	 * Run any upgraders the site is behind on.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -116,7 +116,7 @@ class Manager implements Hookable {
 	/**
 	 * Reconcile the tables, run the pending upgraders, record the new version.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -154,7 +154,7 @@ class Manager implements Hookable {
 			/**
 			 * Fires after one FlyAffiliate upgrader has run.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param string $version The schema version the upgrader brought the site to.
 			 */
@@ -166,7 +166,7 @@ class Manager implements Hookable {
 		/**
 		 * Fires after every pending FlyAffiliate upgrader has run.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string $from The schema version the site was on.
 		 * @param string $to   The schema version it is now on.

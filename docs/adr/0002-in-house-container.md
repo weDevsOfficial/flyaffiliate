@@ -2,6 +2,10 @@
 
 **Status:** Accepted
 **Date:** 2026-09-07
+**Note (2026-10-23):** one third-party package now ships: the Appsero SDK,
+prefixed by Mozart into `vendor-prefixed/` and committed, not installed by
+Composer ([ADR-0018](0018-appsero-insights-opt-in.md)). The rule below holds
+for everything else.
 
 ## Context
 
@@ -41,9 +45,10 @@ Method names stay camelCase (`addShared`, `addServiceProvider`, `setShared`,
 exception to the snake_case rule in `CLAUDE.md`, and `phpcs.xml.dist` silences
 `WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid` for it.
 
-**No third-party runtime package is ever added to the release zip.** Composer is
-a development-only tool here: `vendor/` is in `.distignore` and the plugin
-autoloads its own classes through `includes/Autoloader.php`.
+**No third-party runtime package is ever added to the release zip.** Classes
+are autoloaded by Composer's own loader; how that loader reaches the zip is
+decided in [ADR-0013](0013-wordpress-first-woocommerce-optional.md), which
+retired the in-house `includes/Autoloader.php`.
 
 ### Divergence from Dokan: constructor injection
 

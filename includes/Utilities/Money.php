@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * floats. `0.1 + 0.2 !== 0.3` is not a rounding curiosity when the result
  * decides what an affiliate is paid.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Money {
 
@@ -36,7 +36,7 @@ class Money {
 	/**
 	 * Convert an amount to integer cents.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param float|int|string $amount The amount.
 	 *
@@ -49,7 +49,7 @@ class Money {
 	/**
 	 * Convert integer cents back to an amount.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $cents Integer cents.
 	 *
@@ -63,7 +63,7 @@ class Money {
 	/**
 	 * Round an amount to the currency's own precision.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param float|int|string $amount The amount.
 	 *
@@ -79,7 +79,7 @@ class Money {
 	 * Returned as a string so the value reaches MySQL exactly as computed,
 	 * without a float round-trip.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param float|int|string $amount The amount.
 	 *
@@ -95,7 +95,7 @@ class Money {
 	 * Used when a partial refund rescales a commission by the unrefunded
 	 * fraction of its own order item (CONTEXT.md money rule 5).
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param float|int|string $amount   The amount.
 	 * @param float            $fraction The fraction to keep, between 0 and 1.

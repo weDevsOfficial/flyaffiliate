@@ -14,6 +14,7 @@ import Layout from './components/Layout';
 import AffiliatesPage from './pages/affiliates';
 import AffiliatePage from './pages/affiliates/single';
 import CommissionsPage from './pages/commissions';
+import CommissionFormPage from './pages/commissions/form';
 import VisitsPage from './pages/visits';
 import DashboardPage from './pages/dashboard';
 import PayoutsPage from './pages/payouts';
@@ -22,9 +23,11 @@ import PaymentsPage from './pages/payouts/payments';
 import PaymentPage from './pages/payouts/payment';
 import NewPayoutPage from './pages/payouts/new';
 import SettingsPage from './pages/settings';
+import ExtensionsPage from './pages/extensions';
 import SetupPage from './pages/setup';
 import NotFound from './components/NotFound';
 import { theme } from './theme';
+import { getGlobals } from './lib/globals';
 
 export type AdminRoute = {
 	id: string;
@@ -56,8 +59,22 @@ function getRoutes(): AdminRoute[] {
 			path: '/commissions',
 			element: <CommissionsPage />,
 		},
+		{
+			id: 'commission-new',
+			path: '/commissions/new',
+			element: <CommissionFormPage />,
+		},
+		{
+			id: 'commission-edit',
+			path: '/commissions/:id/edit',
+			element: <CommissionFormPage />,
+		},
 		{ id: 'visits', path: '/visits', element: <VisitsPage /> },
-		{ id: 'payouts', path: '/payouts', element: <PayoutsPage /> },
+		{
+			id: 'payout-batch',
+			path: '/payouts/batch/:batchKey',
+			element: <PayoutBatchPage />,
+		},
 		{ id: 'payout-new', path: '/payouts/new', element: <NewPayoutPage /> },
 		{
 			id: 'payments',
@@ -69,14 +86,20 @@ function getRoutes(): AdminRoute[] {
 			path: '/payouts/payment/:id',
 			element: <PaymentPage />,
 		},
-		{
-			id: 'payout-batch',
-			path: '/payouts/batch/:batchKey',
-			element: <PayoutBatchPage />,
-		},
+		{ id: 'payouts', path: '/payouts', element: <PayoutsPage /> },
 		{ id: 'settings', path: '/settings', element: <SettingsPage /> },
 		{ id: 'setup', path: '/setup', element: <SetupPage /> },
 	];
+
+	// Pro's extensions as previews, only while Pro is not active: with Pro
+	// running, PHP sends no `proExtensions` and Pro's own page takes the route.
+	if ( getGlobals().proExtensions ) {
+		routes.push( {
+			id: 'extensions',
+			path: '/extensions',
+			element: <ExtensionsPage />,
+		} );
+	}
 
 	/**
 	 * Filters the admin app's routes.

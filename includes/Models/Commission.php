@@ -20,23 +20,32 @@ if ( ! defined( 'ABSPATH' ) ) {
  * is NULL — not 0 — on a commission an admin adds by hand, so two manual rows
  * cannot collide on the constraint.
  *
- * The lifecycle is `pending` -> `unpaid` -> `paid`, with either of the first two
- * able to become `rejected`. `paid` is terminal and is never edited, rescaled or
- * deleted.
+ * The usual lifecycle is `pending` -> `unpaid` -> `paid`, with either of the
+ * first two able to become `rejected`; the order sync and the admin can move a
+ * commission back as well (ADR-0014, ADR-0012). A commission inside a payment (`payout_id` set)
+ * is edited the way SliceWP edits one — amount, reference, type and status
+ * stay open to the admin, and an unpaid payment re-sums to follow — while the
+ * order status sync keeps off it and it cannot be deleted; a paid payment
+ * keeps the amount it was paid with.
  *
- * @since FLYAFFILIATE_SINCE
+ * `matures_at` is `created_at` plus the hold period, whatever the status: it
+ * says when a payout may take the commission, not when it changes status
+ * (ADR-0014).
+ *
+ * @since 1.0.0
  */
 class Commission extends BaseModel {
 
 	/**
-	 * Created with the order, inside the hold period. Nothing has moved yet.
+	 * Created with the order, which is not paid yet. Nothing has moved yet.
 	 *
 	 * @var string
 	 */
 	const STATUS_PENDING = 'pending';
 
 	/**
-	 * Matured: the hold period elapsed and the order reached a paying status.
+	 * Earned: the order reached a paying status. A payout takes it once the
+	 * hold period is over.
 	 *
 	 * @var string
 	 */
@@ -128,7 +137,7 @@ class Commission extends BaseModel {
 	/**
 	 * Every commission status.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Status => translated label.
 	 */
@@ -144,7 +153,7 @@ class Commission extends BaseModel {
 	/**
 	 * Every commission source.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Source => translated label.
 	 */
@@ -156,9 +165,35 @@ class Commission extends BaseModel {
 	}
 
 	/**
+	 * The origins a new commission can be given right now.
+	 *
+	 * The manual origin is always there. A platform's origin is added by its
+	 * integration (ADR-0013), listed whether or not the platform's plugin is
+	 * active, as SliceWP lists its integrations; a third party can take one
+	 * out through the filter. Rows that already carry an origin keep their
+	 * label from `get_sources()`.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array<string, string> Origin => label, the preferred one first.
+	 */
+	public static function get_available_sources(): array {
+		/**
+		 * Filters the origins open to a new commission.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array<string, string> $sources Origin => label. Manual, plus what each integration adds.
+		 */
+		$sources = (array) apply_filters( 'flyaffiliate_available_commission_sources', [ self::SOURCE_MANUAL => self::get_sources()[ self::SOURCE_MANUAL ] ] );
+
+		return array_intersect_key( $sources, self::get_sources() );
+	}
+
+	/**
 	 * Every commission type.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Type => translated label.
 	 */
@@ -169,17 +204,24 @@ class Commission extends BaseModel {
 	}
 
 	/**
-	 * Whether this commission is terminal and must not be touched.
+	 * Whether the hold period is over, so a payout may take this commission.
 	 *
-	 * A paid commission is never edited, rescaled or deleted — not by a refund,
-	 * not by an admin, not by a recalculation (CONTEXT.md money rule 5).
+	 * A commission without a maturity date has nothing to wait for.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
+	 *
+	 * @param string $now The moment to compare with, `Y-m-d H:i:s` in GMT. Defaults to now.
 	 *
 	 * @return bool
 	 */
-	public function is_locked(): bool {
-		return self::STATUS_PAID === $this->get( 'status' ) || $this->is_in_payout();
+	public function is_matured( string $now = '' ): bool {
+		$matures_at = (string) $this->get( 'matures_at', '' );
+
+		if ( '' === $matures_at ) {
+			return true;
+		}
+
+		return $matures_at <= ( '' !== $now ? $now : current_time( 'mysql', true ) );
 	}
 
 	/**
@@ -189,7 +231,7 @@ class Commission extends BaseModel {
 	 * send, so the rows under it hold still: the payment is what changes them,
 	 * and `Payout\Manager::remove_commission()` is how one gets out.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -200,7 +242,7 @@ class Commission extends BaseModel {
 	/**
 	 * The commission amount in integer cents.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return int
 	 */
@@ -213,7 +255,7 @@ class Commission extends BaseModel {
 	 *
 	 * Goes through `wc_get_order()` so the lookup is correct under HPOS.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return \WC_Order|null
 	 */

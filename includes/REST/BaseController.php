@@ -22,7 +22,7 @@ use WP_REST_Response;
  * is no default that lets anyone through. `__return_true` is never an acceptable
  * `permission_callback` in this codebase.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 abstract class BaseController extends WP_REST_Controller {
 
@@ -36,7 +36,7 @@ abstract class BaseController extends WP_REST_Controller {
 	/**
 	 * Wrap a list of items in a response carrying the pagination headers.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $items    Prepared items.
 	 * @param int   $total    Total number of matching rows.
@@ -57,7 +57,7 @@ abstract class BaseController extends WP_REST_Controller {
 	 * The request's day range as GMT datetimes: the start of the first day and
 	 * the end of the last, in the site's timezone.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -79,7 +79,7 @@ abstract class BaseController extends WP_REST_Controller {
 	/**
 	 * The date range every dashboard route accepts.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array<string, string>>
 	 */
@@ -101,7 +101,7 @@ abstract class BaseController extends WP_REST_Controller {
 	/**
 	 * The `context`, `page`, `per_page` and `search` parameters every collection takes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -116,7 +116,7 @@ abstract class BaseController extends WP_REST_Controller {
 	/**
 	 * Add the standard `self` and `collection` links to a response.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Response $response The response.
 	 * @param array            $links    Prepared links.
@@ -132,7 +132,7 @@ abstract class BaseController extends WP_REST_Controller {
 	/**
 	 * The `_fields` filter, applied for the caller's context.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array           $data    Prepared data.
 	 * @param WP_REST_Request $request The request.
@@ -148,48 +148,50 @@ abstract class BaseController extends WP_REST_Controller {
 	}
 
 	/**
-	 * An affiliate's display name, for rows that only carry the id.
+	 * A stored GMT datetime as RFC 3339, or null when there is none.
 	 *
-	 * Cached for the request: a page of commissions repeats the same few
-	 * affiliates, and the UI shows the name on every row.
+	 * @since 1.0.0
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @param string|null $value The stored `Y-m-d H:i:s` value, in GMT.
 	 *
-	 * @param int $affiliate_id The affiliate.
-	 *
-	 * @return string The name, or an empty string when the affiliate is gone.
+	 * @return string|null
 	 */
-	/**
-	 * Where an affiliate's payouts are sent.
-	 *
-	 * Cached per request, like get_affiliate_name(), so a list of payments
-	 * does not load the same affiliate once per row.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param int $affiliate_id The affiliate.
-	 *
-	 * @return string The payment email, or an empty string.
-	 */
-	protected function get_affiliate_payment_email( int $affiliate_id ): string {
-		static $emails = [];
-
-		if ( ! array_key_exists( $affiliate_id, $emails ) ) {
-			$affiliate               = \FlyAffiliate\Models\Affiliate::find( $affiliate_id );
-			$emails[ $affiliate_id ] = null === $affiliate ? '' : $affiliate->get_payment_email();
-		}
-
-		return $emails[ $affiliate_id ];
+	protected function prepare_date( $value ): ?string {
+		return empty( $value ) ? null : mysql_to_rfc3339( (string) $value );
 	}
 
-	protected function get_affiliate_name( int $affiliate_id ): string {
-		static $names = [];
+	/**
+	 * An affiliate, loaded once per request: a page of commissions, visits or
+	 * payments names the same few affiliates on many rows.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $affiliate_id The affiliate.
+	 *
+	 * @return \FlyAffiliate\Models\Affiliate|null Null when there is no such affiliate.
+	 */
+	protected function get_affiliate( int $affiliate_id ): ?\FlyAffiliate\Models\Affiliate {
+		static $affiliates = [];
 
-		if ( ! array_key_exists( $affiliate_id, $names ) ) {
-			$affiliate              = \FlyAffiliate\Models\Affiliate::find( $affiliate_id );
-			$names[ $affiliate_id ] = null === $affiliate ? '' : $affiliate->get_display_name();
+		if ( ! array_key_exists( $affiliate_id, $affiliates ) ) {
+			$affiliates[ $affiliate_id ] = \FlyAffiliate\Models\Affiliate::find( $affiliate_id );
 		}
 
-		return $names[ $affiliate_id ];
+		return $affiliates[ $affiliate_id ];
+	}
+
+	/**
+	 * An affiliate's display name, or an empty string when they are gone.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $affiliate_id The affiliate.
+	 *
+	 * @return string
+	 */
+	protected function get_affiliate_name( int $affiliate_id ): string {
+		$affiliate = $this->get_affiliate( $affiliate_id );
+
+		return null === $affiliate ? '' : $affiliate->get_display_name();
 	}
 }

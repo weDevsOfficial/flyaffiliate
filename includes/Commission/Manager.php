@@ -18,21 +18,23 @@ use WP_Error;
 /**
  * The one way to read and change commission rows from a screen or a controller.
  *
- * The status rules from CONTEXT.md are enforced here, not in the callers:
- * `paid` is terminal and never changes, `rejected` is terminal, and the only
- * moves are `pending` -> `unpaid`, `pending`/`unpaid` -> `rejected`, and a
- * manual `unpaid` -> `pending` for an admin undoing an early maturation.
- * Marking `paid` is not a status edit at all — it happens only through a payout
- * batch (`Payout\Manager`), which is what sets `payout_id`.
+ * The rules from CONTEXT.md are enforced here, not in the callers. An admin
+ * edits a commission the way SliceWP allows — amount, reference, type, any of
+ * the four statuses — whether or not a payment holds it; an unpaid payment
+ * re-sums to follow, a paid one keeps the amount it was paid with. A payment
+ * does keep its commission away from the automatic mover (the order status
+ * sync passes `$automatic`) and from deletion. A
+ * WooCommerce-origin commission refers to an order that exists; the reference
+ * is checked on create and edit.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager {
 
 	/**
 	 * Get a commission by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $commission_id Commission id.
 	 *
@@ -45,7 +47,7 @@ class Manager {
 	/**
 	 * Query commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::query()}.
 	 *
@@ -58,7 +60,7 @@ class Manager {
 	/**
 	 * Count commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::count()}.
 	 *
@@ -69,32 +71,25 @@ class Manager {
 	}
 
 	/**
-	 * Row counts per status, plus the total, for status tabs.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param array $where Extra equality conditions applied to every count.
-	 *
-	 * @return array<string, int> `all` and one key per status.
-	 */
-	public function count_by_status( array $where = [] ): array {
-		$counts = [ 'all' => $this->count( $where ) ];
-
-		foreach ( array_keys( Commission::get_statuses() ) as $status ) {
-			$counts[ $status ] = $this->count( array_merge( $where, [ 'status' => $status ] ) );
-		}
-
-		return $counts;
-	}
-
-	/**
 	 * Add a commission by hand.
 	 *
-	 * A manual commission has no order item, so `order_item_id` stays NULL and
-	 * the unique constraint does not apply. The rate is recorded as the
-	 * effective percentage of the base amount so the row reads like every other.
+	 * The row is shaped the way SliceWP's "add commission" form shapes it: an
+	 * affiliate, an amount, a reference (the order id), the reference amount the
+	 * commission is on, an origin, a type, a status and a date. An admin-created
+	 * commission never has an order item, so `order_item_id` stays NULL and the
+	 * unique constraint does not apply; the rate is recorded as the effective
+	 * percentage of the base amount so the row reads like every other.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * The origin decides who moves the commission later. One created under the
+	 * WooCommerce origin with an order id follows that order the way an
+	 * attributed commission does — it becomes unpaid when the order is paid and
+	 * is rejected when the order fails — while one under the manual origin only
+	 * moves when the admin moves it. Whatever the origin, the status it is given
+	 * is the status it keeps until the order or the admin changes it: a pending
+	 * commission added by hand stays pending, as in SliceWP. The hold period
+	 * counts from the date given, whatever the status (ADR-0014).
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array $args {
 	 *     Commission data.
@@ -102,14 +97,16 @@ class Manager {
 	 *     @type int    $affiliate_id Required.
 	 *     @type float  $amount       Required. What the affiliate earns.
 	 *     @type float  $base_amount  The sale amount the commission is on. Default equal to `amount`.
-	 *     @type int    $order_id     Optional reference order.
-	 *     @type string $status       `pending` or `unpaid`. Default `pending`.
-	 *     @type string $created_at   Optional `Y-m-d H:i:s` in GMT.
+	 *     @type int    $order_id     Optional reference order. Under the WooCommerce origin it must be an existing order.
+	 *     @type string $source       One of `Commission::get_available_sources()`. Default the first of them.
+	 *     @type string $type         A key of `Commission::get_types()`. Default `sale`.
+	 *     @type string $status       Any commission status. Default `unpaid`.
+	 *     @type string $created_at   Optional `Y-m-d H:i:s` in GMT. Default now.
 	 * }
 	 *
 	 * @return Commission|WP_Error
 	 */
-	public function create_manual( array $args ) {
+	public function create( array $args ) {
 		$affiliate_id = absint( $args['affiliate_id'] ?? 0 );
 
 		if ( 0 === $affiliate_id || null === flyaffiliate()->affiliate->get( $affiliate_id ) ) {
@@ -122,18 +119,34 @@ class Manager {
 			return new WP_Error( 'flyaffiliate_invalid_amount', __( 'The commission amount must be more than zero.', 'flyaffiliate' ), [ 'status' => 400 ] );
 		}
 
-		$base   = Money::round( (float) ( $args['base_amount'] ?? $amount ) );
-		$base   = Money::to_cents( $base ) > 0 ? $base : $amount;
-		$status = in_array( $args['status'] ?? '', [ Commission::STATUS_PENDING, Commission::STATUS_UNPAID ], true )
-			? $args['status']
-			: Commission::STATUS_PENDING;
+		$base = Money::round( (float) ( $args['base_amount'] ?? $amount ) );
+		$base = Money::to_cents( $base ) > 0 ? $base : $amount;
 
+		$available = Commission::get_available_sources();
+		$source    = $this->choice( $args['source'] ?? (string) array_key_first( $available ), $available, 'flyaffiliate_invalid_source', __( 'Choose where the commission comes from. An origin is open only while its platform is active.', 'flyaffiliate' ) );
+		$type   = $this->choice( $args['type'] ?? Commission::TYPE_SALE, Commission::get_types(), 'flyaffiliate_invalid_type', __( 'Choose a commission type.', 'flyaffiliate' ) );
+		$status = $this->choice( $args['status'] ?? Commission::STATUS_UNPAID, Commission::get_statuses(), 'flyaffiliate_invalid_status', __( 'Choose a commission status.', 'flyaffiliate' ) );
+
+		foreach ( [ $source, $type, $status ] as $checked ) {
+			if ( is_wp_error( $checked ) ) {
+				return $checked;
+			}
+		}
+
+		$order_id  = absint( $args['order_id'] ?? 0 );
+		$reference = $this->check_reference( $source, $order_id );
+
+		if ( is_wp_error( $reference ) ) {
+			return $reference;
+		}
+
+		$created_at = $this->sanitize_datetime( (string) ( $args['created_at'] ?? '' ) );
 		$commission = new Commission();
 
 		$commission->fill(
 			[
 				'affiliate_id'  => $affiliate_id,
-				'order_id'      => absint( $args['order_id'] ?? 0 ),
+				'order_id'      => $order_id,
 				'order_item_id' => null,
 				'product_id'    => 0,
 				'vendor_id'     => 0,
@@ -142,13 +155,14 @@ class Manager {
 				'rate_type'     => Commission::RATE_PERCENTAGE,
 				'amount'        => $amount,
 				'currency'      => flyaffiliate_get_currency(),
-				'source'        => Commission::SOURCE_MANUAL,
-				'type'          => Commission::TYPE_SALE,
+				'source'        => $source,
+				'type'          => $type,
 				'status'        => $status,
-				'matures_at'    => Commission::STATUS_UNPAID === $status ? current_time( 'mysql', true ) : $this->maturation_date(),
-				'created_at'    => ! empty( $args['created_at'] ) ? (string) $args['created_at'] : current_time( 'mysql', true ),
+				'created_at'    => $created_at,
 			]
 		);
+
+		$commission->set( 'matures_at', $this->maturation_date( $created_at, $commission ) );
 
 		if ( 0 === $commission->save() ) {
 			return new WP_Error( 'flyaffiliate_create_failed', __( 'The commission could not be saved.', 'flyaffiliate' ), [ 'status' => 500 ] );
@@ -157,7 +171,7 @@ class Manager {
 		/**
 		 * Fires after a commission is created, from any source.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Commission $commission The commission.
 		 */
@@ -167,16 +181,232 @@ class Manager {
 	}
 
 	/**
-	 * Change a commission's status.
+	 * Edit a commission the way SliceWP's "edit commission" form does.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * The amount, the reference, the reference amount, the type and the status
+	 * can change; the affiliate, the origin and the date are fixed for the life
+	 * of the row. The amount is editable whatever the origin (ADR-0011): an
+	 * admin correcting a calculated commission is the reason to edit one at
+	 * all. The reference of a commission that came from checkout stays with its
+	 * order item. The rate is re-derived from the base amount so the row stays
+	 * self-consistent.
 	 *
-	 * @param int    $commission_id Commission id.
-	 * @param string $status        The status to move to: `pending`, `unpaid` or `rejected`.
+	 * A commission inside a payment is edited like any other, as in SliceWP;
+	 * the payment follows (`Payout\Manager::resync()`) while it is unpaid and
+	 * keeps its amount once paid. A status change goes through `set_status()`,
+	 * so the transition rules and the status-change hook hold.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int   $commission_id Commission id.
+	 * @param array $args {
+	 *     Fields to change. A missing key leaves the field alone.
+	 *
+	 *     @type float  $amount      What the affiliate earns.
+	 *     @type float  $base_amount The sale amount the commission is on.
+	 *     @type int    $order_id    The reference order, on an admin-created commission. Under the WooCommerce origin it must be an existing order.
+	 *     @type string $type        A key of `Commission::get_types()`.
+	 *     @type string $status      Any commission status.
+	 * }
 	 *
 	 * @return Commission|WP_Error
 	 */
-	public function set_status( int $commission_id, string $status ) {
+	public function update( int $commission_id, array $args ) {
+		$commission = $this->get( $commission_id );
+
+		if ( null === $commission ) {
+			return new WP_Error( 'flyaffiliate_commission_not_found', __( 'No commission with that ID.', 'flyaffiliate' ), [ 'status' => 404 ] );
+		}
+
+		$locked = $this->locked_payment_error( $commission );
+
+		if ( null !== $locked ) {
+			return $locked;
+		}
+
+		$changed = false;
+
+		if ( isset( $args['amount'] ) ) {
+			$amount = Money::round( (float) $args['amount'] );
+
+			if ( Money::to_cents( $amount ) <= 0 ) {
+				return new WP_Error( 'flyaffiliate_invalid_amount', __( 'The commission amount must be more than zero.', 'flyaffiliate' ), [ 'status' => 400 ] );
+			}
+
+			$commission->set( 'amount', $amount );
+			$changed = true;
+		}
+
+		if ( isset( $args['base_amount'] ) ) {
+			$base = Money::round( (float) $args['base_amount'] );
+
+			$commission->set( 'base_amount', Money::to_cents( $base ) > 0 ? $base : (float) $commission->get( 'amount' ) );
+			$changed = true;
+		}
+
+		if ( isset( $args['order_id'] ) && absint( $args['order_id'] ) !== (int) $commission->get( 'order_id', 0 ) ) {
+			if ( null !== $commission->get( 'order_item_id' ) ) {
+				return new WP_Error( 'flyaffiliate_reference_locked', __( 'This commission came from an order item, so its reference cannot change.', 'flyaffiliate' ), [ 'status' => 409 ] );
+			}
+
+			$reference = $this->check_reference( (string) $commission->get( 'source' ), absint( $args['order_id'] ) );
+
+			if ( is_wp_error( $reference ) ) {
+				return $reference;
+			}
+
+			$commission->set( 'order_id', absint( $args['order_id'] ) );
+			$changed = true;
+		}
+
+		if ( isset( $args['type'] ) ) {
+			$type = $this->choice( $args['type'], Commission::get_types(), 'flyaffiliate_invalid_type', __( 'Choose a commission type.', 'flyaffiliate' ) );
+
+			if ( is_wp_error( $type ) ) {
+				return $type;
+			}
+
+			$commission->set( 'type', $type );
+			$changed = true;
+		}
+
+		if ( $changed ) {
+			$base   = (float) $commission->get( 'base_amount', 0 );
+			$amount = (float) $commission->get( 'amount', 0 );
+
+			$commission->set( 'rate', Money::to_cents( $base ) > 0 ? round( $amount / $base * 100, 4 ) : 100 );
+
+			if ( 0 === $commission->save() ) {
+				return new WP_Error( 'flyaffiliate_update_failed', __( 'The commission could not be saved.', 'flyaffiliate' ), [ 'status' => 500 ] );
+			}
+
+			/**
+			 * Fires after an admin edits a commission's fields.
+			 *
+			 * Not fired for a status change alone; that is
+			 * `flyaffiliate_commission_status_changed`.
+			 *
+			 * @since 1.0.0
+			 *
+			 * @param Commission $commission The commission, saved.
+			 */
+			do_action( 'flyaffiliate_commission_updated', $commission );
+
+			$this->follow_payment( $commission );
+		}
+
+		if ( isset( $args['status'] ) && (string) $args['status'] !== (string) $commission->get( 'status' ) ) {
+			return $this->set_status( $commission_id, (string) $args['status'] );
+		}
+
+		return $commission;
+	}
+
+	/**
+	 * Let the payment holding a commission follow an edit.
+	 *
+	 * An unpaid payment is a promise still being counted, so it re-sums to its
+	 * unpaid commissions; a paid one keeps the amount it was paid with, as in
+	 * SliceWP, and the edit corrects the commission's own record only.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Commission $commission The commission, saved.
+	 *
+	 * @return void
+	 */
+	protected function follow_payment( Commission $commission ): void {
+		if ( $commission->is_in_payout() ) {
+			flyaffiliate()->payout->resync( (int) $commission->get( 'payout_id' ) );
+		}
+	}
+
+	/**
+	 * One of the allowed values, or an error naming the field.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed                 $value   The value given.
+	 * @param array<string, string> $choices Allowed value => label.
+	 * @param string                $code    The error code.
+	 * @param string                $message The error message.
+	 *
+	 * @return string|WP_Error
+	 */
+	protected function choice( $value, array $choices, string $code, string $message ) {
+		return is_string( $value ) && array_key_exists( $value, $choices )
+			? $value
+			: new WP_Error( $code, $message, [ 'status' => 400 ] );
+	}
+
+	/**
+	 * Whether a reference is acceptable for the origin.
+	 *
+	 * A commission under the WooCommerce origin follows its order — the order
+	 * status moves it, and the screens link to it — so the order has to exist
+	 * while WooCommerce is there to ask. A refund is not an order. The manual
+	 * origin, and any origin whose platform is not active, refers to nothing
+	 * the plugin can check, so the reference is kept as given.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $source   The commission's origin.
+	 * @param int    $order_id The reference given; 0 for none.
+	 *
+	 * @return true|WP_Error
+	 */
+	protected function check_reference( string $source, int $order_id ) {
+		if ( Commission::SOURCE_WOOCOMMERCE !== $source || 0 === $order_id ) {
+			return true;
+		}
+
+		// Without WooCommerce there is nothing to ask; the reference is kept as
+		// given, the way SliceWP keeps every reference.
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			return true;
+		}
+
+		if ( wc_get_order( $order_id ) instanceof \WC_Order ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'flyaffiliate_invalid_reference',
+			/* translators: %d: the order id given */
+			sprintf( __( 'There is no WooCommerce order #%d. Enter the number of an existing order, or change the origin.', 'flyaffiliate' ), $order_id ),
+			[ 'status' => 400 ]
+		);
+	}
+
+	/**
+	 * A `Y-m-d H:i:s` GMT date from what was given, or now.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $value A date-time string, read as GMT.
+	 *
+	 * @return string
+	 */
+	protected function sanitize_datetime( string $value ): string {
+		$time = '' !== $value ? strtotime( $value . ' UTC' ) : false;
+
+		return false === $time ? current_time( 'mysql', true ) : gmdate( 'Y-m-d H:i:s', $time );
+	}
+
+	/**
+	 * Change a commission's status.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int    $commission_id Commission id.
+	 * @param string $status        The status to move to.
+	 * @param bool   $automatic     True when an order status change asks, not
+	 *                              an admin: a commission inside a payment is
+	 *                              then left alone (CONTEXT.md money rule 7).
+	 *
+	 * @return Commission|WP_Error
+	 */
+	public function set_status( int $commission_id, string $status, bool $automatic = false ) {
 		$commission = $this->get( $commission_id );
 
 		if ( null === $commission ) {
@@ -189,23 +419,21 @@ class Manager {
 			return $commission;
 		}
 
-		/*
-		 * A commission inside a payment does not move on its own: a refunded
-		 * order, an admin, or the maturation job would otherwise change a row
-		 * whose amount a payment is already promising.
-		 */
-		if ( $commission->is_in_payout() ) {
-			return $this->locked_error( $commission );
+		// A commission inside a payment does not move on its own: a refunded
+		// order would otherwise change a row whose amount a payment is already
+		// promising. An admin may, as in SliceWP, and the payment follows.
+		if ( $automatic && $commission->is_in_payout() ) {
+			return $this->in_payment_error( $commission );
+		}
+
+		$locked = $this->locked_payment_error( $commission );
+
+		if ( null !== $locked ) {
+			return $locked;
 		}
 
 		if ( ! $this->can_transition( $from, $status ) ) {
-			return new WP_Error(
-				'flyaffiliate_locked_commission',
-				Commission::STATUS_PAID === $from
-					? __( 'A paid commission cannot be changed.', 'flyaffiliate' )
-					: __( 'That status change is not allowed.', 'flyaffiliate' ),
-				[ 'status' => 409 ]
-			);
+			return new WP_Error( 'flyaffiliate_locked_commission', __( 'That status change is not allowed.', 'flyaffiliate' ), [ 'status' => 409 ] );
 		}
 
 		$commission->set( 'status', $status );
@@ -217,7 +445,7 @@ class Manager {
 		/**
 		 * Fires when a commission's status changes.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Commission $commission The commission.
 		 * @param string     $status     The status it is now in.
@@ -225,82 +453,77 @@ class Manager {
 		 */
 		do_action( 'flyaffiliate_commission_status_changed', $commission, $status, $from );
 
-		return $commission;
-	}
-
-	/**
-	 * Change the amount of a manual commission.
-	 *
-	 * A WooCommerce commission's amount is calculated from its order item and
-	 * stays that way; only a commission an admin created by hand can be edited.
-	 * The stored rate is re-derived from the base amount to keep the row
-	 * self-consistent.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param int   $commission_id Commission id.
-	 * @param float $amount        The new amount.
-	 *
-	 * @return Commission|WP_Error
-	 */
-	public function set_manual_amount( int $commission_id, float $amount ) {
-		$commission = $this->get( $commission_id );
-
-		if ( null === $commission ) {
-			return new WP_Error( 'flyaffiliate_commission_not_found', __( 'No commission with that ID.', 'flyaffiliate' ), [ 'status' => 404 ] );
-		}
-
-		if ( $commission->is_locked() ) {
-			return $this->locked_error( $commission );
-		}
-
-		if ( Commission::SOURCE_MANUAL !== $commission->get( 'source' ) ) {
-			return new WP_Error( 'flyaffiliate_calculated_commission', __( 'Only a manual commission\'s amount can be edited. A WooCommerce commission is calculated from its order item.', 'flyaffiliate' ), [ 'status' => 409 ] );
-		}
-
-		$amount = Money::round( $amount );
-
-		if ( Money::to_cents( $amount ) <= 0 ) {
-			return new WP_Error( 'flyaffiliate_invalid_amount', __( 'The commission amount must be more than zero.', 'flyaffiliate' ), [ 'status' => 400 ] );
-		}
-
-		$base = (float) $commission->get( 'base_amount', 0 );
-
-		$commission->set( 'amount', $amount );
-		$commission->set( 'rate', Money::to_cents( $base ) > 0 ? round( $amount / $base * 100, 4 ) : 100 );
-
-		if ( 0 === $commission->save() ) {
-			return new WP_Error( 'flyaffiliate_update_failed', __( 'The commission could not be saved.', 'flyaffiliate' ), [ 'status' => 500 ] );
-		}
+		$this->follow_payment( $commission );
 
 		return $commission;
 	}
 
 	/**
-	 * The error for a commission that must not change, saying which lock holds it.
+	 * The error for something a payment does not let happen to its commission:
+	 * an automatic status change, or deletion.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission.
 	 *
 	 * @return WP_Error
 	 */
-	protected function locked_error( Commission $commission ): WP_Error {
-		if ( $commission->is_in_payout() ) {
-			return new WP_Error(
-				'flyaffiliate_commission_in_payout',
-				__( 'This commission belongs to a payment. Take it out of the payment first, or delete the payment.', 'flyaffiliate' ),
-				[ 'status' => 409 ]
-			);
+	public function in_payment_error( Commission $commission ): WP_Error {
+		$payout_id = (int) $commission->get( 'payout_id', 0 );
+		$payout    = flyaffiliate()->payout->get( $payout_id );
+
+		if ( null !== $payout && $payout->is_paid() ) {
+			/* translators: %d: the payment id */
+			$message = sprintf( __( 'This commission was paid in payment #%d, which keeps it.', 'flyaffiliate' ), $payout_id );
+		} else {
+			/* translators: %d: the payment id */
+			$message = sprintf( __( 'This commission is waiting in payment #%d. Take it out of the payment, or delete the payment, first.', 'flyaffiliate' ), $payout_id );
 		}
 
-		return new WP_Error( 'flyaffiliate_locked_commission', __( 'A paid commission cannot be changed.', 'flyaffiliate' ), [ 'status' => 409 ] );
+		return new WP_Error( 'flyaffiliate_commission_in_payout', $message, [ 'status' => 409 ] );
 	}
 
 	/**
-	 * Whether a status change is allowed.
+	 * The error for editing a commission whose payment is locked, or null when it is not.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * While an automatic payout method sends a payment, the amount it was
+	 * given is the amount that moves: the commissions under it hold still
+	 * until the transfer settles (ADR-0016).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Commission $commission The commission.
+	 *
+	 * @return WP_Error|null
+	 */
+	protected function locked_payment_error( Commission $commission ): ?WP_Error {
+		if ( ! $commission->is_in_payout() ) {
+			return null;
+		}
+
+		$payout = flyaffiliate()->payout->get( (int) $commission->get( 'payout_id' ) );
+
+		if ( null === $payout || ! flyaffiliate()->payout->is_locked( $payout ) ) {
+			return null;
+		}
+
+		/* translators: %d: the payment id */
+		$message = sprintf( __( 'Payment #%d is being sent, so its commissions cannot change until the transfer settles.', 'flyaffiliate' ), $payout->get_id() );
+
+		return new WP_Error( 'flyaffiliate_payout_locked', $message, [ 'status' => 409 ] );
+	}
+
+	/**
+	 * Whether a status change is allowed for a commission outside a payment.
+	 *
+	 * Any of the four statuses can become any other, as in SliceWP: a rejected
+	 * commission comes back when its order recovers or an admin changes their
+	 * mind, and an admin can record a commission as paid by hand or take that
+	 * back. The automatic movers never get this far for a commission inside a
+	 * payment — `set_status()` refuses them first — which is what keeps the
+	 * money a payment promised still; an admin's change re-sums the payment.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param string $from The current status.
 	 * @param string $to   The requested status.
@@ -308,20 +531,15 @@ class Manager {
 	 * @return bool
 	 */
 	public function can_transition( string $from, string $to ): bool {
-		// A rejected commission can come back, as in SliceWP: its order recovered, or an admin changed their mind.
-		$allowed = [
-			Commission::STATUS_PENDING  => [ Commission::STATUS_UNPAID, Commission::STATUS_REJECTED ],
-			Commission::STATUS_UNPAID   => [ Commission::STATUS_PENDING, Commission::STATUS_REJECTED ],
-			Commission::STATUS_REJECTED => [ Commission::STATUS_PENDING, Commission::STATUS_UNPAID ],
-		];
+		$statuses = Commission::get_statuses();
 
-		return in_array( $to, $allowed[ $from ] ?? [], true );
+		return $from !== $to && isset( $statuses[ $from ], $statuses[ $to ] );
 	}
 
 	/**
-	 * Delete a commission that is not paid.
+	 * Delete a commission that no payment holds.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $commission_id Commission id.
 	 *
@@ -330,31 +548,40 @@ class Manager {
 	public function delete( int $commission_id ): bool {
 		$commission = $this->get( $commission_id );
 
-		if ( null === $commission || $commission->is_locked() ) {
+		if ( null === $commission || $commission->is_in_payout() ) {
 			return false;
 		}
 
-		return $commission->delete();
+		// Deleting empties the model; the action gets the fields it had.
+		$deleted = clone $commission;
+
+		if ( ! $commission->delete() ) {
+			return false;
+		}
+
+		/**
+		 * Fires after a commission is deleted.
+		 *
+		 * The row is gone; the commission passed still carries the fields it
+		 * had, so whatever followed it (a marketplace's charge on the vendor,
+		 * say) can follow it out.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param Commission $commission The commission, as it was.
+		 */
+		do_action( 'flyaffiliate_commission_deleted', $deleted );
+
+		return true;
 	}
 
-	/**
-	 * Money and row totals for one affiliate, split the way the screens show them.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param int    $affiliate_id Affiliate id.
-	 * @param string $after        Only commissions created on or after this GMT `Y-m-d H:i:s`.
-	 * @param string $before       Only commissions created on or before this GMT `Y-m-d H:i:s`.
-	 *
-	 * @return array{paid: float, unpaid: float, pending: float, total: float, paid_count: int, unpaid_count: int, pending_count: int, count: int}
-	 */
 	/**
 	 * The same totals for a whole page of affiliates, in one query.
 	 *
 	 * The list screen shows paid and unpaid earnings per row; asking for them
 	 * one affiliate at a time would be a query per row.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int[] $affiliate_ids The affiliates to total.
 	 *
@@ -419,7 +646,7 @@ class Manager {
 	/**
 	 * A zeroed totals set, in the shape get_affiliate_totals() returns.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array The zeroed totals.
 	 */
@@ -436,6 +663,17 @@ class Manager {
 		];
 	}
 
+	/**
+	 * Money and row totals for one affiliate, split the way the screens show them.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int    $affiliate_id Affiliate id.
+	 * @param string $after        Only commissions created on or after this GMT `Y-m-d H:i:s`.
+	 * @param string $before       Only commissions created on or before this GMT `Y-m-d H:i:s`.
+	 *
+	 * @return array{paid: float, unpaid: float, pending: float, total: float, paid_count: int, unpaid_count: int, pending_count: int, count: int}
+	 */
 	public function get_affiliate_totals( int $affiliate_id, string $after = '', string $before = '' ): array {
 		global $wpdb;
 
@@ -489,58 +727,50 @@ class Manager {
 	}
 
 	/**
-	 * Sum of commissions per affiliate, for the statuses given.
+	 * The date a commission's hold period ends: when a payout may take it.
 	 *
-	 * Used to sort the affiliates list by earnings. One grouped query for the
-	 * whole table; the map is small enough to order in PHP at the scale a
-	 * single-site plugin runs at.
+	 * @since 1.0.0
 	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string[] $statuses Statuses to include.
-	 *
-	 * @return array<int, float> Affiliate id => amount.
-	 */
-	public function sum_by_affiliate( array $statuses ): array {
-		global $wpdb;
-
-		$statuses = array_values( array_intersect( $statuses, array_keys( Commission::get_statuses() ) ) );
-
-		if ( [] === $statuses ) {
-			return [];
-		}
-
-		$table        = Commission::get_table();
-		$placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- FlyAffiliate's own table; the IN list is one %s per status, and every status was validated against the model's list.
-		$rows = $wpdb->get_results(
-			$wpdb->prepare( "SELECT affiliate_id, COALESCE( SUM( amount ), 0 ) AS total FROM {$table} WHERE status IN ({$placeholders}) GROUP BY affiliate_id", $statuses )
-		);
-		// phpcs:enable
-
-		$sums = [];
-
-		foreach ( (array) $rows as $row ) {
-			$sums[ (int) $row->affiliate_id ] = (float) $row->total;
-		}
-
-		return $sums;
-	}
-
-	/**
-	 * The date a commission created now would mature on.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string $created_at The creation time in GMT. Defaults to now.
+	 * @param string          $created_at The creation time in GMT. Defaults to now.
+	 * @param Commission|null $commission The commission being created, so its hold can be its own.
 	 *
 	 * @return string `Y-m-d H:i:s` in GMT.
 	 */
-	public function maturation_date( string $created_at = '' ): string {
-		$hold_days = absint( flyaffiliate_get_option( 'hold_days', 30 ) );
-		$base      = '' !== $created_at ? strtotime( $created_at . ' UTC' ) : time();
+	public function maturation_date( string $created_at = '', ?Commission $commission = null ): string {
+		$base = '' !== $created_at ? strtotime( $created_at . ' UTC' ) : time();
 
-		return gmdate( 'Y-m-d H:i:s', $base + $hold_days * DAY_IN_SECONDS );
+		return gmdate( 'Y-m-d H:i:s', $base + $this->get_hold_days( $commission ) * DAY_IN_SECONDS );
+	}
+
+	/**
+	 * The days a commission waits before a payout may take it: the hold period.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Commission|null $commission The commission; null for the hold period itself.
+	 *
+	 * @return int
+	 */
+	public function get_hold_days( ?Commission $commission = null ): int {
+		$hold_days = absint( flyaffiliate_get_option( 'hold_days', 30 ) );
+
+		if ( null === $commission ) {
+			return $hold_days;
+		}
+
+		/**
+		 * Filters the hold period of one commission, as it is created.
+		 *
+		 * A marketplace gives its sellers' commissions their own hold. The
+		 * answer is fixed into the commission's `matures_at` when it is
+		 * created: a later change of any hold applies to new orders only
+		 * (money rule 4).
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int        $hold_days  The hold period, in days.
+		 * @param Commission $commission The commission, with its vendor and product.
+		 */
+		return absint( apply_filters( 'flyaffiliate_commission_hold_days', $hold_days, $commission ) );
 	}
 }

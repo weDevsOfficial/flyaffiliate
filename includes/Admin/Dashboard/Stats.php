@@ -22,7 +22,7 @@ use FlyAffiliate\Models\Visit;
  * an optional GMT date range on `created_at`. Rejected commissions count for
  * nothing; a paid commission is revenue that has been paid out.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Stats {
 
@@ -51,7 +51,7 @@ class Stats {
 	/**
 	 * Everything the Dashboard shows, for a range.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  GMT `Y-m-d H:i:s` lower bound, or empty.
 	 * @param string $before GMT `Y-m-d H:i:s` upper bound, or empty.
@@ -67,10 +67,8 @@ class Stats {
 			'earnings'           => $this->get_earnings( $after, $before ),
 			'performance'        => $this->get_performance( $after, $before ),
 			'trend'              => $this->get_trend( $after, $before ),
-			/*
-			 * The lists stand apart from the range: they answer "who and what
-			 * is doing the work", which is an all-time question.
-			 */
+			// The lists stand apart from the range: they answer "who and what
+			// is doing the work", which is an all-time question.
 			'top_affiliates'     => $this->get_top_affiliates(),
 			'top_products'       => $this->get_top_products(),
 			'recent_visits'      => $this->get_recent_visits(),
@@ -83,7 +81,7 @@ class Stats {
 	 * Money: what referred orders were worth, what that cost in commissions,
 	 * what has been paid and what is still owed.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -130,7 +128,7 @@ class Stats {
 	/**
 	 * Counts: commissions earned, visits, how many converted.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -172,9 +170,9 @@ class Stats {
 	/**
 	 * Visits and conversions per day, for the sparkline.
 	 *
-	 * Without a range, the last 30 days.
+	 * Without a range (All time), from the first day with a visit to today.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -184,29 +182,42 @@ class Stats {
 	public function get_trend( string $after = '', string $before = '' ): array {
 		global $wpdb;
 
-		if ( '' === $after && '' === $before ) {
-			$after = gmdate( 'Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS );
-		}
-
 		list( $where, $values ) = $this->range_where( 'created_at', $after, $before );
 		$table                  = Visit::get_table();
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter -- FlyAffiliate's own tables: the only interpolations are their names and a WHERE built from placeholders, whose values follow.
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT DATE( created_at ) AS day, COUNT(*) AS visits, COALESCE( SUM( converted ), 0 ) AS converted FROM {$table} {$where} GROUP BY DATE( created_at ) ORDER BY day ASC",
-				$values
-			)
-		);
+		$sql  = "SELECT DATE( created_at ) AS day, COUNT(*) AS visits, COALESCE( SUM( converted ), 0 ) AS converted FROM {$table} {$where} GROUP BY DATE( created_at ) ORDER BY day ASC";
+		$rows = $wpdb->get_results( [] === $values ? $sql : $wpdb->prepare( $sql, $values ) ); // All time has no placeholder to fill.
 		// phpcs:enable
 
-		$trend = [];
+		$by_day = [];
 
 		foreach ( (array) $rows as $row ) {
-			$trend[] = [
+			$by_day[ (string) $row->day ] = [
 				'date'      => (string) $row->day,
 				'visits'    => (int) $row->visits,
 				'converted' => (int) $row->converted,
+			];
+		}
+
+		// One point per day of the range, zero where nothing happened, so the
+		// chart's axis spans the dates asked for rather than the days with
+		// visits. A range wider than a year is left to the days that have rows.
+		$start = strtotime( ( '' !== $after ? $after : ( array_key_first( $by_day ) ?? gmdate( 'Y-m-d' ) ) ) . ' UTC' );
+		$end   = strtotime( ( '' !== $before ? $before : gmdate( 'Y-m-d H:i:s' ) ) . ' UTC' );
+
+		if ( false === $start || false === $end || $end < $start || ( $end - $start ) > YEAR_IN_SECONDS ) {
+			return array_values( $by_day );
+		}
+
+		$trend = [];
+
+		for ( $day = strtotime( gmdate( 'Y-m-d', $start ) . ' UTC' ); $day <= $end; $day += DAY_IN_SECONDS ) {
+			$key     = gmdate( 'Y-m-d', $day );
+			$trend[] = $by_day[ $key ] ?? [
+				'date'      => $key,
+				'visits'    => 0,
+				'converted' => 0,
 			];
 		}
 
@@ -216,7 +227,7 @@ class Stats {
 	/**
 	 * The affiliates who earned the most, with their commission and visit counts.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -263,7 +274,7 @@ class Stats {
 	/**
 	 * The products that earned the most commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -307,7 +318,7 @@ class Stats {
 	/**
 	 * The newest visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -345,12 +356,12 @@ class Stats {
 	/**
 	 * The newest commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
 	 *
-	 * @return array<int, array{id: int, affiliate_id: int, affiliate_name: string, order_id: int, amount: float, status: string, created_at: string}>
+	 * @return array<int, array{id: int, affiliate_id: int, affiliate_name: string, order_id: int, order_url: string|null, amount: float, status: string, created_at: string}>
 	 */
 	public function get_recent_commissions( string $after = '', string $before = '' ): array {
 		$rows = [];
@@ -365,12 +376,14 @@ class Stats {
 			]
 		) as $commission ) {
 			$affiliate = Affiliate::find( (int) $commission->get( 'affiliate_id' ) );
+			$order     = (int) $commission->get( 'order_id', 0 ) > 0 ? $commission->get_order() : null;
 
 			$rows[] = [
 				'id'             => $commission->get_id(),
 				'affiliate_id'   => (int) $commission->get( 'affiliate_id' ),
 				'affiliate_name' => null === $affiliate ? '' : $affiliate->get_display_name(),
 				'order_id'       => (int) $commission->get( 'order_id', 0 ),
+				'order_url'      => null === $order ? null : $order->get_edit_order_url(),
 				'amount'         => (float) $commission->get( 'amount', 0 ),
 				'status'         => (string) $commission->get( 'status' ),
 				'created_at'     => empty( $commission->get( 'created_at' ) ) ? '' : mysql_to_rfc3339( (string) $commission->get( 'created_at' ) ),
@@ -383,7 +396,7 @@ class Stats {
 	/**
 	 * How many affiliates there are, and how many wait for review.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array{total: int, pending: int, active: int, pending_notice: bool}
 	 */
@@ -401,7 +414,7 @@ class Stats {
 	/**
 	 * The newest affiliate waiting for review.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return int The affiliate id, or 0 when nobody is waiting.
 	 */
@@ -426,7 +439,7 @@ class Stats {
 	 * Closing it quiets the notice for two days. Someone new applying in the
 	 * meantime brings it back, because that is news the admin has not seen.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -447,7 +460,7 @@ class Stats {
 	/**
 	 * Record that the current user closed the pending-review notice.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -465,7 +478,7 @@ class Stats {
 	/**
 	 * A WHERE clause for the range, with its placeholder values.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $column The date column, table alias included when joined.
 	 * @param string $after  Lower bound.

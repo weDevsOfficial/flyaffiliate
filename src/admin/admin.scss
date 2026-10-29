@@ -4,15 +4,27 @@
  */
 @use "../styles/base";
 
-/*
- * The mount point, before and after React takes over. The same gap on every
- * side, matching wp-admin's 20px content gutter.
- */
+// The header bar runs edge to edge under the admin bar, as Dokan's does: the
+// screen drops wp-admin's content gutter, and the page under the bar (and a
+// notice above it) takes the gutter back.
+/* stylelint-disable-next-line selector-class-pattern, selector-id-pattern -- WordPress' own selectors. */
+.toplevel_page_flyaffiliate #wpcontent {
+	padding-left: 0;
+}
+
 .flyaffiliate-wrap {
-	margin: 20px 20px 0 0;
+	margin: 0;
+
+	> .notice {
+		margin: 20px 20px 0;
+	}
+}
+
+.flyaffiliate-admin-content {
+	padding: 24px 20px 0;
 
 	@media screen and (max-width: 782px) {
-		margin: 10px 10px 0 0;
+		padding: 16px 10px 0;
 	}
 }
 
@@ -20,18 +32,16 @@
 
 	&__loading {
 		color: #646970;
-		padding: 24px 0;
+		padding: 24px 20px;
 	}
 
-	/*
-	 * The settings save bar sits at the bottom of the panel. plugin-ui makes it
-	 * sticky inside the content's scroll area, which only reaches the panel's
-	 * bottom once the content overflows; on a short subpage it sat right under
-	 * the last field with the rest of the panel empty beneath it. Letting the
-	 * scroll viewport and its wrapper grow as flex columns pushes the bar down,
-	 * and the sticky rule still takes over when the content is taller than the
-	 * panel.
-	 */
+	// The settings save bar sits at the bottom of the panel. plugin-ui makes it
+	// sticky inside the content's scroll area, which only reaches the panel's
+	// bottom once the content overflows; on a short subpage it sat right under
+	// the last field with the rest of the panel empty beneath it. Letting the
+	// scroll viewport and its wrapper grow as flex columns pushes the bar down,
+	// and the sticky rule still takes over when the content is taller than the
+	// panel.
 	[data-testid="settings-content"] > [class~="base-ui-disable-scrollbar"] {
 		display: flex;
 		flex-direction: column;
@@ -44,19 +54,17 @@
 		}
 	}
 
-	/* The header bar's links are buttons; wp-admin must not underline them. */
+	// The header bar's links are buttons; wp-admin must not underline them.
 	.flyaffiliate-topbar a {
 		text-decoration: none;
 	}
 }
 
-/*
- * The row-actions dropdown is a wp-components popover portalled to the body,
- * outside the app. Tint its hover the brand way, as Dokan does.
- */
+// The row-actions dropdown is a wp-components popover portalled to the body,
+// outside the app. Tint its hover the brand way, as Dokan does.
 /* stylelint-disable selector-class-pattern, selector-id-pattern -- WordPress' own selectors. */
 .toplevel_page_flyaffiliate [id^="portal/:"] {
-	--wp-components-color-accent: #e7f1f1;
+	--wp-components-color-accent: #e6ecfb;
 	--wp-components-color-accent-inverted: #{base.$brand};
 
 	div[role="menu"] {
@@ -73,11 +81,9 @@
 
 /* stylelint-enable selector-class-pattern, selector-id-pattern */
 
-/*
- * The dashboard's two half-width lists: the columns keep the widths the view
- * gives them and a long cell truncates, instead of the table growing. Five
- * rows show at a time; the rest are a scroll away, under a pinned header.
- */
+// The dashboard's two half-width lists: the columns keep the widths the view
+// gives them and a long cell truncates, instead of the table growing. Five
+// rows show at a time; the rest are a scroll away, under a pinned header.
 .flyaffiliate-dashboard-list {
 
 	table {
@@ -85,19 +91,31 @@
 		table-layout: fixed;
 	}
 
-	/* stylelint-disable selector-class-pattern -- plugin-ui's own classes. */
-	.pui-root-dataviews {
-
-		/* Header (49px) plus five rows of 65px. */
-		max-height: 374px;
-		overflow-y: auto;
-	}
-
 	thead th {
 		position: sticky;
 		top: 0;
 		z-index: 1;
 		background: #fff;
+	}
+
+	/* stylelint-disable selector-class-pattern -- plugin-ui's own classes. */
+	.pui-root-dataviews {
+
+		// The layout container is the element that scrolls — it is the
+		// header's nearest scrolling ancestor, so a sticky header sticks to
+		// it. Header (49px) plus five rows of 65px.
+		.dataviews-layout__container {
+			max-height: 374px;
+			overflow-y: auto;
+		}
+
+		// The header stays put while the rows scroll under it.
+		thead th {
+			position: sticky;
+			top: 0;
+			z-index: 1;
+			background: var(--background);
+		}
 	}
 
 	.dataviews-view-table__cell-content-wrapper,
@@ -108,11 +126,18 @@
 	/* stylelint-enable selector-class-pattern */
 }
 
-/*
- * The sidebar lists hold ten and show five. A row is 65px, so the height is
- * exactly five of them: no strip of empty card under the fifth, and the rest
- * are a scroll away.
- */
+// An empty list has no rows to scroll: the empty state (its icon, title and
+// line) stands taller than five rows' worth, so the cap would hand it a
+// scrollbar around nothing.
+/* stylelint-disable-next-line selector-class-pattern -- plugin-ui's own class. */
+.flyaffiliate-dashboard-list.is-empty .dataviews-layout__container {
+	max-height: none;
+	overflow-y: visible;
+}
+
+// The sidebar lists hold ten and show five. A row is 65px, so the height is
+// exactly five of them: no strip of empty card under the fifth, and the rest
+// are a scroll away.
 .flyaffiliate-sidebar-list {
 	max-height: 325px;
 	overflow-y: auto;

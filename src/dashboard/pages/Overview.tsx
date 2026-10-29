@@ -1,16 +1,15 @@
 /**
- * Overview: the balance figures, then the referral link beside the link
- * generator, then the terms of the programme in one card.
+ * Overview: the balance figures, the affiliate's referral link and the
+ * generator, then the terms of the programme in one card. The links the
+ * generator saves are listed on the Referral links tab.
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Clock, MousePointerClick, Wallet, WalletCards } from 'lucide-react';
-import { Card } from '@wedevs/plugin-ui';
 import StatCard, { StatCardSkeleton } from '@/components/StatCard';
-import CopyField from '@/components/CopyField';
 import { formatMoney } from '@/lib/format';
 import { getGlobals } from '@/lib/globals';
-import GenerateLink from '../components/GenerateLink';
 import ProgramDetails from '../components/ProgramDetails';
+import ReferralLinkCards from '../components/ReferralLinkCards';
 import type { AffiliateProfile } from '../types';
 
 type Props = {
@@ -24,11 +23,14 @@ export default function OverviewPage( { profile, hasRange }: Props ) {
 
 	if ( ! profile ) {
 		return (
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				<StatCardSkeleton />
-				<StatCardSkeleton />
-				<StatCardSkeleton />
-				<StatCardSkeleton />
+			<div className="flex flex-col gap-6">
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+					<StatCardSkeleton />
+					<StatCardSkeleton />
+					<StatCardSkeleton />
+					<StatCardSkeleton />
+				</div>
+				<ReferralLinkCards profile={ null } />
 			</div>
 		);
 	}
@@ -61,7 +63,7 @@ export default function OverviewPage( { profile, hasRange }: Props ) {
 					tooltip={ sprintf(
 						/* translators: %s: the minimum payout amount */
 						__(
-							'Commissions that are approved and waiting to be paid out. They go into the next payout once your balance reaches %s.',
+							'Commissions you have earned and that are waiting to be paid out. They go into a payout once their hold period is over and your balance reaches %s.',
 							'flyaffiliate'
 						),
 						formatMoney( program.payoutMinimum )
@@ -72,7 +74,7 @@ export default function OverviewPage( { profile, hasRange }: Props ) {
 					label={ __( 'Pending', 'flyaffiliate' ) }
 					value={ formatMoney( totals.pending ?? 0 ) }
 					tooltip={ __(
-						'Commissions whose order is not completed yet, or that are still inside the hold period. They join your unpaid balance after that.',
+						'Commissions whose order is not paid yet. They join your unpaid balance once it is.',
 						'flyaffiliate'
 					) }
 				/>
@@ -100,29 +102,7 @@ export default function OverviewPage( { profile, hasRange }: Props ) {
 				/>
 			</div>
 
-			<div className="grid gap-4 lg:grid-cols-2">
-				<Card className="gap-3 rounded-md border border-border px-5 py-4 shadow ring-0">
-					<label
-						htmlFor="flyaffiliate-referral-link"
-						className="text-sm font-semibold text-foreground"
-					>
-						{ __( 'Your referral link', 'flyaffiliate' ) }
-					</label>
-					<p className="text-sm text-muted-foreground">
-						{ __(
-							'Share this link. When someone follows it and buys, you earn a commission on what they buy.',
-							'flyaffiliate'
-						) }
-					</p>
-					<CopyField
-						id="flyaffiliate-referral-link"
-						value={ profile.referral_url }
-						className="bg-muted/40"
-					/>
-				</Card>
-
-				<GenerateLink referralUrl={ profile.referral_url } />
-			</div>
+			<ReferralLinkCards profile={ profile } />
 
 			<ProgramDetails />
 		</div>

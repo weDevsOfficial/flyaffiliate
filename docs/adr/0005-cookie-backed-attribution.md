@@ -43,6 +43,9 @@ converted.
 A WooCommerce session fallback covers the case where the cookie was refused: if
 `WC()->session` is available, the same pair is mirrored there.
 
+> Note (2026-10-29): the session fallback was not built. Attribution reads the
+> cookie only; a visitor whose browser refuses it is not attributed.
+
 **Last click wins** within the cookie window, consistent with `CONTEXT.md` money
 rule 8: exactly one affiliate per order.
 
@@ -51,7 +54,8 @@ earns nothing.
 
 ## Privacy
 
-The cookie is first-party, contains two integers, and is not shared with anyone.
+The cookie is first-party, contains two integers and the HMAC that signs them
+(`Tracking\Tracker::sign()`), and is not shared with anyone.
 `readme.txt` discloses it under a "Does this plugin use cookies?" FAQ entry, with
 the name, the purpose and the lifetime, so a site owner can put it in their own
 cookie policy. See also [ADR-0007](0007-hashed-visitor-data.md) for what a visit

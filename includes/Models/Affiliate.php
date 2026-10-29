@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * One WordPress user is one affiliate, sitewide (CONTEXT.md). `user_id` is
  * unique, and the database enforces it rather than trusting the caller.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Affiliate extends BaseModel {
 
@@ -62,20 +62,22 @@ class Affiliate extends BaseModel {
 	 * @var array<string, string>
 	 */
 	protected static array $columns = [
-		'id'             => 'int',
-		'user_id'        => 'int',
-		'status'         => 'string',
-		'payment_email'  => 'string',
-		'promo_method'   => 'string',
-		'activation_key' => 'string',
-		'created_at'     => 'datetime',
-		'updated_at'     => 'datetime',
+		'id'                    => 'int',
+		'user_id'               => 'int',
+		'status'                => 'string',
+		'payment_email'         => 'string',
+		'payout_method'         => 'string',
+		'promo_method'          => 'string',
+		'activation_key'        => 'string',
+		'activation_expires_at' => 'datetime',
+		'created_at'            => 'datetime',
+		'updated_at'            => 'datetime',
 	];
 
 	/**
 	 * Every status an affiliate can be in.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Status => translated label.
 	 */
@@ -91,7 +93,7 @@ class Affiliate extends BaseModel {
 	/**
 	 * Whether this affiliate can earn commissions and be attributed traffic.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -100,9 +102,22 @@ class Affiliate extends BaseModel {
 	}
 
 	/**
+	 * The affiliate's website, kept on their user's `user_url`.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function get_website(): string {
+		$user = $this->get_user();
+
+		return null === $user ? '' : (string) $user->user_url;
+	}
+
+	/**
 	 * The WordPress user behind this affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return \WP_User|null
 	 */
@@ -118,7 +133,7 @@ class Affiliate extends BaseModel {
 	 * Falls back through display name and login to the affiliate id, so a row
 	 * whose user was deleted still renders as something a human can act on.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -142,7 +157,7 @@ class Affiliate extends BaseModel {
 	/**
 	 * The email a payout for this affiliate should be sent to.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -159,9 +174,23 @@ class Affiliate extends BaseModel {
 	}
 
 	/**
+	 * The payout method this affiliate chose, or an empty string for the default.
+	 *
+	 * The choice only: `flyaffiliate()->payout_method->resolve_for()` says which
+	 * method actually pays them, since a chosen method can be switched off.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function get_payout_method(): string {
+		return (string) $this->get( 'payout_method', '' );
+	}
+
+	/**
 	 * This affiliate's referral link.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $url The URL to append the referral variable to. Defaults to the site home.
 	 *

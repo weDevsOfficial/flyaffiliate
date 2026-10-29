@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * a marketplace integration can supply a store rate without this class
  * knowing the marketplace exists.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class RateResolver {
 
@@ -32,7 +32,7 @@ class RateResolver {
 	/**
 	 * The percentage rate for a product.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $product_id The product (or variation) id.
 	 * @param int $vendor_id  The vendor, on a marketplace. 0 elsewhere.
@@ -48,7 +48,7 @@ class RateResolver {
 			 *
 			 * Return null to fall through to the default rate.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param float|null $rate       The vendor rate, or null.
 			 * @param int        $vendor_id  The vendor.
@@ -61,7 +61,21 @@ class RateResolver {
 			$rate = (float) flyaffiliate_get_option( 'default_rate', 10 );
 		}
 
-		$max  = (float) flyaffiliate_get_option( 'max_rate', 50 );
+		/**
+		 * Filters the maximum rate a product's sale can earn.
+		 *
+		 * The global maximum by default. A marketplace that sets its own
+		 * maximum for vendor sales replaces it here, for those sales only; the
+		 * rate is clamped to the result before and after
+		 * `flyaffiliate_commission_rate`.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param float $max        The maximum rate, in percent.
+		 * @param int   $product_id The product.
+		 * @param int   $vendor_id  The vendor. 0 on a single-merchant store.
+		 */
+		$max  = max( 0.0, (float) apply_filters( 'flyaffiliate_max_rate', (float) flyaffiliate_get_option( 'max_rate', 50 ), $product_id, $vendor_id ) );
 		$rate = max( 0.0, min( (float) $rate, $max ) );
 
 		/**
@@ -70,7 +84,7 @@ class RateResolver {
 		 * The result is clamped to the maximum rate again, so a filter cannot
 		 * exceed it.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param float $rate       The rate, in percent.
 		 * @param int   $product_id The product.
@@ -84,7 +98,7 @@ class RateResolver {
 	/**
 	 * A per-product rate, from the product or its parent.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $product_id The product or variation id.
 	 *

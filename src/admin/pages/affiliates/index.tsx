@@ -342,7 +342,7 @@ export default function AffiliatesPage() {
 			supportsBulk: true,
 			confirmTitle: __( 'Delete affiliate', 'flyaffiliate' ),
 			confirmMessage: __(
-				'The affiliate record is removed. Their commissions, visits and payouts are financial records and are kept.',
+				'This removes the affiliate. Their commissions, visits and payouts are kept as records.',
 				'flyaffiliate'
 			),
 			callback: async ( items ) => {

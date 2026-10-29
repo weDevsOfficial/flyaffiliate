@@ -41,6 +41,44 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * An unpaid commission still inside its hold period is earned but not payable: the
+	 * preview leaves it out and says so; a hold of zero lets it in (ADR-0014).
+	 *
+	 * @return void
+	 */
+	public function test_preview_leaves_out_unpaid_commissions_still_inside_their_hold(): void {
+		$affiliate = $this->factory()->affiliate->create();
+		$created   = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+
+		$this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 10, 'status' => Commission::STATUS_UNPAID, 'created_at' => $created, 'matures_at' => gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ] );
+		$held = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 20, 'status' => Commission::STATUS_UNPAID, 'created_at' => $created, 'matures_at' => gmdate( 'Y-m-d H:i:s', time() + 29 * DAY_IN_SECONDS ) ] );
+		$this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 40, 'status' => Commission::STATUS_PENDING, 'created_at' => $created, 'matures_at' => gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ] );
+
+		$preview = flyaffiliate()->payout->preview( [ 'minimum_amount' => 0 ] );
+
+		$this->assertSame( 1, $preview['count'] );
+		$this->assertCentsEquals( 1000, $preview['total'] );
+		$this->assertSame( 1, $preview['held']['count'] );
+		$this->assertCentsEquals( 2000, $preview['held']['amount'] );
+		$this->assertSame( 1, $preview['pending']['count'], 'a matured pending commission is still not payable: the order is not paid' );
+
+		// Creating the batch pays the same set.
+		$batch = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] );
+
+		$this->assertNotWPError( $batch );
+		$this->assertCentsEquals( 1000, $batch['total'] );
+		$this->assertSame( 0, (int) flyaffiliate()->commission->get( $held )->get( 'payout_id', 0 ), 'the held commission is in no payment' );
+
+		// A hold of zero applies to new orders: the held commission keeps the date it was created with.
+		flyaffiliate()->settings->save( [ 'hold_days' => 0 ] );
+		$preview = flyaffiliate()->payout->preview( [ 'minimum_amount' => 0 ] );
+
+		$this->assertSame( 0, $preview['count'] );
+		$this->assertSame( 1, $preview['held']['count'] );
+		$this->assertCentsEquals( 2000, $preview['held']['amount'] );
+	}
+
+	/**
 	 * The minimum leaves an affiliate out; the selection modes include and exclude.
 	 *
 	 * @return void
@@ -135,6 +173,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$this->assertInstanceOf( Payout::class, $paid );
 		$this->assertTrue( $paid->is_paid() );
+		$this->assertNotEmpty( $paid->get( 'paid_at' ), 'the day the money went is recorded' );
 		$this->assertSame( Commission::STATUS_PAID, flyaffiliate()->commission->get( $c1 )->get( 'status' ) );
 
 		flyaffiliate()->payout->mark_paid( $payout_id );
@@ -143,6 +182,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$unpaid = flyaffiliate()->payout->mark_unpaid( $payout_id );
 
 		$this->assertFalse( $unpaid->is_paid() );
+		$this->assertNull( $unpaid->get( 'paid_at' ), 'the payment did not happen, so neither did the date' );
 		$this->assertSame( Commission::STATUS_UNPAID, flyaffiliate()->commission->get( $c1 )->get( 'status' ) );
 		$this->assertSame( $payout_id, (int) flyaffiliate()->commission->get( $c1 )->get( 'payout_id' ), 'still attached, so never paid twice' );
 		$this->assertSame( 0, flyaffiliate()->payout->preview( [ 'minimum_amount' => 0 ] )['count'] );
@@ -196,6 +236,31 @@ class ManagerTest extends FlyAffiliateTestCase {
 		flyaffiliate()->payout->mark_paid( $payout_id );
 
 		$this->assertWPError( flyaffiliate()->payout->remove_commission( $payout_id, $c1 ), 'paid payments are locked' );
+	}
+
+	/**
+	 * A commission rejected inside an unpaid payment already left its amount; taking
+	 * it out afterwards does not subtract it a second time: the payment re-sums to
+	 * the unpaid rows it still holds (money rule 7).
+	 *
+	 * @return void
+	 */
+	public function test_removing_a_rejected_commission_does_not_count_it_twice(): void {
+		$affiliate = $this->factory()->affiliate->create();
+		$c1        = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 10, 'status' => Commission::STATUS_UNPAID ] );
+		$c2        = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 5, 'status' => Commission::STATUS_UNPAID ] );
+		$payout_id = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0]->get_id();
+
+		// The admin rejects a row the payment counts; the payment follows at once.
+		$this->assertNotWPError( flyaffiliate()->commission->set_status( $c2, Commission::STATUS_REJECTED ) );
+		$this->assertCentsEquals( 1000, flyaffiliate()->payout->get( $payout_id )->get( 'amount' ) );
+
+		$payout = flyaffiliate()->payout->remove_commission( $payout_id, $c2 );
+
+		$this->assertInstanceOf( Payout::class, $payout );
+		$this->assertCentsEquals( 1000, $payout->get( 'amount' ), 'still the one unpaid row it holds' );
+		$this->assertSame( 0, (int) flyaffiliate()->commission->get( $c2 )->get( 'payout_id' ) );
+		$this->assertSame( $payout_id, (int) flyaffiliate()->commission->get( $c1 )->get( 'payout_id' ) );
 	}
 
 	/**
@@ -317,8 +382,8 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] );
 
-		// What a refund, a cancellation or a trashed order asks for.
-		$refused = flyaffiliate()->commission->set_status( $commission, Commission::STATUS_REJECTED );
+		// What a refund, a cancellation or a trashed order asks for: an automatic move.
+		$refused = flyaffiliate()->commission->set_status( $commission, Commission::STATUS_REJECTED, true );
 
 		$this->assertWPError( $refused );
 		$this->assertSame( 'flyaffiliate_commission_in_payout', $refused->get_error_code() );
@@ -337,10 +402,8 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$payout = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0];
 
-		/*
-		 * A row rejected while the payment waited: the lock keeps this from
-		 * happening now, and rows written before it must not be paid either.
-		 */
+		// A row rejected while the payment waited: the lock keeps this from
+		// happening now, and rows written before it must not be paid either.
 		$rejected = flyaffiliate()->commission->get( $dead );
 		$rejected->set( 'status', Commission::STATUS_REJECTED );
 		$rejected->save();
@@ -352,7 +415,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
-	 * A commission inside an unpaid payment cannot be edited or deleted, and leaving the payment frees it.
+	 * A commission inside an unpaid payment is edited by the admin and the payment follows; it cannot be deleted, and leaving the payment frees it.
 	 *
 	 * @return void
 	 */
@@ -370,9 +433,10 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$payout = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0];
 
-		$this->assertWPError( flyaffiliate()->commission->set_manual_amount( $commission, 5 ) );
-		$this->assertFalse( flyaffiliate()->commission->delete( $commission ) );
-		$this->assertCentsEquals( 2500, flyaffiliate()->commission->get( $commission )->get( 'amount' ) );
+		$this->assertNotWPError( flyaffiliate()->commission->update( $commission, [ 'amount' => 5 ] ), 'the admin edits it as in SliceWP' );
+		$this->assertCentsEquals( 500, flyaffiliate()->commission->get( $commission )->get( 'amount' ) );
+		$this->assertCentsEquals( 500, flyaffiliate()->payout->get( $payout->get_id() )->get( 'amount' ), 'and the unpaid payment re-sums' );
+		$this->assertFalse( flyaffiliate()->commission->delete( $commission ), 'but the payment keeps it from being deleted' );
 
 		// Out of the payment, it is an ordinary unpaid commission again.
 		flyaffiliate()->payout->remove_commission( $payout->get_id(), $commission );

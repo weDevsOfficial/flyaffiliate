@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The visitor's IP address and user agent are stored as `wp_hash()` digests and
  * never as the raw values, so a visit holds no personal data (ADR-0007).
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Visit extends BaseModel {
 
@@ -58,7 +58,7 @@ class Visit extends BaseModel {
 	/**
 	 * Whether this visit led to an order.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */

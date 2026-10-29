@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use FlyAffiliate\Admin\Settings\Repository\SettingsRepository;
-use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Admin\Settings\Schema\SettingsSchema;
 use FlyAffiliate\Affiliate\Role;
+use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Models\Affiliate;
 
 /**
@@ -26,7 +26,7 @@ use FlyAffiliate\Models\Affiliate;
  * scheduled when it is not already scheduled. Running `do_install()` twice
  * changes nothing the second time.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Installer {
 
@@ -53,7 +53,7 @@ class Installer {
 	const PAGES_OPTION = 'flyaffiliate_pages';
 
 	/**
-	 * The recurring Action Scheduler hook that matures commissions.
+	 * The recurring daily hook. It once matured commissions; nothing listens to it since ADR-0014.
 	 *
 	 * @var string
 	 */
@@ -62,11 +62,14 @@ class Installer {
 	/**
 	 * Install or repair everything the plugin needs to run.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
 	public function do_install(): void {
+		// A first install has never stored a database version, as Dokan reads its own version option.
+		$first_install = false === get_option( self::DB_VERSION_OPTION, false );
+
 		$this->create_tables();
 		$this->create_options();
 		$this->create_roles();
@@ -75,13 +78,15 @@ class Installer {
 
 		update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
 
-		// The first admin page load after activation opens the setup wizard, as Dokan's does.
-		SetupWizard::schedule_redirect();
+		// Only a first install opens the setup wizard on the next admin page load, as Dokan's onboarding does.
+		if ( $first_install ) {
+			SetupWizard::schedule_redirect();
+		}
 
 		/**
 		 * Fires after FlyAffiliate has finished installing or repairing itself.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 */
 		do_action( 'flyaffiliate_installed' );
 	}
@@ -89,7 +94,7 @@ class Installer {
 	/**
 	 * Create or reconcile the custom tables.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -110,7 +115,7 @@ class Installer {
 	/**
 	 * Columns that must accept NULL, table => column => definition.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array<string, string>>
 	 */
@@ -129,11 +134,11 @@ class Installer {
 	 *
 	 * dbDelta adds missing columns and widens existing ones, but it never turns
 	 * a `NOT NULL` column into a nullable one. A site whose table was created
-	 * by the prototype therefore keeps `order_item_id NOT NULL`, and every
+	 * by an earlier build therefore keeps `order_item_id NOT NULL`, and every
 	 * manual commission insert fails. This runs after dbDelta on every install
 	 * or repair, and is a no-op once the column is right.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -165,7 +170,7 @@ class Installer {
 	 * never FLOAT, and never DECIMAL(10,2), which cannot hold four decimal
 	 * places of a rate applied to a base amount.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[]
 	 */
@@ -182,13 +187,16 @@ class Installer {
 	user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 	status VARCHAR(20) NOT NULL DEFAULT 'pending',
 	payment_email VARCHAR(191) NOT NULL DEFAULT '',
+	payout_method VARCHAR(20) NOT NULL DEFAULT '',
 	promo_method TEXT NULL,
 	activation_key VARCHAR(64) NOT NULL DEFAULT '',
+	activation_expires_at DATETIME NULL DEFAULT NULL,
 	created_at DATETIME NULL DEFAULT NULL,
 	updated_at DATETIME NULL DEFAULT NULL,
 	PRIMARY KEY  (id),
 	UNIQUE KEY user_id (user_id),
-	KEY status (status)
+	KEY status (status),
+	KEY activation_key (activation_key)
 ) {$collate};";
 
 		$tables[] = "CREATE TABLE {$prefix}flyaffiliate_commissions (
@@ -216,14 +224,15 @@ class Installer {
 	KEY affiliate_status (affiliate_id,status),
 	KEY status_matures_at (status,matures_at),
 	KEY vendor_status (vendor_id,status),
-	KEY payout_id (payout_id)
+	KEY payout_id (payout_id),
+	KEY created_at (created_at)
 ) {$collate};";
 
 		$tables[] = "CREATE TABLE {$prefix}flyaffiliate_visits (
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	affiliate_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
-	url VARCHAR(255) NOT NULL DEFAULT '',
-	referrer VARCHAR(255) NOT NULL DEFAULT '',
+	url TEXT NULL,
+	referrer TEXT NULL,
 	ip_hash VARCHAR(64) NOT NULL DEFAULT '',
 	user_agent_hash VARCHAR(64) NOT NULL DEFAULT '',
 	converted TINYINT(1) NOT NULL DEFAULT 0,
@@ -231,6 +240,7 @@ class Installer {
 	created_at DATETIME NULL DEFAULT NULL,
 	PRIMARY KEY  (id),
 	KEY affiliate_created (affiliate_id,created_at),
+	KEY created_at (created_at),
 	KEY order_id (order_id)
 ) {$collate};";
 
@@ -241,16 +251,30 @@ class Installer {
 	amount DECIMAL(19,4) NOT NULL DEFAULT 0.0000,
 	currency VARCHAR(10) NOT NULL DEFAULT '',
 	method VARCHAR(20) NOT NULL DEFAULT 'manual',
-	status VARCHAR(20) NOT NULL DEFAULT 'paid',
+	status VARCHAR(20) NOT NULL DEFAULT 'unpaid',
 	reference VARCHAR(191) NOT NULL DEFAULT '',
 	note TEXT NULL,
 	period_start DATETIME NULL DEFAULT NULL,
 	period_end DATETIME NULL DEFAULT NULL,
 	created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+	paid_at DATETIME NULL DEFAULT NULL,
 	created_at DATETIME NULL DEFAULT NULL,
 	PRIMARY KEY  (id),
 	KEY batch_key (batch_key),
-	KEY affiliate_id (affiliate_id)
+	KEY affiliate_id (affiliate_id),
+	KEY created_at (created_at)
+) {$collate};";
+
+		// A TEXT column cannot carry a unique key, so the hash of the URL does.
+		$tables[] = "CREATE TABLE {$prefix}flyaffiliate_referral_links (
+	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	affiliate_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+	url TEXT NULL,
+	url_hash CHAR(32) NOT NULL DEFAULT '',
+	created_at DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY  (id),
+	UNIQUE KEY affiliate_url (affiliate_id,url_hash),
+	KEY affiliate_created (affiliate_id,created_at)
 ) {$collate};";
 
 		return $tables;
@@ -265,7 +289,7 @@ class Installer {
 	 * which freezes a default read from WooCommerce (the currency) at the value
 	 * it had when the setting arrived.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -293,7 +317,7 @@ class Installer {
 	 * The backfill covers sites that had affiliates before the role existed;
 	 * from then on {@see Role} keeps the two in step.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -325,7 +349,7 @@ class Installer {
 	/**
 	 * The pages the plugin needs, and the shortcode each one holds.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{title: string, content: string}>
 	 */
@@ -348,7 +372,7 @@ class Installer {
 	 * A page whose stored id still resolves to a published page is left alone, so
 	 * reactivating the plugin does not litter the site with duplicates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -383,17 +407,24 @@ class Installer {
 	}
 
 	/**
-	 * Schedule the daily maturation job.
+	 * Schedule the daily hook.
 	 *
-	 * Action Scheduler, which WooCommerce bundles, rather than WP-Cron: the job
-	 * pages through commissions and must survive a request that dies halfway.
+	 * Action Scheduler when it is available (WooCommerce bundles it), WP-Cron
+	 * otherwise. Nothing listens to it since ADR-0014; it is kept as Dokan
+	 * keeps its daily cron, for the work that will hang off it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
 	public function schedule_events(): void {
+		// Action Scheduler ships with WooCommerce. Without it, WP-Cron runs the
+		// daily job; the hook is the same either way.
 		if ( ! function_exists( 'as_has_scheduled_action' ) || ! function_exists( 'as_schedule_recurring_action' ) ) {
+			if ( ! wp_next_scheduled( self::MATURATION_HOOK ) ) {
+				wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::MATURATION_HOOK );
+			}
+
 			return;
 		}
 
@@ -416,7 +447,7 @@ class Installer {
 	/**
 	 * Cancel the scheduled job. Called on deactivation.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -424,6 +455,8 @@ class Installer {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( self::MATURATION_HOOK );
 		}
+
+		wp_clear_scheduled_hook( self::MATURATION_HOOK );
 	}
 
 	/**
@@ -431,7 +464,7 @@ class Installer {
 	 *
 	 * Used by the uninstaller, and by the test harness to truncate between tests.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[]
 	 */
@@ -441,6 +474,7 @@ class Installer {
 			'flyaffiliate_commissions',
 			'flyaffiliate_visits',
 			'flyaffiliate_payouts',
+			'flyaffiliate_referral_links',
 		];
 	}
 }

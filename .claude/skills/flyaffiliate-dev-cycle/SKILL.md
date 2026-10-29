@@ -20,7 +20,7 @@ find out early.
 ## Setup, once
 
 ```bash
-composer install        # dev dependencies only — nothing from vendor/ ships
+composer install        # dev tools; Mozart re-prefixes the Appsero SDK into vendor-prefixed/ — nothing from vendor/ ships
 npm install
 npm run env:start       # WordPress + WooCommerce in Docker
 ```
@@ -37,7 +37,7 @@ npm run env:start       # WordPress + WooCommerce in Docker
   `bin/plugin-check.sh` to drop the built release directory into. That is what
   makes Plugin Check see the real slug.
 
-PHP is 7.4 by default. To work against 8.3 locally, write a
+PHP is 8.1 by default. To work against 8.3 locally, write a
 `.wp-env.override.json` (gitignored) with `{ "phpVersion": "8.3" }` and restart.
 
 ## PHP
@@ -50,9 +50,6 @@ composer phpcbf         # auto-fix what can be auto-fixed
 `phpcs.xml.dist` does **not** relax the security sniffs (ADR-0003). If PHPCS
 reports unescaped output, an unprepared query, or a missing nonce check, that is
 a real finding — Plugin Check will report the same thing on the built zip.
-
-The only excluded PHP is `includes/admin.php` and `includes/frontend.php`, the
-1.0.7 prototype screens the Phase 2 port reads from. Nothing new goes in them.
 
 ## JavaScript and CSS
 
@@ -109,7 +106,8 @@ is the canary; if it fails, stop and fix it before anything else.
 ## Release
 
 ```bash
-npm run release         # build → makepot → build/flyaffiliate.zip
+npm run version         # release commit only: FLYAFFILIATE_SINCE → package.json's version in the sources
+npm run release         # build → makepot → build/flyaffiliate-v<version>.zip
 npm run plugin-check    # Plugin Check against build/flyaffiliate
 ```
 
@@ -125,7 +123,7 @@ or it lands in the zip.
 | Workflow | Trigger | What fails it |
 |---|---|---|
 | `phpcs.yml` | PR touching `**.php` | Any violation on a changed file (no `--graceful-warnings`) |
-| `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 7.4/8.3 |
+| `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 8.1/8.3 |
 | `plugin-check.yml` | push, PR, manual | Any Plugin Check error **or warning** on the built zip |
 | `deploy.yml` | `v*` tag | Disabled until the wp.org slug is approved |
 

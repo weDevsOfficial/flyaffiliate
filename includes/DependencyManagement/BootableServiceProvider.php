@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * A service provider whose `boot()` runs immediately after `register()`.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 abstract class BootableServiceProvider extends BaseServiceProvider implements BootableServiceProviderInterface {
 }

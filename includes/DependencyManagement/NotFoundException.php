@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Thrown when the container is asked for an identifier it does not know.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class NotFoundException extends ContainerException {
 }

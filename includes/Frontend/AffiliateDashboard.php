@@ -23,7 +23,7 @@ use FlyAffiliate\Abstracts\Shortcode;
  * open. Everything shown is scoped to the affiliate behind the logged-in
  * user; there is no parameter to pick another.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class AffiliateDashboard extends Shortcode {
 
@@ -37,13 +37,14 @@ class AffiliateDashboard extends Shortcode {
 	/**
 	 * The tabs.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Tab key => label.
 	 */
 	public function get_tabs(): array {
 		return [
 			'overview'    => __( 'Overview', 'flyaffiliate' ),
+			'links'       => __( 'Referral links', 'flyaffiliate' ),
 			'commissions' => __( 'Commissions', 'flyaffiliate' ),
 			'visits'      => __( 'Visits', 'flyaffiliate' ),
 			'payouts'     => __( 'Payouts', 'flyaffiliate' ),
@@ -54,7 +55,7 @@ class AffiliateDashboard extends Shortcode {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array|string $atts Shortcode attributes.
 	 *
@@ -64,7 +65,8 @@ class AffiliateDashboard extends Shortcode {
 		wp_enqueue_style( 'flyaffiliate-frontend' );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading a status flag from a redirect for display.
-		$notice = isset( $_GET['flyaffiliate_activated'] ) ? 'activated' : ( isset( $_GET['flyaffiliate_error'] ) ? sanitize_key( wp_unslash( $_GET['flyaffiliate_error'] ) ) : '' );
+		$notice  = isset( $_GET['flyaffiliate_activated'] ) ? 'activated' : ( isset( $_GET['flyaffiliate_error'] ) ? sanitize_key( wp_unslash( $_GET['flyaffiliate_error'] ) ) : '' );
+		$message = $this->get_notice_message( $notice );
 
 		if ( ! is_user_logged_in() ) {
 			return $this->template(
@@ -72,6 +74,7 @@ class AffiliateDashboard extends Shortcode {
 				[
 					'login_url' => wp_login_url( get_permalink() ),
 					'notice'    => $notice,
+					'message'   => $message,
 				]
 			);
 		}
@@ -84,6 +87,7 @@ class AffiliateDashboard extends Shortcode {
 				[
 					'register_url' => flyaffiliate_get_page_url( 'affiliate_register' ),
 					'notice'       => $notice,
+					'message'      => $message,
 				]
 			);
 		}
@@ -94,6 +98,7 @@ class AffiliateDashboard extends Shortcode {
 				[
 					'affiliate' => $affiliate,
 					'notice'    => $notice,
+					'message'   => $message,
 				]
 			);
 		}
@@ -114,15 +119,29 @@ class AffiliateDashboard extends Shortcode {
 	}
 
 	/**
-	 * The URL of a tab.
+	 * What an activation link's result says, for the screens before the dashboard.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
-	 * @param string $tab Tab key.
+	 * @param string $notice `activated`, or the error code the activation link redirected with.
 	 *
-	 * @return string
+	 * @return array{type: string, text: string}|null
 	 */
-	public function get_tab_url( string $tab ): string {
-		return add_query_arg( 'tab', $tab, remove_query_arg( [ 'tab', 'tab_page', 'flyaffiliate_saved', 'flyaffiliate_error', 'flyaffiliate_activated' ] ) );
+	protected function get_notice_message( string $notice ): ?array {
+		$messages = [
+			'activated'          => [ 'success', __( 'Your affiliate account is active. Log in to open your dashboard.', 'flyaffiliate' ) ],
+			'invalid_key'        => [ 'error', __( 'That activation link is not valid, or has already been used.', 'flyaffiliate' ) ],
+			'expired_key'        => [ 'error', __( 'That activation link has expired. Ask the site owner for a new one.', 'flyaffiliate' ) ],
+			'account_not_active' => [ 'error', __( 'This affiliate account is not active, so the link cannot open it. Contact the site owner.', 'flyaffiliate' ) ],
+		];
+
+		if ( ! isset( $messages[ $notice ] ) ) {
+			return null;
+		}
+
+		return [
+			'type' => $messages[ $notice ][0],
+			'text' => $messages[ $notice ][1],
+		];
 	}
 }

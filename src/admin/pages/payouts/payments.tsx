@@ -1,13 +1,17 @@
 /**
  * Payments: one row per affiliate per payout. Created unpaid when a payout is
  * made, marked paid once the money has been sent — which is what marks the
- * commissions in it paid — the way SliceWP's payments work.
+ * commissions in it paid — the way SliceWP's payments work. A payment an
+ * automatic payout method sends shows its transfer, is locked while the money
+ * is on its way, and can be sent again when the transfer failed.
  */
 import { useEffect, useMemo, useState } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Download, Eye, Layers, RotateCcw, Trash2 } from 'lucide-react';
+import { Check, Download, Eye, Layers, RotateCw, Trash2 } from 'lucide-react';
 import {
+	Badge,
 	Button,
 	DataViews,
 	toast,
@@ -18,12 +22,13 @@ import {
 import PageHeader from '@/components/PageHeader';
 import DateTime from '@/components/DateTime';
 import Money from '@/components/Money';
-import StatusBadge from '@/components/StatusBadge';
 import Truncated from '@/components/Truncated';
+import Hint from '@/components/Hint';
+import PaymentStatus from '@/components/PaymentStatus';
+import MethodName from '@/components/MethodName';
 import { useCounts } from '@/hooks/useCounts';
 import { useListView } from '@/hooks/useListView';
 import { errorMessage, send } from '@/lib/api';
-import { getGlobals } from '@/lib/globals';
 import { withIconLabels } from '@/lib/actions';
 import { buildTabs } from '@/lib/tabs';
 import { BRAND_OUTLINE } from '@/lib/ui';
@@ -67,7 +72,127 @@ const DEFAULT_VIEW: DataViewState = {
 	},
 };
 
+/**
+ * One payout's payments, on the payout's own page: no Payout column, which
+ * would only link back to the page it is on.
+ */
+const BATCH_VIEW: DataViewState = {
+	...DEFAULT_VIEW,
+	fields: DEFAULT_VIEW.fields?.filter( ( field ) => field !== 'batch' ),
+	layout: {
+		styles: {
+			id: { width: '8%' },
+			affiliate: { width: '14%' },
+			amount: { width: '10%' },
+			commissions: { width: '10%' },
+			payment_email: { width: '15%' },
+			reference: { width: '10%' },
+			status: { width: '12%' },
+			method: { width: '9%' },
+			created_at: { width: '12%' },
+		},
+	},
+};
+
 const STATUSES = [ 'unpaid', 'paid' ];
+
+/**
+ * A column a payout method adds to the payments table, drawn with
+ * FlyAffiliate's own cells: its text, and an info tip when it explains it.
+ * Added through the `flyaffiliate_payment_columns` filter; it reads what the
+ * method put in each payment's `transfer`.
+ */
+export type PaymentColumn = {
+	id: string;
+	label: string;
+	/** Its width, as the other columns give theirs (`'9%'`). */
+	width?: string;
+	text: ( item: Payout ) => string;
+	hint?: ( item: Payout ) => string;
+	/** Whether the page's rows need the column at all; always when absent. */
+	isVisible?: ( items: Payout[] ) => boolean;
+};
+
+/**
+ * The columns payout methods add, read once: the filter is registered before FlyAffiliate's app runs.
+ *
+ * @return {PaymentColumn[]} The columns.
+ */
+function getExtraColumns(): PaymentColumn[] {
+	const columns = applyFilters( 'flyaffiliate_payment_columns', [] );
+
+	return Array.isArray( columns )
+		? columns.filter(
+				( column ): column is PaymentColumn =>
+					!! column?.id && typeof column.text === 'function'
+		  )
+		: [];
+}
+
+/**
+ * The view with the added columns that the rows need, after Status. The
+ * columns' widths shrink in proportion to make room, so the table keeps its
+ * width and no column is cut short.
+ *
+ * @param {DataViewState}   view    The view.
+ * @param {PaymentColumn[]} columns The added columns that show.
+ * @return {DataViewState} The view.
+ */
+function withColumns(
+	view: DataViewState,
+	columns: PaymentColumn[]
+): DataViewState {
+	if ( ! columns.length ) {
+		return view;
+	}
+
+	const fields = ( view.fields ?? [] ).filter(
+		( field ) => ! columns.some( ( column ) => column.id === field )
+	);
+	const at = fields.indexOf( 'status' ) + 1 || fields.length;
+	const styles: Record< string, { width?: string } > =
+		( view.layout as { styles?: Record< string, { width?: string } > } )
+			?.styles ?? {};
+	const widths: Record< string, number > = Object.fromEntries( [
+		...fields.map( ( field ) => [
+			field,
+			parseFloat( styles[ field ]?.width ?? '' ) || 0,
+		] ),
+		...columns.map( ( column ) => [
+			column.id,
+			parseFloat( column.width ?? '9%' ),
+		] ),
+	] );
+	const total = Object.values( widths ).reduce( ( a, b ) => a + b, 0 );
+	const before = total - columns.reduce( ( a, c ) => a + widths[ c.id ], 0 );
+
+	fields.splice( at, 0, ...columns.map( ( column ) => column.id ) );
+
+	return {
+		...view,
+		fields,
+		layout: {
+			...view.layout,
+			styles: {
+				...styles,
+				...Object.fromEntries(
+					Object.entries( widths )
+						.filter( ( [ , width ] ) => width > 0 )
+						.map( ( [ id, width ] ) => [
+							id,
+							{
+								...styles[ id ],
+								width: `${ (
+									( width * before ) /
+									total
+								).toFixed( 2 ) }%`,
+							},
+						] )
+				),
+			},
+		},
+	} as DataViewState;
+}
 
 type TableProps = {
 	affiliateId?: number;
@@ -75,6 +200,8 @@ type TableProps = {
 	headerContent?: React.ReactNode[];
 	/** Bump to reload the rows after something outside the table changed them. */
 	refreshKey?: number;
+	/** Bump to reload the rows quietly, keeping them on screen (polling). */
+	pollKey?: number;
 	onChanged?: () => void;
 };
 
@@ -83,6 +210,7 @@ export function PaymentsTable( {
 	batchKey,
 	headerContent = [],
 	refreshKey = 0,
+	pollKey = 0,
 	onChanged,
 }: TableProps ) {
 	const navigate = useNavigate();
@@ -102,10 +230,14 @@ export function PaymentsTable( {
 	);
 	const list = useListView< Payout >( {
 		path: '/payouts',
-		defaultView: DEFAULT_VIEW,
+		defaultView: batchKey ? BATCH_VIEW : DEFAULT_VIEW,
 		filters,
 	} );
 	const counts = useCounts( '/payouts', 'status', STATUSES, baseFilters );
+	const extraColumns = useMemo( getExtraColumns, [] );
+	const shownColumns = extraColumns.filter(
+		( column ) => ! column.isVisible || column.isVisible( list.items )
+	);
 
 	const refresh = () => {
 		setSelection( [] );
@@ -123,35 +255,66 @@ export function PaymentsTable( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ refreshKey ] );
 
-	const setStatuses = async ( items: Payout[], next: 'paid' | 'unpaid' ) => {
+	useEffect( () => {
+		if ( pollKey > 0 ) {
+			list.refresh( { silent: true } );
+			counts.refresh( { silent: true } );
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ pollKey ] );
+
+	const retry = async ( items: Payout[] ) => {
 		try {
 			await Promise.all(
 				items.map( ( item ) =>
-					send( `/payouts/${ item.id }`, 'PUT', { status: next } )
+					send( `/payouts/${ item.id }/retry`, 'POST' )
 				)
 			);
 			toast.success(
-				next === 'paid'
-					? sprintf(
-							/* translators: %d: number of payments */
-							_n(
-								'%d payment marked paid.',
-								'%d payments marked paid.',
-								items.length,
-								'flyaffiliate'
-							),
-							items.length
-					  )
-					: sprintf(
-							/* translators: %d: number of payments */
-							_n(
-								'%d payment marked unpaid.',
-								'%d payments marked unpaid.',
-								items.length,
-								'flyaffiliate'
-							),
-							items.length
-					  )
+				sprintf(
+					/* translators: %d: number of payments */
+					_n(
+						'%d payment sent again.',
+						'%d payments sent again.',
+						items.length,
+						'flyaffiliate'
+					),
+					items.length
+				)
+			);
+			refresh();
+		} catch ( error ) {
+			toast.error(
+				errorMessage(
+					error,
+					__( 'The payment could not be sent again.', 'flyaffiliate' )
+				)
+			);
+			refresh();
+		}
+	};
+
+	// Paid is the end of a payment's life, as in SliceWP: the row menu offers
+	// "Mark as paid" and nothing to take it back. `PUT { status: 'unpaid' }`
+	// still exists for the API.
+	const markPaid = async ( items: Payout[] ) => {
+		try {
+			await Promise.all(
+				items.map( ( item ) =>
+					send( `/payouts/${ item.id }`, 'PUT', { status: 'paid' } )
+				)
+			);
+			toast.success(
+				sprintf(
+					/* translators: %d: number of payments */
+					_n(
+						'%d payment marked paid.',
+						'%d payments marked paid.',
+						items.length,
+						'flyaffiliate'
+					),
+					items.length
+				)
 			);
 			refresh();
 		} catch ( error ) {
@@ -164,8 +327,6 @@ export function PaymentsTable( {
 		}
 	};
 
-	const { methods } = getGlobals();
-
 	const fields: DataViewField< Payout >[] = [
 		{
 			id: 'id',
@@ -173,7 +334,7 @@ export function PaymentsTable( {
 			render: ( { item } ) => (
 				<Link
 					to={ `/payouts/payment/${ item.id }` }
-					className="font-medium text-foreground hover:text-primary hover:underline"
+					className="font-medium text-primary hover:underline"
 				>
 					#{ item.id }
 				</Link>
@@ -266,7 +427,7 @@ export function PaymentsTable( {
 			render: ( { item } ) => (
 				<Truncated
 					className="text-muted-foreground"
-					text={ item.reference || '—' }
+					text={ item.reference || item.transfer?.reference || '—' }
 					max={ 18 }
 				/>
 			),
@@ -275,17 +436,21 @@ export function PaymentsTable( {
 			id: 'status',
 			label: __( 'Status', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) => <StatusBadge status={ item.status } />,
+			render: ( { item } ) => <PaymentStatus item={ item } />,
 		},
 		{
 			id: 'method',
-			label: __( 'Method', 'flyaffiliate' ),
+			label: __( 'Paid via', 'flyaffiliate' ),
 			enableSorting: false,
 			getValue: ( { item } ) => item.method,
 			render: ( { item } ) => (
-				<span className="text-muted-foreground">
-					{ methods[ item.method ] ?? item.method ?? '—' }
-				</span>
+				<Badge variant="secondary" className="px-2.5">
+					<MethodName
+						id={ item.method }
+						label={ item.method_label || item.method || '—' }
+						logoClassName="size-3.5"
+					/>
+				</Badge>
 			),
 		},
 		{
@@ -295,6 +460,25 @@ export function PaymentsTable( {
 				<DateTime value={ item.created_at } withTime />
 			),
 		},
+		...extraColumns.map(
+			( column ): DataViewField< Payout > => ( {
+				id: column.id,
+				label: column.label,
+				enableSorting: false,
+				render: ( { item } ) => {
+					const hint = column.hint?.( item ) ?? '';
+
+					return (
+						<span className="inline-flex items-center gap-1.5 tabular-nums">
+							{ column.text( item ) || (
+								<span className="text-muted-foreground">—</span>
+							) }
+							{ hint && <Hint text={ hint } /> }
+						</span>
+					);
+				},
+			} )
+		),
 	];
 
 	const actions: DataViewAction< Payout >[] = [
@@ -312,24 +496,19 @@ export function PaymentsTable( {
 			supportsBulk: true,
 			confirmTitle: __( 'Mark as paid', 'flyaffiliate' ),
 			confirmMessage: __(
-				'The money has been sent: every commission in the payment is marked paid.',
+				'Marks every commission in the payment as paid. Do this once the money has been sent.',
 				'flyaffiliate'
 			),
-			isEligible: ( item ) => item.status === 'unpaid',
-			callback: ( items ) => setStatuses( items, 'paid' ),
+			isEligible: ( item ) => item.status === 'unpaid' && ! item.locked,
+			callback: markPaid,
 		},
 		{
-			id: 'unpay',
-			label: __( 'Mark as unpaid', 'flyaffiliate' ),
-			icon: <RotateCcw size={ 16 } />,
+			id: 'retry',
+			label: __( 'Retry', 'flyaffiliate' ),
+			icon: <RotateCw size={ 16 } />,
 			supportsBulk: true,
-			confirmTitle: __( 'Mark as unpaid', 'flyaffiliate' ),
-			confirmMessage: __(
-				'Marked paid by mistake? The commissions go back to unpaid. They stay in this payment, so they are not paid twice.',
-				'flyaffiliate'
-			),
-			isEligible: ( item ) => item.status === 'paid',
-			callback: ( items ) => setStatuses( items, 'unpaid' ),
+			isEligible: ( item ) => !! item.can_retry,
+			callback: retry,
 		},
 		{
 			id: 'batch',
@@ -355,10 +534,10 @@ export function PaymentsTable( {
 			supportsBulk: true,
 			confirmTitle: __( 'Delete payment', 'flyaffiliate' ),
 			confirmMessage: __(
-				'The commissions in it go back to unpaid and into the next payout. A paid payment cannot be deleted.',
+				'The commissions in it go back to unpaid and into the next payout. A paid payment can’t be deleted.',
 				'flyaffiliate'
 			),
-			isEligible: ( item ) => item.status === 'unpaid',
+			isEligible: ( item ) => item.status === 'unpaid' && ! item.locked,
 			callback: async ( items ) => {
 				try {
 					await Promise.all(
@@ -409,7 +588,7 @@ export function PaymentsTable( {
 			namespace="flyaffiliate-payments"
 			data={ list.items }
 			fields={ fields }
-			view={ list.view }
+			view={ withColumns( list.view, shownColumns ) }
 			onChangeView={ list.setView }
 			actions={ withIconLabels( actions ) }
 			selection={ selection }
@@ -455,7 +634,7 @@ export default function PaymentsPage() {
 				} }
 				title={ __( 'Payments', 'flyaffiliate' ) }
 				description={ __(
-					'Every payment across every payout. Mark one paid once the money has been sent; that is what marks its commissions paid.',
+					'Every payment across all payouts. Mark a payment paid once the money has been sent. That also marks its commissions paid.',
 					'flyaffiliate'
 				) }
 				actions={

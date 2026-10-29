@@ -27,7 +27,7 @@ use WP_REST_Server;
  * controllers' `prepare_item_for_response()`, so the dashboard and the admin
  * app share one set of types.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class MeController extends AffiliateBaseController {
 
@@ -41,7 +41,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -69,6 +69,19 @@ class MeController extends AffiliateBaseController {
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_textarea_field',
 						],
+						'payout_method' => [
+							'description'       => __( 'The payout method the affiliate chose. Empty for the default.', 'flyaffiliate' ),
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_key',
+						],
+						'payout_details' => [
+							'description'          => __( 'Method id => field id => value: the details a payout method needs.', 'flyaffiliate' ),
+							'type'                 => 'object',
+							'additionalProperties' => [
+								'type'                 => 'object',
+								'additionalProperties' => [ 'type' => 'string' ],
+							],
+						],
 					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
@@ -89,6 +102,52 @@ class MeController extends AffiliateBaseController {
 				]
 			);
 		}
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/referral-links',
+			[
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_referral_links' ],
+					'permission_callback' => [ $this, 'get_items_permissions_check' ],
+					'args'                => $this->get_collection_params(),
+				],
+				[
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'create_referral_link' ],
+					'permission_callback' => [ $this, 'check_affiliate_permission' ],
+					'args'                => [
+						// Not sanitize_text_field(), which strips percent-encoded characters:
+						// ReferralLink\Manager::normalize_url() checks the host and escapes it.
+						'url' => [
+							'description' => __( 'The page of this site to link to.', 'flyaffiliate' ),
+							'type'        => 'string',
+							'required'    => true,
+						],
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/referral-links/(?P<id>[\\d]+)',
+			[
+				[
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => [ $this, 'delete_referral_link' ],
+					'permission_callback' => [ $this, 'check_affiliate_permission' ],
+					'args'                => [
+						'id' => [
+							'description' => __( 'The referral link.', 'flyaffiliate' ),
+							'type'        => 'integer',
+							'required'    => true,
+						],
+					],
+				],
+			]
+		);
 
 		register_rest_route(
 			$this->namespace,
@@ -113,7 +172,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The affiliate, with their totals.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -148,7 +207,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * One of the affiliate's commissions, with the item it paid on and the visit it came from.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -177,7 +236,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The product a commission paid on: its name, and a link while it is published.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission.
 	 *
@@ -209,7 +268,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The visit an order was attributed through.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission   The commission.
 	 * @param int        $affiliate_id The affiliate the visit must belong to.
@@ -229,14 +288,14 @@ class MeController extends AffiliateBaseController {
 			'id'         => $visit->get_id(),
 			'url'        => (string) $visit->get( 'url', '' ),
 			'referrer'   => (string) $visit->get( 'referrer', '' ),
-			'created_at' => empty( $visit->get( 'created_at' ) ) ? null : mysql_to_rfc3339( (string) $visit->get( 'created_at' ) ),
+			'created_at' => $this->prepare_date( $visit->get( 'created_at' ) ),
 		];
 	}
 
 	/**
 	 * Change the payment email or the promotion note.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -246,10 +305,14 @@ class MeController extends AffiliateBaseController {
 		$affiliate = $this->get_current_affiliate();
 		$fields    = [];
 
-		foreach ( [ 'payment_email', 'promo_method' ] as $field ) {
+		foreach ( [ 'payment_email', 'promo_method', 'payout_method' ] as $field ) {
 			if ( isset( $request[ $field ] ) ) {
 				$fields[ $field ] = (string) $request[ $field ];
 			}
+		}
+
+		if ( isset( $request['payout_details'] ) && is_array( $request['payout_details'] ) ) {
+			$fields['payout_details'] = $request['payout_details'];
 		}
 
 		if ( [] !== $fields ) {
@@ -266,7 +329,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The affiliate's commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -293,7 +356,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The affiliate's visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -314,23 +377,128 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The affiliate's payouts.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
 	 * @return WP_REST_Response
 	 */
 	public function get_payouts( $request ) {
-		$where = [ 'affiliate_id' => $this->get_current_affiliate()->get_id() ];
-		$args  = $this->list_args( $request, $where, [ 'id', 'amount', 'created_at' ] );
+		$where      = [ 'affiliate_id' => $this->get_current_affiliate()->get_id() ];
+		$args       = $this->list_args( $request, $where, [ 'id', 'amount', 'created_at' ] );
+		$controller = new PayoutsController();
+		$payouts    = flyaffiliate()->payout->query( $args );
+		$items      = [];
 
-		return $this->list_response( new PayoutsController(), flyaffiliate()->payout, $args, $request );
+		$controller->prime_states( $payouts );
+
+		foreach ( $payouts as $payout ) {
+			$data = $this->prepare_response_for_collection( $controller->prepare_item_for_response( $payout, $request ) );
+
+			// The affiliate sees where the money is, not the admin's view of why:
+			// a failure message can name the store's account, and the actions are not theirs.
+			if ( is_array( $data['transfer'] ?? null ) ) {
+				$data['transfer'] = [ 'status' => $data['transfer']['status'] ];
+			}
+
+			unset( $data['locked'], $data['can_retry'] );
+
+			$items[] = $data;
+		}
+
+		return $this->prepare_collection_response( $items, flyaffiliate()->payout->count( $args ), (int) $args['per_page'] );
+	}
+
+	/**
+	 * The affiliate's saved referral links, newest first, with their visits.
+	 *
+	 * A link is listed whatever the dashboard's date range; the range is a
+	 * filter on traffic, and the list is of links.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_referral_links( $request ) {
+		$args = $this->list_args( $request, [ 'affiliate_id' => $this->get_current_affiliate()->get_id() ], [ 'id', 'created_at' ] );
+
+		unset( $args['after'], $args['before'] );
+
+		return ( new ReferralLinksController() )->prepare_collection(
+			flyaffiliate()->referral_link->query( $args ),
+			flyaffiliate()->referral_link->count( $args ),
+			(int) $args['per_page'],
+			$request
+		);
+	}
+
+	/**
+	 * Save a page of this site as one of the affiliate's referral links.
+	 *
+	 * Saving a page that is already in the list returns that link with a 200
+	 * rather than a second copy with a 201.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function create_referral_link( $request ) {
+		$affiliate_id = $this->get_current_affiliate()->get_id();
+		$url          = (string) $request['url'];
+		$existing     = flyaffiliate()->referral_link->find_by_url( $affiliate_id, $url );
+		$link         = $existing ?? flyaffiliate()->referral_link->create( $affiliate_id, $url );
+
+		if ( is_wp_error( $link ) ) {
+			return $link;
+		}
+
+		$response = ( new ReferralLinksController() )->prepare_item_for_response( $link, $request );
+		$response->set_status( null === $existing ? 201 : 200 );
+
+		return $response;
+	}
+
+	/**
+	 * Remove one of the affiliate's referral links from their list.
+	 *
+	 * The link keeps working wherever it was shared; see ReferralLink\Manager.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_referral_link( $request ) {
+		$link = flyaffiliate()->referral_link->get( (int) $request['id'] );
+
+		// Someone else's link is reported as missing, not as forbidden.
+		if ( null === $link || (int) $link->get( 'affiliate_id' ) !== $this->get_current_affiliate()->get_id() ) {
+			return new WP_Error( 'flyaffiliate_rest_referral_link_not_found', __( 'No referral link with that ID.', 'flyaffiliate' ), [ 'status' => 404 ] );
+		}
+
+		$previous = ( new ReferralLinksController() )->prepare_item_for_response( $link, $request );
+
+		if ( ! flyaffiliate()->referral_link->delete( $link->get_id() ) ) {
+			return new WP_Error( 'flyaffiliate_rest_delete_failed', __( 'The link could not be removed.', 'flyaffiliate' ), [ 'status' => 500 ] );
+		}
+
+		return rest_ensure_response(
+			[
+				'deleted'  => true,
+				'previous' => $previous->get_data(),
+			]
+		);
 	}
 
 	/**
 	 * Query arguments from the paging and sorting parameters.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request  The request.
 	 * @param array           $where    Conditions, always scoped to the affiliate.
@@ -357,7 +525,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * Run a list query and shape the rows the way the admin controller does.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param \WP_REST_Controller $controller The admin controller for the resource.
 	 * @param object              $manager    The resource manager: has `query()` and `count()`.
@@ -379,7 +547,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -418,7 +586,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

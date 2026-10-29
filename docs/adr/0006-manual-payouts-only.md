@@ -1,6 +1,6 @@
 # ADR-0006 — Phase 1 pays affiliates manually; Dokan withdrawal is not an affiliate channel
 
-**Status:** Accepted — amended by ADR-0012 (a batch now creates unpaid payments; marking a payment paid is what pays its commissions)
+**Status:** Accepted — amended by ADR-0012 (a batch now creates unpaid payments; marking a payment paid is what pays its commissions) and ADR-0016 (payout methods: Manual plus any other plugin registers)
 **Date:** 2026-09-07
 
 ## Context

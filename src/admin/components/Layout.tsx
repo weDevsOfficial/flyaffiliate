@@ -1,12 +1,13 @@
 /**
- * The shell every page renders inside: a branded header bar, then the page.
+ * The shell every page renders inside: a branded header bar across the top
+ * of the screen, flush with wp-admin's chrome as Dokan's is, then the page.
  */
 import type { ReactNode } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { BookOpen, LifeBuoy } from 'lucide-react';
-import { Button, TopBar } from '@wedevs/plugin-ui';
+import { MessageCircleQuestionMark } from 'lucide-react';
+import { TopBar } from '@wedevs/plugin-ui';
 import { getGlobals } from '@/lib/globals';
-import { BRAND_OUTLINE } from '@/lib/ui';
+import HelpMenu from './HelpMenu';
 
 export default function Layout( { children }: { children: ReactNode } ) {
 	const { version, urls } = getGlobals();
@@ -17,7 +18,7 @@ export default function Layout( { children }: { children: ReactNode } ) {
 			data-testid="flyaffiliate-admin-app"
 		>
 			<TopBar
-				className="flyaffiliate-topbar mb-6 items-center rounded-md shadow"
+				className="flyaffiliate-topbar items-center border-b border-border shadow-xs"
 				logo={
 					<a
 						href={ urls.app }
@@ -26,8 +27,8 @@ export default function Layout( { children }: { children: ReactNode } ) {
 					>
 						<img
 							src={ urls.logo }
+							className="size-7 shrink-0"
 							alt=""
-							className="size-7 rounded-md"
 						/>
 						<span className="text-lg font-bold leading-none">
 							{ __( 'FlyAffiliate', 'flyaffiliate' ) }
@@ -51,43 +52,27 @@ export default function Layout( { children }: { children: ReactNode } ) {
 						: []
 				}
 				rightSideComponents={
-					<>
-						<Button
-							variant="ghost"
-							size="sm"
-							className="text-muted-foreground hover:text-primary"
-							render={
-								// eslint-disable-next-line jsx-a11y/anchor-has-content
-								<a
-									href={ urls.docs }
-									target="_blank"
-									rel="noopener noreferrer"
-								/>
-							}
+					<div className="flex items-center gap-6">
+						{ /* Dokan's Get Support button, measure for measure. */ }
+						<a
+							href={ urls.support }
+							target="_blank"
+							rel="noopener noreferrer"
+							className="flex h-10 items-center gap-1 rounded-md border border-primary bg-card px-3 whitespace-nowrap text-primary transition-colors duration-200 hover:bg-primary hover:text-primary-foreground"
 						>
-							<BookOpen className="size-4" />
-							{ __( 'Documentation', 'flyaffiliate' ) }
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							className={ BRAND_OUTLINE }
-							render={
-								// eslint-disable-next-line jsx-a11y/anchor-has-content
-								<a
-									href={ urls.support }
-									target="_blank"
-									rel="noopener noreferrer"
-								/>
-							}
-						>
-							<LifeBuoy className="size-4" />
-							{ __( 'Get support', 'flyaffiliate' ) }
-						</Button>
-					</>
+							<MessageCircleQuestionMark
+								className="size-5"
+								aria-hidden="true"
+							/>
+							<span className="min-w-20 text-xs">
+								{ __( 'Get Support', 'flyaffiliate' ) }
+							</span>
+						</a>
+						<HelpMenu />
+					</div>
 				}
 			/>
-			{ children }
+			<div className="flyaffiliate-admin-content">{ children }</div>
 		</div>
 	);
 }

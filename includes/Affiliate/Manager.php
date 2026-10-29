@@ -22,14 +22,14 @@ use WP_Error;
  * sitewide, the user has to exist, the status has to be a real status — are
  * written once and cannot be bypassed by whichever caller is next.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager {
 
 	/**
 	 * Get an affiliate by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $affiliate_id Affiliate id.
 	 *
@@ -42,7 +42,7 @@ class Manager {
 	/**
 	 * Get the affiliate belonging to a WordPress user.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $user_id WordPress user id.
 	 *
@@ -59,7 +59,7 @@ class Manager {
 	/**
 	 * Get an affiliate by its activation key.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $activation_key The key sent in the activation link.
 	 *
@@ -76,7 +76,7 @@ class Manager {
 	/**
 	 * Whether a user is already an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $user_id WordPress user id.
 	 *
@@ -89,7 +89,7 @@ class Manager {
 	/**
 	 * Create an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args {
 	 *     Affiliate data.
@@ -98,7 +98,14 @@ class Manager {
 	 *     @type string $status         Default `pending`.
 	 *     @type string $payment_email  Default the user's own email.
 	 *     @type string $promo_method   How the affiliate plans to promote the store.
-	 *     @type string $activation_key Set by the registration flow.
+	 *     @type string $payout_method  The payout method they chose; empty for the default.
+	 *     @type array  $payout_details Method id => field id => value, for `PayoutMethod::save_affiliate_details()`.
+	 *     @type string $website        The affiliate's website; stored on the user, as SliceWP does.
+	 *     @type bool   $send_welcome_email Email the new affiliate a welcome with their referral link. Default false.
+	 *     @type string $activation_key The **stored** form of the key — its hash, not the key.
+	 *                                  `Affiliate\Registration` is the only thing that writes one,
+	 *                                  and it hashes before it gets here.
+	 *     @type string $activation_expires_at When that key stops working, UTC. Null for never.
 	 * }
 	 *
 	 * @return Affiliate|WP_Error
@@ -122,17 +129,32 @@ class Manager {
 			);
 		}
 
+		$payout_method = $this->sanitize_payout_method( $args['payout_method'] ?? '' );
+
+		if ( is_wp_error( $payout_method ) ) {
+			return $payout_method;
+		}
+
 		$affiliate = new Affiliate();
 
 		$affiliate->fill(
 			[
-				'user_id'        => $user_id,
-				'status'         => $this->sanitize_status( $args['status'] ?? Affiliate::STATUS_PENDING ),
-				'payment_email'  => $this->sanitize_email( $args['payment_email'] ?? '', $user_id ),
-				'promo_method'   => sanitize_textarea_field( (string) ( $args['promo_method'] ?? '' ) ),
-				'activation_key' => sanitize_text_field( (string) ( $args['activation_key'] ?? '' ) ),
+				'user_id'               => $user_id,
+				'status'                => $this->sanitize_status( $args['status'] ?? Affiliate::STATUS_PENDING ),
+				'payment_email'         => $this->sanitize_email( $args['payment_email'] ?? '', $user_id ),
+				'payout_method'         => $payout_method,
+				'promo_method'          => sanitize_textarea_field( (string) ( $args['promo_method'] ?? '' ) ),
+				'activation_key'        => sanitize_text_field( (string) ( $args['activation_key'] ?? '' ) ),
+				'activation_expires_at' => $this->sanitize_expiry( $args['activation_expires_at'] ?? null ),
 			]
 		);
+
+		// The details live on the user, so they can be checked and stored before the row exists.
+		$details = $this->save_payout_details( $affiliate, $args['payout_details'] ?? null );
+
+		if ( is_wp_error( $details ) ) {
+			return $details;
+		}
 
 		if ( 0 === $affiliate->save() ) {
 			return new WP_Error(
@@ -142,14 +164,22 @@ class Manager {
 			);
 		}
 
+		if ( isset( $args['website'] ) ) {
+			$this->set_website( $user_id, (string) $args['website'] );
+		}
+
 		/**
 		 * Fires after an affiliate is created.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Affiliate $affiliate The affiliate.
 		 */
 		do_action( 'flyaffiliate_affiliate_created', $affiliate );
+
+		if ( ! empty( $args['send_welcome_email'] ) ) {
+			flyaffiliate()->registration->send_welcome_email( $affiliate );
+		}
 
 		return $affiliate;
 	}
@@ -160,7 +190,7 @@ class Manager {
 	 * `user_id` is not updatable: moving an affiliate to another user would move
 	 * their commissions with it and break the one-user-one-affiliate rule.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int   $affiliate_id Affiliate id.
 	 * @param array $args         Fields to change.
@@ -192,8 +222,32 @@ class Manager {
 			$affiliate->set( 'promo_method', sanitize_textarea_field( (string) $args['promo_method'] ) );
 		}
 
+		if ( isset( $args['payout_method'] ) ) {
+			$payout_method = $this->sanitize_payout_method( $args['payout_method'], $affiliate->get_payout_method() );
+
+			if ( is_wp_error( $payout_method ) ) {
+				return $payout_method;
+			}
+
+			$affiliate->set( 'payout_method', $payout_method );
+		}
+
+		$details = $this->save_payout_details( $affiliate, $args['payout_details'] ?? null );
+
+		if ( is_wp_error( $details ) ) {
+			return $details;
+		}
+
 		if ( array_key_exists( 'activation_key', $args ) ) {
 			$affiliate->set( 'activation_key', sanitize_text_field( (string) $args['activation_key'] ) );
+		}
+
+		if ( array_key_exists( 'activation_expires_at', $args ) ) {
+			$affiliate->set( 'activation_expires_at', $this->sanitize_expiry( $args['activation_expires_at'] ) );
+		}
+
+		if ( isset( $args['website'] ) ) {
+			$this->set_website( (int) $affiliate->get( 'user_id' ), (string) $args['website'] );
 		}
 
 		if ( 0 === $affiliate->save() ) {
@@ -210,7 +264,7 @@ class Manager {
 			/**
 			 * Fires when an affiliate's status changes.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param Affiliate $affiliate       The affiliate.
 			 * @param string    $new_status      The status it is now in.
@@ -222,7 +276,7 @@ class Manager {
 		/**
 		 * Fires after an affiliate is updated.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Affiliate $affiliate The affiliate.
 		 */
@@ -232,13 +286,32 @@ class Manager {
 	}
 
 	/**
+	 * Store the affiliate's website on their user, where SliceWP keeps it too.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int    $user_id The user.
+	 * @param string $website The URL; empty clears it.
+	 *
+	 * @return void
+	 */
+	protected function set_website( int $user_id, string $website ): void {
+		wp_update_user(
+			[
+				'ID'       => $user_id,
+				'user_url' => esc_url_raw( trim( $website ) ),
+			]
+		);
+	}
+
+	/**
 	 * Delete an affiliate row.
 	 *
 	 * The commissions, visits and payouts that reference it are left in place:
 	 * they are financial records, and deleting the affiliate does not un-earn
 	 * the money.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $affiliate_id Affiliate id.
 	 *
@@ -259,7 +332,7 @@ class Manager {
 			/**
 			 * Fires after an affiliate is deleted.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param int       $affiliate_id The id of the deleted affiliate.
 			 * @param Affiliate $affiliate    The affiliate as it was before deletion.
@@ -273,7 +346,7 @@ class Manager {
 	/**
 	 * Query affiliates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::query()}.
 	 *
@@ -286,7 +359,7 @@ class Manager {
 	/**
 	 * Count affiliates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $conditions Column => value, or the full query arguments.
 	 *
@@ -303,7 +376,7 @@ class Manager {
 	 * is matched there first and the users found are OR-ed with a match on
 	 * the payment email column.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $term What was typed.
 	 *
@@ -333,9 +406,28 @@ class Manager {
 	}
 
 	/**
+	 * A UTC datetime the column accepts, or null for no expiry.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $value Candidate datetime.
+	 *
+	 * @return string|null
+	 */
+	protected function sanitize_expiry( $value ): ?string {
+		if ( empty( $value ) ) {
+			return null;
+		}
+
+		$time = strtotime( (string) $value );
+
+		return false === $time ? null : gmdate( 'Y-m-d H:i:s', $time );
+	}
+
+	/**
 	 * Reduce a value to a known affiliate status.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $status Candidate status.
 	 *
@@ -348,9 +440,67 @@ class Manager {
 	}
 
 	/**
+	 * Reduce a value to a payout method an affiliate may choose.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed  $method  The method id given; empty for the default.
+	 * @param string $current The affiliate's current choice, which may be kept.
+	 *
+	 * @return string|WP_Error
+	 */
+	protected function sanitize_payout_method( $method, string $current = '' ) {
+		$method = sanitize_key( (string) $method );
+
+		// Empty is "the default"; keeping a choice whose method was switched off
+		// since is allowed, so saving the rest of a profile never trips on it.
+		if ( '' === $method || $method === $current || flyaffiliate()->payout_method->is_enabled( $method ) ) {
+			return $method;
+		}
+
+		return new WP_Error(
+			'flyaffiliate_invalid_payout_method',
+			__( 'That payout method is not available.', 'flyaffiliate' ),
+			[ 'status' => 400 ]
+		);
+	}
+
+	/**
+	 * Store an affiliate's details for the payout methods they were given for.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Affiliate $affiliate The affiliate (saved or not; the details live on its user).
+	 * @param mixed     $details   Method id => field id => value, or null when not given.
+	 *
+	 * @return true|WP_Error
+	 */
+	protected function save_payout_details( Affiliate $affiliate, $details ) {
+		if ( ! is_array( $details ) ) {
+			return true;
+		}
+
+		foreach ( $details as $method_id => $values ) {
+			$method = flyaffiliate()->payout_method->get( sanitize_key( (string) $method_id ) );
+
+			if ( null === $method || ! is_array( $values ) ) {
+				continue;
+			}
+
+			$saved = $method->save_affiliate_details( $affiliate, $values );
+
+			if ( is_wp_error( $saved ) ) {
+				return $saved;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Reduce a value to a valid payment email, falling back to the user's own.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $email   Candidate email.
 	 * @param int   $user_id The affiliate's user id, for the fallback.

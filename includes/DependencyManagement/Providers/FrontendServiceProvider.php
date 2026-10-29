@@ -16,7 +16,7 @@ use FlyAffiliate\DependencyManagement\BaseServiceProvider;
 /**
  * Registers the affiliate-facing front-end services.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class FrontendServiceProvider extends BaseServiceProvider {
 
@@ -40,7 +40,7 @@ class FrontendServiceProvider extends BaseServiceProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

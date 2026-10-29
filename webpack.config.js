@@ -1,18 +1,3 @@
-/**
- * FlyAffiliate build configuration.
- *
- * Extends @wordpress/scripts' default webpack config with two changes:
- *
- * 1. Output lands in assets/js and assets/css, which is what Assets.php enqueues
- *    and what ships in the release zip. Sources live in assets/src.
- * 2. Entries are discovered rather than listed, so adding assets/src/js/foo.js or
- *    assets/src/css/foo.css is enough — no edit here.
- *
- * React apps live under src/<name>/index.tsx and build to assets/js/<name>.js;
- * the stylesheet an app imports is extracted to assets/css/<name>.css so it
- * sits beside the plain stylesheets and Assets.php can treat them alike.
- */
-
 const path = require( 'path' );
 const fs = require( 'fs' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
@@ -73,8 +58,7 @@ if ( fs.existsSync( srcDir ) ) {
 		} );
 }
 
-// webpack refuses to run without at least one entry; a build with nothing to
-// build should say so rather than fail with a stack trace.
+// webpack needs at least one entry; say so instead of failing with a stack trace.
 if ( Object.keys( entry ).length === 0 ) {
 	// eslint-disable-next-line no-console
 	console.warn(
@@ -118,6 +102,106 @@ class MoveStylesToCssDirPlugin {
 	}
 }
 
+/**
+ * Strip the remote-looking strings that bundled libraries leave in the built
+ * CSS and JS. None of them loads anything, but WordPress.org's review scanner
+ * reports each as "Calling files remotely".
+ */
+class RemoveRemoteUrlsPlugin {
+	apply( compiler ) {
+		const { RawSource } = compiler.webpack.sources;
+
+		compiler.hooks.thisCompilation.tap(
+			'FlyAffiliateRemoveRemoteUrls',
+			( compilation ) => {
+				compilation.hooks.processAssets.tap(
+					{
+						name: 'FlyAffiliateRemoveRemoteUrls',
+						stage: compiler.webpack.Compilation
+							.PROCESS_ASSETS_STAGE_REPORT,
+					},
+					( assets ) => {
+						Object.keys( assets ).forEach( ( name ) => {
+							const isCss = /\.css$/.test( name );
+							const isJs = /\.js$/.test( name );
+
+							if ( ! isCss && ! isJs ) {
+								return;
+							}
+
+							const before = assets[ name ].source().toString();
+							let after = before;
+
+							// SVG namespace attributes: react-dom sets the namespace itself via createElementNS().
+							if ( isJs ) {
+								after = after
+									.replace(
+										/;background-image:url\(\\'data:image\/svg\+xml;charset=utf-8,<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"[^)]*\)/g,
+										''
+									)
+									.replace(
+										/xmlns:"http:\/\/www\.w3\.org\/2000\/svg",/g,
+										''
+									)
+									.replace(
+										/,xmlns:"http:\/\/www\.w3\.org\/2000\/svg"/g,
+										''
+									)
+									.replace(
+										/ xmlns="http:\/\/www\.w3\.org\/2000\/svg"/g,
+										''
+									);
+							}
+
+							// Whatever is left sits in a data: URI; percent-encoded it is inert and decodes the same.
+							after = after.replace(
+								/http:\/\/www\.w3\.org\/2000\/svg/g,
+								'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'
+							);
+
+							if ( isCss ) {
+								after = after
+									// Tailwind's licence banner names its website.
+									.replace( /\/\*![\s\S]*?\*\//g, '' )
+									// wp-components' colour-picker checkerboard: the one data: URI carrying the namespace.
+									.replace(
+										/\.components-circular-option-picker__option-wrapper:before\{[^}]*\}/g,
+										''
+									)
+									// Its doubled selector spells "placeholder.com"; wp-components' Placeholder is never rendered here.
+									.replace(
+										/\.components-placeholder/g,
+										'.section-content'
+									);
+							}
+
+							// plugin-ui's Google logo (never rendered) and library doc URLs in error text.
+							if ( isJs ) {
+								after = after
+									.replace(
+										/https:\/\/upload\.wikimedia\.org\/[^"'`)\s]*/g,
+										'data:,'
+									)
+									.replace(
+										/https?:\/\/(redux\.js\.org|radix-ui\.com|base-ui\.com|github\.com|fb\.me)\//g,
+										'$1/'
+									);
+							}
+
+							if ( after !== before ) {
+								compilation.updateAsset(
+									name,
+									new RawSource( after )
+								);
+							}
+						} );
+					}
+				);
+			}
+		);
+	}
+}
+
 module.exports = {
 	...defaultConfig,
 	entry,
@@ -132,20 +216,16 @@ module.exports = {
 		...defaultConfig.output,
 		path: path.resolve( root, 'assets' ),
 		filename: '[name].js',
-		// The output directory also holds hand-maintained files — assets/images
-		// and assets/src — so the default "wipe everything" clean would delete
-		// the sources it was about to build from. Only the generated
-		// subdirectories are cleared.
+		// assets/ also holds the sources (assets/src); only the built css/ and js/ are cleared.
 		clean: {
 			keep: ( asset ) => ! /^(css|js)\//.test( asset ),
 		},
 	},
 	plugins: [
-		// A CSS-only entry otherwise emits an empty sibling .js file, which would
-		// then ship in the release zip. @wordpress/scripts does not include this
-		// plugin in its default config.
+		// A CSS-only entry would otherwise emit an empty .js file that ships in the zip.
 		new RemoveEmptyScriptsPlugin(),
 		...defaultConfig.plugins,
+		new RemoveRemoteUrlsPlugin(),
 		new MoveStylesToCssDirPlugin(),
 	],
 };

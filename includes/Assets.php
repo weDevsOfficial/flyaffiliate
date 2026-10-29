@@ -15,6 +15,7 @@ use FlyAffiliate\Admin\Menu;
 use FlyAffiliate\Admin\PayoutExport;
 use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Contracts\Hookable;
+use FlyAffiliate\Contracts\PayoutMethod;
 use FlyAffiliate\Models\Affiliate;
 use FlyAffiliate\Models\Commission;
 use FlyAffiliate\Models\Payout;
@@ -27,11 +28,18 @@ use FlyAffiliate\Models\Payout;
  * page, the setup wizard included) and the affiliate dashboard app (mounted by
  * its shortcode). The registration form and the dashboard's PHP-rendered
  * states share one plain stylesheet. Nothing is loaded from a remote host, and
- * nothing is emitted as an inline `<style>` or `<script>` block — both are
- * rejected by WordPress.org. Data reaches JavaScript through
- * `wp_add_inline_script()`, attached to a handle that was registered here.
+ * nothing is emitted as an inline `<style>` or `<script>` block. Data reaches
+ * JavaScript through `wp_add_inline_script()`, attached to a handle that was
+ * registered here.
  *
- * @since FLYAFFILIATE_SINCE
+ * Registration happens on `init`, as in Dokan, not on `wp_enqueue_scripts`: a
+ * block theme renders the page content — and with it a shortcode — before
+ * `wp_head()`, so the dashboard shortcode enqueues its bundle before
+ * `wp_enqueue_scripts` fires. WordPress drops inline data attached to a
+ * handle that is not registered yet, and the app would start without
+ * `window.flyaffiliate`. By `init` every handle exists, whatever renders first.
+ *
+ * @since 1.0.0
  */
 class Assets implements Hookable {
 
@@ -45,20 +53,23 @@ class Assets implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		add_action( 'admin_enqueue_scripts', [ $this, 'register_assets' ], 5 );
-		add_action( 'wp_enqueue_scripts', [ $this, 'register_assets' ], 5 );
+		add_action( 'init', [ $this, 'register_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 	}
 
 	/**
 	 * Register — but do not enqueue — everything this plugin ships.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * Runs on `init`, so a handle is registered before anything — a block
+	 * theme's early content render included — can enqueue it or attach inline
+	 * data to it. Registering a handle twice changes nothing.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -74,7 +85,7 @@ class Assets implements Hookable {
 		}
 
 		foreach ( $this->get_scripts() as $handle => $script ) {
-			wp_register_script( $handle, $script['src'], $script['deps'], $script['version'], true );
+			wp_register_script( $handle, $script['src'], $script['deps'], $script['version'], $script['in_footer'] ?? true );
 			wp_set_script_translations( $handle, 'flyaffiliate', FLYAFFILIATE_DIR . '/languages' );
 		}
 	}
@@ -82,7 +93,7 @@ class Assets implements Hookable {
 	/**
 	 * The stylesheets this plugin ships.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{src: string, deps: string[], version: string, rtl: bool}>
 	 */
@@ -114,7 +125,7 @@ class Assets implements Hookable {
 		/**
 		 * Filters the stylesheets FlyAffiliate registers.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $styles Handle => definition.
 		 */
@@ -124,9 +135,9 @@ class Assets implements Hookable {
 	/**
 	 * The scripts this plugin ships.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
-	 * @return array<string, array{src: string, deps: string[], version: string}>
+	 * @return array<string, array{src: string, deps: string[], version: string, in_footer?: bool}>
 	 */
 	public function get_scripts(): array {
 		$scripts = [
@@ -140,12 +151,20 @@ class Assets implements Hookable {
 				'deps'    => $this->get_script_dependencies( '/assets/js/dashboard.asset.php' ),
 				'version' => $this->get_version( '/assets/js/dashboard.js', '/assets/js/dashboard.asset.php' ),
 			],
+			// The page WooCommerce Analytics' box opens (Integrations\WooCommerce\Analytics):
+			// in the header, so it is added before WooCommerce's app builds its routes.
+			self::HANDLE_PREFIX . 'analytics' => [
+				'src'       => FLYAFFILIATE_ASSETS_URL . '/js/analytics.js',
+				'deps'      => $this->get_script_dependencies( '/assets/js/analytics.asset.php' ),
+				'version'   => $this->get_version( '/assets/js/analytics.js', '/assets/js/analytics.asset.php' ),
+				'in_footer' => false,
+			],
 		];
 
 		/**
 		 * Filters the scripts FlyAffiliate registers.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $scripts Handle => definition.
 		 */
@@ -155,18 +174,15 @@ class Assets implements Hookable {
 	/**
 	 * Enqueue the admin app on its page.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
 	public function enqueue_admin_assets(): void {
-		$page = $this->get_current_page();
-
-		if ( Menu::PARENT_SLUG !== $page ) {
+		if ( ! Menu::is_plugin_screen() ) {
 			return;
 		}
 
-		wp_enqueue_media();
 		wp_enqueue_style( self::HANDLE_PREFIX . 'admin' );
 		wp_enqueue_script( self::HANDLE_PREFIX . 'admin' );
 
@@ -183,7 +199,7 @@ class Assets implements Hookable {
 	 * Called by the dashboard shortcode, so the bundle only loads on the page
 	 * that renders it and only for an affiliate who can see it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $tab    The tab to open first.
 	 * @param string $notice A status flag from a redirect, or an empty string.
@@ -206,7 +222,7 @@ class Assets implements Hookable {
 	 *
 	 * A subset of the admin data: no admin URLs, nothing about other affiliates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $tab    The tab to open first.
 	 * @param string $notice A status flag from a redirect, or an empty string.
@@ -222,6 +238,9 @@ class Assets implements Hookable {
 			'statuses'   => $admin['statuses'],
 			'sources'    => $admin['sources'],
 			'types'      => $admin['types'],
+			// Only the methods an affiliate can choose now, and the one they get without choosing.
+			'payoutMethods' => flyaffiliate()->payout_method->get_script_data( true ),
+			'payoutDefault' => flyaffiliate()->payout_method->get_default()->get_id(),
 			'dashboard'  => [
 				'tab'    => $tab,
 				'notice' => $notice,
@@ -231,6 +250,8 @@ class Assets implements Hookable {
 				'rateType'      => (string) flyaffiliate_get_option( 'rate_type', 'percentage' ),
 				'cookieDays'    => absint( flyaffiliate_get_option( 'cookie_duration', 30 ) ),
 				'holdDays'      => absint( flyaffiliate_get_option( 'hold_days', 30 ) ),
+				// A marketplace whose sellers set their own hold says so here (`flyaffiliate_dashboard_script_data`).
+				'holdNote'      => '',
 				'payoutMinimum' => (float) flyaffiliate_get_option( 'minimum_amount', 0 ),
 			],
 		];
@@ -238,7 +259,7 @@ class Assets implements Hookable {
 		/**
 		 * Filters the data exposed to the affiliate dashboard as `window.flyaffiliate`.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $data The data.
 		 */
@@ -246,9 +267,56 @@ class Assets implements Hookable {
 	}
 
 	/**
+	 * The top bar's help menu, as Dokan's: the changelog, the documentation
+	 * and the feature board.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array<int, array{id: string, title: string, url: string, icon: string, external: bool}>
+	 */
+	public function get_help_menu_items(): array {
+		$items = [
+			[
+				'id'       => 'changelog',
+				'title'    => __( 'Changelog', 'flyaffiliate' ),
+				'url'      => 'https://flyaffiliate.co/changelog',
+				'icon'     => 'changelog',
+				'external' => true,
+			],
+			[
+				'id'       => 'documentation',
+				'title'    => __( 'Documentation', 'flyaffiliate' ),
+				'url'      => 'https://docs.flyaffiliate.co/',
+				'icon'     => 'documentation',
+				'external' => true,
+			],
+			[
+				'id'       => 'feature-request',
+				'title'    => __( 'Request a feature', 'flyaffiliate' ),
+				'url'      => 'https://feedback.wedevs.com/b/flyaffiliate',
+				'icon'     => 'feature-request',
+				'external' => true,
+			],
+		];
+
+		/**
+		 * Filters the links in the admin top bar's help menu.
+		 *
+		 * Each item has an `id`, a translated `title`, a `url`, an `icon` key
+		 * (`changelog`, `documentation`, `feature-request`; anything else
+		 * draws a circle) and `external`, true to open it in a new tab.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array $items The items, in order.
+		 */
+		return array_values( (array) apply_filters( 'flyaffiliate_admin_help_menu_items', $items ) );
+	}
+
+	/**
 	 * The data the admin app needs before it can render.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -261,46 +329,59 @@ class Assets implements Hookable {
 				'payoutMinimum' => (float) flyaffiliate_get_option( 'minimum_amount', 0 ),
 			],
 			'urls'       => [
-				'app'       => Menu::get_route_url(),
-				'logo'      => FLYAFFILIATE_ASSETS_URL . '/images/logo.svg',
-				'wizard'    => SetupWizard::get_url(),
-				'docs'      => 'https://wedevs.com/docs/flyaffiliate/',
-				'support'   => 'https://wedevs.com/support/',
-				'payoutCsv' => PayoutExport::get_url(),
-				'users'     => admin_url( 'user-edit.php?user_id=' ),
-				'orders'    => admin_url( 'admin.php?page=wc-orders&action=edit&id=' ),
-				'products'  => admin_url( 'post.php?action=edit&post=' ),
+				'app'            => Menu::get_route_url(),
+				'wizard'         => SetupWizard::get_url(),
+				'logo'           => FLYAFFILIATE_ASSETS_URL . '/images/flyaffiliate-icon.png',
+				'insightsPolicy' => 'https://appsero.com/privacy-policy/',
+				'docs'           => 'https://docs.flyaffiliate.co/',
+				// WordPress.org's forum, as Dokan Lite's Get Support; FlyAffiliate Pro sends its customers to weDevs.
+				'support'        => 'https://wordpress.org/support/plugin/flyaffiliate/',
+				'payoutCsv'      => PayoutExport::get_url(),
+				'users'          => admin_url( 'user-edit.php?user_id=' ),
+				'orders'         => admin_url( 'admin.php?page=wc-orders&action=edit&id=' ),
+				'products'       => admin_url( 'post.php?action=edit&post=' ),
 			],
 			'setup'      => [
-				'done'  => SetupWizard::is_done(),
-				'pages' => [
+				'done'            => SetupWizard::is_done(),
+				'pages'           => [
 					'register'  => flyaffiliate_get_page_url( 'affiliate_register' ),
 					'dashboard' => flyaffiliate_get_page_url( 'affiliate_dashboard' ),
 				],
+				'shareEssentials' => flyaffiliate()->tracker->is_allowed(),
 			],
+			'helpMenu'   => $this->get_help_menu_items(),
 			'statuses'   => [
-				'affiliate'  => [
-					Affiliate::STATUS_PENDING   => __( 'Pending', 'flyaffiliate' ),
-					Affiliate::STATUS_ACTIVE    => __( 'Active', 'flyaffiliate' ),
-					Affiliate::STATUS_INACTIVE  => __( 'Inactive', 'flyaffiliate' ),
-					Affiliate::STATUS_SUSPENDED => __( 'Suspended', 'flyaffiliate' ),
+				'affiliate'  => Affiliate::get_statuses(),
+				'commission' => Commission::get_statuses(),
+				// What an automatic payout method reports about a payment's transfer.
+				'transfer'   => [
+					PayoutMethod::STATE_QUEUED     => __( 'Queued', 'flyaffiliate' ),
+					PayoutMethod::STATE_PROCESSING => __( 'Processing', 'flyaffiliate' ),
+					PayoutMethod::STATE_PENDING    => __( 'Pending', 'flyaffiliate' ),
+					PayoutMethod::STATE_PAID       => __( 'Paid', 'flyaffiliate' ),
+					PayoutMethod::STATE_FAILED     => __( 'Failed', 'flyaffiliate' ),
+					'not_sent'                     => __( 'Not sent', 'flyaffiliate' ),
+					'unavailable'                  => __( 'Method unavailable', 'flyaffiliate' ),
 				],
-				'commission' => [
-					Commission::STATUS_PENDING  => __( 'Pending', 'flyaffiliate' ),
-					Commission::STATUS_UNPAID   => __( 'Unpaid', 'flyaffiliate' ),
-					Commission::STATUS_PAID     => __( 'Paid', 'flyaffiliate' ),
-					Commission::STATUS_REJECTED => __( 'Rejected', 'flyaffiliate' ),
+				// Where a payout stands, from Payout\Manager::summarize().
+				'batch'      => [
+					'processing'      => __( 'Processing', 'flyaffiliate' ),
+					'needs_attention' => __( 'Needs attention', 'flyaffiliate' ),
+					'paid'            => __( 'Paid', 'flyaffiliate' ),
+					'unpaid'          => __( 'Awaiting payment', 'flyaffiliate' ),
 				],
 			],
 			'sources'    => Commission::get_sources(),
+			// The origins open to a new commission: manual, plus whatever integration is active.
+			'availableSources' => Commission::get_available_sources(),
 			'types'      => Commission::get_types(),
-			'methods'    => Payout::get_methods(),
+			'payoutMethods' => flyaffiliate()->payout_method->get_script_data(),
 		];
 
 		/**
 		 * Filters the data exposed to the FlyAffiliate admin app as `window.flyaffiliate`.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $data The data.
 		 */
@@ -310,7 +391,7 @@ class Assets implements Hookable {
 	/**
 	 * How FlyAffiliate's Currency settings write money, so the apps do the same.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array{code: string, symbol: string, position: string, decimals: int, decimalSeparator: string, thousandSeparator: string}
 	 */
@@ -328,18 +409,6 @@ class Assets implements Hookable {
 	}
 
 	/**
-	 * The `page` query argument of the current admin request.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return string
-	 */
-	protected function get_current_page(): string {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the page slug to decide what to enqueue changes nothing.
-		return isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-	}
-
-	/**
 	 * A cache-busting version for an asset.
 	 *
 	 * A bundle's `.asset.php` carries a hash of its contents, which changes with
@@ -347,7 +416,7 @@ class Assets implements Hookable {
 	 * file's modification time is used while `SCRIPT_DEBUG` is on, and the
 	 * plugin version otherwise.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $relative_path Path relative to the plugin directory, with a leading slash.
 	 * @param string $asset_file    Path to the bundle's `.asset.php`, with a leading slash. Optional.
@@ -379,7 +448,7 @@ class Assets implements Hookable {
 	 * bundle. A missing file means the assets were never built, which is a
 	 * development state, not a runtime one.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $relative_path Path to the `.asset.php` file, with a leading slash.
 	 *

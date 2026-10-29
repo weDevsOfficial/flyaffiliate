@@ -22,8 +22,8 @@ export default function NotFound() {
 					'flyaffiliate'
 				) }
 				action={
-					<Button render={ <Link to="/affiliates" /> }>
-						{ __( 'Back to Affiliates', 'flyaffiliate' ) }
+					<Button render={ <Link to="/" /> }>
+						{ __( 'Back to Dashboard', 'flyaffiliate' ) }
 					</Button>
 				}
 			/>

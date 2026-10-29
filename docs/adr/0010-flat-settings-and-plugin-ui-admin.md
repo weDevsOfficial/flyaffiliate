@@ -1,7 +1,13 @@
 # ADR-0010 — One flat settings option, and a plugin-ui admin app
 
-**Status:** Accepted
+**Status:** Accepted — amended by ADR-0017 (other plugins' notices are hidden on FlyAffiliate's screen)
 **Date:** 2026-09-08
+**Note (2026-10-23):** the logo changed. The brand is now its blue, `#0043da`,
+in both plugins' theme tokens and the frontend stylesheet; the menu icon is
+its mark, drawn 17px wide like Dokan's; the header bar runs edge to edge as
+Dokan's does, with Get support (WordPress.org's forum, weDevs' help desk when
+Pro is active) and Dokan's help menu (Changelog, Documentation, Request a
+feature) in place of the Documentation button.
 
 ## Context
 
@@ -56,16 +62,17 @@ the bridge Dokan carries for its legacy options.
   build on the same page. plugin-ui's prebuilt `styles.css` is not imported:
   its layered utilities lose to unlayered admin CSS.
 - **The brand is the logo teal.** `src/admin/theme.ts` sets plugin-ui's
-  `primary` to `#0d7377`, the colour of `logo.svg`, the WordPress.org icon,
+  `primary` to `#0d7377`, the colour of the WordPress.org icon,
   the frontend stylesheet and the setup wizard. WordPress's own components
   inside the app (DataViews checkboxes) read `--wp-components-color-accent`,
   which `admin.css` sets to the same value on the app element; `--primary`
   only exists inside `.pui-root`, so a `var()` on `body` would not see it.
-- **A header bar, and no foreign notices.** Every page renders under
+- **A header bar, and notices left alone.** Every page renders under
   plugin-ui's `<TopBar>` (logo, version, Documentation, Get support), like
-  Dokan's admin. `Admin\Menu::hide_foreign_notices()` removes other plugins'
-  `admin_notices` on the app page and puts FlyAffiliate's own back, as the
-  setup wizard already did; the menu icon is the logo's paper plane as an
+  Dokan's admin. Other plugins' `admin_notices` stay where they are —
+  WordPress.org reads removing them as hijacking the dashboard (Guideline
+  11) — and FlyAffiliate's own render only on this page, through
+  `Admin\Notices\Manager`; the menu icon is the logo's paper plane as an
   inline SVG so wp-admin recolours it per colour scheme.
 - **The bundle is not externalised.** plugin-ui and its dependencies compile
   into `assets/js/admin.js`; only the `@wordpress/*` packages WordPress ships

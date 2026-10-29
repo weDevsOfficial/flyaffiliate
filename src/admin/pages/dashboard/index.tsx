@@ -32,7 +32,6 @@ import {
 	X,
 } from 'lucide-react';
 import {
-	Button,
 	Card,
 	ChartContainer,
 	ChartTooltip,
@@ -48,6 +47,7 @@ import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
+	cn,
 	recharts,
 	toast,
 	type DataViewField,
@@ -64,6 +64,7 @@ import { errorMessage, fetchOne, send } from '@/lib/api';
 import { formatDate, formatMoney, toYmd } from '@/lib/format';
 import { getGlobals } from '@/lib/globals';
 import type { DashboardStats } from '@/lib/types';
+import { BRAND } from '@/theme';
 
 const { Area, AreaChart, CartesianGrid, XAxis } = recharts;
 
@@ -301,7 +302,7 @@ function SideCard( {
 }
 
 export default function DashboardPage() {
-	const { urls, statuses } = getGlobals();
+	const { statuses } = getGlobals();
 	const [ preset, setPreset ] = useState< Preset >( '30' );
 	const [ custom, setCustom ] = useState< DateRange | undefined >();
 	const [ stats, setStats ] = useState< DashboardStats | null >( null );
@@ -366,15 +367,20 @@ export default function DashboardPage() {
 		presets.push( { value: 'custom', label: customLabel } );
 	}
 
-	// Two hues of their own, the way Dokan's chart tells its series apart.
+	// Both series in the brand's blues, the logo's two: visits in its light
+	// blue, the conversions they led to in the brand blue, drawn on top. Each
+	// area is filled with a solid tint of its own colour, not a see-through
+	// one, which blended the two into a colour the legend does not show.
 	const chartConfig = {
 		visits: {
 			label: __( 'Visits', 'flyaffiliate' ),
-			color: '#7047eb',
+			color: '#99c8ed',
+			tint: '#eff6fd',
 		},
 		converted: {
 			label: __( 'Converted', 'flyaffiliate' ),
-			color: '#12b76a',
+			color: BRAND,
+			tint: '#e0e8fb',
 		},
 	};
 
@@ -542,12 +548,14 @@ export default function DashboardPage() {
 							placeholder={ __( 'Pick dates', 'flyaffiliate' ) }
 							confirmLabel={ __( 'Apply', 'flyaffiliate' ) }
 							cancelLabel={ __( 'Cancel', 'flyaffiliate' ) }
+							// The picker's own trigger is the button; a Button here would nest one inside it.
 							trigger={ ( { open } ) => (
-								<Button
-									variant="outline"
-									size="icon"
-									className="size-9 shrink-0 border-input bg-background text-foreground shadow-xs hover:border-primary hover:bg-primary hover:text-primary-foreground aria-expanded:border-primary aria-expanded:bg-primary aria-expanded:text-primary-foreground"
-									aria-expanded={ open }
+								<span
+									className={ cn(
+										'inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-foreground shadow-xs transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground',
+										open &&
+											'border-primary bg-primary text-primary-foreground'
+									) }
 									aria-label={ __(
 										'Pick a date range',
 										'flyaffiliate'
@@ -558,7 +566,7 @@ export default function DashboardPage() {
 										className="size-4"
 										aria-hidden="true"
 									/>
-								</Button>
+								</span>
 							) }
 						/>
 					</div>
@@ -612,7 +620,7 @@ export default function DashboardPage() {
 					<Section
 						title={ __( 'Earnings & payouts', 'flyaffiliate' ) }
 						tooltip={ __(
-							'Money in the selected dates: what the referred sales were worth and what the commissions on them cost.',
+							'Referred sales and the commissions on them, for the selected dates.',
 							'flyaffiliate'
 						) }
 						action={
@@ -635,7 +643,7 @@ export default function DashboardPage() {
 											stats.earnings.referral_revenue
 										) }
 										tooltip={ __(
-											'What the referred order items were worth before commissions, in the selected dates.',
+											'The value of referred order items in the selected dates, before commissions.',
 											'flyaffiliate'
 										) }
 									/>
@@ -663,7 +671,7 @@ export default function DashboardPage() {
 											stats.earnings.paid
 										) }
 										tooltip={ __(
-											'Commissions whose payment has been marked paid.',
+											'Commissions that have been paid out.',
 											'flyaffiliate'
 										) }
 									/>
@@ -679,7 +687,7 @@ export default function DashboardPage() {
 										tooltip={ sprintf(
 											/* translators: %s: amount still pending */
 											__(
-												'Approved commissions waiting for a payout. Another %s is still inside its hold period.',
+												'Commissions earned and waiting to be paid out. Another %s is waiting for its order to be paid.',
 												'flyaffiliate'
 											),
 											formatMoney(
@@ -759,7 +767,7 @@ export default function DashboardPage() {
 										tooltip={ sprintf(
 											/* translators: %d: number of active affiliates */
 											__(
-												'Everyone with an affiliate account, whatever their status. %d of them are active.',
+												'All affiliates, whatever their status. %d are active.',
 												'flyaffiliate'
 											),
 											stats.affiliates.active
@@ -835,16 +843,18 @@ export default function DashboardPage() {
 										<Area
 											dataKey="visits"
 											type="monotone"
-											fill="var(--color-visits)"
-											fillOpacity={ 0.15 }
+											fill={ chartConfig.visits.tint }
+											fillOpacity={ 1 }
 											stroke="var(--color-visits)"
+											strokeWidth={ 2 }
 										/>
 										<Area
 											dataKey="converted"
 											type="monotone"
-											fill="var(--color-converted)"
-											fillOpacity={ 0.25 }
+											fill={ chartConfig.converted.tint }
+											fillOpacity={ 1 }
 											stroke="var(--color-converted)"
+											strokeWidth={ 2 }
 										/>
 									</AreaChart>
 								</ChartContainer>
@@ -885,7 +895,11 @@ export default function DashboardPage() {
 							}
 						>
 							<div
-								className="flyaffiliate-dashboard-list"
+								className={ `flyaffiliate-dashboard-list${
+									( stats?.top_products ?? [] ).length === 0
+										? ' is-empty'
+										: ''
+								}` }
 								data-testid="flyaffiliate-dashboard-products"
 							>
 								<DataViews< TopProduct >
@@ -927,7 +941,9 @@ export default function DashboardPage() {
 							}
 						>
 							<div
-								className="flyaffiliate-dashboard-list"
+								className={ `flyaffiliate-dashboard-list${
+									visits.length === 0 ? ' is-empty' : ''
+								}` }
 								data-testid="flyaffiliate-dashboard-visits"
 							>
 								<DataViews< RecentVisit >
@@ -1059,10 +1075,7 @@ export default function DashboardPage() {
 					>
 						{ ( stats?.recent_commissions ?? [] ).length === 0 ? (
 							<p className="m-0 px-5 py-3 text-sm text-muted-foreground">
-								{ __(
-									'No commissions in these dates.',
-									'flyaffiliate'
-								) }
+								{ __( 'No commissions yet.', 'flyaffiliate' ) }
 							</p>
 						) : (
 							<ul
@@ -1124,10 +1137,11 @@ export default function DashboardPage() {
 															true
 														) }` }
 													>
-														{ commission.order_id >
-														0 ? (
+														{ commission.order_url ? (
 															<a
-																href={ `${ urls.orders }${ commission.order_id }` }
+																href={
+																	commission.order_url
+																}
 																className="font-medium text-primary hover:underline"
 															>
 																{ linked }

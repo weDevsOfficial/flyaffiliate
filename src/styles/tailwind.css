@@ -229,9 +229,7 @@
 
 /* ─── plugin-ui component rules ─── */
 
-/* ============================================
-   Scrollbar Utilities
-   ============================================ */
+/* Scrollbar Utilities */
 
 .no-scrollbar {
     -ms-overflow-style: none;
@@ -241,9 +239,7 @@
     }
 }
 
-/* ============================================
-   Scoped Base Styles (CSS Reset within .pui-root)
-   ============================================ */
+/* Scoped Base Styles (CSS Reset within .pui-root) */
 
 .pui-root {
     /* Base styles */
@@ -259,9 +255,7 @@
     }
 }
 
-/* ============================================
-   Component Base Styles
-   ============================================ */
+/* Component Base Styles */
 
 /* Focus ring utility */
 .pui-root .focus-ring {
@@ -278,9 +272,7 @@
     pointer-events: none;
 }
 
-/* ============================================
-   Animation Utilities
-   ============================================ */
+/* Animation Utilities */
 
 @keyframes pui-spin {
     to {
@@ -292,9 +284,7 @@
     animation: pui-spin 1s linear infinite;
 }
 
-/* ============================================
-   Progress Bar Striped Effect
-   ============================================ */
+/* Progress Bar Striped Effect */
 
 @keyframes pui-progress-stripes {
     from {
@@ -323,9 +313,7 @@
     animation: pui-progress-stripes 1s linear infinite;
 }
 
-/* ============================================
-   react-day-picker Animation (Calendar)
-   ============================================ */
+/* react-day-picker Animation (Calendar) */
 
 .rdp-root {
     --rdp-animation_duration: 0.20s;

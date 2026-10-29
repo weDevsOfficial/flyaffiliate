@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * A shortcode that renders a template and enqueues its own assets.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 abstract class Shortcode {
 
@@ -28,7 +28,7 @@ abstract class Shortcode {
 	/**
 	 * Register the shortcode with WordPress.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -37,20 +37,9 @@ abstract class Shortcode {
 	}
 
 	/**
-	 * The shortcode tag.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return string
-	 */
-	public function get_tag(): string {
-		return $this->tag;
-	}
-
-	/**
 	 * Render the shortcode.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array|string $atts Shortcode attributes.
 	 *
@@ -61,7 +50,7 @@ abstract class Shortcode {
 	/**
 	 * Render a template to a string.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $template Template file name, relative to `templates/`.
 	 * @param array  $args     Variables for the template.

@@ -11,16 +11,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use FlyAffiliate\Admin\Menu;
 use FlyAffiliate\Contracts\Hookable;
 
 /**
- * Collects and renders the plugin's admin notices.
+ * Collects and renders the plugin's admin notices, and keeps every other
+ * notice off FlyAffiliate's screen.
  *
- * Every notice is dismissible and only shown to a user who can act on it.
- * WordPress.org rejects a notice that cannot be dismissed, and a store owner
- * who cannot fix the thing being complained about should not be told about it.
+ * Every notice is dismissible, appears on FlyAffiliate's own screen only, and
+ * is shown only to a user who can act on it: a store owner who cannot fix the
+ * thing being complained about should not be told about it.
  *
- * @since FLYAFFILIATE_SINCE
+ * Other plugins' notices are hidden on that screen, as Dokan's and
+ * WooCommerce's admin hide them on theirs (ADR-0017): they print inside a
+ * hidden container that also holds the page's only `.wp-header-end`, so
+ * WordPress's own script moves the rest in there too. FlyAffiliate's own print
+ * above the app instead (`flyaffiliate_before_admin_app`).
+ *
+ * @since 1.0.0
  */
 class Manager implements Hookable {
 
@@ -39,21 +47,70 @@ class Manager implements Hookable {
 	const DISMISS_ACTION = 'flyaffiliate_dismiss_notice';
 
 	/**
+	 * Whether the hidden container for other plugins' notices is open.
+	 *
+	 * @var bool
+	 */
+	protected bool $hiding = false;
+
+	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		add_action( 'admin_notices', [ $this, 'render' ] );
+		add_action( 'admin_notices', [ $this, 'start_hiding' ], PHP_INT_MIN );
+		add_action( 'all_admin_notices', [ $this, 'stop_hiding' ], PHP_INT_MAX );
+		add_action( 'flyaffiliate_before_admin_app', [ $this, 'render' ] );
 		add_action( 'admin_post_' . self::DISMISS_ACTION, [ $this, 'handle_dismiss' ] );
+	}
+
+	/**
+	 * Open the hidden container every notice on FlyAffiliate's screen prints
+	 * into, before any other `admin_notices` callback runs.
+	 *
+	 * WordPress's admin script moves `.notice` boxes printed anywhere else
+	 * after the first `.wp-header-end`; the one in here is the page's only
+	 * one, so those end up hidden too.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function start_hiding(): void {
+		if ( ! $this->is_flyaffiliate_screen() ) {
+			return;
+		}
+
+		$this->hiding = true;
+
+		echo '<div class="flyaffiliate-hidden-notices" hidden>';
+		echo '<div class="wp-header-end"></div>';
+	}
+
+	/**
+	 * Close the hidden container, after every `all_admin_notices` callback.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function stop_hiding(): void {
+		if ( ! $this->hiding ) {
+			return;
+		}
+
+		$this->hiding = false;
+
+		echo '</div>';
 	}
 
 	/**
 	 * The notices to show on this request.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{message: string, type: string, dismissible: bool}>
 	 */
@@ -61,7 +118,7 @@ class Manager implements Hookable {
 		/**
 		 * Filters the FlyAffiliate admin notices for the current request.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $notices Notice id => definition. `type` is one of
 		 *                       `info`, `success`, `warning`, `error`.
@@ -70,14 +127,23 @@ class Manager implements Hookable {
 	}
 
 	/**
-	 * Render the notices.
+	 * Render the notices, above the admin app.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * `inline` keeps WordPress's admin script from moving them into the
+	 * hidden container with everyone else's.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
 	public function render(): void {
 		if ( ! current_user_can( flyaffiliate_admin_capability() ) ) {
+			return;
+		}
+
+		// FlyAffiliate's notices appear on FlyAffiliate's screen only, never on
+		// another screen of the admin.
+		if ( ! $this->is_flyaffiliate_screen() ) {
 			return;
 		}
 
@@ -101,7 +167,7 @@ class Manager implements Hookable {
 				continue;
 			}
 
-			$classes = 'notice notice-' . sanitize_html_class( $notice['type'] );
+			$classes = 'notice inline notice-' . sanitize_html_class( $notice['type'] );
 
 			if ( $notice['dismissible'] ) {
 				$classes .= ' is-dismissible';
@@ -122,7 +188,7 @@ class Manager implements Hookable {
 	 * The `is-dismissible` class hides a notice for the current page load only.
 	 * This link is what makes the dismissal stick.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $notice_id Notice id.
 	 *
@@ -150,7 +216,7 @@ class Manager implements Hookable {
 	/**
 	 * Record that the current user dismissed a notice.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -174,7 +240,7 @@ class Manager implements Hookable {
 	/**
 	 * Whether a user has dismissed a notice.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $notice_id Notice id.
 	 * @param int    $user_id   User id.
@@ -183,5 +249,18 @@ class Manager implements Hookable {
 	 */
 	public function is_dismissed( string $notice_id, int $user_id ): bool {
 		return (bool) get_user_meta( $user_id, self::DISMISSED_META_PREFIX . $notice_id, true );
+	}
+
+	/**
+	 * Whether the current screen is FlyAffiliate's admin app.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	protected function is_flyaffiliate_screen(): bool {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+		return $screen && 'toplevel_page_' . Menu::PARENT_SLUG === $screen->id;
 	}
 }

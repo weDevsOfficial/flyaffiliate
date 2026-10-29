@@ -27,11 +27,20 @@ test.describe( 'Payouts', () => {
 		await expect( table ).toBeVisible();
 		await expect( table.locator( 'tbody tr' ).first() ).toBeVisible();
 
+		// An unpaid commission still inside its hold period is left out, and
+		// the preview says how many. Those stay unpaid after the batch is paid.
+		const heldNote = page.getByTestId( 'flyaffiliate-payout-held' );
+		const held =
+			( await heldNote.count() ) > 0
+				? Number( await heldNote.getAttribute( 'data-count' ) )
+				: 0;
+
 		await page.getByTestId( 'flyaffiliate-payout-confirm' ).click();
 		await list.expectToast( /Payout created/ );
 		await expect( page ).toHaveURL( /#\/payouts\/batch\// );
 		const batchUrl = page.url();
-		await expect( list.heading ).toHaveText( 'Playwright payout' );
+		// The heading carries the batch's status badge beside the title.
+		await expect( list.heading ).toContainText( 'Playwright payout' );
 		await expect(
 			page.getByTestId( 'flyaffiliate-batch-csv' )
 		).toHaveAttribute( 'href', /flyaffiliate_payout_csv/ );
@@ -43,7 +52,7 @@ test.describe( 'Payouts', () => {
 		// Marking the whole payout paid is what pays them. (`open()` passes
 		// through about:blank, so going back would land there, not here.)
 		await list.goto( batchUrl );
-		await expect( list.heading ).toHaveText( 'Playwright payout' );
+		await expect( list.heading ).toContainText( 'Playwright payout' );
 		await page.getByTestId( 'flyaffiliate-batch-pay' ).click();
 		await page.getByTestId( 'flyaffiliate-confirm' ).click();
 		await list.expectToast( /marked paid/ );
@@ -52,7 +61,7 @@ test.describe( 'Payouts', () => {
 		).toHaveCount( 0 );
 
 		await list.open( urls.commissions, 'Commissions' );
-		await expect.poll( () => list.tabCount( 'Unpaid' ) ).toBe( 0 );
+		await expect.poll( () => list.tabCount( 'Unpaid' ) ).toBe( held );
 	} );
 
 	test( 'lists recorded payouts', async ( { page } ) => {

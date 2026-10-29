@@ -21,7 +21,7 @@ use WP_REST_Server;
 /**
  * `flyaffiliate/v1/affiliates` — the admin's view of the affiliate roster.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class AffiliatesController extends AdminBaseController {
 
@@ -35,7 +35,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Register the routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -102,26 +102,26 @@ class AffiliatesController extends AdminBaseController {
 	}
 
 	/**
-	 * List affiliates.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param WP_REST_Request $request The request.
-	 *
-	 * @return WP_REST_Response
-	 */
-	/**
 	 * Commission totals for the affiliates in the collection being prepared.
 	 *
 	 * Filled once per collection request so the list does not run a grouped
 	 * query per row.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @var array<int, array>
 	 */
 	protected array $list_totals = [];
 
+	/**
+	 * List affiliates.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response
+	 */
 	public function get_items( $request ) {
 		$per_page = (int) $request['per_page'];
 		$where    = [];
@@ -166,7 +166,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Get one affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -185,7 +185,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Create an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -198,6 +198,10 @@ class AffiliatesController extends AdminBaseController {
 				'status'        => $request['status'] ?? Affiliate::STATUS_PENDING,
 				'payment_email' => $request['payment_email'] ?? '',
 				'promo_method'  => $request['promo_method'] ?? '',
+				'payout_method' => $request['payout_method'] ?? '',
+				'payout_details' => $request['payout_details'] ?? null,
+				'website'       => $request['website'] ?? '',
+				'send_welcome_email' => ! empty( $request['send_welcome_email'] ),
 			]
 		);
 
@@ -215,7 +219,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Update an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -224,7 +228,7 @@ class AffiliatesController extends AdminBaseController {
 	public function update_item( $request ) {
 		$changes = [];
 
-		foreach ( [ 'status', 'payment_email', 'promo_method' ] as $field ) {
+		foreach ( [ 'status', 'payment_email', 'promo_method', 'payout_method', 'payout_details', 'website' ] as $field ) {
 			if ( isset( $request[ $field ] ) ) {
 				$changes[ $field ] = $request[ $field ];
 			}
@@ -242,7 +246,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Delete an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -276,37 +280,26 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Turn an affiliate into a response.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate       $item    The affiliate.
 	 * @param WP_REST_Request $request The request.
 	 *
 	 * @return WP_REST_Response
 	 */
-	/**
-	 * The WordPress username behind an affiliate.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param int $user_id The user id.
-	 *
-	 * @return string The login, or an empty string when the user is gone.
-	 */
-	protected function get_user_login( int $user_id ): string {
-		$user = $user_id > 0 ? get_userdata( $user_id ) : false;
-
-		return $user instanceof \WP_User ? $user->user_login : '';
-	}
-
 	public function prepare_item_for_response( $item, $request ) {
+		$user = $item->get_user();
 		$data = [
 			'id'            => $item->get_id(),
 			'user_id'       => (int) $item->get( 'user_id' ),
 			'name'          => $item->get_display_name(),
-			'user_login'    => $this->get_user_login( (int) $item->get( 'user_id' ) ),
+			'user_login'    => null === $user ? '' : $user->user_login,
+			'email'         => null === $user ? '' : $user->user_email,
 			'status'        => (string) $item->get( 'status' ),
 			'payment_email' => $item->get_payment_email(),
+			'payout_method' => $item->get_payout_method(),
 			'promo_method'  => (string) $item->get( 'promo_method', '' ),
+			'website'       => $item->get_website(),
 			'referral_url'  => $item->get_referral_url(),
 			'created_at'    => $this->prepare_date( $item->get( 'created_at' ) ),
 			'updated_at'    => $this->prepare_date( $item->get( 'updated_at' ) ),
@@ -319,8 +312,10 @@ class AffiliatesController extends AdminBaseController {
 		}
 
 		if ( 'edit' === ( $request['context'] ?? 'view' ) ) {
-			$data['totals'] = flyaffiliate()->commission->get_affiliate_totals( $item->get_id() );
-			$data['visits'] = flyaffiliate()->tracking->count_by_result( [ 'where' => [ 'affiliate_id' => $item->get_id() ] ] );
+			$data['totals']         = flyaffiliate()->commission->get_affiliate_totals( $item->get_id() );
+			$data['visits']         = flyaffiliate()->tracking->count_by_result( [ 'where' => [ 'affiliate_id' => $item->get_id() ] ] );
+			$data['payout_details']     = $this->get_payout_details( $item );
+			$data['connected_accounts'] = $this->get_connected_accounts( $item );
 		}
 
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );
@@ -331,7 +326,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * The links for one affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $item The affiliate.
 	 *
@@ -365,7 +360,7 @@ class AffiliatesController extends AdminBaseController {
 	 * Clearing the field is how an admin sends payouts back to the account
 	 * email, so the empty string passes; anything else must be an address.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed           $value   The submitted value.
 	 * @param WP_REST_Request $request The request.
@@ -382,9 +377,58 @@ class AffiliatesController extends AdminBaseController {
 	}
 
 	/**
+	 * An affiliate's details for every payout method that asks for some.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Affiliate $affiliate The affiliate.
+	 *
+	 * @return array<string, array<string, string>> Method id => field id => value.
+	 */
+	protected function get_payout_details( Affiliate $affiliate ): array {
+		$details = [];
+
+		foreach ( flyaffiliate()->payout_method->all() as $id => $method ) {
+			if ( [] !== $method->get_affiliate_fields() ) {
+				$details[ $id ] = $method->get_affiliate_details( $affiliate );
+			}
+		}
+
+		return $details;
+	}
+
+	/**
+	 * The accounts an affiliate is paid to without entering anything, by method.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Affiliate $affiliate The affiliate.
+	 *
+	 * @return array<string, array{label: string, detail: string, url: string, connected: bool}> Method id => the account.
+	 */
+	protected function get_connected_accounts( Affiliate $affiliate ): array {
+		$accounts = [];
+
+		foreach ( flyaffiliate()->payout_method->all() as $id => $method ) {
+			$account = $method->get_connected_account( $affiliate );
+
+			if ( '' !== (string) ( $account['label'] ?? '' ) ) {
+				$accounts[ $id ] = [
+					'label'     => (string) $account['label'],
+					'detail'    => (string) ( $account['detail'] ?? '' ),
+					'url'       => esc_url_raw( (string) ( $account['url'] ?? '' ) ),
+					'connected' => false !== ( $account['connected'] ?? true ),
+				];
+			}
+		}
+
+		return $accounts;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -422,6 +466,12 @@ class AffiliatesController extends AdminBaseController {
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
+				'email'         => [
+					'description' => __( 'The account email of the user behind the affiliate.', 'flyaffiliate' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
 				'status'        => [
 					'description' => __( 'Affiliate status.', 'flyaffiliate' ),
 					'type'        => 'string',
@@ -442,6 +492,55 @@ class AffiliatesController extends AdminBaseController {
 					'description' => __( 'How the affiliate plans to promote the store.', 'flyaffiliate' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
+				],
+				'payout_method' => [
+					'description' => __( 'The payout method the affiliate chose. Empty means the default.', 'flyaffiliate' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'arg_options' => [
+						'sanitize_callback' => 'sanitize_key',
+					],
+				],
+				'payout_details' => [
+					'description'          => __( 'The details each payout method needs, method id => field id => value. Only with context=edit.', 'flyaffiliate' ),
+					'type'                 => 'object',
+					'context'              => [ 'edit' ],
+					'additionalProperties' => [
+						'type'                 => 'object',
+						'additionalProperties' => [ 'type' => 'string' ],
+					],
+				],
+				'connected_accounts' => [
+					'description'          => __( 'Method id => an account the affiliate is paid to without entering anything: what it is, which one, and where they change it. Only with context=edit.', 'flyaffiliate' ),
+					'type'                 => 'object',
+					'context'              => [ 'edit' ],
+					'readonly'             => true,
+					'additionalProperties' => [
+						'type'       => 'object',
+						'properties' => [
+							'label'     => [ 'type' => 'string' ],
+							'detail'    => [ 'type' => 'string' ],
+							'url'       => [
+								'type'   => 'string',
+								'format' => 'uri',
+							],
+							'connected' => [ 'type' => 'boolean' ],
+						],
+					],
+				],
+				'website'       => [
+					'description' => __( 'The affiliate\'s website. Kept on their WordPress user.', 'flyaffiliate' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'arg_options' => [
+						'sanitize_callback' => 'esc_url_raw',
+					],
+				],
+				'send_welcome_email' => [
+					'description' => __( 'When creating: email the affiliate a welcome with their referral link.', 'flyaffiliate' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => [],
 				],
 				'referral_url'  => [
 					'description' => __( 'The affiliate\'s referral link.', 'flyaffiliate' ),
@@ -485,7 +584,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -528,7 +627,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * The 404 this controller returns for a missing affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return WP_Error
 	 */
@@ -538,22 +637,5 @@ class AffiliatesController extends AdminBaseController {
 			__( 'No affiliate with that ID.', 'flyaffiliate' ),
 			[ 'status' => 404 ]
 		);
-	}
-
-	/**
-	 * Format a stored datetime as RFC3339 for the response.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string|null $value Stored `Y-m-d H:i:s` value, in GMT.
-	 *
-	 * @return string|null
-	 */
-	protected function prepare_date( $value ): ?string {
-		if ( empty( $value ) ) {
-			return null;
-		}
-
-		return mysql_to_rfc3339( (string) $value );
 	}
 }

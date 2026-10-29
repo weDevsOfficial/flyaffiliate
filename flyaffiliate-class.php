@@ -5,6 +5,7 @@
  * @package FlyAffiliate
  */
 
+use FlyAffiliate\Admin\Menu;
 use FlyAffiliate\Contracts\Hookable;
 use FlyAffiliate\DependencyManagement\Container;
 use FlyAffiliate\Install\Installer;
@@ -19,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Holds the version, defines the constants, wires the WordPress lifecycle, and
  * exposes the container's named services through a magic getter.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  *
  * @property FlyAffiliate\Affiliate\Manager        $affiliate     Affiliate data access.
  * @property FlyAffiliate\Admin\Settings\Manager   $settings      Settings registration and defaults.
@@ -28,6 +29,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @property FlyAffiliate\REST\Manager             $api           REST API bootstrap.
  * @property FlyAffiliate\Install\Installer        $installer     Tables, options, pages, scheduled job.
  * @property FlyAffiliate\Upgrade\Manager          $upgrades      Schema and data upgrades.
+ * @property FlyAffiliate\Payout\Manager           $payout        Payouts and their payments.
+ * @property FlyAffiliate\PayoutMethod\Manager     $payout_method The payout methods: Manual, and any other plugin adds.
+ * @property FlyAffiliate\Tracker                  $tracker       Usage data for Appsero, opt-in.
  */
 final class FlyAffiliate_Plugin {
 
@@ -46,7 +50,7 @@ final class FlyAffiliate_Plugin {
 	 *
 	 * @var string
 	 */
-	private string $min_php = '7.4';
+	private string $min_php = '8.1';
 
 	/**
 	 * The single instance.
@@ -58,7 +62,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Wire the plugin into WordPress.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 */
 	private function __construct() {
 		$this->define_constants();
@@ -67,14 +71,13 @@ final class FlyAffiliate_Plugin {
 		register_deactivation_hook( FLYAFFILIATE_FILE, [ $this, 'deactivate' ] );
 
 		add_action( 'before_woocommerce_init', [ $this, 'declare_woocommerce_feature_compatibility' ] );
-		add_action( 'woocommerce_loaded', [ $this, 'init_plugin' ] );
-		add_action( 'plugins_loaded', [ $this, 'woocommerce_not_loaded' ], 11 );
+		add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
 	}
 
 	/**
 	 * Get the plugin instance, creating it once.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return FlyAffiliate_Plugin
 	 */
@@ -89,7 +92,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Resolve a named service from the container.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $property Service name, for example `affiliate` or `settings`.
 	 *
@@ -107,7 +110,7 @@ final class FlyAffiliate_Plugin {
 	 * Without this, `isset( flyaffiliate()->affiliate )` is always false, because
 	 * `__get()` alone does not answer `isset()`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $property Service name.
 	 *
@@ -120,7 +123,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * The container.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return Container
 	 */
@@ -131,7 +134,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Define the plugin constants.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -151,7 +154,7 @@ final class FlyAffiliate_Plugin {
 	 * Declared before WooCommerce initialises, which is why it hooks
 	 * `before_woocommerce_init` rather than anything later.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -165,14 +168,24 @@ final class FlyAffiliate_Plugin {
 	}
 
 	/**
-	 * Boot the plugin, once WooCommerce is available.
+	 * Boot the plugin on `plugins_loaded`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
 	public function init_plugin(): void {
 		$this->includes();
+
+		// Integrations are optional, as in SliceWP: each one is always listed
+		// (as a commission origin and under Settings → Integrations) and its
+		// hooks run only while its plugin is active — WooCommerce today, others
+		// the same way. Everything else — affiliates, referral links,
+		// hand-entered commissions, payouts, the admin and the affiliate
+		// dashboard — runs on WordPress alone (ADR-0013). Registered here, on
+		// `plugins_loaded`, once it is known which plugins are active.
+		$this->get_container()->addServiceProvider( new \FlyAffiliate\DependencyManagement\Providers\IntegrationServiceProvider() );
+
 		$this->init_hooks();
 
 		/**
@@ -180,7 +193,7 @@ final class FlyAffiliate_Plugin {
 		 *
 		 * The point at which another plugin can safely extend FlyAffiliate.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 */
 		do_action( 'flyaffiliate_loaded' );
 	}
@@ -188,7 +201,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Load the procedural helper files.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -199,7 +212,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Attach the plugin's own hooks and register every `Hookable`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -217,7 +230,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Resolve the tagged service groups.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -247,7 +260,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Put this plugin's tables on `$wpdb`, so queries do not rebuild the names.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -262,7 +275,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Add a Settings link to the plugin's row on the Plugins screen.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string[] $links The existing links.
 	 *
@@ -275,7 +288,7 @@ final class FlyAffiliate_Plugin {
 			$links,
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
-				esc_url( admin_url( 'admin.php?page=flyaffiliate-settings' ) ),
+				esc_url( Menu::get_route_url( 'settings' ) ),
 				esc_html__( 'Settings', 'flyaffiliate' )
 			)
 		);
@@ -286,7 +299,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Install the plugin.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -308,34 +321,30 @@ final class FlyAffiliate_Plugin {
 			);
 		}
 
-		if ( ! $this->has_woocommerce() ) {
-			set_transient( 'flyaffiliate_woocommerce_missing', true, HOUR_IN_SECONDS );
-
-			return;
-		}
-
+		// The plugin is standalone (ADR-0013): the tables, options, role, pages
+		// and the daily job are created on any WordPress site, integrations or not.
 		require_once FLYAFFILIATE_INC_DIR . '/functions.php';
 
 		( new Installer() )->do_install();
+
+		$this->tracker->activate();
 	}
 
 	/**
 	 * Stop the scheduled work. Data is left alone; that is uninstall's job.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
 	public function deactivate(): void {
 		Installer::clear_scheduled_events();
-
-		delete_transient( 'flyaffiliate_woocommerce_missing' );
 	}
 
 	/**
 	 * Whether this PHP version is supported.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -346,7 +355,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Whether WooCommerce is loaded.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -355,40 +364,9 @@ final class FlyAffiliate_Plugin {
 	}
 
 	/**
-	 * Say so, when WooCommerce is not there.
-	 *
-	 * `Requires Plugins: woocommerce` stops this from happening on WordPress 6.5
-	 * and later, but the header is inert on 6.4 (ADR-0009), and WooCommerce can
-	 * be deactivated after FlyAffiliate is installed on any version.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return void
-	 */
-	public function woocommerce_not_loaded(): void {
-		if ( $this->has_woocommerce() || ! is_admin() ) {
-			return;
-		}
-
-		add_action(
-			'admin_notices',
-			static function () {
-				if ( ! current_user_can( 'activate_plugins' ) ) {
-					return;
-				}
-
-				printf(
-					'<div class="notice notice-error"><p>%s</p></div>',
-					esc_html__( 'FlyAffiliate needs WooCommerce to be installed and active.', 'flyaffiliate' )
-				);
-			}
-		);
-	}
-
-	/**
 	 * The plugin directory.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -399,7 +377,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * The theme directory that overrides this plugin's templates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */

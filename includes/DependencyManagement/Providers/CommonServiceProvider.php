@@ -16,7 +16,7 @@ use FlyAffiliate\DependencyManagement\BaseServiceProvider;
 /**
  * Registers services needed on both the admin side and the front end.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class CommonServiceProvider extends BaseServiceProvider {
 
@@ -30,20 +30,19 @@ class CommonServiceProvider extends BaseServiceProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * Phase 3 adds the tracking, commission and payout hook classes here.
+	 * The services every request needs, admin or front end.
 	 *
 	 * @var class-string[]
 	 */
 	protected array $services = [
 		\FlyAffiliate\Affiliate\Role::class,
 		\FlyAffiliate\Tracking\Tracker::class,
-		\FlyAffiliate\Commission\HoldPeriod::class,
 	];
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

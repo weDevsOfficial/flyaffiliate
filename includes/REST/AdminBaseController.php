@@ -15,16 +15,16 @@ use WP_Error;
 use WP_REST_Request;
 
 /**
- * Every route on a subclass requires `manage_woocommerce` (ADR-0008).
+ * Every route on a subclass requires `flyaffiliate_admin_capability()` — `manage_options` unless filtered (ADR-0008, ADR-0013).
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 abstract class AdminBaseController extends BaseController {
 
 	/**
 	 * Whether the caller may administer FlyAffiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -45,7 +45,7 @@ abstract class AdminBaseController extends BaseController {
 	/**
 	 * Permission callback for reading a collection.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -58,7 +58,7 @@ abstract class AdminBaseController extends BaseController {
 	/**
 	 * Permission callback for reading one item.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -71,7 +71,7 @@ abstract class AdminBaseController extends BaseController {
 	/**
 	 * Permission callback for creating an item.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -84,7 +84,7 @@ abstract class AdminBaseController extends BaseController {
 	/**
 	 * Permission callback for updating an item.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -97,7 +97,7 @@ abstract class AdminBaseController extends BaseController {
 	/**
 	 * Permission callback for deleting an item.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *

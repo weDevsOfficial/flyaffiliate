@@ -22,7 +22,7 @@ use FlyAffiliate\DependencyManagement\BootableServiceProvider;
  * here also carries the `container-service` tag, so the bootstrap can resolve
  * the whole group in one call.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class ServiceProvider extends BootableServiceProvider {
 
@@ -51,13 +51,16 @@ class ServiceProvider extends BootableServiceProvider {
 		'registration'  => \FlyAffiliate\Affiliate\Registration::class,
 		'commission'    => \FlyAffiliate\Commission\Manager::class,
 		'payout'        => \FlyAffiliate\Payout\Manager::class,
+		'payout_method' => \FlyAffiliate\PayoutMethod\Manager::class,
 		'tracking'      => \FlyAffiliate\Tracking\Manager::class,
+		'referral_link' => \FlyAffiliate\ReferralLink\Manager::class,
+		'tracker'       => \FlyAffiliate\Tracker::class,
 	];
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -79,7 +82,7 @@ class ServiceProvider extends BootableServiceProvider {
 	/**
 	 * Add the remaining providers.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -90,7 +93,8 @@ class ServiceProvider extends BootableServiceProvider {
 		$container->addServiceProvider( new AdminServiceProvider() );
 		$container->addServiceProvider( new FrontendServiceProvider() );
 		$container->addServiceProvider( new AjaxServiceProvider() );
-		$container->addServiceProvider( new IntegrationServiceProvider() );
+		// IntegrationServiceProvider is added by FlyAffiliate_Plugin::init_plugin()
+		// on `plugins_loaded`, once it is known whether WooCommerce is active.
 		$container->addServiceProvider( new CliServiceProvider() );
 	}
 }

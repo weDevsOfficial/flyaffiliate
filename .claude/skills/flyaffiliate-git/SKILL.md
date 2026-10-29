@@ -78,7 +78,7 @@ Reviewed for: **correct**, **secure**, **readable**, **elegant** — in that ord
 
 ## CI
 
-Every PR runs PHPCS (changed files), PHPUnit (PHP 7.4/8.3),
+Every PR runs PHPCS (changed files), PHPUnit (PHP 8.1/8.3),
 and Plugin Check on the built zip. All three must be green before merge.
 
 `deploy.yml` is tag-triggered and stays disabled until the WordPress.org slug is

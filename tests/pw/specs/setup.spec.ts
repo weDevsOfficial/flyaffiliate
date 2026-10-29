@@ -30,6 +30,17 @@ test.describe( 'Setup wizard', () => {
 		await expect(
 			page.locator( '#flyaffiliate-setup-cookie_duration' )
 		).toBeVisible();
+
+		// Back returns to the previous step with what was entered.
+		await page.getByTestId( 'flyaffiliate-setup-back' ).click();
+		await expect(
+			page.getByTestId( 'flyaffiliate-setup-step-commissions' )
+		).toHaveAttribute( 'data-state', 'active' );
+		await expect( maxRate ).toHaveValue( '60' );
+		await expect(
+			page.getByTestId( 'flyaffiliate-setup-back' )
+		).toHaveCount( 0 );
+		await page.getByTestId( 'flyaffiliate-setup-continue' ).click();
 		await page.getByTestId( 'flyaffiliate-setup-continue' ).click();
 
 		await expect(
@@ -76,11 +87,5 @@ test.describe( 'Setup wizard', () => {
 
 		await page.getByTestId( 'flyaffiliate-setup-skip' ).click();
 		await expect( page ).toHaveURL( /#\/$/ );
-	} );
-
-	test( 'the old page slug redirects into the app', async ( { page } ) => {
-		await page.goto( urls.legacySetup );
-		await expect( page ).toHaveURL( /page=flyaffiliate#\/setup/ );
-		await expect( page.getByTestId( 'flyaffiliate-setup' ) ).toBeVisible();
 	} );
 } );

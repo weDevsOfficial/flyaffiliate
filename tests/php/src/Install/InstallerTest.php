@@ -8,6 +8,7 @@
 namespace FlyAffiliate\Test\Install;
 
 use FlyAffiliate\Admin\Settings\Repository\SettingsRepository;
+use FlyAffiliate\Admin\SetupWizard;
 use FlyAffiliate\Admin\Settings\Schema\SettingsSchema;
 use FlyAffiliate\Install\Installer;
 use FlyAffiliate\Test\FlyAffiliateTestCase;
@@ -214,7 +215,7 @@ class InstallerTest extends FlyAffiliateTestCase {
 		// phpcs:enable
 
 		$affiliate = self::factory()->affiliate->create_and_get_model();
-		$result    = flyaffiliate()->commission->create_manual(
+		$result    = flyaffiliate()->commission->create(
 			[
 				'affiliate_id' => $affiliate->get_id(),
 				'amount'       => 5,
@@ -223,5 +224,26 @@ class InstallerTest extends FlyAffiliateTestCase {
 
 		$this->assertNotWPError( $result );
 		$this->assertNull( $result->get( 'order_item_id' ) );
+	}
+
+	/**
+	 * Only a first install arms the setup wizard redirect, as Dokan's onboarding does.
+	 *
+	 * @return void
+	 */
+	public function test_only_a_first_install_opens_the_setup_wizard(): void {
+		delete_option( SetupWizard::DONE_OPTION );
+		delete_transient( SetupWizard::REDIRECT_TRANSIENT );
+		delete_option( Installer::DB_VERSION_OPTION );
+
+		( new Installer() )->do_install();
+
+		$this->assertNotFalse( get_transient( SetupWizard::REDIRECT_TRANSIENT ), 'a first install opens the wizard' );
+
+		// Deactivate and activate again, wizard still not finished: no second redirect.
+		delete_transient( SetupWizard::REDIRECT_TRANSIENT );
+		( new Installer() )->do_install();
+
+		$this->assertFalse( get_transient( SetupWizard::REDIRECT_TRANSIENT ), 'a reinstall leaves the admin where they are' );
 	}
 }

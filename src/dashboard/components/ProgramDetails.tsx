@@ -99,10 +99,13 @@ export default function ProgramDetails() {
 						program.holdDays,
 						__( 'None', 'flyaffiliate' )
 					) }
-					hint={ __(
-						'How long a commission stays pending before it can be paid.',
-						'flyaffiliate'
-					) }
+					hint={
+						program.holdNote ||
+						__(
+							'How long after the sale a commission waits before it can be paid out.',
+							'flyaffiliate'
+						)
+					}
 				/>
 				<Divider />
 				<Detail

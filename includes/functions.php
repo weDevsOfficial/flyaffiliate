@@ -2,7 +2,7 @@
 /**
  * Procedural helpers.
  *
- * Loaded on every request once WooCommerce is available. Everything here is a
+ * Loaded on every request by `init_plugin()`, and by `activate()`. Everything here is a
  * thin, prefixed wrapper over a class; behaviour lives in the classes.
  *
  * @package FlyAffiliate
@@ -22,7 +22,7 @@ if ( ! function_exists( 'flyaffiliate_get_option' ) ) {
 	 * single `flyaffiliate_settings` option, keyed by field id, and the schema's
 	 * default applies when a site has never saved the field.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id       Field id, as declared in `SettingsSchema`.
 	 * @param mixed  $fallback Value to return when the field is neither stored nor declared.
@@ -41,7 +41,7 @@ if ( ! function_exists( 'flyaffiliate_option_enabled' ) ) {
 	 * Switches store `'on'` / `'off'`, so a plain boolean cast would read every
 	 * stored switch as true.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id Field id.
 	 *
@@ -56,7 +56,7 @@ if ( ! function_exists( 'flyaffiliate_update_option' ) ) {
 	/**
 	 * Write one FlyAffiliate setting, through the field's rules and sanitizer.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id    Field id.
 	 * @param mixed  $value Value.
@@ -72,7 +72,7 @@ if ( ! function_exists( 'flyaffiliate_template_path' ) ) {
 	/**
 	 * The directory inside a theme that overrides this plugin's templates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string Path fragment with a trailing slash.
 	 */
@@ -80,7 +80,7 @@ if ( ! function_exists( 'flyaffiliate_template_path' ) ) {
 		/**
 		 * Filters the theme directory FlyAffiliate templates are overridden from.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string $path Path fragment with a trailing slash. Default `flyaffiliate/`.
 		 */
@@ -94,7 +94,7 @@ if ( ! function_exists( 'flyaffiliate_locate_template' ) ) {
 	 *
 	 * Lookup order: the child theme, then the parent theme, then the plugin.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $template_name Template file name, relative to the templates directory.
 	 *
@@ -113,7 +113,7 @@ if ( ! function_exists( 'flyaffiliate_locate_template' ) ) {
 		/**
 		 * Filters the resolved path of a FlyAffiliate template.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string $template      Absolute path, or an empty string when not found.
 		 * @param string $template_name The template that was asked for.
@@ -129,7 +129,7 @@ if ( ! function_exists( 'flyaffiliate_get_template' ) ) {
 	 * The template receives `$args` as local variables. It renders — it does not
 	 * query. The caller prepares the data.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $template_name Template file name, relative to the templates directory.
 	 * @param array  $args          Variables to extract into the template's scope.
@@ -151,7 +151,7 @@ if ( ! function_exists( 'flyaffiliate_get_template' ) ) {
 		/**
 		 * Fires before a FlyAffiliate template is rendered.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string $template_name The template being rendered.
 		 * @param array  $args          The variables passed to it.
@@ -163,7 +163,7 @@ if ( ! function_exists( 'flyaffiliate_get_template' ) ) {
 		/**
 		 * Fires after a FlyAffiliate template is rendered.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string $template_name The template that was rendered.
 		 * @param array  $args          The variables passed to it.
@@ -180,7 +180,7 @@ if ( ! function_exists( 'flyaffiliate_get_template_part' ) ) {
 	 * renders `affiliate-dashboard/summary-compact.php` when it exists, and
 	 * `affiliate-dashboard/summary.php` otherwise.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $slug Template slug.
 	 * @param string $name Template variant.
@@ -208,7 +208,7 @@ if ( ! function_exists( 'flyaffiliate_get_page_id' ) ) {
 	/**
 	 * The id of a page the installer created.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $key Page key, `affiliate_dashboard` or `affiliate_register`.
 	 *
@@ -226,7 +226,7 @@ if ( ! function_exists( 'flyaffiliate_get_page_url' ) ) {
 	/**
 	 * The permalink of a page the installer created.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $key Page key.
 	 *
@@ -247,10 +247,12 @@ if ( ! function_exists( 'flyaffiliate_admin_capability' ) ) {
 	/**
 	 * The capability required to administer FlyAffiliate.
 	 *
-	 * `manage_woocommerce`, so administrators and shop managers both reach the
-	 * plugin without any role plumbing (ADR-0008). `manage_options` is not used.
+	 * `manage_options`: every administrator has it on every WordPress site, and
+	 * nothing is written to roles on activation (ADR-0008, amended by ADR-0013).
+	 * A store that wants shop managers in returns `manage_woocommerce` from the
+	 * filter.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -258,11 +260,11 @@ if ( ! function_exists( 'flyaffiliate_admin_capability' ) ) {
 		/**
 		 * Filters the capability required to administer FlyAffiliate.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
-		 * @param string $capability Capability name. Default `manage_woocommerce`.
+		 * @param string $capability Capability name. Default `manage_options`.
 		 */
-		return (string) apply_filters( 'flyaffiliate_admin_capability', 'manage_woocommerce' );
+		return (string) apply_filters( 'flyaffiliate_admin_capability', 'manage_options' );
 	}
 }
 
@@ -273,7 +275,7 @@ if ( ! function_exists( 'flyaffiliate_get_currency' ) ) {
 	 * FlyAffiliate's own Currency setting, not WooCommerce's: the store currency
 	 * is only the value it starts from.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string An ISO 4217 code.
 	 */
@@ -287,7 +289,7 @@ if ( ! function_exists( 'flyaffiliate_get_currency' ) ) {
 		/**
 		 * Filters the currency FlyAffiliate shows amounts in.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string $code The currency code.
 		 */
@@ -299,7 +301,7 @@ if ( ! function_exists( 'flyaffiliate_get_currency_symbol' ) ) {
 	/**
 	 * The symbol of a currency, as plain text.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $code A currency code. Defaults to FlyAffiliate's currency.
 	 *
@@ -307,7 +309,9 @@ if ( ! function_exists( 'flyaffiliate_get_currency_symbol' ) ) {
 	 */
 	function flyaffiliate_get_currency_symbol( string $code = '' ): string {
 		$code   = '' !== $code ? $code : flyaffiliate_get_currency();
-		$symbol = function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol( $code ) : '';
+		$symbol = function_exists( 'get_woocommerce_currency_symbol' )
+			? get_woocommerce_currency_symbol( $code )
+			: ( \FlyAffiliate\Admin\Settings\Schema\SettingsSchema::builtin_currencies()[ $code ][1] ?? '' );
 
 		return '' !== $symbol ? html_entity_decode( $symbol, ENT_QUOTES, 'UTF-8' ) : $code;
 	}
@@ -320,7 +324,7 @@ if ( ! function_exists( 'flyaffiliate_get_currency_decimals' ) ) {
 	 * Two for most currencies; none for the yen and the others without minor
 	 * units, three for the dinars that divide into a thousand.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $code A currency code. Defaults to FlyAffiliate's currency.
 	 *
@@ -339,11 +343,58 @@ if ( ! function_exists( 'flyaffiliate_get_currency_decimals' ) ) {
 		/**
 		 * Filters the decimal places of a currency.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param int    $decimals Decimal places.
 		 * @param string $code     The currency code.
 		 */
 		return (int) apply_filters( 'flyaffiliate_currency_decimals', $decimals, $code );
+	}
+}
+
+if ( ! function_exists( 'flyaffiliate_is_pro_active' ) ) {
+	/**
+	 * Whether FlyAffiliate Pro is running on this site.
+	 *
+	 * FlyAffiliate never looks for Pro's classes: Pro answers through the
+	 * filter when it boots. While it does not, FlyAffiliate shows what Pro adds
+	 * (`Admin\ProExtensions`), as Dokan Lite shows Dokan Pro's modules.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	function flyaffiliate_is_pro_active(): bool {
+		/**
+		 * Filters whether FlyAffiliate Pro is running. Pro returns true.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param bool $active Whether Pro is running. Default false.
+		 */
+		return (bool) apply_filters( 'flyaffiliate_is_pro_active', false );
+	}
+}
+
+if ( ! function_exists( 'flyaffiliate_get_pro_upgrade_url' ) ) {
+	/**
+	 * Where Upgrade to FlyAffiliate Pro leads: here, and on Pro's Extensions
+	 * page while its license is not active.
+	 *
+	 * FlyAffiliate's site until Pro's pricing page is published.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	function flyaffiliate_get_pro_upgrade_url(): string {
+		/**
+		 * Filters where Upgrade to FlyAffiliate Pro leads.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $url The URL.
+		 */
+		return (string) apply_filters( 'flyaffiliate_pro_upgrade_url', 'https://flyaffiliate.co/' );
 	}
 }

@@ -1,6 +1,8 @@
 /**
  * Payouts: each one a batch of payments, one per affiliate, created unpaid
- * and marked paid once the money has been sent — SliceWP's two steps.
+ * and marked paid once the money has been sent — SliceWP's two steps. A
+ * payout whose payments an automatic method is sending shows "Processing"
+ * and its counts update while it settles.
  */
 import { useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -17,13 +19,16 @@ import {
 import PageHeader from '@/components/PageHeader';
 import DateTime from '@/components/DateTime';
 import Money from '@/components/Money';
+import StatusBadge from '@/components/StatusBadge';
 import Truncated from '@/components/Truncated';
 import { useListView } from '@/hooks/useListView';
+import { usePolling } from '@/hooks/usePolling';
 import { errorMessage, send } from '@/lib/api';
 import { getGlobals } from '@/lib/globals';
 import { withIconLabels } from '@/lib/actions';
 import { BRAND_OUTLINE } from '@/lib/ui';
 import type { PayoutBatch } from '@/lib/types';
+import { paymentParts, type PaymentPart } from './parts';
 
 const DEFAULT_VIEW: DataViewState = {
 	type: 'table',
@@ -65,6 +70,30 @@ export function csvUrl( batchKey: string ): string {
 export const unpaidCount = ( batch: PayoutBatch ) =>
 	batch.affiliates - batch.paid;
 
+/**
+ * "6 paid · 1 on the way · 1 failed" for a payout's Payments cell, "0 paid"
+ * while nothing has moved.
+ *
+ * @param {PayoutBatch} batch The payout.
+ * @return {PaymentPart[]} The parts.
+ */
+function paymentText( batch: PayoutBatch ): PaymentPart[] {
+	const parts = paymentParts( batch );
+
+	return parts.length > 0
+		? parts
+		: [
+				{
+					key: 'paid',
+					tone: '',
+					count: 0,
+					/* translators: %d: number of payments */
+					text: sprintf( __( '%d paid', 'flyaffiliate' ), 0 ),
+					trouble: false,
+				},
+		  ];
+}
+
 export default function PayoutsPage() {
 	const navigate = useNavigate();
 	const [ selection, setSelection ] = useState< string[] >( [] );
@@ -77,6 +106,15 @@ export default function PayoutsPage() {
 		setSelection( [] );
 		list.refresh();
 	};
+
+	const { statuses } = getGlobals();
+
+	// A payout still settling updates in place, quietly.
+	usePolling(
+		() => list.refresh( { silent: true } ),
+		10000,
+		list.items.some( ( item ) => item.status === 'processing' )
+	);
 
 	const fields: DataViewField< PayoutBatch >[] = [
 		{
@@ -116,25 +154,41 @@ export default function PayoutsPage() {
 			label: __( 'Payments', 'flyaffiliate' ),
 			enableSorting: false,
 			render: ( { item } ) => (
-				<div>
-					<div>
-						{ sprintf(
-							/* translators: %d: number of payments */
-							_n(
-								'%d payment',
-								'%d payments',
-								item.affiliates,
-								'flyaffiliate'
-							),
-							item.affiliates
-						) }
-					</div>
-					<div className="text-xs text-muted-foreground">
-						{ sprintf(
-							/* translators: %d: number of paid payments */
-							__( '%d paid', 'flyaffiliate' ),
-							item.paid
-						) }
+				<div className="flex flex-col items-start gap-1">
+					{ item.status === 'processing' ? (
+						<StatusBadge
+							status="processing"
+							label={ statuses.batch?.processing }
+						/>
+					) : (
+						<div>
+							{ sprintf(
+								/* translators: %d: number of payments */
+								_n(
+									'%d payment',
+									'%d payments',
+									item.affiliates,
+									'flyaffiliate'
+								),
+								item.affiliates
+							) }
+						</div>
+					) }
+					<div
+						className="text-xs text-muted-foreground"
+						data-testid="flyaffiliate-batch-payments"
+					>
+						{ paymentText( item ).map( ( part, index ) => (
+							<span
+								key={ part.key }
+								className={
+									part.trouble ? 'text-destructive' : ''
+								}
+							>
+								{ index > 0 && ' · ' }
+								{ part.text }
+							</span>
+						) ) }
 					</div>
 				</div>
 			),
@@ -184,10 +238,13 @@ export default function PayoutsPage() {
 			icon: <Check size={ 16 } />,
 			confirmTitle: __( 'Mark all as paid', 'flyaffiliate' ),
 			confirmMessage: __(
-				'Every unpaid payment in this payout is marked paid, and every commission in them with it.',
+				'Marks every unpaid manual payment in this payout as paid, along with their commissions. Payments an automatic method sends are left to it.',
 				'flyaffiliate'
 			),
-			isEligible: ( item ) => unpaidCount( item ) > 0,
+			isEligible: ( item ) =>
+				item.counts
+					? item.counts.manual_unpaid > 0
+					: unpaidCount( item ) > 0,
 			callback: async ( [ item ] ) => {
 				try {
 					const result = await send< { paid: number } >(
@@ -235,10 +292,13 @@ export default function PayoutsPage() {
 			isDestructive: true,
 			confirmTitle: __( 'Delete payout', 'flyaffiliate' ),
 			confirmMessage: __(
-				'Its payments are deleted and their commissions go back to unpaid, ready for the next payout. A payout with a paid payment cannot be deleted.',
+				'Deletes its payments. Their commissions go back to unpaid and into the next payout. A payout with a paid payment can’t be deleted.',
 				'flyaffiliate'
 			),
-			isEligible: ( item ) => item.paid === 0,
+			isEligible: ( item ) =>
+				item.paid === 0 &&
+				( item.in_flight ?? 0 ) === 0 &&
+				( item.counts?.unavailable ?? 0 ) === 0,
 			callback: async ( [ item ] ) => {
 				try {
 					await send(
@@ -267,7 +327,7 @@ export default function PayoutsPage() {
 			<PageHeader
 				title={ __( 'Payouts', 'flyaffiliate' ) }
 				description={ __(
-					'A payout turns unpaid commissions into one payment per affiliate. Pay them the way you normally would, then mark each payment paid.',
+					'A payout groups unpaid commissions into one payment per affiliate, each paid by their payout method. Send manual payments your usual way and mark them paid. Automatic methods send theirs and settle on their own.',
 					'flyaffiliate'
 				) }
 				actions={

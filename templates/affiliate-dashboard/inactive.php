@@ -6,6 +6,7 @@
  *
  * @var \FlyAffiliate\Models\Affiliate $affiliate The affiliate.
  * @var string                         $notice    A status flag from a redirect.
+ * @var array|null                     $message   The activation link's result to show: `type` (success, error) and `text`.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,6 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 use FlyAffiliate\Models\Affiliate;
 ?>
 <div class="flyaffiliate-area">
+	<?php if ( ! empty( $message ) ) : ?>
+		<div class="flyaffiliate-notice flyaffiliate-notice--<?php echo esc_attr( $message['type'] ); ?>"><?php echo esc_html( $message['text'] ); ?></div>
+	<?php endif; ?>
 	<div class="flyaffiliate-state">
 		<?php if ( Affiliate::STATUS_PENDING === $affiliate->get( 'status' ) ) : ?>
 			<h2 class="flyaffiliate-state__title"><?php esc_html_e( 'Almost there', 'flyaffiliate' ); ?></h2>

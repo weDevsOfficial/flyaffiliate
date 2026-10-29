@@ -16,7 +16,6 @@ import {
 import {
 	Button,
 	Card,
-	Skeleton,
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -25,7 +24,13 @@ import {
 } from '@wedevs/plugin-ui';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
-import StatCard, { StatCardSkeleton } from '@/components/StatCard';
+import {
+	FormCardSkeleton,
+	HeaderSkeleton,
+	StatGridSkeleton,
+	TableSkeleton,
+} from '@/components/PageSkeleton';
+import StatCard from '@/components/StatCard';
 import CopyField from '@/components/CopyField';
 import EmptyState from '@/components/EmptyState';
 import { errorMessage, fetchOne } from '@/lib/api';
@@ -37,12 +42,15 @@ import { CommissionsTable } from '../commissions';
 import { VisitsTable } from '../visits';
 import { PaymentsTable } from '../payouts/payments';
 import AffiliateForm from './AffiliateForm';
+import { ReferralLinksTable } from './ReferralLinksTable';
 
 type Detail = Affiliate & {
 	visits?: { all: number; converted: number; not_converted: number };
 };
 
-const TAB_TRIGGER = 'px-4 data-active:text-primary';
+// Inactive tabs stay readable on the grey track; the active one is the brand blue.
+const TAB_TRIGGER =
+	'px-4 text-foreground/80 hover:text-foreground data-active:text-primary';
 
 export default function AffiliatePage() {
 	const { id } = useParams();
@@ -77,19 +85,10 @@ export default function AffiliatePage() {
 	if ( loading ) {
 		return (
 			<div data-testid="flyaffiliate-affiliate-loading">
-				<Skeleton className="mb-3 h-4 w-24" />
-				<div className="mb-6 flex items-center justify-between">
-					<Skeleton className="h-8 w-64" />
-					<Skeleton className="h-9 w-40" />
-				</div>
-				<Skeleton className="mb-6 h-20 w-full rounded-md" />
-				<div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					<StatCardSkeleton />
-					<StatCardSkeleton />
-					<StatCardSkeleton />
-					<StatCardSkeleton />
-				</div>
-				<Skeleton className="h-11 w-72 rounded-lg" />
+				<HeaderSkeleton actions={ 2 } />
+				<FormCardSkeleton rows={ 1 } title={ false } className="mb-6" />
+				<StatGridSkeleton />
+				<TableSkeleton tabs={ 4 } rows={ 4 } columns={ 7 } />
 			</div>
 		);
 	}
@@ -126,6 +125,12 @@ export default function AffiliatePage() {
 		not_converted: 0,
 	};
 	const numericId = Number( id );
+	// The link's own query, e.g. "?affiliate=5": the referral variable may have been renamed.
+	let referralQuery = '';
+
+	try {
+		referralQuery = new URL( affiliate.referral_url ).search;
+	} catch {}
 
 	return (
 		<>
@@ -173,12 +178,18 @@ export default function AffiliatePage() {
 					>
 						{ __( 'Referral link', 'flyaffiliate' ) }
 					</label>
-					<span className="text-xs text-muted-foreground">
-						{ __(
-							'Add ?affiliate=ID to any product URL to link straight to it.',
-							'flyaffiliate'
-						) }
-					</span>
+					{ referralQuery && (
+						<span className="text-xs text-muted-foreground">
+							{ sprintf(
+								/* translators: %s: the referral link's query, e.g. ?affiliate=5 */
+								__(
+									'Add %s to any product URL to link straight to it.',
+									'flyaffiliate'
+								),
+								referralQuery
+							) }
+						</span>
+					) }
 				</div>
 				<CopyField
 					id="flyaffiliate-referral-link"
@@ -202,7 +213,7 @@ export default function AffiliatePage() {
 					label={ __( 'Pending', 'flyaffiliate' ) }
 					value={ formatMoney( totals?.pending ?? 0 ) }
 					tooltip={ __(
-						'Commissions still inside their hold period.',
+						'Commissions waiting for their order to be paid.',
 						'flyaffiliate'
 					) }
 				/>
@@ -242,7 +253,8 @@ export default function AffiliatePage() {
 			</div>
 
 			<Tabs defaultValue="commissions" className="gap-6">
-				<TabsList className="h-11 gap-2 bg-muted p-1">
+				{ /* The strip is a shade darker than wp-admin's grey ground, so it reads as a control. */ }
+				<TabsList className="h-11 gap-2 bg-foreground/8 p-1">
 					<TabsTrigger value="commissions" className={ TAB_TRIGGER }>
 						{ __( 'Commissions', 'flyaffiliate' ) }
 					</TabsTrigger>
@@ -251,6 +263,9 @@ export default function AffiliatePage() {
 					</TabsTrigger>
 					<TabsTrigger value="payouts" className={ TAB_TRIGGER }>
 						{ __( 'Payouts', 'flyaffiliate' ) }
+					</TabsTrigger>
+					<TabsTrigger value="links" className={ TAB_TRIGGER }>
+						{ __( 'Referral links', 'flyaffiliate' ) }
 					</TabsTrigger>
 				</TabsList>
 				<TabsContent value="commissions">
@@ -264,6 +279,9 @@ export default function AffiliatePage() {
 				</TabsContent>
 				<TabsContent value="payouts">
 					<PaymentsTable affiliateId={ numericId } />
+				</TabsContent>
+				<TabsContent value="links">
+					<ReferralLinksTable affiliateId={ numericId } />
 				</TabsContent>
 			</Tabs>
 

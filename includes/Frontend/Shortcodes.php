@@ -16,14 +16,14 @@ use FlyAffiliate\Contracts\Hookable;
 /**
  * Registers the front-end shortcodes on `init`.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Shortcodes implements Hookable {
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -34,7 +34,7 @@ class Shortcodes implements Hookable {
 	/**
 	 * The shortcodes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return \FlyAffiliate\Abstracts\Shortcode[]
 	 */
@@ -47,7 +47,7 @@ class Shortcodes implements Hookable {
 		/**
 		 * Filters the FlyAffiliate shortcodes.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param \FlyAffiliate\Abstracts\Shortcode[] $shortcodes The shortcode objects.
 		 */
@@ -57,7 +57,7 @@ class Shortcodes implements Hookable {
 	/**
 	 * Register them.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

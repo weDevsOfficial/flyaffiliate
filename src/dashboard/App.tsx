@@ -17,6 +17,7 @@ import {
 	TabsTrigger,
 	ThemeProvider,
 	Toaster,
+	cn,
 	toast,
 	type DateRange,
 } from '@wedevs/plugin-ui';
@@ -27,11 +28,22 @@ import { getGlobals } from '@/lib/globals';
 import type { AffiliateProfile, DateArgs } from './types';
 import OverviewPage from './pages/Overview';
 import SettingsPage from './pages/Settings';
+import ReferralLinksPage from './pages/ReferralLinks';
 import CommissionsTable from './tables/CommissionsTable';
 import VisitsTable from './tables/VisitsTable';
 import PayoutsTable from './tables/PayoutsTable';
 
-const TABS = [ 'overview', 'commissions', 'visits', 'payouts', 'settings' ];
+const TABS = [
+	'overview',
+	'links',
+	'commissions',
+	'visits',
+	'payouts',
+	'settings',
+];
+
+/** Tabs the date range does not apply to: the profile, and the list of links. */
+const UNDATED_TABS = [ 'links', 'settings' ];
 
 const TAB_TRIGGER = 'px-4 data-active:text-foreground';
 
@@ -69,8 +81,17 @@ export default function App() {
 	// The picker only reports a range once Apply is pressed; the debounce keeps
 	// a quick re-pick or a clear from firing a round of requests each.
 	useEffect( () => {
+		// Same dates, same object: the first debounce after mount would otherwise
+		// fetch the dashboard a second time with the arguments it already has.
 		const timer = window.setTimeout(
-			() => setDates( toDateArgs( range ) ),
+			() =>
+				setDates( ( previous ) => {
+					const next = toDateArgs( range );
+
+					return JSON.stringify( previous ) === JSON.stringify( next )
+						? previous
+						: next;
+				} ),
 			RANGE_DEBOUNCE_MS
 		);
 
@@ -147,6 +168,12 @@ export default function App() {
 								{ __( 'Overview', 'flyaffiliate' ) }
 							</TabsTrigger>
 							<TabsTrigger
+								value="links"
+								className={ TAB_TRIGGER }
+							>
+								{ __( 'Referral links', 'flyaffiliate' ) }
+							</TabsTrigger>
+							<TabsTrigger
 								value="commissions"
 								className={ TAB_TRIGGER }
 							>
@@ -172,7 +199,7 @@ export default function App() {
 							</TabsTrigger>
 						</TabsList>
 
-						{ tab !== 'settings' && (
+						{ ! UNDATED_TABS.includes( tab ) && (
 							<div
 								className="flex items-center gap-2"
 								data-testid="flyaffiliate-date-range"
@@ -194,11 +221,14 @@ export default function App() {
 										'Cancel',
 										'flyaffiliate'
 									) }
+									// The picker's own trigger is the button; a Button here would nest one inside it.
 									trigger={ ( { value, open } ) => (
-										<Button
-											variant="outline"
-											className={ `${ CONTROL_HEIGHT } gap-2 px-4 font-normal` }
-											aria-expanded={ open }
+										<span
+											className={ cn(
+												CONTROL_HEIGHT,
+												'inline-flex items-center gap-2 rounded-md border border-primary bg-transparent px-4 text-sm font-normal text-primary transition-all hover:bg-muted',
+												open && 'bg-muted'
+											) }
 											aria-label={ __(
 												'Pick a date range',
 												'flyaffiliate'
@@ -213,7 +243,7 @@ export default function App() {
 													'All time',
 													'flyaffiliate'
 												) }
-										</Button>
+										</span>
 									) }
 								/>
 								{ range?.from && (
@@ -241,6 +271,9 @@ export default function App() {
 							profile={ profile }
 							hasRange={ Boolean( dates.after ) }
 						/>
+					</TabsContent>
+					<TabsContent value="links">
+						<ReferralLinksPage />
 					</TabsContent>
 					<TabsContent value="commissions">
 						<CommissionsTable dates={ dates } />

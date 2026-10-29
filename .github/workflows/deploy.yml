@@ -1,9 +1,8 @@
 # Publishes a tagged release to the WordPress.org plugin repository.
 #
-# DISABLED until the flyaffiliate slug is approved: every job is gated on the
-# repository variable WPORG_DEPLOY_ENABLED being the string "true". Set that
-# variable (and the SVN_USERNAME / SVN_PASSWORD secrets) only after approval.
-# See RELEASE.md for the manual first-submission steps.
+# Gated: every job runs only while the repository variable WPORG_DEPLOY_ENABLED
+# is the string "true". Set that variable (and the SVN_USERNAME / SVN_PASSWORD
+# secrets) once the first version is in the directory. See RELEASE.md.
 name: Deploy to WordPress.org
 
 on:
@@ -26,9 +25,10 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: '8.1'
           coverage: none
-          tools: composer:v2
+          # `npm run release` builds the translation template with WP-CLI.
+          tools: composer:v2, wp-cli
 
       - uses: actions/setup-node@v4
         with:

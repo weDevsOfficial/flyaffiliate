@@ -4,18 +4,14 @@
  * the card, so a row of them stays level.
  */
 import type { ReactNode } from 'react';
-import { Info, type LucideIcon } from 'lucide-react';
-import {
-	Card,
-	Skeleton,
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-	cn,
-} from '@wedevs/plugin-ui';
+import type { LucideIcon } from 'lucide-react';
+import { Card, Skeleton, cn } from '@wedevs/plugin-ui';
+import Hint from './Hint';
 
 type Props = {
 	icon: LucideIcon;
+	/** An image in the icon's place: a payout method's logo. */
+	image?: string;
 	label: string;
 	value: ReactNode;
 	/** What the figure means, behind an info icon beside the label, as on Dokan's report cards. */
@@ -25,11 +21,17 @@ type Props = {
 
 export default function StatCard( {
 	icon: Icon,
+	image,
 	label,
 	value,
 	tooltip,
 	className,
 }: Props ) {
+	// A figure (an amount, a count, a rate) takes Dokan's 30px; a name, a
+	// link or a list of methods reads at a calmer size, or a long one
+	// crowds the tile.
+	const isFigure = 'string' === typeof value || 'number' === typeof value;
+
 	return (
 		<Card
 			className={ cn(
@@ -37,31 +39,31 @@ export default function StatCard( {
 				className
 			) }
 		>
-			<div className="flex size-10 items-center justify-center rounded bg-primary/10 text-primary">
-				<Icon className="size-5" aria-hidden="true" />
+			{ /* Dokan's tile: a 40px box in a 5% tint of the brand, a 24px line icon. */ }
+			<div className="flex size-10 items-center justify-center rounded bg-primary/5 text-primary">
+				{ image ? (
+					<img
+						src={ image }
+						alt=""
+						aria-hidden="true"
+						className="size-6 object-contain"
+					/>
+				) : (
+					<Icon className="size-6" aria-hidden="true" />
+				) }
 			</div>
 			<div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
 				{ label }
-				{ tooltip && (
-					<Tooltip>
-						<TooltipTrigger
-							render={
-								<button
-									type="button"
-									className="inline-flex cursor-default text-muted-foreground"
-									aria-label={ tooltip }
-								/>
-							}
-						>
-							<Info className="size-3.5" aria-hidden="true" />
-						</TooltipTrigger>
-						<TooltipContent className="max-w-xs">
-							{ tooltip }
-						</TooltipContent>
-					</Tooltip>
-				) }
+				{ tooltip && <Hint text={ tooltip } /> }
 			</div>
-			<div className="-mt-1 whitespace-nowrap text-2xl font-bold leading-tight text-foreground tabular-nums">
+			<div
+				className={ cn(
+					'min-w-0 leading-tight text-foreground',
+					isFigure
+						? '-mt-1 whitespace-nowrap text-3xl font-bold tabular-nums'
+						: 'text-lg font-semibold'
+				) }
+			>
 				{ value }
 			</div>
 		</Card>

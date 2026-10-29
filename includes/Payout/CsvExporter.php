@@ -17,14 +17,14 @@ use FlyAffiliate\Models\Payout;
  * Streams a payout batch as CSV: one line per affiliate, with the fields a
  * bookkeeper needs to make the payment and reconcile it afterwards.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class CsvExporter {
 
 	/**
 	 * The column headings, in order.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[]
 	 */
@@ -47,14 +47,15 @@ class CsvExporter {
 	/**
 	 * The rows for a batch, as plain arrays.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts The batch.
 	 *
 	 * @return array<int, array<int, string>>
 	 */
 	public function get_rows( array $payouts ): array {
-		$rows = [];
+		$rows   = [];
+		$states = flyaffiliate()->payout_method->get_states( $payouts );
 
 		foreach ( $payouts as $payout ) {
 			$affiliate = flyaffiliate()->affiliate->get( (int) $payout->get( 'affiliate_id' ) );
@@ -65,7 +66,7 @@ class CsvExporter {
 					(string) $payout->get_id(),
 					(string) $payout->get( 'affiliate_id' ),
 					null === $affiliate ? '' : $affiliate->get_display_name(),
-					null === $affiliate ? '' : $affiliate->get_payment_email(),
+					flyaffiliate()->payout_method->get_payment_recipient( $payout, $affiliate, $states ),
 					number_format( (float) $payout->get( 'amount', 0 ), 2, '.', '' ),
 					(string) $payout->get( 'currency', '' ),
 					(string) count( $payout->get_commissions() ),
@@ -83,7 +84,7 @@ class CsvExporter {
 	/**
 	 * Send a batch to the browser as a CSV download and stop.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts   The batch.
 	 * @param string   $batch_key The batch key, for the file name.
@@ -99,8 +100,8 @@ class CsvExporter {
 
 		// A CSV download is streamed, not written to disk: WP_Filesystem has no
 		// stream API and buffering a large batch into a string to echo it is
-		// what this export exists to avoid. See docs/wporg-accepted-warnings.md.
-		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		// what this export exists to avoid.
+		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output is a stream; WP_Filesystem has no stream API.
 
 		fputcsv( $output, $this->get_headings() );
 
@@ -108,7 +109,7 @@ class CsvExporter {
 			fputcsv( $output, $row );
 		}
 
-		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closes the php://output stream opened above.
 
 		exit;
 	}
@@ -116,7 +117,7 @@ class CsvExporter {
 	/**
 	 * Neutralise a cell a spreadsheet would otherwise execute as a formula.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $value The cell.
 	 *

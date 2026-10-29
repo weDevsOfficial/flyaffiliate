@@ -20,14 +20,14 @@ use FlyAffiliate\Models\Visit;
  * work and lives in `Tracker`. This class is what the screens, the controllers
  * and the tracker itself write and read through.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager {
 
 	/**
 	 * Get a visit by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $visit_id Visit id.
 	 *
@@ -40,7 +40,7 @@ class Manager {
 	/**
 	 * Query visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::query()}.
 	 *
@@ -53,7 +53,7 @@ class Manager {
 	/**
 	 * Count visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::count()}.
 	 *
@@ -69,7 +69,7 @@ class Manager {
 	 * The IP address and user agent are hashed here, on the way in, so no caller
 	 * can store the raw values by mistake (ADR-0007).
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args {
 	 *     Visit data.
@@ -111,7 +111,7 @@ class Manager {
 	/**
 	 * Mark a visit as having led to an order.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $visit_id Visit id.
 	 * @param int $order_id The order.
@@ -134,7 +134,7 @@ class Manager {
 	/**
 	 * Row counts for the All / Converted / Not converted tabs.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args Query arguments applied to every count.
 	 *
@@ -148,47 +148,5 @@ class Manager {
 			'converted'     => $this->count( array_merge( $args, [ 'where' => array_merge( $where, [ 'converted' => 1 ] ) ] ) ),
 			'not_converted' => $this->count( array_merge( $args, [ 'where' => array_merge( $where, [ 'converted' => 0 ] ) ] ) ),
 		];
-	}
-
-	/**
-	 * The affiliate ids whose user matches a search term.
-	 *
-	 * Lets a visits list be filtered by affiliate name without joining the
-	 * users table into the model's query.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string $term The search term.
-	 *
-	 * @return int[] Affiliate ids. Empty when nothing matches, which callers turn into an empty result.
-	 */
-	public function find_affiliate_ids_by_user_search( string $term ): array {
-		$term = trim( $term );
-
-		if ( '' === $term ) {
-			return [];
-		}
-
-		$user_ids = get_users(
-			[
-				'search'         => '*' . $term . '*',
-				'search_columns' => [ 'user_login', 'user_email', 'display_name', 'user_nicename' ],
-				'fields'         => 'ID',
-				'number'         => 200,
-			]
-		);
-
-		if ( [] === $user_ids ) {
-			return [];
-		}
-
-		$affiliates = flyaffiliate()->affiliate->query(
-			[
-				'where'    => [ 'user_id' => array_map( 'intval', $user_ids ) ],
-				'per_page' => -1,
-			]
-		);
-
-		return array_map( static fn( $affiliate ) => $affiliate->get_id(), $affiliates );
 	}
 }

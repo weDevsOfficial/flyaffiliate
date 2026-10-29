@@ -22,7 +22,7 @@ use FlyAffiliate\Contracts\Hookable;
  * admin there once, and remember that the wizard was completed or dismissed
  * so it never redirects again.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class SetupWizard implements Hookable {
 
@@ -50,7 +50,7 @@ class SetupWizard implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -61,7 +61,7 @@ class SetupWizard implements Hookable {
 	/**
 	 * The URL of the wizard.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -72,7 +72,7 @@ class SetupWizard implements Hookable {
 	/**
 	 * Whether the wizard has been completed or dismissed.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -83,7 +83,7 @@ class SetupWizard implements Hookable {
 	/**
 	 * Record that the wizard is finished, so it never redirects again.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -95,11 +95,11 @@ class SetupWizard implements Hookable {
 	/**
 	 * Arm the one-time redirect.
 	 *
-	 * Called by the installer, not from a hook: activation runs the installer
+	 * Called by the installer on a first install only, not from a hook: activation runs the installer
 	 * after `init`, when the plugin's own listeners are not attached yet, so a
 	 * hook here would never fire on the activation that matters.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -114,12 +114,13 @@ class SetupWizard implements Hookable {
 	/**
 	 * Send the activating admin to the wizard, once.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
 	public function maybe_redirect(): void {
-		if ( ! get_transient( self::REDIRECT_TRANSIENT ) ) {
+		// The done flag is an autoloaded option; the transient is read only until setup is done.
+		if ( self::is_done() || ! get_transient( self::REDIRECT_TRANSIENT ) ) {
 			return;
 		}
 

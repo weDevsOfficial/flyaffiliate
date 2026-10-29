@@ -21,7 +21,7 @@ use FlyAffiliate\Payout\CsvExporter;
  * REST call cannot give it, so this is the one admin-post handler the React
  * app links to. The link carries a nonce the app reads from its script data.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class PayoutExport implements Hookable {
 
@@ -35,7 +35,7 @@ class PayoutExport implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -46,7 +46,7 @@ class PayoutExport implements Hookable {
 	/**
 	 * The download URL of a batch, nonce included.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $batch_key The batch. Empty yields a base URL the app appends the key to.
 	 *
@@ -68,7 +68,7 @@ class PayoutExport implements Hookable {
 	/**
 	 * Verify the request and stream the file.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

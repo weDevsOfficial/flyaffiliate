@@ -21,7 +21,7 @@ use WP_REST_Server;
 /**
  * `flyaffiliate/v1/visits` — read-only.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class VisitsController extends AdminBaseController {
 
@@ -35,7 +35,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * Register the routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -78,7 +78,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * List visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -125,7 +125,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * Get one visit.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -142,7 +142,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * Turn a visit into a response. Hashes are not exposed.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Visit           $item    The visit.
 	 * @param WP_REST_Request $request The request.
@@ -158,7 +158,8 @@ class VisitsController extends AdminBaseController {
 			'referrer'     => (string) $item->get( 'referrer', '' ),
 			'converted'    => $item->is_converted(),
 			'order_id'     => (int) $item->get( 'order_id', 0 ) > 0 ? (int) $item->get( 'order_id' ) : null,
-			'created_at'   => empty( $item->get( 'created_at' ) ) ? null : mysql_to_rfc3339( (string) $item->get( 'created_at' ) ),
+			'order_url'    => $this->get_order_url( (int) $item->get( 'order_id', 0 ) ),
+			'created_at'   => $this->prepare_date( $item->get( 'created_at' ) ),
 		];
 
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );
@@ -167,9 +168,31 @@ class VisitsController extends AdminBaseController {
 	}
 
 	/**
+	 * The admin URL of the visit's order, when that order exists.
+	 *
+	 * An order deleted since the visit converted, or a seeded id, is shown as a
+	 * number, not a link.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $order_id The order id; 0 for none.
+	 *
+	 * @return string|null
+	 */
+	protected function get_order_url( int $order_id ): ?string {
+		if ( $order_id <= 0 || ! function_exists( 'wc_get_order' ) ) {
+			return null;
+		}
+
+		$order = wc_get_order( $order_id );
+
+		return $order instanceof \WC_Order ? $order->get_edit_order_url() : null;
+	}
+
+	/**
 	 * The links for one visit.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Visit $item The visit.
 	 *
@@ -189,7 +212,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -246,6 +269,12 @@ class VisitsController extends AdminBaseController {
 					'context' => [ 'view', 'edit' ],
 					'readonly' => true,
 				],
+				'order_url'    => [
+					'description' => __( 'The admin URL of that order, when it exists.', 'flyaffiliate' ),
+					'type' => [ 'string', 'null' ],
+					'context' => [ 'view', 'edit' ],
+					'readonly' => true,
+				],
 				'created_at'   => [
 					'description' => __( 'When the link was clicked, in GMT.', 'flyaffiliate' ),
 					'type' => [ 'string', 'null' ],
@@ -262,7 +291,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

@@ -22,14 +22,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * constructor, which runs during container resolution at a moment the class does
  * not control.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 interface Hookable {
 
 	/**
 	 * Attach this class's WordPress hooks.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
