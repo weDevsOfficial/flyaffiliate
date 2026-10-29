@@ -32,7 +32,6 @@ import {
 	X,
 } from 'lucide-react';
 import {
-	Button,
 	Card,
 	ChartContainer,
 	ChartTooltip,
@@ -48,6 +47,7 @@ import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
+	cn,
 	recharts,
 	toast,
 	type DataViewField,
@@ -548,12 +548,14 @@ export default function DashboardPage() {
 							placeholder={ __( 'Pick dates', 'flyaffiliate' ) }
 							confirmLabel={ __( 'Apply', 'flyaffiliate' ) }
 							cancelLabel={ __( 'Cancel', 'flyaffiliate' ) }
+							// The picker's own trigger is the button; a Button here would nest one inside it.
 							trigger={ ( { open } ) => (
-								<Button
-									variant="outline"
-									size="icon"
-									className="size-9 shrink-0 border-input bg-background text-foreground shadow-xs hover:border-primary hover:bg-primary hover:text-primary-foreground aria-expanded:border-primary aria-expanded:bg-primary aria-expanded:text-primary-foreground"
-									aria-expanded={ open }
+								<span
+									className={ cn(
+										'inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-input bg-background text-foreground shadow-xs transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground',
+										open &&
+											'border-primary bg-primary text-primary-foreground'
+									) }
 									aria-label={ __(
 										'Pick a date range',
 										'flyaffiliate'
@@ -564,7 +566,7 @@ export default function DashboardPage() {
 										className="size-4"
 										aria-hidden="true"
 									/>
-								</Button>
+								</span>
 							) }
 						/>
 					</div>

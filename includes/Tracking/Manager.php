@@ -149,46 +149,4 @@ class Manager {
 			'not_converted' => $this->count( array_merge( $args, [ 'where' => array_merge( $where, [ 'converted' => 0 ] ) ] ) ),
 		];
 	}
-
-	/**
-	 * The affiliate ids whose user matches a search term.
-	 *
-	 * Lets a visits list be filtered by affiliate name without joining the
-	 * users table into the model's query.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string $term The search term.
-	 *
-	 * @return int[] Affiliate ids. Empty when nothing matches, which callers turn into an empty result.
-	 */
-	public function find_affiliate_ids_by_user_search( string $term ): array {
-		$term = trim( $term );
-
-		if ( '' === $term ) {
-			return [];
-		}
-
-		$user_ids = get_users(
-			[
-				'search'         => '*' . $term . '*',
-				'search_columns' => [ 'user_login', 'user_email', 'display_name', 'user_nicename' ],
-				'fields'         => 'ID',
-				'number'         => 200,
-			]
-		);
-
-		if ( [] === $user_ids ) {
-			return [];
-		}
-
-		$affiliates = flyaffiliate()->affiliate->query(
-			[
-				'where'    => [ 'user_id' => array_map( 'intval', $user_ids ) ],
-				'per_page' => -1,
-			]
-		);
-
-		return array_map( static fn( $affiliate ) => $affiliate->get_id(), $affiliates );
-	}
 }

@@ -54,7 +54,9 @@ not in the status lifecycle SliceWP already defines.
    count as paid, cash on delivery waits for `completed`) moves to
    `OrderStatusSync::order_is_paid()`, behind the
    `flyaffiliate_paid_order_statuses` filter, so nothing under
-   `Commission\` references WooCommerce any more.
+   `Commission\` references WooCommerce any more, beyond the two calls ADR-0013
+   allows behind `function_exists()`: the product rate in `RateResolver` and
+   the order check in `Manager::check_reference()`.
 5. **A hand-entered commission keeps the status it is given**, as before and as
    in SliceWP. A manual-origin row is never moved by an order. A WooCommerce-
    origin row entered by hand follows its order like an attributed one.

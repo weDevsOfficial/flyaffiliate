@@ -18,8 +18,8 @@ use FlyAffiliate\Install\Installer;
  * Decides whether the installed schema is behind the code, and runs the
  * upgraders that close the gap.
  *
- * An upgrader is a class under `Upgrade\Upgrades` keyed by the schema version it
- * brings the site **to**. They run in version order, each exactly once, and the
+ * An upgrader is a class the `flyaffiliate_upgraders` filter lists, keyed by the
+ * schema version it brings the site **to**. They run in version order, each exactly once, and the
  * stored version is only advanced after the whole set succeeds — a run that dies
  * halfway is retried on the next request rather than skipped.
  *

@@ -102,15 +102,6 @@ class AffiliatesController extends AdminBaseController {
 	}
 
 	/**
-	 * List affiliates.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param WP_REST_Request $request The request.
-	 *
-	 * @return WP_REST_Response
-	 */
-	/**
 	 * Commission totals for the affiliates in the collection being prepared.
 	 *
 	 * Filled once per collection request so the list does not run a grouped
@@ -122,6 +113,15 @@ class AffiliatesController extends AdminBaseController {
 	 */
 	protected array $list_totals = [];
 
+	/**
+	 * List affiliates.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return WP_REST_Response
+	 */
 	public function get_items( $request ) {
 		$per_page = (int) $request['per_page'];
 		$where    = [];
@@ -287,43 +287,14 @@ class AffiliatesController extends AdminBaseController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	/**
-	 * The WordPress username behind an affiliate.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param int $user_id The user id.
-	 *
-	 * @return string The login, or an empty string when the user is gone.
-	 */
-	protected function get_user_login( int $user_id ): string {
-		$user = $user_id > 0 ? get_userdata( $user_id ) : false;
-
-		return $user instanceof \WP_User ? $user->user_login : '';
-	}
-
-	/**
-	 * The account email behind an affiliate.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param int $user_id The user.
-	 *
-	 * @return string The email, or an empty string when the user is gone.
-	 */
-	protected function get_user_email( int $user_id ): string {
-		$user = $user_id > 0 ? get_userdata( $user_id ) : false;
-
-		return $user instanceof \WP_User ? $user->user_email : '';
-	}
-
 	public function prepare_item_for_response( $item, $request ) {
+		$user = $item->get_user();
 		$data = [
 			'id'            => $item->get_id(),
 			'user_id'       => (int) $item->get( 'user_id' ),
 			'name'          => $item->get_display_name(),
-			'user_login'    => $this->get_user_login( (int) $item->get( 'user_id' ) ),
-			'email'         => $this->get_user_email( (int) $item->get( 'user_id' ) ),
+			'user_login'    => null === $user ? '' : $user->user_login,
+			'email'         => null === $user ? '' : $user->user_email,
 			'status'        => (string) $item->get( 'status' ),
 			'payment_email' => $item->get_payment_email(),
 			'payout_method' => $item->get_payout_method(),
@@ -666,22 +637,5 @@ class AffiliatesController extends AdminBaseController {
 			__( 'No affiliate with that ID.', 'flyaffiliate' ),
 			[ 'status' => 404 ]
 		);
-	}
-
-	/**
-	 * Format a stored datetime as RFC3339 for the response.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string|null $value Stored `Y-m-d H:i:s` value, in GMT.
-	 *
-	 * @return string|null
-	 */
-	protected function prepare_date( $value ): ?string {
-		if ( empty( $value ) ) {
-			return null;
-		}
-
-		return mysql_to_rfc3339( (string) $value );
 	}
 }

@@ -25,6 +25,7 @@ import {
 	toast,
 } from '@wedevs/plugin-ui';
 import FormDialog from '@/components/FormDialog';
+import Required from '@/components/Required';
 import UserPicker from '@/components/UserPicker';
 import { errorMessage, send } from '@/lib/api';
 import { formatDate } from '@/lib/format';
@@ -37,14 +38,6 @@ type Props = {
 	affiliate?: Affiliate | null;
 	onSaved: ( affiliate: Affiliate ) => void;
 };
-
-function Required() {
-	return (
-		<span className="text-destructive" aria-hidden="true">
-			*
-		</span>
-	);
-}
 
 /**
  * A fact about the affiliate that the form shows but does not change.

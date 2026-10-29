@@ -21,7 +21,7 @@ import type { Payout } from '@/lib/types';
  * @param {boolean} forAffiliate The affiliate's view: no admin states (not sent, method gone).
  * @return {string} A status key, labelled by `statuses.transfer` or the payment statuses.
  */
-export function paymentState( item: Payout, forAffiliate = false ): string {
+function paymentState( item: Payout, forAffiliate = false ): string {
 	if ( item.status === 'paid' ) {
 		return 'paid';
 	}

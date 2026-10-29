@@ -1,8 +1,8 @@
 # Accepted Plugin Check findings
 
 The gate for every release is **0 errors, 0 warnings** from
-`npm run plugin-check` on the built zip. This file is the complete list of
-findings that are allowed to remain, with the reason and the exact suppression.
+`npm run plugin-check` on the built zip. This file lists the findings that are
+allowed to remain, with the reason and the exact suppression.
 
 A finding may only be added here when all three are true:
 
@@ -18,8 +18,13 @@ Anything else is a bug to fix, not a warning to accept.
 
 Plugin Check reports **0 errors and 0 warnings** on the built zip. The entries
 below are the suppressions that keep it there — each one a single-line
-`phpcs:ignore` with its reason in the comment, and each one on a query against a
-table this plugin created itself.
+`phpcs:ignore` with its reason in the comment, most of them on a query against a
+table this plugin created itself. Every other `phpcs:ignore` in the code (a
+nonce check on a read-only query parameter, and the like) carries its reason
+inline the same way. `phpcs.xml.dist` turns `DirectQuery` and `NoCaching` off
+for the repository's own PHPCS run, because every direct query here is on the
+plugin's own tables; Plugin Check runs them regardless, which is what the
+inline suppressions are for.
 
 ### Custom-table queries — `includes/Models/BaseModel.php`
 
@@ -59,3 +64,9 @@ table this plugin created itself.
 | Lines | Checks | Why it stands |
 |---|---|---|
 | `apply_filters( $element['hook_key'], … )` | `WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound` | The hook name is dynamic by design — one filter per structural node, so an extension can inject fields under exactly one section — but `generate_keys()` builds every key as `flyaffiliate_settings_{path}_children`, so the prefix rule is met; the sniff just cannot see it through the variable. |
+
+### WooCommerce Analytics — `includes/Integrations/WooCommerce/Analytics.php`
+
+| Lines | Checks | Why it stands |
+|---|---|---|
+| `apply_filters( 'woocommerce_analytics_excluded_order_statuses', … )` | `WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound` | The box on WooCommerce → Analytics counts the orders the report counts, so it leaves out the statuses the report leaves out: the ones picked in WooCommerce's settings plus whatever WooCommerce's own filter adds (its checkout-draft status, for one). WooCommerce applies that filter from a protected method, so the only way to read the same list is to apply its filter. The plugin declares no hook of its own without the `flyaffiliate_` prefix. |

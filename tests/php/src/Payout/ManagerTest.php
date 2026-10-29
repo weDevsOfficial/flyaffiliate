@@ -239,6 +239,31 @@ class ManagerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * A commission rejected inside an unpaid payment already left its amount; taking
+	 * it out afterwards does not subtract it a second time: the payment re-sums to
+	 * the unpaid rows it still holds (money rule 7).
+	 *
+	 * @return void
+	 */
+	public function test_removing_a_rejected_commission_does_not_count_it_twice(): void {
+		$affiliate = $this->factory()->affiliate->create();
+		$c1        = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 10, 'status' => Commission::STATUS_UNPAID ] );
+		$c2        = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 5, 'status' => Commission::STATUS_UNPAID ] );
+		$payout_id = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0]->get_id();
+
+		// The admin rejects a row the payment counts; the payment follows at once.
+		$this->assertNotWPError( flyaffiliate()->commission->set_status( $c2, Commission::STATUS_REJECTED ) );
+		$this->assertCentsEquals( 1000, flyaffiliate()->payout->get( $payout_id )->get( 'amount' ) );
+
+		$payout = flyaffiliate()->payout->remove_commission( $payout_id, $c2 );
+
+		$this->assertInstanceOf( Payout::class, $payout );
+		$this->assertCentsEquals( 1000, $payout->get( 'amount' ), 'still the one unpaid row it holds' );
+		$this->assertSame( 0, (int) flyaffiliate()->commission->get( $c2 )->get( 'payout_id' ) );
+		$this->assertSame( $payout_id, (int) flyaffiliate()->commission->get( $c1 )->get( 'payout_id' ) );
+	}
+
+	/**
 	 * Deleting an unpaid payment detaches its commissions; a paid one, or a batch with a paid
 	 * payment, cannot be deleted.
 	 *
@@ -377,10 +402,8 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$payout = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0];
 
-		/*
-		 * A row rejected while the payment waited: the lock keeps this from
-		 * happening now, and rows written before it must not be paid either.
-		 */
+		// A row rejected while the payment waited: the lock keeps this from
+		// happening now, and rows written before it must not be paid either.
 		$rejected = flyaffiliate()->commission->get( $dead );
 		$rejected->set( 'status', Commission::STATUS_REJECTED );
 		$rejected->save();

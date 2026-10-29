@@ -35,11 +35,9 @@ if ( ! file_exists( $entry_file ) ) {
 	exit( 1 );
 }
 
-/*
- * The version from the plugin header. New code is documented with the literal
- * `@since FLYAFFILIATE_SINCE`; the zip is where it becomes the version it
- * first shipped in, so a docblock in the repository never guesses one.
- */
+// The version from the plugin header. New code is documented with the literal
+// `@since FLYAFFILIATE_SINCE`; the zip is where it becomes the version it
+// first shipped in, so a docblock in the repository never guesses one.
 preg_match( '/^\s*\*\s*Version:\s*(\S+)/m', (string) file_get_contents( $entry_file ), $version_match );
 $version = $version_match[1] ?? '';
 
@@ -211,12 +209,10 @@ foreach ( $iterator as $file ) {
 
 flyaffiliate_prune_empty_dirs( $stage_dir );
 
-/*
- * A production vendor/ for the zip: Composer's autoloader and nothing else,
- * since the plugin has no runtime packages. The local vendor/ (with the dev
- * tools) is never copied; Composer builds a fresh one inside the stage, the
- * way Dokan's bin/zip.js does.
- */
+// A production vendor/ for the zip: Composer's autoloader and nothing else,
+// since the plugin has no runtime packages. The local vendor/ (with the dev
+// tools) is never copied; Composer builds a fresh one inside the stage, the
+// way Dokan's bin/zip.js does.
 foreach ( [ 'composer.json', 'composer.lock' ] as $composer_file ) {
 	if ( file_exists( $root . '/' . $composer_file ) ) {
 		copy( $root . '/' . $composer_file, $stage_dir . '/' . $composer_file );

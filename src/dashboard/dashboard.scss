@@ -5,28 +5,24 @@
  */
 @use "../styles/base";
 
-/*
- * WordPress's toolbar moves the page down with a margin on <html>, which
- * the popups (tooltips, menus) measure from the wrong origin: they open
- * 32px above their trigger. Placing them from <body> puts them back.
- */
+// WordPress's toolbar moves the page down with a margin on <html>, which
+// the popups (tooltips, menus) measure from the wrong origin: they open
+// 32px above their trigger. Placing them from <body> puts them back.
 body.admin-bar:has(.flyaffiliate-dashboard-app) {
 	position: relative;
 }
 
-/*
- * Themes lift their header over the page (Storefront's sits at z-index
- * 999), and plugin-ui's dialogs and popups stack at 50, so a payout's
- * dialog opened near the top hid its title under the header. Each popup
- * is portalled to <body>; stacking the portal itself puts the backdrop
- * and the dialog over the theme and under WordPress's toolbar (99999).
- */
+// Themes lift their header over the page (Storefront's sits at z-index
+// 999), and plugin-ui's dialogs and popups stack at 50, so a payout's
+// dialog opened near the top hid its title under the header. Each popup
+// is portalled to <body>; stacking the portal itself puts the backdrop
+// and the dialog over the theme and under WordPress's toolbar (99999).
 body:has(.flyaffiliate-dashboard-app) > [data-slot$="portal"] {
 	position: relative;
 	z-index: 99990;
 }
 
-/* The mount point, before and after React takes over. */
+// The mount point, before and after React takes over.
 .flyaffiliate-dashboard-app {
 	min-height: 200px;
 
@@ -35,26 +31,22 @@ body:has(.flyaffiliate-dashboard-app) > [data-slot$="portal"] {
 		color: #6b7280;
 	}
 
-	/* On a white theme background the shadow alone does not draw the box. */
+	// On a white theme background the shadow alone does not draw the box.
 	.pui-root-dataviews {
 		border: 1px solid var(--border);
 	}
 
-	/*
-	 * A theme's content column is narrower than wp-admin: DataViews' 15ch
-	 * column floor would push the last columns past the card's edge, under
-	 * the row menu. The columns share the width the view gives them.
-	 */
+	// A theme's content column is narrower than wp-admin: DataViews' 15ch
+	// column floor would push the last columns past the card's edge, under
+	// the row menu. The columns share the width the view gives them.
 	/* stylelint-disable-next-line selector-class-pattern -- WordPress DataViews' own class. */
 	.dataviews-view-table__cell-content-wrapper {
 		min-width: 0;
 	}
 
-	/*
-	 * Themes style every table, link and heading. The app's own elements sit
-	 * under `.pui-root`, which the shared reset covers; the few that reach
-	 * further are pinned here.
-	 */
+	// Themes style every table, link and heading. The app's own elements sit
+	// under `.pui-root`, which the shared reset covers; the few that reach
+	// further are pinned here.
 	.pui-root {
 
 		table {
@@ -70,18 +62,16 @@ body:has(.flyaffiliate-dashboard-app) > [data-slot$="portal"] {
 			color: inherit;
 		}
 
-		/* A link drawn as a button keeps the button's look, not the theme's underline. */
+		// A link drawn as a button keeps the button's look, not the theme's underline.
 		a[data-slot="button"] {
 			text-decoration: none;
 		}
 	}
 }
 
-/*
- * The commissions inside a payout sit in their own bordered box inside the
- * dialog, so the list drops the card it would otherwise draw: its rounded
- * corners and shadow would read as a second edge inside that box.
- */
+// The commissions inside a payout sit in their own bordered box inside the
+// dialog, so the list drops the card it would otherwise draw: its rounded
+// corners and shadow would read as a second edge inside that box.
 /* stylelint-disable selector-class-pattern -- plugin-ui's own classes. */
 .flyaffiliate-payout-commissions {
 
@@ -91,10 +81,8 @@ body:has(.flyaffiliate-dashboard-app) > [data-slot$="portal"] {
 		box-shadow: none;
 	}
 
-	/*
-	 * DataViews' 15ch column floor would push the last column past the edge,
-	 * so the columns share the width the view gives them.
-	 */
+	// DataViews' 15ch column floor would push the last column past the edge,
+	// so the columns share the width the view gives them.
 	.dataviews-view-table__cell-content-wrapper {
 		min-width: 0;
 	}

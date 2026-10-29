@@ -381,7 +381,7 @@ if ( ! function_exists( 'flyaffiliate_get_pro_upgrade_url' ) ) {
 	 * Where Upgrade to FlyAffiliate Pro leads: here, and on Pro's Extensions
 	 * page while its license is not active.
 	 *
-	 * TODO(upgrade): FlyAffiliate Pro's pricing page, once it is published.
+	 * FlyAffiliate's site until Pro's pricing page is published.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *

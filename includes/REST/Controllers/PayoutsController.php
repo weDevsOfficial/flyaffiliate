@@ -468,7 +468,7 @@ class PayoutsController extends AdminBaseController {
 	 * @return array
 	 */
 	protected function prepare_summary( array $summary ): array {
-		$summary['created_at'] = empty( $summary['created_at'] ) ? null : mysql_to_rfc3339( (string) $summary['created_at'] );
+		$summary['created_at'] = $this->prepare_date( $summary['created_at'] );
 		$summary['methods']    = array_map(
 			static fn( string $id ) => [
 				'id'    => $id,
@@ -685,15 +685,7 @@ class PayoutsController extends AdminBaseController {
 	 * @return string
 	 */
 	protected function get_payment_recipient( Payout $payout, array $states ): string {
-		static $affiliates = [];
-
-		$id = (int) $payout->get( 'affiliate_id' );
-
-		if ( ! array_key_exists( $id, $affiliates ) ) {
-			$affiliates[ $id ] = Affiliate::find( $id );
-		}
-
-		return flyaffiliate()->payout_method->get_payment_recipient( $payout, $affiliates[ $id ], $states );
+		return flyaffiliate()->payout_method->get_payment_recipient( $payout, $this->get_affiliate( (int) $payout->get( 'affiliate_id' ) ), $states );
 	}
 
 	/**
@@ -726,11 +718,11 @@ class PayoutsController extends AdminBaseController {
 			'can_retry'    => flyaffiliate()->payout_method->can_retry( $item, $states ),
 			'reference'    => (string) $item->get( 'reference', '' ),
 			'note'         => (string) $item->get( 'note', '' ),
-			'period_start' => empty( $item->get( 'period_start' ) ) ? null : mysql_to_rfc3339( (string) $item->get( 'period_start' ) ),
-			'period_end'   => empty( $item->get( 'period_end' ) ) ? null : mysql_to_rfc3339( (string) $item->get( 'period_end' ) ),
+			'period_start' => $this->prepare_date( $item->get( 'period_start' ) ),
+			'period_end'   => $this->prepare_date( $item->get( 'period_end' ) ),
 			'created_by'   => (int) $item->get( 'created_by', 0 ),
-			'created_at'   => empty( $item->get( 'created_at' ) ) ? null : mysql_to_rfc3339( (string) $item->get( 'created_at' ) ),
-			'paid_at'      => empty( $item->get( 'paid_at' ) ) ? null : mysql_to_rfc3339( (string) $item->get( 'paid_at' ) ),
+			'created_at'   => $this->prepare_date( $item->get( 'created_at' ) ),
+			'paid_at'      => $this->prepare_date( $item->get( 'paid_at' ) ),
 			'commissions'  => array_map( static fn( $commission ) => $commission->get_id(), $item->get_commissions() ),
 		];
 

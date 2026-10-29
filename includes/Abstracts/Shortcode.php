@@ -37,17 +37,6 @@ abstract class Shortcode {
 	}
 
 	/**
-	 * The shortcode tag.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return string
-	 */
-	public function get_tag(): string {
-		return $this->tag;
-	}
-
-	/**
 	 * Render the shortcode.
 	 *
 	 * @since FLYAFFILIATE_SINCE

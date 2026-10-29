@@ -63,7 +63,7 @@ composer phpcbf             # Auto-fix code style
 composer test               # PHPUnit (needs a provisioned WP test install or wp-env)
 composer test-f <filter>    # PHPUnit with --filter
 
-# Assets (Phase 1 admin is PHP-rendered; the build pipeline exists for later React work)
+# Assets (the two React apps, and the plain front-end stylesheet)
 npm run start               # Dev build with watch
 npm run build               # Production build
 npm run lint:js / lint:css
@@ -108,23 +108,24 @@ flyaffiliate/
 ├── readme.txt
 ├── includes/                      # PHP backend, PSR-4 root for FlyAffiliate\
 │   ├── Abstracts/                 # Shortcode, PayoutMethod (safe defaults + the affiliate-details store)
-│   ├── Admin/                     # Menu (hash routes), PayoutExport, Settings/{Schema,Repository,Manager}, Notices, SetupWizard, UserProfile
+│   ├── Admin/                     # Menu (hash routes), Dashboard/Stats, Notices/, PayoutExport, ProExtensions, Settings/{Schema,Repository,Manager}, SetupWizard, UserProfile
 │   ├── Affiliate/                 # Manager, Registration, Role (the flyaffiliate_affiliate user role)
-│   ├── Commission/                # Manager, Commission model, Calculator, RateResolver, Hooks
+│   ├── CLI/                       # Seeder (`wp flyaffiliate seed`)
+│   ├── Commission/                # Manager, RateResolver
 │   ├── Contracts/                 # Hookable, PayoutMethod
 │   ├── DependencyManagement/      # Container, Definition, BaseServiceProvider, Providers/
-│   ├── Frontend/                  # Shortcodes, AffiliateDashboard, Hooks
+│   ├── Frontend/                  # Shortcodes, AffiliateDashboard, RegistrationForm
 │   ├── Install/                   # Installer (dbDelta, pages, options, cron)
 │   ├── Integrations/
-│   │   └── WooCommerce/           # OrderAttribution (checkout), OrderStatusSync, HPOS-safe helpers
-│   ├── Models/                    # BaseModel + data stores over the custom tables
-│   ├── Payout/                    # Manager, Payout model, CsvExporter
+│   │   └── WooCommerce/           # Integration (the announcement), OrderAttribution (checkout), OrderStatusSync, Analytics
+│   ├── Models/                    # BaseModel + Affiliate, Commission, Visit, Payout, ReferralLink over the custom tables
+│   ├── Payout/                    # Manager, CsvExporter
 │   ├── PayoutMethod/              # Manager (the `flyaffiliate_payout_methods` registry, locks), Manual
 │   ├── ReferralLink/              # Manager: the affiliate's saved referral links and their visit counts
 │   ├── REST/                      # Manager, BaseController, AdminBaseController, controllers
-│   ├── Tracking/                  # Tracker (query var → cookie), Visit model, Hooks
-│   ├── Upgrade/                   # Manager + Upgrades/ versioned upgraders
-│   ├── Utilities/
+│   ├── Tracking/                  # Tracker (query var → cookie), Manager (visits)
+│   ├── Upgrade/                   # Manager: the versioned upgraders run from here
+│   ├── Utilities/                 # Money
 │   ├── Assets.php
 │   ├── Tracker.php                # Appsero Insights, opt-in, as Dokan Lite's Tracker (ADR-0018)
 │   └── functions.php              # flyaffiliate_get_option(), flyaffiliate_get_template_part(), helpers

@@ -19,18 +19,21 @@ use FlyAffiliate\Tracker;
 class TrackerTest extends FlyAffiliateTestCase {
 
 	/**
-	 * The SDK's options and event, named after the plugin's directory.
+	 * The SDK's opt-in option, named after the plugin's directory.
+	 *
+	 * The directory is `flyaffiliate` on a site and `flyaffiliate-src` in
+	 * wp-env's tests environment, so the name is read, not written out.
 	 *
 	 * @var string
 	 */
-	const ALLOW_OPTION = 'flyaffiliate_allow_tracking';
+	protected string $allow_option;
 
 	/**
-	 * The weekly send.
+	 * The weekly send, named after the plugin's directory as well.
 	 *
 	 * @var string
 	 */
-	const SEND_EVENT = 'flyaffiliate_tracker_send_event';
+	protected string $send_event;
 
 	/**
 	 * The URLs requested during the test, with their bodies.
@@ -47,11 +50,16 @@ class TrackerTest extends FlyAffiliateTestCase {
 	public function set_up() {
 		parent::set_up();
 
-		foreach ( [ self::ALLOW_OPTION, 'flyaffiliate_tracking_notice', 'flyaffiliate_tracking_last_send', 'flyaffiliate_tracking_skipped' ] as $option ) {
+		$slug = dirname( plugin_basename( FLYAFFILIATE_FILE ) );
+
+		$this->allow_option = $slug . '_allow_tracking';
+		$this->send_event   = $slug . '_tracker_send_event';
+
+		foreach ( [ $this->allow_option, $slug . '_tracking_notice', $slug . '_tracking_last_send', $slug . '_tracking_skipped' ] as $option ) {
 			delete_option( $option );
 		}
 
-		wp_clear_scheduled_hook( self::SEND_EVENT );
+		wp_clear_scheduled_hook( $this->send_event );
 
 		$this->requests = [];
 		add_filter( 'pre_http_request', [ $this, 'record_request' ], 10, 3 );
@@ -64,7 +72,7 @@ class TrackerTest extends FlyAffiliateTestCase {
 	 */
 	public function tear_down() {
 		remove_filter( 'pre_http_request', [ $this, 'record_request' ] );
-		wp_clear_scheduled_hook( self::SEND_EVENT );
+		wp_clear_scheduled_hook( $this->send_event );
 
 		parent::tear_down();
 	}
@@ -128,9 +136,9 @@ class TrackerTest extends FlyAffiliateTestCase {
 	public function test_nothing_is_sent_until_allowed(): void {
 		$this->assertFalse( $this->tracker()->is_allowed() );
 
-		do_action( self::SEND_EVENT );
+		do_action( $this->send_event );
 
-		$this->assertFalse( wp_next_scheduled( self::SEND_EVENT ) );
+		$this->assertFalse( wp_next_scheduled( $this->send_event ) );
 		$this->assertSame( [], $this->requests );
 	}
 
@@ -147,7 +155,7 @@ class TrackerTest extends FlyAffiliateTestCase {
 		$this->tracker()->optin();
 
 		$this->assertTrue( $this->tracker()->is_allowed() );
-		$this->assertNotFalse( wp_next_scheduled( self::SEND_EVENT ) );
+		$this->assertNotFalse( wp_next_scheduled( $this->send_event ) );
 
 		$sent = $this->appsero_requests( 'track' );
 
@@ -171,7 +179,7 @@ class TrackerTest extends FlyAffiliateTestCase {
 		$this->tracker()->optout();
 
 		$this->assertFalse( $this->tracker()->is_allowed() );
-		$this->assertFalse( wp_next_scheduled( self::SEND_EVENT ) );
+		$this->assertFalse( wp_next_scheduled( $this->send_event ) );
 		$this->assertSame( [], $this->appsero_requests( 'track' ) );
 
 		$skipped = $this->appsero_requests( 'tracking-skipped' );
@@ -189,14 +197,14 @@ class TrackerTest extends FlyAffiliateTestCase {
 	public function test_activation_resumes_only_an_allowed_send(): void {
 		flyaffiliate()->activate();
 
-		$this->assertFalse( wp_next_scheduled( self::SEND_EVENT ) );
+		$this->assertFalse( wp_next_scheduled( $this->send_event ) );
 		$this->assertSame( [], $this->appsero_requests( 'track' ) );
 
-		update_option( self::ALLOW_OPTION, 'yes' );
+		update_option( $this->allow_option, 'yes' );
 
 		flyaffiliate()->activate();
 
-		$this->assertNotFalse( wp_next_scheduled( self::SEND_EVENT ) );
+		$this->assertNotFalse( wp_next_scheduled( $this->send_event ) );
 		$this->assertCount( 1, $this->appsero_requests( 'track' ) );
 	}
 

@@ -42,13 +42,6 @@ class ReferralLinksController extends AdminBaseController {
 	protected array $stats = [];
 
 	/**
-	 * The affiliates of the links being prepared, keyed by id; null when deleted.
-	 *
-	 * @var array<int, Affiliate|null>
-	 */
-	protected array $affiliates = [];
-
-	/**
 	 * Register the routes.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -180,12 +173,7 @@ class ReferralLinksController extends AdminBaseController {
 		}
 
 		$affiliate_id = (int) $item->get( 'affiliate_id' );
-
-		if ( ! array_key_exists( $affiliate_id, $this->affiliates ) ) {
-			$this->affiliates[ $affiliate_id ] = Affiliate::find( $affiliate_id );
-		}
-
-		$affiliate = $this->affiliates[ $affiliate_id ];
+		$affiliate    = $this->get_affiliate( $affiliate_id );
 		$url       = (string) $item->get( 'url', '' );
 		$stats     = $this->stats[ $item->get_id() ];
 
@@ -198,8 +186,8 @@ class ReferralLinksController extends AdminBaseController {
 			'referral_url'   => null === $affiliate ? '' : $affiliate->get_referral_url( $url ),
 			'visits'         => $stats['visits'],
 			'conversions'    => $stats['conversions'],
-			'last_visit_at'  => null === $stats['last_visit_at'] ? null : mysql_to_rfc3339( $stats['last_visit_at'] ),
-			'created_at'     => empty( $item->get( 'created_at' ) ) ? null : mysql_to_rfc3339( (string) $item->get( 'created_at' ) ),
+			'last_visit_at'  => $this->prepare_date( $stats['last_visit_at'] ),
+			'created_at'     => $this->prepare_date( $item->get( 'created_at' ) ),
 		];
 
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );

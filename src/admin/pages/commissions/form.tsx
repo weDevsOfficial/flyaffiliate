@@ -48,6 +48,7 @@ import {
 	toast,
 } from '@wedevs/plugin-ui';
 import AffiliatePicker from '@/components/AffiliatePicker';
+import Required from '@/components/Required';
 import EmptyState from '@/components/EmptyState';
 import Hint from '@/components/Hint';
 import NoticeCard from '@/components/NoticeCard';
@@ -108,14 +109,6 @@ function dayToDate( day: string ): Date | undefined {
 	const [ y, m, d ] = day.split( '-' ).map( Number );
 
 	return y && m && d ? new Date( y, m - 1, d, 12 ) : undefined;
-}
-
-function Required() {
-	return (
-		<span className="text-destructive" aria-hidden="true">
-			*
-		</span>
-	);
 }
 
 /**

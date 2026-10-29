@@ -331,7 +331,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$by_hand = $this->factory()->commission->create_and_get_model( [ 'status' => Commission::STATUS_PAID, 'source' => Commission::SOURCE_MANUAL, 'amount' => 20 ] );
 
-		$this->assertFalse( $by_hand->is_locked(), 'a paid row recorded outside any payment is held by nothing' );
+		$this->assertFalse( $by_hand->is_in_payout(), 'a paid row recorded outside any payment is held by nothing' );
 		$this->assertTrue( $manager->delete( $by_hand->get_id() ) );
 	}
 
@@ -441,25 +441,5 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$this->assertEqualsWithDelta( $single['paid'], $totals[ $a ]['paid'], 0.0001 );
 		$this->assertEqualsWithDelta( $single['unpaid'], $totals[ $a ]['unpaid'], 0.0001 );
 		$this->assertSame( $single['count'], $totals[ $a ]['count'] );
-	}
-
-	/**
-	 * Sums by affiliate honour the status filter.
-	 *
-	 * @return void
-	 */
-	public function test_sum_by_affiliate(): void {
-		$a = $this->factory()->affiliate->create();
-		$b = $this->factory()->affiliate->create();
-
-		$this->factory()->commission->create( [ 'affiliate_id' => $a, 'amount' => 5, 'status' => Commission::STATUS_PAID ] );
-		$this->factory()->commission->create( [ 'affiliate_id' => $a, 'amount' => 6, 'status' => Commission::STATUS_UNPAID ] );
-		$this->factory()->commission->create( [ 'affiliate_id' => $b, 'amount' => 7, 'status' => Commission::STATUS_PAID ] );
-
-		$paid = flyaffiliate()->commission->sum_by_affiliate( [ Commission::STATUS_PAID ] );
-
-		$this->assertCentsEquals( 500, $paid[ $a ] );
-		$this->assertCentsEquals( 700, $paid[ $b ] );
-		$this->assertSame( [], flyaffiliate()->commission->sum_by_affiliate( [ 'nonsense' ] ) );
 	}
 }

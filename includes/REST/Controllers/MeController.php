@@ -288,7 +288,7 @@ class MeController extends AffiliateBaseController {
 			'id'         => $visit->get_id(),
 			'url'        => (string) $visit->get( 'url', '' ),
 			'referrer'   => (string) $visit->get( 'referrer', '' ),
-			'created_at' => empty( $visit->get( 'created_at' ) ) ? null : mysql_to_rfc3339( (string) $visit->get( 'created_at' ) ),
+			'created_at' => $this->prepare_date( $visit->get( 'created_at' ) ),
 		];
 	}
 

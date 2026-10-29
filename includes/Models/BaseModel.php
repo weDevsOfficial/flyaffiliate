@@ -108,17 +108,6 @@ abstract class BaseModel {
 	}
 
 	/**
-	 * The column map.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return array<string, string>
-	 */
-	public static function get_columns(): array {
-		return static::$columns;
-	}
-
-	/**
 	 * Read a column.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -194,17 +183,6 @@ abstract class BaseModel {
 	 */
 	public function exists(): bool {
 		return $this->get_id() > 0;
-	}
-
-	/**
-	 * The row as an array.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return array<string, mixed>
-	 */
-	public function to_array(): array {
-		return $this->data;
 	}
 
 	/**

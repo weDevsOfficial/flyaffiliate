@@ -21,12 +21,26 @@
 					"layer"
 				]
 			}
+		],
+		"comment-empty-line-before": [
+			"always",
+			{
+				"except": [
+					"first-nested"
+				],
+				"ignore": [
+					"after-comment",
+					"stylelint-commands"
+				]
+			}
 		]
 	},
 	"ignoreFiles": [
 		"assets/css/**",
 		"build/**",
 		"node_modules/**",
-		"vendor/**"
+		"vendor/**",
+		"tests/pw/report/**",
+		"tests/pw/test-results/**"
 	]
 }

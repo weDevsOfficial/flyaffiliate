@@ -32,18 +32,6 @@ interface SettingsRepositoryInterface {
 	public function all(): array;
 
 	/**
-	 * One stored value.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string $key      Field id.
-	 * @param mixed  $fallback Returned when the id is not stored.
-	 *
-	 * @return mixed
-	 */
-	public function get( string $key, $fallback = null );
-
-	/**
 	 * Merge a slice of values into storage.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -53,17 +41,6 @@ interface SettingsRepositoryInterface {
 	 * @return array<string, mixed> The keys whose stored value actually changed.
 	 */
 	public function update( array $slice ): array;
-
-	/**
-	 * Replace the whole payload.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param array<string, mixed> $values Field id => value.
-	 *
-	 * @return void
-	 */
-	public function replace( array $values ): void;
 
 	/**
 	 * Forget the in-request snapshot so the next read hits the option again.

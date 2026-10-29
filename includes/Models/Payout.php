@@ -49,23 +49,6 @@ class Payout extends BaseModel {
 	const METHOD_MANUAL = 'manual';
 
 	/**
-	 * Every payout method, labelled: Manual and any other plugin registers.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return array<string, string> Method => translated label.
-	 */
-	public static function get_methods(): array {
-		if ( function_exists( 'flyaffiliate' ) && isset( flyaffiliate()->payout_method ) ) {
-			return flyaffiliate()->payout_method->get_labels();
-		}
-
-		return [
-			self::METHOD_MANUAL => __( 'Manual', 'flyaffiliate' ),
-		];
-	}
-
-	/**
 	 * {@inheritDoc}
 	 *
 	 * @var string

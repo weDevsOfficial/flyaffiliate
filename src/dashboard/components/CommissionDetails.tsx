@@ -3,7 +3,7 @@
  * item it paid on and the visit that brought the sale.
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Info } from 'lucide-react';
 import {
 	Dialog,
@@ -104,10 +104,14 @@ export default function CommissionDetails( { commissionId, onClose }: Props ) {
 				<DialogHeader className="border-b border-border px-6 py-4 pr-14">
 					<DialogTitle className="text-lg font-semibold leading-6 text-foreground">
 						{ detail?.order_id
-							? `${ __(
-									'Commission for order',
-									'flyaffiliate'
-							  ) } #${ detail.order_id }`
+							? sprintf(
+									/* translators: %d: the order number */
+									__(
+										'Commission for order #%d',
+										'flyaffiliate'
+									),
+									detail.order_id
+							  )
 							: __( 'Commission', 'flyaffiliate' ) }
 					</DialogTitle>
 				</DialogHeader>

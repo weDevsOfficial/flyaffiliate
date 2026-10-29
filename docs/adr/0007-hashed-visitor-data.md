@@ -20,7 +20,8 @@ data it does not need in the first place.
 `ip` and `user_agent`.
 
 - Both are `wp_hash()` of the value, which is salted with the site's own
-  `NONCE_SALT`. The digest is not reversible and is not portable between sites.
+  the site's own keys (`wp_hash()` with its default `auth` scheme, so
+  `AUTH_KEY` and `AUTH_SALT`). The digest is not reversible and is not portable between sites.
 - They are enough for what they are for: detecting that a single source is
   generating many visits, and deduplicating repeated clicks.
 - The raw values are never written to the database and never logged.

@@ -224,7 +224,8 @@ class Installer {
 	KEY affiliate_status (affiliate_id,status),
 	KEY status_matures_at (status,matures_at),
 	KEY vendor_status (vendor_id,status),
-	KEY payout_id (payout_id)
+	KEY payout_id (payout_id),
+	KEY created_at (created_at)
 ) {$collate};";
 
 		$tables[] = "CREATE TABLE {$prefix}flyaffiliate_visits (
@@ -260,7 +261,8 @@ class Installer {
 	created_at DATETIME NULL DEFAULT NULL,
 	PRIMARY KEY  (id),
 	KEY batch_key (batch_key),
-	KEY affiliate_id (affiliate_id)
+	KEY affiliate_id (affiliate_id),
+	KEY created_at (created_at)
 ) {$collate};";
 
 		// A TEXT column cannot carry a unique key, so the hash of the URL does.
@@ -405,11 +407,11 @@ class Installer {
 	}
 
 	/**
-	 * Schedule the daily maturation job.
+	 * Schedule the daily hook.
 	 *
 	 * Action Scheduler when it is available (WooCommerce bundles it), WP-Cron
-	 * otherwise. The job pages through commissions and must survive a request
-	 * that dies halfway, which Action Scheduler handles better.
+	 * otherwise. Nothing listens to it since ADR-0014; it is kept as Dokan
+	 * keeps its daily cron, for the work that will hang off it.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *

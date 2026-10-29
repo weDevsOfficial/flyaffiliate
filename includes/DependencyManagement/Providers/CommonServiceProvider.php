@@ -30,7 +30,7 @@ class CommonServiceProvider extends BaseServiceProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * Phase 3 adds the tracking, commission and payout hook classes here.
+	 * The services every request needs, admin or front end.
 	 *
 	 * @var class-string[]
 	 */

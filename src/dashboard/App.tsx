@@ -17,6 +17,7 @@ import {
 	TabsTrigger,
 	ThemeProvider,
 	Toaster,
+	cn,
 	toast,
 	type DateRange,
 } from '@wedevs/plugin-ui';
@@ -80,8 +81,17 @@ export default function App() {
 	// The picker only reports a range once Apply is pressed; the debounce keeps
 	// a quick re-pick or a clear from firing a round of requests each.
 	useEffect( () => {
+		// Same dates, same object: the first debounce after mount would otherwise
+		// fetch the dashboard a second time with the arguments it already has.
 		const timer = window.setTimeout(
-			() => setDates( toDateArgs( range ) ),
+			() =>
+				setDates( ( previous ) => {
+					const next = toDateArgs( range );
+
+					return JSON.stringify( previous ) === JSON.stringify( next )
+						? previous
+						: next;
+				} ),
 			RANGE_DEBOUNCE_MS
 		);
 
@@ -211,11 +221,14 @@ export default function App() {
 										'Cancel',
 										'flyaffiliate'
 									) }
+									// The picker's own trigger is the button; a Button here would nest one inside it.
 									trigger={ ( { value, open } ) => (
-										<Button
-											variant="outline"
-											className={ `${ CONTROL_HEIGHT } gap-2 px-4 font-normal` }
-											aria-expanded={ open }
+										<span
+											className={ cn(
+												CONTROL_HEIGHT,
+												'inline-flex items-center gap-2 rounded-md border border-primary bg-transparent px-4 text-sm font-normal text-primary transition-all hover:bg-muted',
+												open && 'bg-muted'
+											) }
 											aria-label={ __(
 												'Pick a date range',
 												'flyaffiliate'
@@ -230,7 +243,7 @@ export default function App() {
 													'All time',
 													'flyaffiliate'
 												) }
-										</Button>
+										</span>
 									) }
 								/>
 								{ range?.from && (

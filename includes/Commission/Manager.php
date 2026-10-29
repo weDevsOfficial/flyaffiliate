@@ -71,25 +71,6 @@ class Manager {
 	}
 
 	/**
-	 * Row counts per status, plus the total, for status tabs.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param array $where Extra equality conditions applied to every count.
-	 *
-	 * @return array<string, int> `all` and one key per status.
-	 */
-	public function count_by_status( array $where = [] ): array {
-		$counts = [ 'all' => $this->count( $where ) ];
-
-		foreach ( array_keys( Commission::get_statuses() ) as $status ) {
-			$counts[ $status ] = $this->count( array_merge( $where, [ 'status' => $status ] ) );
-		}
-
-		return $counts;
-	}
-
-	/**
 	 * Add a commission by hand.
 	 *
 	 * The row is shaped the way SliceWP's "add commission" form shapes it: an
@@ -438,11 +419,9 @@ class Manager {
 			return $commission;
 		}
 
-		/*
-		 * A commission inside a payment does not move on its own: a refunded
-		 * order would otherwise change a row whose amount a payment is already
-		 * promising. An admin may, as in SliceWP, and the payment follows.
-		 */
+		// A commission inside a payment does not move on its own: a refunded
+		// order would otherwise change a row whose amount a payment is already
+		// promising. An admin may, as in SliceWP, and the payment follows.
 		if ( $automatic && $commission->is_in_payout() ) {
 			return $this->in_payment_error( $commission );
 		}
@@ -531,7 +510,7 @@ class Manager {
 		/* translators: %d: the payment id */
 		$message = sprintf( __( 'Payment #%d is being sent, so its commissions cannot change until the transfer settles.', 'flyaffiliate' ), $payout->get_id() );
 
-		return new WP_Error( 'flyaffiliate_commission_in_payout', $message, [ 'status' => 409 ] );
+		return new WP_Error( 'flyaffiliate_payout_locked', $message, [ 'status' => 409 ] );
 	}
 
 	/**
@@ -569,7 +548,7 @@ class Manager {
 	public function delete( int $commission_id ): bool {
 		$commission = $this->get( $commission_id );
 
-		if ( null === $commission || $commission->is_locked() ) {
+		if ( null === $commission || $commission->is_in_payout() ) {
 			return false;
 		}
 
@@ -596,17 +575,6 @@ class Manager {
 		return true;
 	}
 
-	/**
-	 * Money and row totals for one affiliate, split the way the screens show them.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param int    $affiliate_id Affiliate id.
-	 * @param string $after        Only commissions created on or after this GMT `Y-m-d H:i:s`.
-	 * @param string $before       Only commissions created on or before this GMT `Y-m-d H:i:s`.
-	 *
-	 * @return array{paid: float, unpaid: float, pending: float, total: float, paid_count: int, unpaid_count: int, pending_count: int, count: int}
-	 */
 	/**
 	 * The same totals for a whole page of affiliates, in one query.
 	 *
@@ -695,6 +663,17 @@ class Manager {
 		];
 	}
 
+	/**
+	 * Money and row totals for one affiliate, split the way the screens show them.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int    $affiliate_id Affiliate id.
+	 * @param string $after        Only commissions created on or after this GMT `Y-m-d H:i:s`.
+	 * @param string $before       Only commissions created on or before this GMT `Y-m-d H:i:s`.
+	 *
+	 * @return array{paid: float, unpaid: float, pending: float, total: float, paid_count: int, unpaid_count: int, pending_count: int, count: int}
+	 */
 	public function get_affiliate_totals( int $affiliate_id, string $after = '', string $before = '' ): array {
 		global $wpdb;
 
@@ -745,46 +724,6 @@ class Manager {
 			'pending_count' => $num( Commission::STATUS_PENDING ),
 			'count'         => array_sum( array_map( static fn( $row ) => (int) $row->rows_count, $rows ) ),
 		];
-	}
-
-	/**
-	 * Sum of commissions per affiliate, for the statuses given.
-	 *
-	 * Used to sort the affiliates list by earnings. One grouped query for the
-	 * whole table; the map is small enough to order in PHP at the scale a
-	 * single-site plugin runs at.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string[] $statuses Statuses to include.
-	 *
-	 * @return array<int, float> Affiliate id => amount.
-	 */
-	public function sum_by_affiliate( array $statuses ): array {
-		global $wpdb;
-
-		$statuses = array_values( array_intersect( $statuses, array_keys( Commission::get_statuses() ) ) );
-
-		if ( [] === $statuses ) {
-			return [];
-		}
-
-		$table        = Commission::get_table();
-		$placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- FlyAffiliate's own table; the IN list is one %s per status, and every status was validated against the model's list.
-		$rows = $wpdb->get_results(
-			$wpdb->prepare( "SELECT affiliate_id, COALESCE( SUM( amount ), 0 ) AS total FROM {$table} WHERE status IN ({$placeholders}) GROUP BY affiliate_id", $statuses )
-		);
-		// phpcs:enable
-
-		$sums = [];
-
-		foreach ( (array) $rows as $row ) {
-			$sums[ (int) $row->affiliate_id ] = (float) $row->total;
-		}
-
-		return $sums;
 	}
 
 	/**

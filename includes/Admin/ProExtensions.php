@@ -115,7 +115,7 @@ class ProExtensions implements Hookable {
 				'name'        => 'Dokan',
 				'description' => __( 'Let Dokan vendors run their own affiliate programs. Each vendor opts in and pays the commission on their own products.', 'flyaffiliate' ),
 				'category'    => 'integration',
-				// TODO(docs): the extension's own page, once it is published.
+				// The documentation's front page until the extension has a page of its own.
 				'doc_url'     => 'https://docs.flyaffiliate.co/',
 			],
 			[
@@ -123,7 +123,7 @@ class ProExtensions implements Hookable {
 				'name'        => 'PayPal Payouts',
 				'description' => __( 'Pay affiliates straight to their PayPal account in one batch. Connect your PayPal Business account once and FlyAffiliate sends the money.', 'flyaffiliate' ),
 				'category'    => 'payout_method',
-				// TODO(docs): the extension's own page, once it is published.
+				// The documentation's front page until the extension has a page of its own.
 				'doc_url'     => 'https://docs.flyaffiliate.co/',
 			],
 		];

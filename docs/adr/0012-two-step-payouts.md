@@ -34,7 +34,7 @@ unpaid again if it was marked by mistake. The product asked for the same.
 - `preview()` keeps excluding any commission whose `payout_id` is set, so a
   commission waiting in an unpaid payment is never put into a second one.
 - **A payment holds its commissions, the admin still edits them.**
-  `Commission::is_locked()` covers `payout_id > 0`: while a payment counts a
+  `Commission::is_in_payout()` covers `payout_id > 0`: while a payment counts a
   commission towards money an admin is about to send, no refunded, cancelled,
   failed or trashed order and no maturation job moves it (`set_status()`
   refuses the automatic callers), and it is not deleted. The admin keeps
