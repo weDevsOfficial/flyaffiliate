@@ -81,5 +81,5 @@ Reviewed for: **correct**, **secure**, **readable**, **elegant** — in that ord
 Every PR runs PHPCS (changed files), PHPUnit (PHP 8.1/8.3),
 and Plugin Check on the built zip. All three must be green before merge.
 
-`deploy.yml` is tag-triggered and stays disabled until the WordPress.org slug is
-approved — see `RELEASE.md`.
+`deploy.yml` is tag-triggered: a `v*` tag publishes to the WordPress.org SVN and
+creates the GitHub release — see `RELEASE.md`.

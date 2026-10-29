@@ -125,7 +125,7 @@ or it lands in the zip.
 | `phpcs.yml` | PR touching `**.php` | Any violation on a changed file (no `--graceful-warnings`) |
 | `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 8.1/8.3 |
 | `plugin-check.yml` | push, PR, manual | Any Plugin Check error **or warning** on the built zip |
-| `deploy.yml` | `v*` tag | Disabled until the wp.org slug is approved |
+| `deploy.yml` | `v*` tag, manual on a tag | Publishes to the wp.org SVN and creates the GitHub release |
 
 ## When something is broken
 
