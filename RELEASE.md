@@ -14,7 +14,11 @@ the built zip (`flyaffiliate-wporg-compliance`).
    WordPress.
 4. `npm run release` — builds the assets, regenerates `languages/flyaffiliate.pot`
    and stages `build/flyaffiliate` into `build/flyaffiliate-v<version>.zip`,
-   replacing every `@since FLYAFFILIATE_SINCE` with the version.
+   replacing every `@since FLYAFFILIATE_SINCE` with the version. WP-CLI parses
+   the built bundles for the template and needs more than PHP's default
+   memory: if `make-pot` stops with "Allowed memory size", run it as
+   `php -d memory_limit=2G "$(command -v wp)" i18n make-pot …` with the
+   arguments from `package.json`.
 5. `npm run plugin-check`, `composer phpcs`, `npm run phpunit` — all green.
 6. Merge into `develop`, then `develop` into `main`, and tag `v<version>`.
 
