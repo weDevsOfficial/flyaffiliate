@@ -29,5 +29,6 @@ the built zip (`flyaffiliate-wporg-compliance`).
 WordPress.org SVN with `.wordpress-org/` as the listing's assets. It runs only
 while the repository variable `WPORG_DEPLOY_ENABLED` is `true` and the
 `SVN_USERNAME` / `SVN_PASSWORD` secrets are set in the `wordpress-org`
-environment. The first version goes up by hand through the plugin directory's
-upload form, as its review requires; the action takes over from the next tag.
+environment. The review took its zip through the plugin directory's upload
+form; since its approval every version, the first included, is an SVN commit,
+made by this action on the tag or by hand from `build/flyaffiliate`.
