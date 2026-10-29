@@ -159,7 +159,7 @@ class VisitsController extends AdminBaseController {
 			'converted'    => $item->is_converted(),
 			'order_id'     => (int) $item->get( 'order_id', 0 ) > 0 ? (int) $item->get( 'order_id' ) : null,
 			'order_url'    => $this->get_order_url( (int) $item->get( 'order_id', 0 ) ),
-			'created_at'   => empty( $item->get( 'created_at' ) ) ? null : mysql_to_rfc3339( (string) $item->get( 'created_at' ) ),
+			'created_at'   => $this->prepare_date( $item->get( 'created_at' ) ),
 		];
 
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );

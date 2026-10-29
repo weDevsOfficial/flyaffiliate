@@ -183,7 +183,6 @@ class Assets implements Hookable {
 			return;
 		}
 
-		wp_enqueue_media();
 		wp_enqueue_style( self::HANDLE_PREFIX . 'admin' );
 		wp_enqueue_script( self::HANDLE_PREFIX . 'admin' );
 
@@ -352,18 +351,8 @@ class Assets implements Hookable {
 			],
 			'helpMenu'   => $this->get_help_menu_items(),
 			'statuses'   => [
-				'affiliate'  => [
-					Affiliate::STATUS_PENDING   => __( 'Pending', 'flyaffiliate' ),
-					Affiliate::STATUS_ACTIVE    => __( 'Active', 'flyaffiliate' ),
-					Affiliate::STATUS_INACTIVE  => __( 'Inactive', 'flyaffiliate' ),
-					Affiliate::STATUS_SUSPENDED => __( 'Suspended', 'flyaffiliate' ),
-				],
-				'commission' => [
-					Commission::STATUS_PENDING  => __( 'Pending', 'flyaffiliate' ),
-					Commission::STATUS_UNPAID   => __( 'Unpaid', 'flyaffiliate' ),
-					Commission::STATUS_PAID     => __( 'Paid', 'flyaffiliate' ),
-					Commission::STATUS_REJECTED => __( 'Rejected', 'flyaffiliate' ),
-				],
+				'affiliate'  => Affiliate::get_statuses(),
+				'commission' => Commission::get_statuses(),
 				// What an automatic payout method reports about a payment's transfer.
 				'transfer'   => [
 					PayoutMethod::STATE_QUEUED     => __( 'Queued', 'flyaffiliate' ),
@@ -386,7 +375,6 @@ class Assets implements Hookable {
 			// The origins open to a new commission: manual, plus whatever integration is active.
 			'availableSources' => Commission::get_available_sources(),
 			'types'      => Commission::get_types(),
-			'methods'    => Payout::get_methods(),
 			'payoutMethods' => flyaffiliate()->payout_method->get_script_data(),
 		];
 

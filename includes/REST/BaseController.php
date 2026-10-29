@@ -148,48 +148,50 @@ abstract class BaseController extends WP_REST_Controller {
 	}
 
 	/**
-	 * An affiliate's display name, for rows that only carry the id.
-	 *
-	 * Cached for the request: a page of commissions repeats the same few
-	 * affiliates, and the UI shows the name on every row.
+	 * A stored GMT datetime as RFC 3339, or null when there is none.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
-	 * @param int $affiliate_id The affiliate.
+	 * @param string|null $value The stored `Y-m-d H:i:s` value, in GMT.
 	 *
-	 * @return string The name, or an empty string when the affiliate is gone.
+	 * @return string|null
 	 */
-	/**
-	 * Where an affiliate's payouts are sent.
-	 *
-	 * Cached per request, like get_affiliate_name(), so a list of payments
-	 * does not load the same affiliate once per row.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param int $affiliate_id The affiliate.
-	 *
-	 * @return string The payment email, or an empty string.
-	 */
-	protected function get_affiliate_payment_email( int $affiliate_id ): string {
-		static $emails = [];
-
-		if ( ! array_key_exists( $affiliate_id, $emails ) ) {
-			$affiliate               = \FlyAffiliate\Models\Affiliate::find( $affiliate_id );
-			$emails[ $affiliate_id ] = null === $affiliate ? '' : $affiliate->get_payment_email();
-		}
-
-		return $emails[ $affiliate_id ];
+	protected function prepare_date( $value ): ?string {
+		return empty( $value ) ? null : mysql_to_rfc3339( (string) $value );
 	}
 
-	protected function get_affiliate_name( int $affiliate_id ): string {
-		static $names = [];
+	/**
+	 * An affiliate, loaded once per request: a page of commissions, visits or
+	 * payments names the same few affiliates on many rows.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int $affiliate_id The affiliate.
+	 *
+	 * @return \FlyAffiliate\Models\Affiliate|null Null when there is no such affiliate.
+	 */
+	protected function get_affiliate( int $affiliate_id ): ?\FlyAffiliate\Models\Affiliate {
+		static $affiliates = [];
 
-		if ( ! array_key_exists( $affiliate_id, $names ) ) {
-			$affiliate              = \FlyAffiliate\Models\Affiliate::find( $affiliate_id );
-			$names[ $affiliate_id ] = null === $affiliate ? '' : $affiliate->get_display_name();
+		if ( ! array_key_exists( $affiliate_id, $affiliates ) ) {
+			$affiliates[ $affiliate_id ] = \FlyAffiliate\Models\Affiliate::find( $affiliate_id );
 		}
 
-		return $names[ $affiliate_id ];
+		return $affiliates[ $affiliate_id ];
+	}
+
+	/**
+	 * An affiliate's display name, or an empty string when they are gone.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param int $affiliate_id The affiliate.
+	 *
+	 * @return string
+	 */
+	protected function get_affiliate_name( int $affiliate_id ): string {
+		$affiliate = $this->get_affiliate( $affiliate_id );
+
+		return null === $affiliate ? '' : $affiliate->get_display_name();
 	}
 }

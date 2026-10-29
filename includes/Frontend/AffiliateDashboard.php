@@ -144,17 +144,4 @@ class AffiliateDashboard extends Shortcode {
 			'text' => $messages[ $notice ][1],
 		];
 	}
-
-	/**
-	 * The URL of a tab.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string $tab Tab key.
-	 *
-	 * @return string
-	 */
-	public function get_tab_url( string $tab ): string {
-		return add_query_arg( 'tab', $tab, remove_query_arg( [ 'tab', 'tab_page', 'flyaffiliate_saved', 'flyaffiliate_error', 'flyaffiliate_activated' ] ) );
-	}
 }

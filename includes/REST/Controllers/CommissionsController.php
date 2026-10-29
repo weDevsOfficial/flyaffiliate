@@ -19,9 +19,9 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * `flyaffiliate/v1/commissions` — read, filter, add by hand, and change status.
+ * `flyaffiliate/v1/commissions` — read, filter, add by hand, edit and change status.
  *
- * There is no route that marks a commission paid; that is a payout.
+ * A payout is what pays commissions; an admin may still record one as paid by hand, as in SliceWP.
  *
  * @since FLYAFFILIATE_SINCE
  */
@@ -232,7 +232,7 @@ class CommissionsController extends AdminBaseController {
 			return $this->not_found();
 		}
 
-		if ( $commission->is_locked() ) {
+		if ( $commission->is_in_payout() ) {
 			return flyaffiliate()->commission->in_payment_error( $commission );
 		}
 
@@ -469,14 +469,14 @@ class CommissionsController extends AdminBaseController {
 					'context' => [ 'view', 'edit' ],
 				],
 				'status'        => [
-					'description' => __( 'Status. Any status can be given when the commission is created; afterwards paid is set by a payout, never here.', 'flyaffiliate' ),
+					'description' => __( 'Status. Any status can be given; a payout is what normally marks a commission paid.', 'flyaffiliate' ),
 					'type' => 'string',
 					'enum' => [ Commission::STATUS_PENDING, Commission::STATUS_UNPAID, Commission::STATUS_REJECTED, Commission::STATUS_PAID ],
 					'context' => [ 'view', 'edit' ],
 				],
 				'payout_id'     => $ro(
 					[
-						'description' => __( 'The payout it was paid in, once paid.', 'flyaffiliate' ),
+						'description' => __( 'The payment holding it, once a payout has taken it.', 'flyaffiliate' ),
 						'type' => [ 'integer', 'null' ],
 						'context' => [ 'view', 'edit' ],
 					]
@@ -587,18 +587,5 @@ class CommissionsController extends AdminBaseController {
 	 */
 	protected function not_found(): WP_Error {
 		return new WP_Error( 'flyaffiliate_rest_commission_not_found', __( 'No commission with that ID.', 'flyaffiliate' ), [ 'status' => 404 ] );
-	}
-
-	/**
-	 * Format a stored datetime as RFC3339.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param string|null $value Stored GMT value.
-	 *
-	 * @return string|null
-	 */
-	protected function prepare_date( $value ): ?string {
-		return empty( $value ) ? null : mysql_to_rfc3339( (string) $value );
 	}
 }

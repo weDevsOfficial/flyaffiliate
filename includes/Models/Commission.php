@@ -20,8 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * is NULL — not 0 — on a commission an admin adds by hand, so two manual rows
  * cannot collide on the constraint.
  *
- * The lifecycle is `pending` -> `unpaid` -> `paid`, with either of the first two
- * able to become `rejected`. A commission inside a payment (`payout_id` set)
+ * The usual lifecycle is `pending` -> `unpaid` -> `paid`, with either of the
+ * first two able to become `rejected`; the order sync and the admin can move a
+ * commission back as well (ADR-0014, ADR-0012). A commission inside a payment (`payout_id` set)
  * is edited the way SliceWP edits one — amount, reference, type and status
  * stay open to the admin, and an unpaid payment re-sums to follow — while the
  * order status sync keeps off it and it cannot be deleted; a paid payment
@@ -200,21 +201,6 @@ class Commission extends BaseModel {
 		return [
 			self::TYPE_SALE => __( 'Sale', 'flyaffiliate' ),
 		];
-	}
-
-	/**
-	 * Whether a payment holds this commission.
-	 *
-	 * A held commission (CONTEXT.md money rule 7) is not deleted, not moved by
-	 * an order status change, and never put into a second payment. An admin can still edit it, as in SliceWP. A paid row recorded by
-	 * hand, outside any payment, is held by nothing.
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @return bool
-	 */
-	public function is_locked(): bool {
-		return $this->is_in_payout();
 	}
 
 	/**

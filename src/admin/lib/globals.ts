@@ -86,7 +86,6 @@ export type AdminGlobals = {
 	/** The origins a new commission may be given: manual, plus each active integration's. */
 	availableSources: Record< string, string >;
 	types: Record< string, string >;
-	methods: Record< string, string >;
 	/** Every payout method (admin), or the ones an affiliate can choose (dashboard). */
 	payoutMethods: PayoutMethodInfo[];
 	/** Only on the affiliate dashboard page: the method an affiliate gets without choosing. */
@@ -150,7 +149,6 @@ const fallback: AdminGlobals = {
 	sources: {},
 	availableSources: { manual: 'Manual' },
 	types: {},
-	methods: {},
 	payoutMethods: [],
 	dashboard: { tab: 'overview', notice: '' },
 	program: {
@@ -167,9 +165,22 @@ const fallback: AdminGlobals = {
  *
  * @return {AdminGlobals} The globals.
  */
+let cached: AdminGlobals | undefined;
+let cachedFrom: unknown;
+
 export function getGlobals(): AdminGlobals {
-	// The dashboard page localizes a subset; the fallback fills the rest.
-	return { ...fallback, ...( window.flyaffiliate ?? {} ) } as AdminGlobals;
+	// Read per cell, so merged once; the merge is shallow and `setup` stays the
+	// page's own object, which markSetupDone() writes to.
+	if ( ! cached || cachedFrom !== window.flyaffiliate ) {
+		cachedFrom = window.flyaffiliate;
+		// The dashboard page localizes a subset; the fallback fills the rest.
+		cached = {
+			...fallback,
+			...( window.flyaffiliate ?? {} ),
+		} as AdminGlobals;
+	}
+
+	return cached;
 }
 
 /**

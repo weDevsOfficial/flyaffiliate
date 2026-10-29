@@ -24,8 +24,8 @@ use WP_Error;
  * SliceWP's payouts and payments work (ADR-0012).
  *
  * A batch is one payment run: one `Payout` row — a payment — per affiliate,
- * covering that affiliate's `unpaid` commissions, never `pending` ones, which
- * have not matured. Creating a batch writes the rows `unpaid` and sets each
+ * covering that affiliate's `unpaid` commissions whose hold is over, never
+ * `pending` ones, whose order is not paid. Creating a batch writes the rows `unpaid` and sets each
  * commission's `payout_id`, which is the key that keeps it out of the next
  * batch; the commission itself stays `unpaid` until the store has sent the
  * money and marks the payment paid, which is the only thing that marks a
@@ -596,10 +596,10 @@ class Manager {
 		}
 
 		if ( ! $by_method ) {
-			$lock = $this->methods()->get_lock( $payout );
+			$locked = $this->refuse_if_locked( $payout );
 
-			if ( '' !== $lock ) {
-				return $this->locked( $payout, $lock );
+			if ( null !== $locked ) {
+				return $locked;
 			}
 
 			$method = $this->methods()->get( (string) $payout->get( 'method' ) );
@@ -667,10 +667,10 @@ class Manager {
 		}
 
 		if ( ! $by_method ) {
-			$lock = $this->methods()->get_lock( $payout );
+			$locked = $this->refuse_if_locked( $payout );
 
-			if ( '' !== $lock ) {
-				return $this->locked( $payout, $lock );
+			if ( null !== $locked ) {
+				return $locked;
 			}
 		}
 
@@ -767,10 +767,10 @@ class Manager {
 			return new WP_Error( 'flyaffiliate_payout_not_retryable', __( 'This payment is paid by hand, so there is nothing to send again.', 'flyaffiliate' ), [ 'status' => 400 ] );
 		}
 
-		$lock = $this->methods()->get_lock( $payout );
+		$locked = $this->refuse_if_locked( $payout );
 
-		if ( '' !== $lock ) {
-			return $this->locked( $payout, $lock );
+		if ( null !== $locked ) {
+			return $locked;
 		}
 
 		if ( ! $this->methods()->can_retry( $payout ) ) {
@@ -963,6 +963,36 @@ class Manager {
 	}
 
 	/**
+	 * The refusal a hand-made change gets while a payment is locked, or null.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Payout     $payout The payment.
+	 * @param array|null $states The payments' transfer states, when already fetched.
+	 *
+	 * @return WP_Error|null
+	 */
+	protected function refuse_if_locked( Payout $payout, ?array $states = null ): ?WP_Error {
+		$lock = $this->methods()->get_lock( $payout, $states );
+
+		return '' === $lock ? null : $this->locked( $payout, $lock );
+	}
+
+	/**
+	 * Take a commission out of its payment; the row stays as it is otherwise.
+	 *
+	 * @since FLYAFFILIATE_SINCE
+	 *
+	 * @param Commission $commission The commission.
+	 *
+	 * @return void
+	 */
+	protected function detach( Commission $commission ): void {
+		$commission->set( 'payout_id', 0 );
+		$commission->save();
+	}
+
+	/**
 	 * Whether a payment is locked against changes by hand.
 	 *
 	 * @since FLYAFFILIATE_SINCE
@@ -1036,10 +1066,10 @@ class Manager {
 			return new WP_Error( 'flyaffiliate_payout_paid', __( 'A commission cannot be removed from a payment that has been paid.', 'flyaffiliate' ), [ 'status' => 409 ] );
 		}
 
-		$lock = $this->methods()->get_lock( $payout );
+		$locked = $this->refuse_if_locked( $payout );
 
-		if ( '' !== $lock ) {
-			return $this->locked( $payout, $lock );
+		if ( null !== $locked ) {
+			return $locked;
 		}
 
 		$commission = flyaffiliate()->commission->get( $commission_id );
@@ -1048,13 +1078,13 @@ class Manager {
 			return new WP_Error( 'flyaffiliate_commission_not_in_payout', __( 'That commission is not part of this payment.', 'flyaffiliate' ), [ 'status' => 404 ] );
 		}
 
-		$commission->set( 'payout_id', 0 );
-		$commission->save();
+		$this->detach( $commission );
 
-		$payout->set( 'amount', Money::from_cents( max( 0, Money::to_cents( $payout->get( 'amount', 0 ) ) - $commission->get_amount_in_cents() ) ) );
+		// The payment follows its commissions the one way every change does (money rule 7).
+		$payout = $this->resync( $payout_id );
 
-		if ( 0 === $payout->save() ) {
-			return $this->save_failed();
+		if ( null === $payout ) {
+			return $this->not_found();
 		}
 
 		/**
@@ -1090,15 +1120,14 @@ class Manager {
 			return new WP_Error( 'flyaffiliate_payout_paid', __( 'A payment that has been paid cannot be deleted.', 'flyaffiliate' ), [ 'status' => 409 ] );
 		}
 
-		$lock = $this->methods()->get_lock( $payout );
+		$locked = $this->refuse_if_locked( $payout );
 
-		if ( '' !== $lock ) {
-			return $this->locked( $payout, $lock );
+		if ( null !== $locked ) {
+			return $locked;
 		}
 
 		foreach ( $payout->get_commissions() as $commission ) {
-			$commission->set( 'payout_id', 0 );
-			$commission->save();
+			$this->detach( $commission );
 		}
 
 		$snapshot = clone $payout;
@@ -1143,10 +1172,10 @@ class Manager {
 				return new WP_Error( 'flyaffiliate_payout_batch_paid', __( 'A payout with a paid payment cannot be deleted.', 'flyaffiliate' ), [ 'status' => 409 ] );
 			}
 
-			$lock = $this->methods()->get_lock( $payout, $states );
+			$locked = $this->refuse_if_locked( $payout, $states );
 
-			if ( '' !== $lock ) {
-				return $this->locked( $payout, $lock );
+			if ( null !== $locked ) {
+				return $locked;
 			}
 		}
 
@@ -1165,7 +1194,8 @@ class Manager {
 	 * Move a commission between unpaid and paid as its payment changes.
 	 *
 	 * Written here rather than through `Commission\Manager::set_status()`,
-	 * whose transitions keep `paid` out of reach of everything but a payment.
+	 * which refuses an automatic move on a row inside a payment and any move
+	 * while the payment is locked: the payment itself is the one mover here.
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
@@ -1207,8 +1237,7 @@ class Manager {
 	protected function unwind( array $saved, Payout $current ): void {
 		foreach ( array_merge( $saved, [ $current ] ) as $payout ) {
 			foreach ( $payout->get_commissions() as $commission ) {
-				$commission->set( 'payout_id', 0 );
-				$commission->save();
+				$this->detach( $commission );
 			}
 
 			$payout->delete();

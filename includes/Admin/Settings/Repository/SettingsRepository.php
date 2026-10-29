@@ -68,22 +68,6 @@ final class SettingsRepository implements SettingsRepositoryInterface {
 	 *
 	 * @since FLYAFFILIATE_SINCE
 	 *
-	 * @param string $key      Field id.
-	 * @param mixed  $fallback Returned when the id is not stored.
-	 *
-	 * @return mixed
-	 */
-	public function get( string $key, $fallback = null ) {
-		$all = $this->all();
-
-		return array_key_exists( $key, $all ) ? $all[ $key ] : $fallback;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
 	 * @param array<string, mixed> $slice Field id => value.
 	 *
 	 * @return array<string, mixed> The keys whose stored value actually changed.
@@ -131,20 +115,6 @@ final class SettingsRepository implements SettingsRepositoryInterface {
 		do_action( 'flyaffiliate_settings_changed', $changed, $merged );
 
 		return $changed;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @since FLYAFFILIATE_SINCE
-	 *
-	 * @param array<string, mixed> $values Field id => value.
-	 *
-	 * @return void
-	 */
-	public function replace( array $values ): void {
-		update_option( self::OPTION_KEY, $values, true );
-		$this->snapshot = $values;
 	}
 
 	/**

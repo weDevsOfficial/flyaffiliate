@@ -171,7 +171,7 @@ class Manager {
 	public function enabled(): array {
 		return array_filter(
 			$this->all(),
-			static fn( PayoutMethod $method ) => Payout::METHOD_MANUAL === $method->get_id() || $method->is_enabled()
+			static fn( PayoutMethod $method ) => $method->is_enabled()
 		);
 	}
 

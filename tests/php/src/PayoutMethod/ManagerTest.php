@@ -94,7 +94,7 @@ class ManagerTest extends FlyAffiliateTestCase {
 		$this->assertSame( [ 'manual', 'fake' ], array_keys( $all ) );
 		$this->assertInstanceOf( Manual::class, $all['manual'] );
 		$this->assertSame( 'Manual', $this->methods()->get_labels()['manual'] );
-		$this->assertSame( [ 'manual' => 'Manual', 'fake' => 'Fake' ], Payout::get_methods() );
+		$this->assertSame( [ 'manual' => 'Manual', 'fake' => 'Fake' ], $this->methods()->get_labels() );
 	}
 
 	/**

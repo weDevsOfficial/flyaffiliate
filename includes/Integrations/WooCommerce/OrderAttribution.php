@@ -116,7 +116,7 @@ class OrderAttribution implements Hookable {
 
 		$affiliate = flyaffiliate()->affiliate->get( $attribution['affiliate_id'] );
 
-		if ( null === $affiliate || Affiliate::STATUS_ACTIVE !== $affiliate->get( 'status' ) ) {
+		if ( null === $affiliate || ! $affiliate->is_active() ) {
 			return [];
 		}
 
