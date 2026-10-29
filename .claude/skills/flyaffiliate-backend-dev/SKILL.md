@@ -87,8 +87,8 @@ class CommonServiceProvider extends BaseServiceProvider {
 	protected $tags = [ 'common-service' ];
 
 	protected $services = [
-		\FlyAffiliate\Commission\Hooks::class,
-		\FlyAffiliate\Tracking\Hooks::class,
+		\FlyAffiliate\Tracking\Tracker::class,
+		\FlyAffiliate\Affiliate\Role::class,
 	];
 
 	public function register(): void {
@@ -153,7 +153,7 @@ $commission = $wpdb->get_row(
 - Money is `DECIMAL(19,4)` in the schema. **Compare and sum in integer cents**:
   `(int) round( $amount * 100 )`. Never compare floats.
 - Schema changes go in `Install\Installer` via `dbDelta`, plus a versioned
-  upgrader under `includes/Upgrade/Upgrades/` and a bump of
+  upgrader listed on the `flyaffiliate_upgraders` filter and a bump of
   `flyaffiliate_db_version`. Never `ALTER TABLE` outside an upgrader.
 
 ## Settings
@@ -238,7 +238,8 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
 - Partial refunds are not rescaled (ADR-0011's rescaler was reverted): an
   admin handles them by hand through `Manager::update()`, which edits the
   amount, reference (only on an admin-created row), reference amount, type
-  and status of any commission that is not paid and not inside a payment.
+  and status of any commission whose payment is not locked; an unpaid
+  payment re-sums to follow, a paid one keeps its amount (ADR-0012).
   `Manager::create()` is the admin's add form: origin (`source`), type, any
   status (default `unpaid`) and date; a pending commission created by hand
   keeps its status until its order is paid or the admin moves it — nothing
@@ -254,7 +255,8 @@ marks a payment and its commissions `paid`; `mark_unpaid()` reverses a mistake
 `delete()` only work on unpaid payments; `delete_batch()` refuses once any
 payment is paid. `preview()` skips every commission with a `payout_id`. Only
 the payout manager moves a commission to or from `paid` —
-`Commission\Manager::can_transition()` never allows it.
+`Commission\Manager::can_transition()` allows any move, so an admin can
+record a commission as paid by hand, as in SliceWP.
 
 Payout methods (ADR-0016): `flyaffiliate()->payout_method` lists Manual plus
 whatever the `flyaffiliate_payout_methods` filter adds (instances of
@@ -384,7 +386,8 @@ contain no queries — the caller prepares the data.
   fields from the settings schema, saves with `PUT /settings/{page}` and calls
   `POST /setup/complete`; `Admin\SetupWizard` only owns the one-time redirect
   and the done flag. The one PHP-rendered admin page left (user profile) keeps
-  the old rules: capability, `check_admin_referer()`, then sanitize.
+  the old rules: capability, the profile form's own nonce (core verifies it
+  before `edit_user_profile_update` fires), then sanitize.
 
 ## REST
 

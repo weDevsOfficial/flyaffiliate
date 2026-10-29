@@ -61,6 +61,8 @@ upgrader.
 ## Consequences
 
 - A visit to a saved page counts on the link however the visitor arrived
+  (a visitor already carrying this affiliate's cookie only has it refreshed,
+  `Tracker::track()`, so a second saved page in the same window adds no visit)
   there — through the generated link, the plain referral link plus a hand-typed
   path, or a link the affiliate built themselves. The figure answers "visits
   this affiliate brought to this page", which is what an affiliate can act on.

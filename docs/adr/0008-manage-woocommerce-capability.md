@@ -29,7 +29,8 @@ the programme returns `manage_woocommerce` from the
 original decision above bought them. Every screen, handler and admin REST
 route reads the helper, never a literal.
 
-`manage_options` does not appear in this codebase.
+`manage_options` appears in this codebase only as the helper's default (note of
+2026-09 above).
 
 Reasons a custom capability was rejected for Phase 1:
 
