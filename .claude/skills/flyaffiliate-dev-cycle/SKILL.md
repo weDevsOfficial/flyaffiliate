@@ -51,9 +51,6 @@ composer phpcbf         # auto-fix what can be auto-fixed
 reports unescaped output, an unprepared query, or a missing nonce check, that is
 a real finding — Plugin Check will report the same thing on the built zip.
 
-The only excluded PHP is `includes/admin.php` and `includes/frontend.php`, the
-1.0.7 prototype screens the Phase 2 port reads from. Nothing new goes in them.
-
 ## JavaScript and CSS
 
 ```bash

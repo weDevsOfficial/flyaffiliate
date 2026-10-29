@@ -1,6 +1,6 @@
 # FlyAffiliate
 
-<img src="assets/images/logo.svg" alt="FlyAffiliate" width="96" />
+<img src="assets/images/flyaffiliate-icon.png" alt="FlyAffiliate" width="96" />
 
 Welcome to the **FlyAffiliate** repository on **GitHub**!
 
@@ -57,12 +57,12 @@ flyaffiliate/
 │   ├── js/                # admin.js, dashboard.js.
 │   └── images/            # Logo and icons.
 ├── 📂 includes/           # Core PHP, PSR-4 root for FlyAffiliate\.
-│   ├── Admin/             # Menu (hash routes), Dashboard stats, Settings schema, Notices, SetupWizard.
+│   ├── Admin/             # Menu (hash routes), Dashboard stats, Settings schema, Notices, SetupWizard, ProExtensions.
 │   ├── Affiliate/         # Manager, Registration, Role.
-│   ├── Commission/        # Manager, RateResolver, HoldPeriod.
+│   ├── Commission/        # Manager, RateResolver.
 │   ├── Payout/            # Manager, CsvExporter.
 │   ├── Tracking/          # Tracker (referral link → visit → cookie).
-│   ├── Integrations/      # WooCommerce: OrderAttribution, OrderStatusSync.
+│   ├── Integrations/      # WooCommerce: Integration, OrderAttribution, OrderStatusSync, Analytics.
 │   ├── Models/            # BaseModel + the custom-table models.
 │   ├── REST/              # Controllers under flyaffiliate/v1.
 │   ├── DependencyManagement/ # The container and service providers.
