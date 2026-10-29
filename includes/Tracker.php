@@ -24,7 +24,7 @@ use FlyAffiliate\Dependencies\Appsero\Insights as AppseroInsights;
  * once a week: what the notice lists, plus the counts in `get_extra_data()`.
  * Not to be confused with `Tracking\Tracker`, the referral tracker.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Tracker implements Hookable {
 
@@ -47,7 +47,7 @@ class Tracker implements Hookable {
 	 *
 	 * The SDK's notice, opt-in links, weekly send and deactivation survey.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -58,7 +58,7 @@ class Tracker implements Hookable {
 	/**
 	 * Whether the site allows usage data to be sent.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -69,7 +69,7 @@ class Tracker implements Hookable {
 	/**
 	 * Allow sending, and send now.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -80,7 +80,7 @@ class Tracker implements Hookable {
 	/**
 	 * Stop sending.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -95,7 +95,7 @@ class Tracker implements Hookable {
 	 * the SDK is set up while the plugin file loads; FlyAffiliate sets it up on
 	 * `plugins_loaded`, so `FlyAffiliate_Plugin::activate()` asks here.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -107,7 +107,7 @@ class Tracker implements Hookable {
 	 * What FlyAffiliate adds to the SDK's data: counts and versions, nothing
 	 * about an affiliate or a visitor.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, int|string|null>
 	 */
@@ -124,7 +124,7 @@ class Tracker implements Hookable {
 	/**
 	 * The SDK's insights, built once.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return AppseroInsights
 	 */

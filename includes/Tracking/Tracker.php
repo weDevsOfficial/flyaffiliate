@@ -22,7 +22,7 @@ use FlyAffiliate\Models\Affiliate;
  * lives for the attribution window (the `cookie_duration` setting); the order
  * attribution reads it at checkout. The last link clicked wins.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Tracker implements Hookable {
 
@@ -36,7 +36,7 @@ class Tracker implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -48,7 +48,7 @@ class Tracker implements Hookable {
 	/**
 	 * The query variable a referral link carries.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -61,7 +61,7 @@ class Tracker implements Hookable {
 	/**
 	 * Record the visit and set the cookie when the request carries a referral.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -89,7 +89,7 @@ class Tracker implements Hookable {
 		/**
 		 * Filters whether this request is tracked as a visit.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param bool      $track     Default true.
 		 * @param Affiliate $affiliate The affiliate the link belongs to.
@@ -126,7 +126,7 @@ class Tracker implements Hookable {
 		/**
 		 * Fires after a referral visit is recorded.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param \FlyAffiliate\Models\Visit $visit     The visit.
 		 * @param Affiliate                  $affiliate The affiliate.
@@ -137,7 +137,7 @@ class Tracker implements Hookable {
 	/**
 	 * The affiliate and visit the current visitor is attributed to, if any.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array{affiliate_id: int, visit_id: int}|null Null when there is no valid cookie.
 	 */
@@ -151,7 +151,7 @@ class Tracker implements Hookable {
 	/**
 	 * Build a signed cookie value.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $affiliate_id Affiliate id.
 	 * @param int $visit_id     Visit id.
@@ -167,7 +167,7 @@ class Tracker implements Hookable {
 	/**
 	 * Verify and parse a cookie value.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $value The raw cookie value.
 	 *
@@ -196,7 +196,7 @@ class Tracker implements Hookable {
 	/**
 	 * Set the attribution cookie for the attribution window.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $affiliate_id Affiliate id.
 	 * @param int $visit_id     Visit id.
@@ -232,7 +232,7 @@ class Tracker implements Hookable {
 	/**
 	 * The page the visitor landed on, without the referral variable.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $variable The referral variable.
 	 *
@@ -253,7 +253,7 @@ class Tracker implements Hookable {
 	 * a second time. A saved referral link finds its visits by this value, so
 	 * both go through here.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $request_uri The path and query string, e.g. `/shop/?orderby=price`.
 	 * @param string $variable    The referral variable, which is left out.
@@ -271,7 +271,7 @@ class Tracker implements Hookable {
 	/**
 	 * The visitor's IP address, for the hashed fingerprint.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */

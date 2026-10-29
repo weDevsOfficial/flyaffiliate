@@ -23,14 +23,14 @@ use WP_REST_Request;
  * request, so there is no parameter to tamper with — an affiliate cannot ask for
  * another affiliate's rows because there is nowhere to ask.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 abstract class AffiliateBaseController extends BaseController {
 
 	/**
 	 * The calling user's affiliate record, or null.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return Affiliate|null
 	 */
@@ -47,7 +47,7 @@ abstract class AffiliateBaseController extends BaseController {
 	/**
 	 * Whether the caller is an active affiliate acting on their own data.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -78,7 +78,7 @@ abstract class AffiliateBaseController extends BaseController {
 	/**
 	 * Permission callback for reading a collection.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -91,7 +91,7 @@ abstract class AffiliateBaseController extends BaseController {
 	/**
 	 * Permission callback for reading one item.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *

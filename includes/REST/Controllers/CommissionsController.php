@@ -23,7 +23,7 @@ use WP_REST_Server;
  *
  * A payout is what pays commissions; an admin may still record one as paid by hand, as in SliceWP.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class CommissionsController extends AdminBaseController {
 
@@ -37,7 +37,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * Register the routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -97,7 +97,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * List commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -135,7 +135,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * Get one commission.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -150,7 +150,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * Add a commission by hand.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -186,7 +186,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * Edit a commission: its amount, reference, reference amount, type or status.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -219,7 +219,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * Delete an unpaid commission.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -251,7 +251,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * Turn a commission into a response.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission      $item    The commission.
 	 * @param WP_REST_Request $request The request.
@@ -294,7 +294,7 @@ class CommissionsController extends AdminBaseController {
 	 * The affiliate's own routes (`/me/…`) reuse this controller's shape, so
 	 * the route tells which screen is asking.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission           $item    The commission.
 	 * @param WP_REST_Request|null $request The request.
@@ -313,7 +313,7 @@ class CommissionsController extends AdminBaseController {
 		 * for out of the vendor's earning, say. The admin's screens and the
 		 * affiliate's dashboard show it as an info tip beside the amount.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string     $note       Default empty: no tip.
 		 * @param Commission $commission The commission.
@@ -328,7 +328,7 @@ class CommissionsController extends AdminBaseController {
 	 * A reference that points at nothing — a manual commission's free-form
 	 * reference, or an order deleted since — is shown as a number, not a link.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $item The commission.
 	 *
@@ -343,7 +343,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * The links for one commission.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $item The commission.
 	 *
@@ -372,7 +372,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -519,7 +519,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -581,7 +581,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * The 404 for a missing commission.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return WP_Error
 	 */

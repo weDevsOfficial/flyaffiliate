@@ -20,14 +20,14 @@ use FlyAffiliate\Models\Visit;
  * work and lives in `Tracker`. This class is what the screens, the controllers
  * and the tracker itself write and read through.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager {
 
 	/**
 	 * Get a visit by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $visit_id Visit id.
 	 *
@@ -40,7 +40,7 @@ class Manager {
 	/**
 	 * Query visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::query()}.
 	 *
@@ -53,7 +53,7 @@ class Manager {
 	/**
 	 * Count visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::count()}.
 	 *
@@ -69,7 +69,7 @@ class Manager {
 	 * The IP address and user agent are hashed here, on the way in, so no caller
 	 * can store the raw values by mistake (ADR-0007).
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args {
 	 *     Visit data.
@@ -111,7 +111,7 @@ class Manager {
 	/**
 	 * Mark a visit as having led to an order.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $visit_id Visit id.
 	 * @param int $order_id The order.
@@ -134,7 +134,7 @@ class Manager {
 	/**
 	 * Row counts for the All / Converted / Not converted tabs.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args Query arguments applied to every count.
 	 *

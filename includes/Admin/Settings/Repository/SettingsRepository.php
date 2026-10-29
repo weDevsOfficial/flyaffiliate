@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This is the only source of truth for settings. There is no per-group option
  * and no legacy bridge: the plugin is new, so nothing needs migrating.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 final class SettingsRepository implements SettingsRepositoryInterface {
 
@@ -39,7 +39,7 @@ final class SettingsRepository implements SettingsRepositoryInterface {
 	 * Subscribe to the option's own hooks so a write that bypasses this class
 	 * (a migration, WP-CLI, a test) still invalidates the snapshot.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 */
 	public function __construct() {
 		add_action( 'update_option_' . self::OPTION_KEY, [ $this, 'flush_cache' ] );
@@ -50,7 +50,7 @@ final class SettingsRepository implements SettingsRepositoryInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -66,7 +66,7 @@ final class SettingsRepository implements SettingsRepositoryInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $slice Field id => value.
 	 *
@@ -80,7 +80,7 @@ final class SettingsRepository implements SettingsRepositoryInterface {
 		 *
 		 * Return an empty array to block the write.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<string, mixed> $slice   Incoming values, keyed by field id.
 		 * @param array<string, mixed> $current Values currently stored.
@@ -107,7 +107,7 @@ final class SettingsRepository implements SettingsRepositoryInterface {
 		/**
 		 * Fires after settings changed.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<string, mixed> $changed The keys that changed, with their new values.
 		 * @param array<string, mixed> $merged  The full payload now stored.
@@ -120,7 +120,7 @@ final class SettingsRepository implements SettingsRepositoryInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

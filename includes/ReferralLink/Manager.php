@@ -28,14 +28,14 @@ use WP_Error;
  * visits whose landing page is the link's page, so removing a link and saving
  * it again brings its history back.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager implements Hookable {
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -46,7 +46,7 @@ class Manager implements Hookable {
 	/**
 	 * Get a referral link by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $link_id Referral link id.
 	 *
@@ -59,7 +59,7 @@ class Manager implements Hookable {
 	/**
 	 * Query referral links.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::query()}.
 	 *
@@ -72,7 +72,7 @@ class Manager implements Hookable {
 	/**
 	 * Count referral links.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::count()}.
 	 *
@@ -85,7 +85,7 @@ class Manager implements Hookable {
 	/**
 	 * The affiliate's saved link to a page, if there is one.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int    $affiliate_id The affiliate.
 	 * @param string $url          The page, in any form {@see self::normalize_url()} accepts.
@@ -112,7 +112,7 @@ class Manager implements Hookable {
 	 *
 	 * Saving the same page twice returns the link saved the first time.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int    $affiliate_id The affiliate.
 	 * @param string $url          The page, in any form {@see self::normalize_url()} accepts.
@@ -152,7 +152,7 @@ class Manager implements Hookable {
 		/**
 		 * Fires after an affiliate saves a referral link.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param ReferralLink $link         The saved link.
 		 * @param int          $affiliate_id The affiliate.
@@ -168,7 +168,7 @@ class Manager implements Hookable {
 	 * The link keeps working wherever it was shared, and its visits and
 	 * commissions are untouched.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $link_id Referral link id.
 	 *
@@ -189,7 +189,7 @@ class Manager implements Hookable {
 			/**
 			 * Fires after a referral link is removed from its affiliate's list.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param int          $link_id The id of the removed link.
 			 * @param ReferralLink $link    The link as it was before removal.
@@ -206,7 +206,7 @@ class Manager implements Hookable {
 	 * Unlike commissions and visits, a saved link is not a financial record;
 	 * with its affiliate gone there is no list to show it in.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $affiliate_id The deleted affiliate.
 	 *
@@ -228,7 +228,7 @@ class Manager implements Hookable {
 	 * page must be on this site, `www.` or not, and inside the directory
 	 * WordPress lives in; a link anywhere else could never be tracked.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $url The page.
 	 *
@@ -276,7 +276,7 @@ class Manager implements Hookable {
 	/**
 	 * The landing URL a visit through this link is recorded under.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param ReferralLink $link The link.
 	 *
@@ -296,7 +296,7 @@ class Manager implements Hookable {
 	 * A visit belongs to a link when it is the link's affiliate's and landed on
 	 * the link's page, whichever way the visitor reached it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param ReferralLink[] $links The links.
 	 *
@@ -370,7 +370,7 @@ class Manager implements Hookable {
 	/**
 	 * A host without a leading `www.`, so www and bare domains match.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $host A hostname.
 	 *

@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * (`Admin\Notices\Manager`), so an override of this template must not
 	 * add another one.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 */
 	do_action( 'flyaffiliate_before_admin_app' );
 	?>

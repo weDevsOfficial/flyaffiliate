@@ -105,6 +105,7 @@ npm run phpunit             # PHPUnit inside wp-env (env:start first)
 npm run test:e2e            # Playwright against the wp-env site
 npm run plugin-check        # WordPress.org Plugin Check against the built zip
 npm run release             # Builds build/flyaffiliate-v<version>.zip honouring .distignore
+npm run version             # Stamps package.json's version on every FLYAFFILIATE_SINCE (the release commit only)
 ```
 
 Every change must pass Plugin Check with zero errors and zero warnings before it ships: the plugin is distributed on WordPress.org.

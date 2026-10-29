@@ -19,7 +19,7 @@ use FlyAffiliate\DependencyManagement\BaseServiceProvider;
  * A marketplace integration adds its own provider from a listener attached
  * here; none ships on this branch.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class IntegrationServiceProvider extends BaseServiceProvider {
 
@@ -59,7 +59,7 @@ class IntegrationServiceProvider extends BaseServiceProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * says when a payout may take the commission, not when it changes status
  * (ADR-0014).
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Commission extends BaseModel {
 
@@ -137,7 +137,7 @@ class Commission extends BaseModel {
 	/**
 	 * Every commission status.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Status => translated label.
 	 */
@@ -153,7 +153,7 @@ class Commission extends BaseModel {
 	/**
 	 * Every commission source.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Source => translated label.
 	 */
@@ -173,7 +173,7 @@ class Commission extends BaseModel {
 	 * out through the filter. Rows that already carry an origin keep their
 	 * label from `get_sources()`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Origin => label, the preferred one first.
 	 */
@@ -181,7 +181,7 @@ class Commission extends BaseModel {
 		/**
 		 * Filters the origins open to a new commission.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<string, string> $sources Origin => label. Manual, plus what each integration adds.
 		 */
@@ -193,7 +193,7 @@ class Commission extends BaseModel {
 	/**
 	 * Every commission type.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Type => translated label.
 	 */
@@ -208,7 +208,7 @@ class Commission extends BaseModel {
 	 *
 	 * A commission without a maturity date has nothing to wait for.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $now The moment to compare with, `Y-m-d H:i:s` in GMT. Defaults to now.
 	 *
@@ -231,7 +231,7 @@ class Commission extends BaseModel {
 	 * send, so the rows under it hold still: the payment is what changes them,
 	 * and `Payout\Manager::remove_commission()` is how one gets out.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -242,7 +242,7 @@ class Commission extends BaseModel {
 	/**
 	 * The commission amount in integer cents.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return int
 	 */
@@ -255,7 +255,7 @@ class Commission extends BaseModel {
 	 *
 	 * Goes through `wc_get_order()` so the lookup is correct under HPOS.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return \WC_Order|null
 	 */

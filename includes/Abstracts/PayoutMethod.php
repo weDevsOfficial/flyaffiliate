@@ -26,7 +26,7 @@ use WP_Error;
  * details elsewhere overrides `get_affiliate_details()` and
  * `save_affiliate_details()`.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 abstract class PayoutMethod implements PayoutMethodContract {
 
@@ -40,7 +40,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -51,7 +51,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -62,7 +62,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -73,7 +73,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -84,7 +84,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -114,7 +114,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	 * A field left out of `$details` keeps its stored value. A required field
 	 * that ends up empty refuses the whole save.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate            $affiliate The affiliate.
 	 * @param array<string, mixed> $details   Field id => value.
@@ -167,7 +167,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	 *
 	 * Every required detail must be there.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -194,7 +194,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	 *
 	 * The first detail the affiliate gave, else their payment email.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -219,7 +219,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	 *
 	 * None: the affiliate gives their own details.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -232,7 +232,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string   $batch_key The payout.
 	 * @param Payout[] $payouts   The payments.
@@ -244,7 +244,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout $payout The payment.
 	 *
@@ -262,7 +262,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts The payments.
 	 *
@@ -273,7 +273,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts The payments.
 	 *
@@ -286,7 +286,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * The user meta key this method's details are kept under.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -297,7 +297,7 @@ abstract class PayoutMethod implements PayoutMethodContract {
 	/**
 	 * Clean one detail by its field type.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $field The field definition.
 	 * @param mixed $value  The value given.

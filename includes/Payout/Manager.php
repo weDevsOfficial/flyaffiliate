@@ -41,14 +41,14 @@ use WP_Error;
  * when the money arrives. While its transfer is in flight a payment is
  * *locked*: nothing here changes it by hand.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager {
 
 	/**
 	 * Get a payout row by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $payout_id Payout id.
 	 *
@@ -61,7 +61,7 @@ class Manager {
 	/**
 	 * Query payout rows.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::query()}.
 	 *
@@ -74,7 +74,7 @@ class Manager {
 	/**
 	 * Count payout rows.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::count()}.
 	 *
@@ -87,7 +87,7 @@ class Manager {
 	/**
 	 * Every row in a batch.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $batch_key The batch key.
 	 *
@@ -111,7 +111,7 @@ class Manager {
 	/**
 	 * Work out what a batch would pay, without writing anything.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args {
 	 *     Batch selection.
@@ -261,7 +261,7 @@ class Manager {
 	/**
 	 * The per-payout method choices that name a method switched on.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $overrides Affiliate id => method id.
 	 *
@@ -289,7 +289,7 @@ class Manager {
 	 * empty it is often because the order is not paid yet, so the screen can
 	 * say so instead of leaving the admin guessing.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args The parsed selection.
 	 *
@@ -337,7 +337,7 @@ class Manager {
 	/**
 	 * Create a batch: one unpaid payment per affiliate, with every commission in it attached.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args Batch selection, as for {@see preview()}, plus:
 	 *
@@ -412,7 +412,7 @@ class Manager {
 			/**
 			 * Fires after an affiliate's payment is created, unpaid, with its commissions attached.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param Payout       $payout      The payout row.
 			 * @param Commission[] $commissions The commissions it covers.
@@ -423,7 +423,7 @@ class Manager {
 		/**
 		 * Fires after a whole payout batch is recorded.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string   $batch_key The batch key.
 		 * @param Payout[] $payouts   Every row in the batch.
@@ -442,7 +442,7 @@ class Manager {
 	/**
 	 * Whether a preview still pays exactly what the admin saw.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $rows     The preview's rows, by affiliate id.
 	 * @param array $expected Affiliate id => amount.
@@ -476,7 +476,7 @@ class Manager {
 	 * both take the same commission (CONTEXT.md money rule 7): the second
 	 * changes no row and is unwound.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission, unpaid and free.
 	 * @param int        $payout_id  The payment.
@@ -515,7 +515,7 @@ class Manager {
 	 * A method that throws leaves its payments unpaid with nothing sent; the
 	 * payout page offers to send them again.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string   $batch_key The payout.
 	 * @param Payout[] $payouts   Its payments.
@@ -538,7 +538,7 @@ class Manager {
 				 *
 				 * Its payments stay unpaid with nothing sent, and can be sent again.
 				 *
-				 * @since FLYAFFILIATE_SINCE
+				 * @since 1.0.0
 				 *
 				 * @param string     $method_id The method.
 				 * @param string     $batch_key The payout.
@@ -552,7 +552,7 @@ class Manager {
 	/**
 	 * Payments grouped by the method that pays them.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts Payments.
 	 *
@@ -577,7 +577,7 @@ class Manager {
 	 * after its transfer failed, say — records it as Manual, so the payment
 	 * says how it was really paid.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int  $payout_id The payment.
 	 * @param bool $by_method True when the payment's own method settles it: the money arrived.
@@ -631,7 +631,7 @@ class Manager {
 		/**
 		 * Fires after a payment is marked paid and its commissions with it.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Payout $payout The payment.
 		 */
@@ -645,7 +645,7 @@ class Manager {
 	 * commissions go back to unpaid. They stay attached, so nothing pays them
 	 * twice.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * A payment its method sent cannot be marked unpaid by hand; the method
 	 * does it when the money comes back.
@@ -694,7 +694,7 @@ class Manager {
 		/**
 		 * Fires after a payment is marked unpaid again and its commissions with it.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Payout $payout The payment.
 		 */
@@ -709,7 +709,7 @@ class Manager {
 	 * Payments an automatic method pays are left to it: they are paid when
 	 * the money arrives, or sent again from the payout page.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $batch_key The batch.
 	 *
@@ -744,7 +744,7 @@ class Manager {
 	 * re-summed first, so a commission corrected while it waited is sent at
 	 * its new amount.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $payout_id The payment.
 	 *
@@ -792,7 +792,7 @@ class Manager {
 		/**
 		 * Fires after a payment is handed to its method to be sent again.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Payout $payout The payment.
 		 */
@@ -807,7 +807,7 @@ class Manager {
 	 * The payout page calls this while transfers are in flight, so a site
 	 * that does not receive the service's notifications still settles.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $batch_key The payout.
 	 *
@@ -835,7 +835,7 @@ class Manager {
 	/**
 	 * Where a payout stands: every payment counted by what is happening to it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $batch_key The payout.
 	 *
@@ -867,7 +867,7 @@ class Manager {
 	 * was never sent, or its method is gone; `unpaid` when what is left is
 	 * waiting to be paid by hand.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[]   $payouts The payout's payments.
 	 * @param array|null $states  Payment id => transfer state, when already loaded.
@@ -953,7 +953,7 @@ class Manager {
 		 * translated and formatted: the payout's page shows it as one more
 		 * card beside its totals, the hint behind the card's info icon.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array    $summary The summary.
 		 * @param Payout[] $payouts The payout's payments.
@@ -965,7 +965,7 @@ class Manager {
 	/**
 	 * The refusal a hand-made change gets while a payment is locked, or null.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout     $payout The payment.
 	 * @param array|null $states The payments' transfer states, when already fetched.
@@ -981,7 +981,7 @@ class Manager {
 	/**
 	 * Take a commission out of its payment; the row stays as it is otherwise.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission.
 	 *
@@ -995,7 +995,7 @@ class Manager {
 	/**
 	 * Whether a payment is locked against changes by hand.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout $payout The payment.
 	 *
@@ -1014,7 +1014,7 @@ class Manager {
 	 * payment is left as it was paid, and so is a locked one: its method is
 	 * sending the amount it was given.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $payout_id The payment.
 	 *
@@ -1048,7 +1048,7 @@ class Manager {
 	/**
 	 * Take a commission out of an unpaid payment, so the next batch picks it up.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $payout_id     The payment.
 	 * @param int $commission_id The commission.
@@ -1090,7 +1090,7 @@ class Manager {
 		/**
 		 * Fires after a commission is taken out of an unpaid payment.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Payout     $payout     The payment.
 		 * @param Commission $commission The commission, no longer attached.
@@ -1103,7 +1103,7 @@ class Manager {
 	/**
 	 * Delete an unpaid payment. Its commissions are detached and stay unpaid.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $payout_id The payment.
 	 *
@@ -1139,7 +1139,7 @@ class Manager {
 		/**
 		 * Fires after an unpaid payment is deleted and its commissions detached.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param int    $payout_id The deleted payment's id.
 		 * @param Payout $payout    The payment as it was.
@@ -1152,7 +1152,7 @@ class Manager {
 	/**
 	 * Delete a whole batch, as long as none of its payments has been paid.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $batch_key The batch.
 	 *
@@ -1197,7 +1197,7 @@ class Manager {
 	 * which refuses an automatic move on a row inside a payment and any move
 	 * while the payment is locked: the payment itself is the one mover here.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission.
 	 * @param string     $status     `paid` or `unpaid`.
@@ -1227,7 +1227,7 @@ class Manager {
 	 * The model layer writes one row at a time with no transaction, so a batch
 	 * that fails midway is taken apart here rather than left behind.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $saved   The payments already written.
 	 * @param Payout   $current The payment being written when it failed.
@@ -1247,7 +1247,7 @@ class Manager {
 	/**
 	 * The error for a payment that does not exist.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return WP_Error
 	 */
@@ -1258,7 +1258,7 @@ class Manager {
 	/**
 	 * The error for a write that failed.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return WP_Error
 	 */
@@ -1269,7 +1269,7 @@ class Manager {
 	/**
 	 * The batches, newest first, one summary per batch key.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $per_page Batches per page.
 	 * @param int $page     1-based page.
@@ -1353,7 +1353,7 @@ class Manager {
 	/**
 	 * The payout method registry.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return PayoutMethods
 	 */
@@ -1364,7 +1364,7 @@ class Manager {
 	/**
 	 * The error for a change a locked payment does not allow.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout $payout The payment.
 	 * @param string $lock   Why it is locked.

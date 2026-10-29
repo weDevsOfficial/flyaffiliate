@@ -28,7 +28,7 @@ use FlyAffiliate\Contracts\Hookable;
  * WordPress's own script moves the rest in there too. FlyAffiliate's own print
  * above the app instead (`flyaffiliate_before_admin_app`).
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager implements Hookable {
 
@@ -56,7 +56,7 @@ class Manager implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -75,7 +75,7 @@ class Manager implements Hookable {
 	 * after the first `.wp-header-end`; the one in here is the page's only
 	 * one, so those end up hidden too.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -93,7 +93,7 @@ class Manager implements Hookable {
 	/**
 	 * Close the hidden container, after every `all_admin_notices` callback.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -110,7 +110,7 @@ class Manager implements Hookable {
 	/**
 	 * The notices to show on this request.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{message: string, type: string, dismissible: bool}>
 	 */
@@ -118,7 +118,7 @@ class Manager implements Hookable {
 		/**
 		 * Filters the FlyAffiliate admin notices for the current request.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $notices Notice id => definition. `type` is one of
 		 *                       `info`, `success`, `warning`, `error`.
@@ -132,7 +132,7 @@ class Manager implements Hookable {
 	 * `inline` keeps WordPress's admin script from moving them into the
 	 * hidden container with everyone else's.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -188,7 +188,7 @@ class Manager implements Hookable {
 	 * The `is-dismissible` class hides a notice for the current page load only.
 	 * This link is what makes the dismissal stick.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $notice_id Notice id.
 	 *
@@ -216,7 +216,7 @@ class Manager implements Hookable {
 	/**
 	 * Record that the current user dismissed a notice.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -240,7 +240,7 @@ class Manager implements Hookable {
 	/**
 	 * Whether a user has dismissed a notice.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $notice_id Notice id.
 	 * @param int    $user_id   User id.
@@ -254,7 +254,7 @@ class Manager implements Hookable {
 	/**
 	 * Whether the current screen is FlyAffiliate's admin app.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */

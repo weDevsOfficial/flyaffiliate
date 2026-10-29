@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * ids, unknown types, dangling parent pointers, duplicate field ids and
  * dependencies on fields that do not exist.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class SchemaValidator {
 
@@ -30,7 +30,7 @@ class SchemaValidator {
 	/**
 	 * Validate a flat schema.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<int, array<string, mixed>> $elements Flat schema.
 	 *

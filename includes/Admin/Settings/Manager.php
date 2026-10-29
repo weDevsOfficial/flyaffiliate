@@ -25,7 +25,7 @@ use WP_Error;
  *
  * Read settings through `flyaffiliate_get_option()`, never `get_option()`.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager {
 
@@ -46,7 +46,7 @@ class Manager {
 	/**
 	 * Construct the service.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param SettingsRegistry            $registry   The schema.
 	 * @param SettingsRepositoryInterface $repository Storage.
@@ -59,7 +59,7 @@ class Manager {
 	/**
 	 * The schema registry.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return SettingsRegistry
 	 */
@@ -70,7 +70,7 @@ class Manager {
 	/**
 	 * Read one setting.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id       Field id.
 	 * @param mixed  $fallback Returned when the field is neither stored nor declared.
@@ -96,7 +96,7 @@ class Manager {
 	/**
 	 * Whether a switch is on.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id Field id.
 	 *
@@ -111,7 +111,7 @@ class Manager {
 	/**
 	 * Write one setting through its field's rules.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id    Field id.
 	 * @param mixed  $value Value.
@@ -131,7 +131,7 @@ class Manager {
 	 * stores nothing and returns a `WP_Error` whose data carries every field's
 	 * messages under `errors`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $values   Field id => submitted value. Dot paths are reduced to their last segment.
 	 * @param string               $scope_id Restrict the save to one page or subpage. Empty accepts any field.
@@ -191,7 +191,7 @@ class Manager {
 		/**
 		 * Fires before settings are stored.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<string, mixed> $sanitized Values about to be stored, keyed by field id.
 		 * @param string               $scope_id  The page or subpage being saved, or empty.
@@ -204,7 +204,7 @@ class Manager {
 		/**
 		 * Fires after settings are stored.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<string, mixed> $sanitized Values that were stored, keyed by field id.
 		 * @param string               $scope_id  The page or subpage that was saved, or empty.
@@ -221,7 +221,7 @@ class Manager {
 	 * Rules come from the field's `validations` (plugin-ui's shape, so the same
 	 * rule runs in the browser and here) and its optional `validate_callback`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $field  The field element.
 	 * @param mixed                $value  Submitted value.
@@ -263,7 +263,7 @@ class Manager {
 		/**
 		 * Filters a field's validation errors.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string[]             $errors Messages so far; empty means valid.
 		 * @param array<string, mixed> $field  The field element.
@@ -276,7 +276,7 @@ class Manager {
 	/**
 	 * One validation rule.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $rule    Rule name.
 	 * @param mixed  $value   Submitted value.
@@ -329,7 +329,7 @@ class Manager {
 	 *
 	 * A field's own `sanitize_callback` wins; otherwise the variant decides.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $field The field element.
 	 * @param mixed                $value Submitted value.
@@ -386,7 +386,7 @@ class Manager {
 				/**
 				 * Filters the sanitized value of a field variant this class does not know.
 				 *
-				 * @since FLYAFFILIATE_SINCE
+				 * @since 1.0.0
 				 *
 				 * @param mixed                $value   The value, already passed through `sanitize_text_field()` when a string.
 				 * @param array<string, mixed> $field   The field element.

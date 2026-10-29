@@ -24,14 +24,14 @@ use FlyAffiliate\Models\Commission;
  * same way — while the hooks that act on orders wait for WooCommerce. A
  * future platform integration adds its own origin and subpage the same way.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Integration implements Hookable {
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 */
 	public function register_hooks(): void {
 		add_filter( 'flyaffiliate_available_commission_sources', [ $this, 'add_source' ] );
@@ -47,7 +47,7 @@ class Integration implements Hookable {
 	 * is not installed: nothing would ever confirm its order, so a `pending`
 	 * row under that origin could never become unpaid (`OrderStatusSync`).
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, string> $sources Origin => label.
 	 *
@@ -62,7 +62,7 @@ class Integration implements Hookable {
 	/**
 	 * The Integrations → WooCommerce subpage.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<int, array<string, mixed>> $elements Flat schema elements.
 	 *

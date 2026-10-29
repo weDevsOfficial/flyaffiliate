@@ -14,14 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * A service provider registers a related group of entries into the container.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 interface ServiceProviderInterface {
 
 	/**
 	 * Register this provider's entries into the container.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -30,7 +30,7 @@ interface ServiceProviderInterface {
 	/**
 	 * Whether this provider registers the given identifier or tag.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $alias Identifier or tag.
 	 *
@@ -41,7 +41,7 @@ interface ServiceProviderInterface {
 	/**
 	 * Give the provider its container.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Container $container The container.
 	 *
@@ -52,7 +52,7 @@ interface ServiceProviderInterface {
 	/**
 	 * Get the container.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return Container
 	 */
@@ -61,7 +61,7 @@ interface ServiceProviderInterface {
 	/**
 	 * A stable name for this provider, used to register it only once.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */

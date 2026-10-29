@@ -16,7 +16,7 @@ use RuntimeException;
 /**
  * Thrown when the container cannot build what it was asked for.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class ContainerException extends RuntimeException {
 }

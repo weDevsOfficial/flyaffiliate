@@ -16,7 +16,7 @@ use FlyAffiliate\Contracts\Hookable;
 /**
  * Registers every FlyAffiliate REST controller on `rest_api_init`.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager implements Hookable {
 
@@ -30,7 +30,7 @@ class Manager implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -41,7 +41,7 @@ class Manager implements Hookable {
 	/**
 	 * The controllers to register.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return class-string[]
 	 */
@@ -61,7 +61,7 @@ class Manager implements Hookable {
 		/**
 		 * Filters the FlyAffiliate REST controllers.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param class-string[] $controllers Controller class names.
 		 */
@@ -71,7 +71,7 @@ class Manager implements Hookable {
 	/**
 	 * Register the routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

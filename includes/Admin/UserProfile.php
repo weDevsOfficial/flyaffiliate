@@ -19,14 +19,14 @@ use WP_User;
  * Lets an admin make any user an affiliate — or stop them being one — from
  * the Users screen, and set their status there.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class UserProfile implements Hookable {
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -40,7 +40,7 @@ class UserProfile implements Hookable {
 	/**
 	 * Render the section.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_User $user The user being edited.
 	 *
@@ -67,7 +67,7 @@ class UserProfile implements Hookable {
 	 * these actions fire; the capability is re-checked here because a user
 	 * editing their own profile reaches `personal_options_update` too.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $user_id The user being edited.
 	 *

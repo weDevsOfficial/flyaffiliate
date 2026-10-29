@@ -22,7 +22,7 @@ use FlyAffiliate\Models\Visit;
  * an optional GMT date range on `created_at`. Rejected commissions count for
  * nothing; a paid commission is revenue that has been paid out.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Stats {
 
@@ -51,7 +51,7 @@ class Stats {
 	/**
 	 * Everything the Dashboard shows, for a range.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  GMT `Y-m-d H:i:s` lower bound, or empty.
 	 * @param string $before GMT `Y-m-d H:i:s` upper bound, or empty.
@@ -81,7 +81,7 @@ class Stats {
 	 * Money: what referred orders were worth, what that cost in commissions,
 	 * what has been paid and what is still owed.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -128,7 +128,7 @@ class Stats {
 	/**
 	 * Counts: commissions earned, visits, how many converted.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -172,7 +172,7 @@ class Stats {
 	 *
 	 * Without a range (All time), from the first day with a visit to today.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -227,7 +227,7 @@ class Stats {
 	/**
 	 * The affiliates who earned the most, with their commission and visit counts.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -274,7 +274,7 @@ class Stats {
 	/**
 	 * The products that earned the most commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -318,7 +318,7 @@ class Stats {
 	/**
 	 * The newest visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -356,7 +356,7 @@ class Stats {
 	/**
 	 * The newest commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $after  Lower bound.
 	 * @param string $before Upper bound.
@@ -396,7 +396,7 @@ class Stats {
 	/**
 	 * How many affiliates there are, and how many wait for review.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array{total: int, pending: int, active: int, pending_notice: bool}
 	 */
@@ -414,7 +414,7 @@ class Stats {
 	/**
 	 * The newest affiliate waiting for review.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return int The affiliate id, or 0 when nobody is waiting.
 	 */
@@ -439,7 +439,7 @@ class Stats {
 	 * Closing it quiets the notice for two days. Someone new applying in the
 	 * meantime brings it back, because that is news the admin has not seen.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -460,7 +460,7 @@ class Stats {
 	/**
 	 * Record that the current user closed the pending-review notice.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -478,7 +478,7 @@ class Stats {
 	/**
 	 * A WHERE clause for the range, with its placeholder values.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $column The date column, table alias included when joined.
 	 * @param string $after  Lower bound.

@@ -24,7 +24,7 @@ use WP_REST_Server;
  * two things it needs that are not settings: the done flag, and Share
  * Essentials, the Appsero opt-in Dokan Lite's wizard asks for.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class SetupController extends AdminBaseController {
 
@@ -38,7 +38,7 @@ class SetupController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -67,7 +67,7 @@ class SetupController extends AdminBaseController {
 	 * Mark the wizard done, and opt in to Appsero or out of it as Share
 	 * Essentials says.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -96,7 +96,7 @@ class SetupController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $item    The state.
 	 * @param WP_REST_Request      $request The request.
@@ -113,7 +113,7 @@ class SetupController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $item The state.
 	 *
@@ -130,7 +130,7 @@ class SetupController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, mixed>
 	 */

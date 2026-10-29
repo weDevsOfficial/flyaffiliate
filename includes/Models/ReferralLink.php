@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * variable on any page, so the link works whether or not a row exists, and
  * its visits are counted from the visits table rather than stored here.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class ReferralLink extends BaseModel {
 

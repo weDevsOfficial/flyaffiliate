@@ -80,6 +80,7 @@ npm run test:phpunit        # env:start → phpunit → env:stop
 
 # WordPress.org gate
 npm run release             # Builds build/flyaffiliate-v<version>.zip honouring .distignore
+npm run version             # Stamps package.json's version on every FLYAFFILIATE_SINCE (the release commit only)
 npm run plugin-check        # Runs Plugin Check against the built zip (wp-env)
 ```
 

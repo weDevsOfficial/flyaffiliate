@@ -41,7 +41,7 @@ use WP_REST_Response;
  * may give it to others (`flyaffiliate_analytics_report_path`) and take them
  * where they belong.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Analytics implements Hookable {
 
@@ -76,7 +76,7 @@ class Analytics implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -95,7 +95,7 @@ class Analytics implements Hookable {
 	 * In the header, so its page is added before WooCommerce's app, loaded in
 	 * the footer, builds its routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -126,7 +126,7 @@ class Analytics implements Hookable {
 	 * indicator only when the report declares it, and refuses a request for
 	 * one it does not list.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $properties The schema's properties: `totals` and `intervals`.
 	 *
@@ -158,7 +158,7 @@ class Analytics implements Hookable {
 	 * WooCommerce asks once for the period picked and once for the period it
 	 * is compared with.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed                $value      The value so far: none, the revenue report has no such total.
 	 * @param string               $stat       The indicator asked for.
@@ -193,7 +193,7 @@ class Analytics implements Hookable {
 	 * it is unlinked unless an integration gives it a page of its own. The link
 	 * is kept, empty when unlinked, because the dashboards read it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Response $response The indicator's response.
 	 *
@@ -217,7 +217,7 @@ class Analytics implements Hookable {
 		 * for anyone else. A marketplace integration may link it for a vendor
 		 * on their own dashboard and take them to their affiliates.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string $path The page's path, or empty for no link.
 		 */
@@ -232,7 +232,7 @@ class Analytics implements Hookable {
 	/**
 	 * Show the box right after net sales.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string[] $order Indicator ids, in the order they show.
 	 *
@@ -250,7 +250,7 @@ class Analytics implements Hookable {
 	/**
 	 * The vendor the total is narrowed to.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return int|null Null for the whole store.
 	 */
@@ -264,7 +264,7 @@ class Analytics implements Hookable {
 		 * that vendor — never another vendor for someone who cannot read the
 		 * store's reports.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param int|null $vendor_id Default null.
 		 */
@@ -276,7 +276,7 @@ class Analytics implements Hookable {
 	/**
 	 * Whether the current user may see the total.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int|null $vendor_id The vendor it is narrowed to, or null.
 	 *
@@ -296,7 +296,7 @@ class Analytics implements Hookable {
 	 * "Update now" included — as every other box does. Rejected commissions
 	 * are left out.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string   $after     The period's start, in the site's time zone. Empty for no start.
 	 * @param string   $before    The period's end, in the site's time zone. Empty for no end.
@@ -342,7 +342,7 @@ class Analytics implements Hookable {
 	/**
 	 * The `wc_order_stats` column WooCommerce Analytics dates its reports by.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string `date_paid` (WooCommerce's default), `date_created` or `date_completed`.
 	 */
@@ -360,7 +360,7 @@ class Analytics implements Hookable {
 	 * drafts and trashed orders, the statuses picked in its settings, and its
 	 * filter.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[] With the `wc-` prefix, as `wc_order_stats` stores them.
 	 */
@@ -384,7 +384,7 @@ class Analytics implements Hookable {
 	/**
 	 * A report's date, as `wc_order_stats` stores dates: in the site's time zone.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $date An ISO 8601 date, in the site's time zone unless it says otherwise.
 	 *

@@ -134,18 +134,23 @@ A. FlyAffiliate works on any WordPress site. Integrations are optional and switc
 
 == Changelog ==
 
-= v1.0.0 ( Sep 17, 2026 ) =
+= v1.0.0 ( Oct 29, 2026 ) =
 
 * **new:** Affiliates — email-only signup with a one-time activation link, an Affiliate user role, pending/active/inactive/suspended statuses, and an admin form with the payment email, website, promotion method and an optional welcome email
 * **new:** Tracking — a referral link per affiliate, a visit log with hashed visitor data, and a signed first-party cookie for the attribution window
+* **new:** Referral links — affiliates generate a link to any page of your site from their dashboard and keep the ones they use, each with its visit count; you see them on the affiliate's page
 * **new:** Commissions — one commission per order item at checkout (classic and block), a product → default rate hierarchy clamped to a maximum, shipping and tax excluded by choice, and self-referral blocked by default
 * **new:** Hold period — every commission carries the date its hold ends, fixed when it is created; a payout takes a commission only once that date has passed
-* **new:** Order sync — commissions follow the order: failed, cancelled and (optionally) refunded orders reject them, a recovered order restores them, a paid one is never reversed
+* **new:** Order sync — commissions follow the order: pending at checkout, unpaid once the order is paid; failed, cancelled and (optionally) refunded orders reject them, a recovered order restores them, a paid one is never reversed
 * **new:** Hand-entered commissions — affiliate, amount, reference order (checked against WooCommerce), reference amount, origin, date, type and status, on their own page, with the same fields on edit
-* **new:** Payouts — preview, create one payment per affiliate, mark paid or unpaid, take a commission out, delete an unpaid payment, export CSV
-* **new:** Admin — a React admin on weDevs' plugin UI: dashboard, affiliates, commissions, visits, payouts, settings and a setup wizard
-* **new:** Affiliate dashboard — `[flyaffiliate_dashboard]` with the referral link, balance, commissions, visits and payouts; `[flyaffiliate_register]` for signup
-* **new:** REST API under `flyaffiliate/v1` for affiliates, commissions, visits, payouts, settings and the affiliate's own data
+* **new:** Payouts — preview grouped by payout method, create one payment per affiliate, mark paid or unpaid, take a commission out, delete an unpaid payment, export CSV; each payment keeps the address it was sent to
+* **new:** Payout methods — Manual payouts to the affiliate's payment email, ready for more methods; affiliates choose how they are paid in their dashboard
+* **new:** WooCommerce Analytics — an Affiliate Commission box on Analytics → Overview that counts the orders the report counts
+* **new:** Admin — a React admin on weDevs' plugin UI: dashboard with a chart, affiliates, commissions, visits, payouts, settings and a setup wizard that opens on a first install only; other plugins' notices are kept off its screens
+* **new:** Extensions — a page that previews FlyAffiliate Pro's extensions while Pro is not active
+* **new:** Affiliate dashboard — `[flyaffiliate_dashboard]` with the referral link and a link generator, balance, commissions, visits, payouts and settings; `[flyaffiliate_register]` for signup
+* **new:** Usage data — opt-in Appsero Insights; nothing is sent until an administrator allows it (see Privacy)
+* **new:** REST API under `flyaffiliate/v1` for affiliates, commissions, visits, referral links, payouts, payout methods, settings and the affiliate's own data
 * **new:** WP-CLI `wp flyaffiliate seed` for demo data
 
 == Upgrade Notice ==

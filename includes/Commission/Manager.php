@@ -27,14 +27,14 @@ use WP_Error;
  * WooCommerce-origin commission refers to an order that exists; the reference
  * is checked on create and edit.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager {
 
 	/**
 	 * Get a commission by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $commission_id Commission id.
 	 *
@@ -47,7 +47,7 @@ class Manager {
 	/**
 	 * Query commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::query()}.
 	 *
@@ -60,7 +60,7 @@ class Manager {
 	/**
 	 * Count commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::count()}.
 	 *
@@ -89,7 +89,7 @@ class Manager {
 	 * commission added by hand stays pending, as in SliceWP. The hold period
 	 * counts from the date given, whatever the status (ADR-0014).
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args {
 	 *     Commission data.
@@ -171,7 +171,7 @@ class Manager {
 		/**
 		 * Fires after a commission is created, from any source.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Commission $commission The commission.
 		 */
@@ -196,7 +196,7 @@ class Manager {
 	 * keeps its amount once paid. A status change goes through `set_status()`,
 	 * so the transition rules and the status-change hook hold.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int   $commission_id Commission id.
 	 * @param array $args {
@@ -286,7 +286,7 @@ class Manager {
 			 * Not fired for a status change alone; that is
 			 * `flyaffiliate_commission_status_changed`.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param Commission $commission The commission, saved.
 			 */
@@ -309,7 +309,7 @@ class Manager {
 	 * unpaid commissions; a paid one keeps the amount it was paid with, as in
 	 * SliceWP, and the edit corrects the commission's own record only.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission, saved.
 	 *
@@ -324,7 +324,7 @@ class Manager {
 	/**
 	 * One of the allowed values, or an error naming the field.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed                 $value   The value given.
 	 * @param array<string, string> $choices Allowed value => label.
@@ -348,7 +348,7 @@ class Manager {
 	 * origin, and any origin whose platform is not active, refers to nothing
 	 * the plugin can check, so the reference is kept as given.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $source   The commission's origin.
 	 * @param int    $order_id The reference given; 0 for none.
@@ -381,7 +381,7 @@ class Manager {
 	/**
 	 * A `Y-m-d H:i:s` GMT date from what was given, or now.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $value A date-time string, read as GMT.
 	 *
@@ -396,7 +396,7 @@ class Manager {
 	/**
 	 * Change a commission's status.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int    $commission_id Commission id.
 	 * @param string $status        The status to move to.
@@ -445,7 +445,7 @@ class Manager {
 		/**
 		 * Fires when a commission's status changes.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Commission $commission The commission.
 		 * @param string     $status     The status it is now in.
@@ -462,7 +462,7 @@ class Manager {
 	 * The error for something a payment does not let happen to its commission:
 	 * an automatic status change, or deletion.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission.
 	 *
@@ -490,7 +490,7 @@ class Manager {
 	 * given is the amount that moves: the commissions under it hold still
 	 * until the transfer settles (ADR-0016).
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission.
 	 *
@@ -523,7 +523,7 @@ class Manager {
 	 * payment — `set_status()` refuses them first — which is what keeps the
 	 * money a payment promised still; an admin's change re-sums the payment.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $from The current status.
 	 * @param string $to   The requested status.
@@ -539,7 +539,7 @@ class Manager {
 	/**
 	 * Delete a commission that no payment holds.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $commission_id Commission id.
 	 *
@@ -566,7 +566,7 @@ class Manager {
 		 * had, so whatever followed it (a marketplace's charge on the vendor,
 		 * say) can follow it out.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Commission $commission The commission, as it was.
 		 */
@@ -581,7 +581,7 @@ class Manager {
 	 * The list screen shows paid and unpaid earnings per row; asking for them
 	 * one affiliate at a time would be a query per row.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int[] $affiliate_ids The affiliates to total.
 	 *
@@ -646,7 +646,7 @@ class Manager {
 	/**
 	 * A zeroed totals set, in the shape get_affiliate_totals() returns.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array The zeroed totals.
 	 */
@@ -666,7 +666,7 @@ class Manager {
 	/**
 	 * Money and row totals for one affiliate, split the way the screens show them.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int    $affiliate_id Affiliate id.
 	 * @param string $after        Only commissions created on or after this GMT `Y-m-d H:i:s`.
@@ -729,7 +729,7 @@ class Manager {
 	/**
 	 * The date a commission's hold period ends: when a payout may take it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string          $created_at The creation time in GMT. Defaults to now.
 	 * @param Commission|null $commission The commission being created, so its hold can be its own.
@@ -745,7 +745,7 @@ class Manager {
 	/**
 	 * The days a commission waits before a payout may take it: the hold period.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission|null $commission The commission; null for the hold period itself.
 	 *
@@ -766,7 +766,7 @@ class Manager {
 		 * created: a later change of any hold applies to new orders only
 		 * (money rule 4).
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param int        $hold_days  The hold period, in days.
 		 * @param Commission $commission The commission, with its vendor and product.

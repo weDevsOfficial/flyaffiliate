@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Extension point: `flyaffiliate_settings_schema`.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class SettingsSchema {
 
@@ -42,7 +42,7 @@ class SettingsSchema {
 	/**
 	 * The complete schema, before the registry processes it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -60,7 +60,7 @@ class SettingsSchema {
 		 *
 		 * Append flat elements to add pages, subpages, sections or fields.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<int, array<string, mixed>> $elements Flat schema elements.
 		 */
@@ -70,7 +70,7 @@ class SettingsSchema {
 	/**
 	 * Every field's default, keyed by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -91,7 +91,7 @@ class SettingsSchema {
 	/**
 	 * A switch's enabled state.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array{value: string, title: string}
 	 */
@@ -105,7 +105,7 @@ class SettingsSchema {
 	/**
 	 * A switch's disabled state.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array{value: string, title: string}
 	 */
@@ -119,7 +119,7 @@ class SettingsSchema {
 	/**
 	 * A validation entry in plugin-ui's shape.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $rules   Pipe-separated rule names: `required`, `min`, `max`, `not_in`.
 	 * @param string $message Error shown when the rule fails.
@@ -138,7 +138,7 @@ class SettingsSchema {
 	/**
 	 * A percentage field: 0 to 100 with two decimals.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id          Field id.
 	 * @param string $section_id  Parent section.
@@ -178,7 +178,7 @@ class SettingsSchema {
 	/**
 	 * A whole-number-of-days field.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id          Field id.
 	 * @param string $section_id  Parent section.
@@ -210,7 +210,7 @@ class SettingsSchema {
 	/**
 	 * A switch field.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id          Field id.
 	 * @param string $section_id  Parent section.
@@ -237,7 +237,7 @@ class SettingsSchema {
 	/**
 	 * The General page: tracking, the affiliate area and data handling.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -461,7 +461,7 @@ class SettingsSchema {
 	/**
 	 * The Commissions page: rates and the rules they are applied under.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -608,7 +608,7 @@ class SettingsSchema {
 	/**
 	 * The Payouts page.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -688,7 +688,7 @@ class SettingsSchema {
 	/**
 	 * The Integrations page: WooCommerce.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -708,7 +708,7 @@ class SettingsSchema {
 	/**
 	 * The Email page.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -751,7 +751,7 @@ class SettingsSchema {
 	/**
 	 * Every WooCommerce currency as a select option: "US Dollar ($)".
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array{value: string, label: string}>
 	 */
@@ -788,7 +788,7 @@ class SettingsSchema {
 	 * Read from the stored option directly: the schema is what defines the
 	 * defaults, so going through the settings service here would recurse.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -803,7 +803,7 @@ class SettingsSchema {
 	/**
 	 * The currencies offered when WooCommerce is not there to list them.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{0: string, 1: string}> Code => [ name, symbol ].
 	 */
@@ -825,7 +825,7 @@ class SettingsSchema {
 	/**
 	 * WooCommerce's symbol position, the first value of FlyAffiliate's own.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -838,7 +838,7 @@ class SettingsSchema {
 	/**
 	 * Keep a currency code WooCommerce knows.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $value Submitted value.
 	 *
@@ -854,7 +854,7 @@ class SettingsSchema {
 	/**
 	 * Keep one of the four symbol positions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $value Submitted value.
 	 *
@@ -873,7 +873,7 @@ class SettingsSchema {
 	 * is a real thousands separator in much of Europe, so tags are removed with
 	 * `wp_kses()` instead.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $value Submitted value.
 	 *
@@ -889,7 +889,7 @@ class SettingsSchema {
 	/**
 	 * Reduce a referral variable to a safe query key.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $value Submitted value.
 	 *
@@ -904,7 +904,7 @@ class SettingsSchema {
 	/**
 	 * Clamp a percentage to 0–100 with two decimals.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $value Submitted value.
 	 *
@@ -917,7 +917,7 @@ class SettingsSchema {
 	/**
 	 * A non-negative money amount with two decimals.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $value Submitted value.
 	 *
@@ -934,7 +934,7 @@ class SettingsSchema {
 	 * the maximum is a configuration mistake worth refusing rather than silently
 	 * clamping every commission later.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed                $value  The submitted default rate.
 	 * @param array<string, mixed> $values Every value in the same save, keyed by id.

@@ -29,7 +29,7 @@ use WP_Error;
  * adding an affiliate are the only emails Phase 1 sends (ADR-0009). When the
  * setting turns it off, affiliates stay pending until an admin activates them.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Registration implements Hookable {
 
@@ -50,7 +50,7 @@ class Registration implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -63,7 +63,7 @@ class Registration implements Hookable {
 	/**
 	 * Whether public signup is open.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -71,7 +71,7 @@ class Registration implements Hookable {
 		/**
 		 * Filters whether affiliates may register themselves.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param bool $enabled Default true.
 		 */
@@ -81,7 +81,7 @@ class Registration implements Hookable {
 	/**
 	 * Handle the registration form.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -125,7 +125,7 @@ class Registration implements Hookable {
 	/**
 	 * Register an affiliate for an email address.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $email        The address.
 	 * @param string $promo_method How they plan to promote the store.
@@ -190,7 +190,7 @@ class Registration implements Hookable {
 		/**
 		 * Fires after an affiliate registers through the public form.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Affiliate $affiliate The new, pending affiliate.
 		 * @param bool      $emailed   Whether an activation link was sent.
@@ -205,7 +205,7 @@ class Registration implements Hookable {
 	 *
 	 * The key is single-use: it is cleared as the status is set.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $key The activation key.
 	 *
@@ -243,7 +243,7 @@ class Registration implements Hookable {
 	/**
 	 * Activate from the query variable on the front end.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -274,7 +274,7 @@ class Registration implements Hookable {
 	 * The key is the one handed to the caller when the affiliate registered; the
 	 * row only holds its hash, so the URL cannot be rebuilt from the database.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $key The activation key, unhashed.
 	 *
@@ -289,7 +289,7 @@ class Registration implements Hookable {
 	/**
 	 * Send the activation email.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 * @param string    $key       The activation key, unhashed.
@@ -316,7 +316,7 @@ class Registration implements Hookable {
 		/**
 		 * Filters the activation email before it is sent.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array     $email     `[ 'to' => string, 'subject' => string, 'message' => string, 'headers' => array ]`.
 		 * @param Affiliate $affiliate The affiliate.
@@ -342,7 +342,7 @@ class Registration implements Hookable {
 	 * referral link and the dashboard address, so the affiliate can start
 	 * without anyone telling them where to go.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -370,7 +370,7 @@ class Registration implements Hookable {
 		/**
 		 * Filters the welcome email before it is sent.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array     $email     `[ 'to' => string, 'subject' => string, 'message' => string, 'headers' => array ]`.
 		 * @param Affiliate $affiliate The affiliate.
@@ -392,7 +392,7 @@ class Registration implements Hookable {
 	/**
 	 * A random activation key.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -413,7 +413,7 @@ class Registration implements Hookable {
 	 * digest the column silently truncated on the way in would never match the
 	 * untruncated one on the way out.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $key The activation key, unhashed.
 	 *
@@ -430,7 +430,7 @@ class Registration implements Hookable {
 	 * up is not locked out of anything while they wait, and people read a
 	 * marketing email late.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return int Seconds.
 	 */
@@ -438,7 +438,7 @@ class Registration implements Hookable {
 		/**
 		 * Filters how long an activation link stays usable.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param int $lifetime Seconds. Default one week.
 		 */
@@ -451,7 +451,7 @@ class Registration implements Hookable {
 	 * A row carrying no expiry never expires: it was written before the column
 	 * existed, or by something that set a key of its own.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -470,7 +470,7 @@ class Registration implements Hookable {
 	/**
 	 * A login derived from an email address that no user has yet.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $email The address.
 	 *

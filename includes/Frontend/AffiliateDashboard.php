@@ -23,7 +23,7 @@ use FlyAffiliate\Abstracts\Shortcode;
  * open. Everything shown is scoped to the affiliate behind the logged-in
  * user; there is no parameter to pick another.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class AffiliateDashboard extends Shortcode {
 
@@ -37,7 +37,7 @@ class AffiliateDashboard extends Shortcode {
 	/**
 	 * The tabs.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Tab key => label.
 	 */
@@ -55,7 +55,7 @@ class AffiliateDashboard extends Shortcode {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array|string $atts Shortcode attributes.
 	 *
@@ -121,7 +121,7 @@ class AffiliateDashboard extends Shortcode {
 	/**
 	 * What an activation link's result says, for the screens before the dashboard.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $notice `activated`, or the error code the activation link redirected with.
 	 *

@@ -35,9 +35,9 @@ if ( ! file_exists( $entry_file ) ) {
 	exit( 1 );
 }
 
-// The version from the plugin header. New code is documented with the literal
-// `@since FLYAFFILIATE_SINCE`; the zip is where it becomes the version it
-// first shipped in, so a docblock in the repository never guesses one.
+// The version from the plugin header. Unreleased code is documented with the
+// literal `@since FLYAFFILIATE_SINCE`; the zip stamps it with this version, and
+// the release commit stamps the source too (`npm run version`).
 preg_match( '/^\s*\*\s*Version:\s*(\S+)/m', (string) file_get_contents( $entry_file ), $version_match );
 $version = $version_match[1] ?? '';
 

@@ -26,7 +26,7 @@ use FlyAffiliate\Models\Affiliate;
  * scheduled when it is not already scheduled. Running `do_install()` twice
  * changes nothing the second time.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Installer {
 
@@ -62,7 +62,7 @@ class Installer {
 	/**
 	 * Install or repair everything the plugin needs to run.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -86,7 +86,7 @@ class Installer {
 		/**
 		 * Fires after FlyAffiliate has finished installing or repairing itself.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 */
 		do_action( 'flyaffiliate_installed' );
 	}
@@ -94,7 +94,7 @@ class Installer {
 	/**
 	 * Create or reconcile the custom tables.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -115,7 +115,7 @@ class Installer {
 	/**
 	 * Columns that must accept NULL, table => column => definition.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array<string, string>>
 	 */
@@ -138,7 +138,7 @@ class Installer {
 	 * manual commission insert fails. This runs after dbDelta on every install
 	 * or repair, and is a no-op once the column is right.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -170,7 +170,7 @@ class Installer {
 	 * never FLOAT, and never DECIMAL(10,2), which cannot hold four decimal
 	 * places of a rate applied to a base amount.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[]
 	 */
@@ -289,7 +289,7 @@ class Installer {
 	 * which freezes a default read from WooCommerce (the currency) at the value
 	 * it had when the setting arrived.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -317,7 +317,7 @@ class Installer {
 	 * The backfill covers sites that had affiliates before the role existed;
 	 * from then on {@see Role} keeps the two in step.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -349,7 +349,7 @@ class Installer {
 	/**
 	 * The pages the plugin needs, and the shortcode each one holds.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{title: string, content: string}>
 	 */
@@ -372,7 +372,7 @@ class Installer {
 	 * A page whose stored id still resolves to a published page is left alone, so
 	 * reactivating the plugin does not litter the site with duplicates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -413,7 +413,7 @@ class Installer {
 	 * otherwise. Nothing listens to it since ADR-0014; it is kept as Dokan
 	 * keeps its daily cron, for the work that will hang off it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -447,7 +447,7 @@ class Installer {
 	/**
 	 * Cancel the scheduled job. Called on deactivation.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -464,7 +464,7 @@ class Installer {
 	 *
 	 * Used by the uninstaller, and by the test harness to truncate between tests.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[]
 	 */

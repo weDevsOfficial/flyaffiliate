@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Holds the version, defines the constants, wires the WordPress lifecycle, and
  * exposes the container's named services through a magic getter.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  *
  * @property FlyAffiliate\Affiliate\Manager        $affiliate     Affiliate data access.
  * @property FlyAffiliate\Admin\Settings\Manager   $settings      Settings registration and defaults.
@@ -62,7 +62,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Wire the plugin into WordPress.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 */
 	private function __construct() {
 		$this->define_constants();
@@ -77,7 +77,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Get the plugin instance, creating it once.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return FlyAffiliate_Plugin
 	 */
@@ -92,7 +92,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Resolve a named service from the container.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $property Service name, for example `affiliate` or `settings`.
 	 *
@@ -110,7 +110,7 @@ final class FlyAffiliate_Plugin {
 	 * Without this, `isset( flyaffiliate()->affiliate )` is always false, because
 	 * `__get()` alone does not answer `isset()`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $property Service name.
 	 *
@@ -123,7 +123,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * The container.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return Container
 	 */
@@ -134,7 +134,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Define the plugin constants.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -154,7 +154,7 @@ final class FlyAffiliate_Plugin {
 	 * Declared before WooCommerce initialises, which is why it hooks
 	 * `before_woocommerce_init` rather than anything later.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -170,7 +170,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Boot the plugin on `plugins_loaded`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -193,7 +193,7 @@ final class FlyAffiliate_Plugin {
 		 *
 		 * The point at which another plugin can safely extend FlyAffiliate.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 */
 		do_action( 'flyaffiliate_loaded' );
 	}
@@ -201,7 +201,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Load the procedural helper files.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -212,7 +212,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Attach the plugin's own hooks and register every `Hookable`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -230,7 +230,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Resolve the tagged service groups.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -260,7 +260,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Put this plugin's tables on `$wpdb`, so queries do not rebuild the names.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -275,7 +275,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Add a Settings link to the plugin's row on the Plugins screen.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string[] $links The existing links.
 	 *
@@ -299,7 +299,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Install the plugin.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -333,7 +333,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Stop the scheduled work. Data is left alone; that is uninstall's job.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -344,7 +344,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Whether this PHP version is supported.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -355,7 +355,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * Whether WooCommerce is loaded.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -366,7 +366,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * The plugin directory.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -377,7 +377,7 @@ final class FlyAffiliate_Plugin {
 	/**
 	 * The theme directory that overrides this plugin's templates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */

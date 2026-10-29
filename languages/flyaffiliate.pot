@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-29T05:49:19+00:00\n"
+"POT-Creation-Date: 2026-10-29T11:29:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: flyaffiliate\n"
@@ -3346,9 +3346,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: affiliate name
-#. translators: %s: the total to pay, e.g. $25.00.
 #: assets/js/admin.js:327
-#: assets/js/admin.js:336
+msgctxt "an affiliate"
 msgid "Pay %s"
 msgstr ""
 
@@ -3503,6 +3502,11 @@ msgstr[1] ""
 
 #: assets/js/admin.js:335
 msgid "The payout could not be recorded."
+msgstr ""
+
+#. translators: %s: the total to pay, e.g. $25.00.
+#: assets/js/admin.js:336
+msgid "Pay %s"
 msgstr ""
 
 #: assets/js/admin.js:336

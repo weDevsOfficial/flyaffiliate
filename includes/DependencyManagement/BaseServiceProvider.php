@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * for every interface a class implements, which is what makes
  * `Contracts\Hookable` self-registering.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 abstract class BaseServiceProvider implements ServiceProviderInterface {
 
@@ -50,7 +50,7 @@ abstract class BaseServiceProvider implements ServiceProviderInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Container $container The container.
 	 *
@@ -65,7 +65,7 @@ abstract class BaseServiceProvider implements ServiceProviderInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return Container
 	 *
@@ -82,7 +82,7 @@ abstract class BaseServiceProvider implements ServiceProviderInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -93,7 +93,7 @@ abstract class BaseServiceProvider implements ServiceProviderInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $alias Identifier or tag.
 	 *
@@ -123,7 +123,7 @@ abstract class BaseServiceProvider implements ServiceProviderInterface {
 	 * The interface tags are what let the bootstrap ask the container for every
 	 * `Hookable` and call `register_hooks()` on each, without a list to maintain.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id       Identifier, normally the class name.
 	 * @param mixed  $concrete What to build. Null means "build the class named by $id".
@@ -148,7 +148,7 @@ abstract class BaseServiceProvider implements ServiceProviderInterface {
 	/**
 	 * Register a shared class and tag it with every interface it implements.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id       Identifier, normally the class name.
 	 * @param mixed  $concrete What to build.
@@ -162,7 +162,7 @@ abstract class BaseServiceProvider implements ServiceProviderInterface {
 	/**
 	 * Add several tags to a definition.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Definition $definition The definition.
 	 * @param string[]   $tags       Tags to add.
@@ -184,7 +184,7 @@ abstract class BaseServiceProvider implements ServiceProviderInterface {
 	 * Providers whose registration is nothing more than that call this from
 	 * `register()` instead of repeating the loop.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
