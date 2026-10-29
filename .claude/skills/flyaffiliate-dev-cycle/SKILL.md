@@ -106,6 +106,7 @@ is the canary; if it fails, stop and fix it before anything else.
 ## Release
 
 ```bash
+npm run version         # release commit only: FLYAFFILIATE_SINCE → package.json's version in the sources
 npm run release         # build → makepot → build/flyaffiliate-v<version>.zip
 npm run plugin-check    # Plugin Check against build/flyaffiliate
 ```
