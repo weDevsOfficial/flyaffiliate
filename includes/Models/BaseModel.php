@@ -24,7 +24,7 @@ use FlyAffiliate\Utilities\Money;
  * written, ordered by, or filtered on, so a request parameter can never reach
  * the SQL as an identifier.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 abstract class BaseModel {
 
@@ -73,7 +73,7 @@ abstract class BaseModel {
 	/**
 	 * Construct a model from a row, an array, or nothing.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param object|array|null $row Row to hydrate from.
 	 */
@@ -92,7 +92,7 @@ abstract class BaseModel {
 	/**
 	 * The fully qualified table name.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -110,7 +110,7 @@ abstract class BaseModel {
 	/**
 	 * Read a column.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $column  Column name.
 	 * @param mixed  $fallback Value to return when the column is not set.
@@ -124,7 +124,7 @@ abstract class BaseModel {
 	/**
 	 * Write a column, if it is one this model has.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $column Column name.
 	 * @param mixed  $value  Value.
@@ -149,7 +149,7 @@ abstract class BaseModel {
 	/**
 	 * Write several columns.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $values Column => value.
 	 *
@@ -166,7 +166,7 @@ abstract class BaseModel {
 	/**
 	 * The row id, or 0 when the row has not been saved.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return int
 	 */
@@ -177,7 +177,7 @@ abstract class BaseModel {
 	/**
 	 * Whether this model refers to a row that exists.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -188,7 +188,7 @@ abstract class BaseModel {
 	/**
 	 * Insert or update the row.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return int The row id, or 0 when the write failed.
 	 */
@@ -236,7 +236,7 @@ abstract class BaseModel {
 	/**
 	 * Delete the row.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -263,7 +263,7 @@ abstract class BaseModel {
 	/**
 	 * Find one row by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $id Row id.
 	 *
@@ -280,7 +280,7 @@ abstract class BaseModel {
 	/**
 	 * Find the first row matching a set of equality conditions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $conditions Column => value.
 	 *
@@ -307,7 +307,7 @@ abstract class BaseModel {
 	/**
 	 * Query rows.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args {
 	 *     Query arguments.
@@ -388,7 +388,7 @@ abstract class BaseModel {
 	 * Takes either the same arguments as {@see query()} — `where`, `search`,
 	 * `after`, `before` — or, for the common case, a bare column => value map.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args Query arguments, or a column => value map.
 	 *
@@ -424,7 +424,7 @@ abstract class BaseModel {
 	/**
 	 * Update the row this model was loaded from.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return int The row id, or 0 when nothing was written.
 	 */
@@ -462,7 +462,7 @@ abstract class BaseModel {
 	/**
 	 * Build the WHERE clause for a full set of query arguments.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args Query arguments as accepted by {@see query()}.
 	 *
@@ -532,7 +532,7 @@ abstract class BaseModel {
 	/**
 	 * Build a prepared WHERE clause from equality and IN conditions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $conditions Column => value, or column => array of values.
 	 *
@@ -577,7 +577,7 @@ abstract class BaseModel {
 	/**
 	 * Restrict a column name to one this model declares.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $column   Candidate column name.
 	 * @param string $fallback Column to use when the candidate is not declared.
@@ -591,7 +591,7 @@ abstract class BaseModel {
 	/**
 	 * The `$wpdb` placeholder for a column.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $column Column name.
 	 *
@@ -612,7 +612,7 @@ abstract class BaseModel {
 	/**
 	 * Placeholders for a list of columns, in order.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string[] $columns Column names.
 	 *
@@ -625,7 +625,7 @@ abstract class BaseModel {
 	/**
 	 * Convert model values into the forms the columns store.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $values Column => value.
 	 *
@@ -650,7 +650,7 @@ abstract class BaseModel {
 	/**
 	 * Cast a stored value to its PHP type.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $column Column name.
 	 * @param mixed  $value  Stored value.

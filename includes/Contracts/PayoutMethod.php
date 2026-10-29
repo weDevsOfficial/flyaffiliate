@@ -38,7 +38,7 @@ use WP_Error;
  * - `is_enabled()` must not read a setting that is not stored yet: it can run
  *   while the settings schema is being built.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 interface PayoutMethod {
 
@@ -80,7 +80,7 @@ interface PayoutMethod {
 	/**
 	 * The method's id, stored on every payment it pays. Lowercase `a-z0-9_`, never changes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -89,7 +89,7 @@ interface PayoutMethod {
 	/**
 	 * The method's name, translated.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -99,7 +99,7 @@ interface PayoutMethod {
 	 * The method's logo, shown beside its name wherever a payment says how it
 	 * is paid. Empty for none: the name stands alone.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string An image URL, or an empty string.
 	 */
@@ -108,7 +108,7 @@ interface PayoutMethod {
 	/**
 	 * Whether the method sends the money itself.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -117,7 +117,7 @@ interface PayoutMethod {
 	/**
 	 * Whether affiliates can be paid this way right now (switched on and ready).
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -126,7 +126,7 @@ interface PayoutMethod {
 	/**
 	 * The details an affiliate gives to be paid this way.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array{id: string, type: string, label: string, description?: string, required?: bool, placeholder?: string, options?: array<string, string>}>
 	 *         `type` is `email`, `text` or `select`; `options` (value => label) is for `select`.
@@ -136,7 +136,7 @@ interface PayoutMethod {
 	/**
 	 * The details an affiliate has given for this method.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -147,7 +147,7 @@ interface PayoutMethod {
 	/**
 	 * Store an affiliate's details for this method.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate            $affiliate The affiliate.
 	 * @param array<string, mixed> $details   Field id => value, unsanitized.
@@ -160,7 +160,7 @@ interface PayoutMethod {
 	 * Whether this affiliate can be paid this way now. The error message is
 	 * shown on the payout preview, before any money moves.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -171,7 +171,7 @@ interface PayoutMethod {
 	/**
 	 * Where the money goes, shown under the affiliate's name.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -186,7 +186,7 @@ interface PayoutMethod {
 	 * connect there but have not (`connected` false) is offered beside the
 	 * fields, with a link to connect it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -200,7 +200,7 @@ interface PayoutMethod {
 	 * Called once per method, right after the payout is recorded. Manual does
 	 * nothing: the admin sends the money and marks the payments paid.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string   $batch_key The payout.
 	 * @param Payout[] $payouts   This method's payments in it, unpaid.
@@ -212,7 +212,7 @@ interface PayoutMethod {
 	/**
 	 * Send one unpaid payment again after its transfer failed, or was never sent.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout $payout The payment, re-summed to its unpaid commissions.
 	 *
@@ -223,7 +223,7 @@ interface PayoutMethod {
 	/**
 	 * Ask the service for the latest state of these payments and settle what it reports.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts Unpaid payments that use this method.
 	 *
@@ -234,7 +234,7 @@ interface PayoutMethod {
 	/**
 	 * The latest transfer of each payment, as the method recorded it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts Payments that use this method.
 	 *

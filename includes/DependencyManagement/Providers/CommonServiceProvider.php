@@ -16,7 +16,7 @@ use FlyAffiliate\DependencyManagement\BaseServiceProvider;
 /**
  * Registers services needed on both the admin side and the front end.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class CommonServiceProvider extends BaseServiceProvider {
 
@@ -42,7 +42,7 @@ class CommonServiceProvider extends BaseServiceProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

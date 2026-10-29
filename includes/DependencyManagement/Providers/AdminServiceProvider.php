@@ -17,7 +17,7 @@ use FlyAffiliate\DependencyManagement\BaseServiceProvider;
  * Registers the wp-admin menu, the React app's PHP-side services, the setup
  * wizard and the user-profile section.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class AdminServiceProvider extends BaseServiceProvider {
 
@@ -44,7 +44,7 @@ class AdminServiceProvider extends BaseServiceProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

@@ -28,7 +28,7 @@ use WP_REST_Server;
  * Each payment carries its payout method and, for an automatic one, the
  * state of its transfer; a failed one can be sent again (ADR-0016).
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class PayoutsController extends AdminBaseController {
 
@@ -45,7 +45,7 @@ class PayoutsController extends AdminBaseController {
 	 * Loaded once per collection, one call per method, so a page of payments
 	 * does not ask a method once per row. Null when nothing is primed.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @var array<int, array>|null
 	 */
@@ -54,7 +54,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Register the routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -260,7 +260,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * The arguments a batch preview or creation takes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -319,7 +319,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * The batch selection from a request.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -355,7 +355,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * List payout rows.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -401,7 +401,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Load the transfer states of the payments about to be prepared, once.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts The payments.
 	 *
@@ -414,7 +414,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Where a payout stands.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -431,7 +431,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Ask the payout's automatic methods for news, then say where it stands.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -446,7 +446,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Send a payment again through its automatic method.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -461,7 +461,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * A payout summary as the apps read it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $summary From `Payout\Manager::summarize_batch()` or `get_batches()`.
 	 *
@@ -483,7 +483,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Get one payment.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -500,7 +500,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Mark a payment paid or unpaid.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -518,7 +518,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Delete an unpaid payment.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -533,7 +533,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Take a commission out of an unpaid payment.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -548,7 +548,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * The batches, newest first.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -565,7 +565,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Mark every unpaid payment of a batch paid.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -578,7 +578,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Delete a batch none of whose payments has been paid.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -593,7 +593,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * What a batch would pay, without writing.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -639,7 +639,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Record a batch.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -677,7 +677,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Where a payment goes, its affiliate read once per request.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout $payout The payment.
 	 * @param array  $states The payments' transfer states.
@@ -691,7 +691,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * Turn a payout row into a response.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout          $item    The payout.
 	 * @param WP_REST_Request $request The request.
@@ -734,7 +734,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * The links for one payout row.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout $item The payout.
 	 *
@@ -755,7 +755,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -909,7 +909,7 @@ class PayoutsController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

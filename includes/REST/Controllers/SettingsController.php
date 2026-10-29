@@ -26,7 +26,7 @@ use WP_REST_Server;
  * /settings/{scope}` saves the fields under one page or subpage; the keys may
  * be field ids or the dot paths plugin-ui emits.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class SettingsController extends AdminBaseController {
 
@@ -47,7 +47,7 @@ class SettingsController extends AdminBaseController {
 	/**
 	 * Construct the controller.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Settings|null $settings The settings service; resolved from the container when omitted.
 	 */
@@ -58,7 +58,7 @@ class SettingsController extends AdminBaseController {
 	/**
 	 * Register the routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -107,7 +107,7 @@ class SettingsController extends AdminBaseController {
 	/**
 	 * The whole schema, values populated.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -120,7 +120,7 @@ class SettingsController extends AdminBaseController {
 	/**
 	 * Save one page's or subpage's fields.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -145,7 +145,7 @@ class SettingsController extends AdminBaseController {
 	/**
 	 * The schema as the UI receives it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -153,7 +153,7 @@ class SettingsController extends AdminBaseController {
 		/**
 		 * Filters the settings schema the REST API returns.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<int, array<string, mixed>> $schema Flat elements with values.
 		 */
@@ -163,7 +163,7 @@ class SettingsController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

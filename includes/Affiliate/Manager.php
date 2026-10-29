@@ -22,14 +22,14 @@ use WP_Error;
  * sitewide, the user has to exist, the status has to be a real status — are
  * written once and cannot be bypassed by whichever caller is next.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager {
 
 	/**
 	 * Get an affiliate by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $affiliate_id Affiliate id.
 	 *
@@ -42,7 +42,7 @@ class Manager {
 	/**
 	 * Get the affiliate belonging to a WordPress user.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $user_id WordPress user id.
 	 *
@@ -59,7 +59,7 @@ class Manager {
 	/**
 	 * Get an affiliate by its activation key.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $activation_key The key sent in the activation link.
 	 *
@@ -76,7 +76,7 @@ class Manager {
 	/**
 	 * Whether a user is already an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $user_id WordPress user id.
 	 *
@@ -89,7 +89,7 @@ class Manager {
 	/**
 	 * Create an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args {
 	 *     Affiliate data.
@@ -171,7 +171,7 @@ class Manager {
 		/**
 		 * Fires after an affiliate is created.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Affiliate $affiliate The affiliate.
 		 */
@@ -190,7 +190,7 @@ class Manager {
 	 * `user_id` is not updatable: moving an affiliate to another user would move
 	 * their commissions with it and break the one-user-one-affiliate rule.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int   $affiliate_id Affiliate id.
 	 * @param array $args         Fields to change.
@@ -264,7 +264,7 @@ class Manager {
 			/**
 			 * Fires when an affiliate's status changes.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param Affiliate $affiliate       The affiliate.
 			 * @param string    $new_status      The status it is now in.
@@ -276,7 +276,7 @@ class Manager {
 		/**
 		 * Fires after an affiliate is updated.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param Affiliate $affiliate The affiliate.
 		 */
@@ -288,7 +288,7 @@ class Manager {
 	/**
 	 * Store the affiliate's website on their user, where SliceWP keeps it too.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int    $user_id The user.
 	 * @param string $website The URL; empty clears it.
@@ -311,7 +311,7 @@ class Manager {
 	 * they are financial records, and deleting the affiliate does not un-earn
 	 * the money.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $affiliate_id Affiliate id.
 	 *
@@ -332,7 +332,7 @@ class Manager {
 			/**
 			 * Fires after an affiliate is deleted.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param int       $affiliate_id The id of the deleted affiliate.
 			 * @param Affiliate $affiliate    The affiliate as it was before deletion.
@@ -346,7 +346,7 @@ class Manager {
 	/**
 	 * Query affiliates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args See {@see \FlyAffiliate\Models\BaseModel::query()}.
 	 *
@@ -359,7 +359,7 @@ class Manager {
 	/**
 	 * Count affiliates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $conditions Column => value, or the full query arguments.
 	 *
@@ -376,7 +376,7 @@ class Manager {
 	 * is matched there first and the users found are OR-ed with a match on
 	 * the payment email column.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $term What was typed.
 	 *
@@ -408,7 +408,7 @@ class Manager {
 	/**
 	 * A UTC datetime the column accepts, or null for no expiry.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $value Candidate datetime.
 	 *
@@ -427,7 +427,7 @@ class Manager {
 	/**
 	 * Reduce a value to a known affiliate status.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $status Candidate status.
 	 *
@@ -442,7 +442,7 @@ class Manager {
 	/**
 	 * Reduce a value to a payout method an affiliate may choose.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed  $method  The method id given; empty for the default.
 	 * @param string $current The affiliate's current choice, which may be kept.
@@ -468,7 +468,7 @@ class Manager {
 	/**
 	 * Store an affiliate's details for the payout methods they were given for.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate (saved or not; the details live on its user).
 	 * @param mixed     $details   Method id => field id => value, or null when not given.
@@ -500,7 +500,7 @@ class Manager {
 	/**
 	 * Reduce a value to a valid payment email, falling back to the user's own.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $email   Candidate email.
 	 * @param int   $user_id The affiliate's user id, for the fallback.

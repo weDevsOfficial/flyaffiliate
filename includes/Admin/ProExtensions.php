@@ -26,7 +26,7 @@ use FlyAffiliate\Contracts\Hookable;
  * The list lives here, not in the app, so it is translated with the rest of
  * FlyAffiliate and reaches the app as `window.flyaffiliate.proExtensions`.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class ProExtensions implements Hookable {
 
@@ -40,7 +40,7 @@ class ProExtensions implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -52,7 +52,7 @@ class ProExtensions implements Hookable {
 	/**
 	 * Add Extensions to the menu, before Settings, where Pro puts its own.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, string>|mixed $routes Route => menu title.
 	 *
@@ -76,7 +76,7 @@ class ProExtensions implements Hookable {
 	/**
 	 * Hand the page its cards and links, as `window.flyaffiliate.proExtensions`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed>|mixed $data The admin app's data.
 	 *
@@ -104,7 +104,7 @@ class ProExtensions implements Hookable {
 	 * The ids are the ones Pro's extensions use, so a card and the extension it
 	 * stands for can be matched later. Brand names are not translated.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array{id: string, name: string, description: string, category: string, doc_url: string}>
 	 */
@@ -131,7 +131,7 @@ class ProExtensions implements Hookable {
 		/**
 		 * Filters the Pro extensions the Extensions page shows while Pro is not active.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $extensions The cards.
 		 */
@@ -141,7 +141,7 @@ class ProExtensions implements Hookable {
 	/**
 	 * What Pro adds today, for the upgrade dialog. Only what ships.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[]
 	 */

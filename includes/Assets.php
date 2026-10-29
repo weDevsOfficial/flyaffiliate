@@ -39,7 +39,7 @@ use FlyAffiliate\Models\Payout;
  * handle that is not registered yet, and the app would start without
  * `window.flyaffiliate`. By `init` every handle exists, whatever renders first.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Assets implements Hookable {
 
@@ -53,7 +53,7 @@ class Assets implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -69,7 +69,7 @@ class Assets implements Hookable {
 	 * theme's early content render included — can enqueue it or attach inline
 	 * data to it. Registering a handle twice changes nothing.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -93,7 +93,7 @@ class Assets implements Hookable {
 	/**
 	 * The stylesheets this plugin ships.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{src: string, deps: string[], version: string, rtl: bool}>
 	 */
@@ -125,7 +125,7 @@ class Assets implements Hookable {
 		/**
 		 * Filters the stylesheets FlyAffiliate registers.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $styles Handle => definition.
 		 */
@@ -135,7 +135,7 @@ class Assets implements Hookable {
 	/**
 	 * The scripts this plugin ships.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{src: string, deps: string[], version: string, in_footer?: bool}>
 	 */
@@ -164,7 +164,7 @@ class Assets implements Hookable {
 		/**
 		 * Filters the scripts FlyAffiliate registers.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $scripts Handle => definition.
 		 */
@@ -174,7 +174,7 @@ class Assets implements Hookable {
 	/**
 	 * Enqueue the admin app on its page.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -199,7 +199,7 @@ class Assets implements Hookable {
 	 * Called by the dashboard shortcode, so the bundle only loads on the page
 	 * that renders it and only for an affiliate who can see it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $tab    The tab to open first.
 	 * @param string $notice A status flag from a redirect, or an empty string.
@@ -222,7 +222,7 @@ class Assets implements Hookable {
 	 *
 	 * A subset of the admin data: no admin URLs, nothing about other affiliates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $tab    The tab to open first.
 	 * @param string $notice A status flag from a redirect, or an empty string.
@@ -259,7 +259,7 @@ class Assets implements Hookable {
 		/**
 		 * Filters the data exposed to the affiliate dashboard as `window.flyaffiliate`.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $data The data.
 		 */
@@ -270,7 +270,7 @@ class Assets implements Hookable {
 	 * The top bar's help menu, as Dokan's: the changelog, the documentation
 	 * and the feature board.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array{id: string, title: string, url: string, icon: string, external: bool}>
 	 */
@@ -306,7 +306,7 @@ class Assets implements Hookable {
 		 * (`changelog`, `documentation`, `feature-request`; anything else
 		 * draws a circle) and `external`, true to open it in a new tab.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $items The items, in order.
 		 */
@@ -316,7 +316,7 @@ class Assets implements Hookable {
 	/**
 	 * The data the admin app needs before it can render.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -381,7 +381,7 @@ class Assets implements Hookable {
 		/**
 		 * Filters the data exposed to the FlyAffiliate admin app as `window.flyaffiliate`.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array $data The data.
 		 */
@@ -391,7 +391,7 @@ class Assets implements Hookable {
 	/**
 	 * How FlyAffiliate's Currency settings write money, so the apps do the same.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array{code: string, symbol: string, position: string, decimals: int, decimalSeparator: string, thousandSeparator: string}
 	 */
@@ -416,7 +416,7 @@ class Assets implements Hookable {
 	 * file's modification time is used while `SCRIPT_DEBUG` is on, and the
 	 * plugin version otherwise.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $relative_path Path relative to the plugin directory, with a leading slash.
 	 * @param string $asset_file    Path to the bundle's `.asset.php`, with a leading slash. Optional.
@@ -448,7 +448,7 @@ class Assets implements Hookable {
 	 * bundle. A missing file means the assets were never built, which is a
 	 * development state, not a runtime one.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $relative_path Path to the `.asset.php` file, with a leading slash.
 	 *

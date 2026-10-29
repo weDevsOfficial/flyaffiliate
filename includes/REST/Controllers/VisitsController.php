@@ -21,7 +21,7 @@ use WP_REST_Server;
 /**
  * `flyaffiliate/v1/visits` — read-only.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class VisitsController extends AdminBaseController {
 
@@ -35,7 +35,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * Register the routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -78,7 +78,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * List visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -125,7 +125,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * Get one visit.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -142,7 +142,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * Turn a visit into a response. Hashes are not exposed.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Visit           $item    The visit.
 	 * @param WP_REST_Request $request The request.
@@ -173,7 +173,7 @@ class VisitsController extends AdminBaseController {
 	 * An order deleted since the visit converted, or a seeded id, is shown as a
 	 * number, not a link.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $order_id The order id; 0 for none.
 	 *
@@ -192,7 +192,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * The links for one visit.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Visit $item The visit.
 	 *
@@ -212,7 +212,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -291,7 +291,7 @@ class VisitsController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

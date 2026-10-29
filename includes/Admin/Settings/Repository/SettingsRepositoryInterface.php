@@ -18,14 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * never per page. Moving a field between pages is a schema edit, not a data
  * migration.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 interface SettingsRepositoryInterface {
 
 	/**
 	 * Every stored value, keyed by field id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -34,7 +34,7 @@ interface SettingsRepositoryInterface {
 	/**
 	 * Merge a slice of values into storage.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $slice Field id => value.
 	 *
@@ -45,7 +45,7 @@ interface SettingsRepositoryInterface {
 	/**
 	 * Forget the in-request snapshot so the next read hits the option again.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

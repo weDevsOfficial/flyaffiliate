@@ -23,7 +23,7 @@ use WP_REST_Server;
  * `flyaffiliate/v1/referral-links` — read-only; the affiliate saves and
  * removes their own through `me/referral-links`.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class ReferralLinksController extends AdminBaseController {
 
@@ -44,7 +44,7 @@ class ReferralLinksController extends AdminBaseController {
 	/**
 	 * Register the routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -87,7 +87,7 @@ class ReferralLinksController extends AdminBaseController {
 	/**
 	 * List referral links.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -119,7 +119,7 @@ class ReferralLinksController extends AdminBaseController {
 	/**
 	 * Get one referral link.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -137,7 +137,7 @@ class ReferralLinksController extends AdminBaseController {
 	 * A page of links as a collection response, with their visit figures
 	 * read in one query rather than one per row.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param ReferralLink[]  $links    The links on this page.
 	 * @param int             $total    Every matching link.
@@ -160,7 +160,7 @@ class ReferralLinksController extends AdminBaseController {
 	/**
 	 * Turn a referral link into a response.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param ReferralLink    $item    The link.
 	 * @param WP_REST_Request $request The request.
@@ -198,7 +198,7 @@ class ReferralLinksController extends AdminBaseController {
 	/**
 	 * The links for one referral link.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param ReferralLink $item The link.
 	 *
@@ -218,7 +218,7 @@ class ReferralLinksController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -299,7 +299,7 @@ class ReferralLinksController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

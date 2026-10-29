@@ -20,14 +20,14 @@ use FlyAffiliate\Models\Payout;
  * payment paid (ADR-0012). Always available, and the fallback for anyone an
  * automatic method cannot pay.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manual extends PayoutMethod {
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -38,7 +38,7 @@ class Manual extends PayoutMethod {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -51,7 +51,7 @@ class Manual extends PayoutMethod {
 	 *
 	 * The payment email, which falls back to the account email.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *

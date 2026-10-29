@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * a marketplace integration can supply a store rate without this class
  * knowing the marketplace exists.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class RateResolver {
 
@@ -32,7 +32,7 @@ class RateResolver {
 	/**
 	 * The percentage rate for a product.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $product_id The product (or variation) id.
 	 * @param int $vendor_id  The vendor, on a marketplace. 0 elsewhere.
@@ -48,7 +48,7 @@ class RateResolver {
 			 *
 			 * Return null to fall through to the default rate.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param float|null $rate       The vendor rate, or null.
 			 * @param int        $vendor_id  The vendor.
@@ -69,7 +69,7 @@ class RateResolver {
 		 * rate is clamped to the result before and after
 		 * `flyaffiliate_commission_rate`.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param float $max        The maximum rate, in percent.
 		 * @param int   $product_id The product.
@@ -84,7 +84,7 @@ class RateResolver {
 		 * The result is clamped to the maximum rate again, so a filter cannot
 		 * exceed it.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param float $rate       The rate, in percent.
 		 * @param int   $product_id The product.
@@ -98,7 +98,7 @@ class RateResolver {
 	/**
 	 * A per-product rate, from the product or its parent.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $product_id The product or variation id.
 	 *

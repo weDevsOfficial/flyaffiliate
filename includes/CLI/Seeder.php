@@ -24,14 +24,14 @@ use WP_CLI;
  * an ordinary request: sample data is created only when an administrator
  * asks for it from the command line.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Seeder implements Hookable {
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -62,7 +62,7 @@ class Seeder implements Hookable {
 	 *
 	 *     wp flyaffiliate seed --affiliates=10 --commissions=100
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $args       Positional arguments.
 	 * @param array $assoc_args Named arguments.

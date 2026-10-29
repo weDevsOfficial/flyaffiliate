@@ -17,14 +17,14 @@ use FlyAffiliate\Models\Payout;
  * Streams a payout batch as CSV: one line per affiliate, with the fields a
  * bookkeeper needs to make the payment and reconcile it afterwards.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class CsvExporter {
 
 	/**
 	 * The column headings, in order.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[]
 	 */
@@ -47,7 +47,7 @@ class CsvExporter {
 	/**
 	 * The rows for a batch, as plain arrays.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts The batch.
 	 *
@@ -84,7 +84,7 @@ class CsvExporter {
 	/**
 	 * Send a batch to the browser as a CSV download and stop.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts   The batch.
 	 * @param string   $batch_key The batch key, for the file name.
@@ -117,7 +117,7 @@ class CsvExporter {
 	/**
 	 * Neutralise a cell a spreadsheet would otherwise execute as a formula.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $value The cell.
 	 *

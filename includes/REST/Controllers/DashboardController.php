@@ -20,7 +20,7 @@ use WP_REST_Server;
 /**
  * `flyaffiliate/v1/dashboard` — everything the Dashboard screen shows, for a date range.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class DashboardController extends AdminBaseController {
 
@@ -34,7 +34,7 @@ class DashboardController extends AdminBaseController {
 	/**
 	 * Register the route.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -69,7 +69,7 @@ class DashboardController extends AdminBaseController {
 	/**
 	 * Close the pending-review notice for the current user.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -85,7 +85,7 @@ class DashboardController extends AdminBaseController {
 	/**
 	 * The figures for the range.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -100,7 +100,7 @@ class DashboardController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array           $item    The figures.
 	 * @param WP_REST_Request $request The request.
@@ -114,7 +114,7 @@ class DashboardController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $item The figures.
 	 *
@@ -129,7 +129,7 @@ class DashboardController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

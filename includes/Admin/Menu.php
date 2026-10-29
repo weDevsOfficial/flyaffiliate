@@ -22,7 +22,7 @@ use FlyAffiliate\Contracts\Hookable;
  * and navigate without a page load. Everything is gated on `flyaffiliate_admin_capability()`
  * (ADR-0008).
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Menu implements Hookable {
 
@@ -36,7 +36,7 @@ class Menu implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -51,7 +51,7 @@ class Menu implements Hookable {
 	 * The view box leaves a margin round the mark, so at wp-admin's 20px it
 	 * draws 17px wide, as wide as Dokan's menu icon.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -65,7 +65,7 @@ class Menu implements Hookable {
 	 * Each route is a path of the admin app. The Dashboard comes first: it is
 	 * where the top-level menu entry lands.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Route => menu title.
 	 */
@@ -85,7 +85,7 @@ class Menu implements Hookable {
 		 * Adding a route here only adds the link; the React app decides what
 		 * renders at it through the `flyaffiliate_admin_routes` JavaScript filter.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<string, string> $routes Route => menu title.
 		 */
@@ -95,7 +95,7 @@ class Menu implements Hookable {
 	/**
 	 * Whether the current admin request is for one of the plugin's screens.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -107,7 +107,7 @@ class Menu implements Hookable {
 	/**
 	 * The admin URL of a route.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $route A route, e.g. `commissions` or `affiliates/5`.
 	 *
@@ -120,7 +120,7 @@ class Menu implements Hookable {
 	/**
 	 * Register the menu with WordPress.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -155,7 +155,7 @@ class Menu implements Hookable {
 	/**
 	 * Render the app's mount point.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

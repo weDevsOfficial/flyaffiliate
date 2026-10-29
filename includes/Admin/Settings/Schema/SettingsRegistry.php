@@ -21,7 +21,7 @@ use FlyAffiliate\Admin\Settings\Repository\SettingsRepositoryInterface;
  * children, fill default properties, populate field values from storage, and
  * validate the result while `WP_DEBUG` is on.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class SettingsRegistry {
 
@@ -63,7 +63,7 @@ class SettingsRegistry {
 	/**
 	 * Construct the registry.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param SettingsRepositoryInterface $repository Settings storage.
 	 */
@@ -77,7 +77,7 @@ class SettingsRegistry {
 	 * Callables stay in this copy so the sanitizer can use them; call
 	 * `get_public_schema()` for anything that leaves PHP.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param bool $force_refresh Rebuild even when cached.
 	 *
@@ -105,7 +105,7 @@ class SettingsRegistry {
 	/**
 	 * The schema as the REST API and the admin UI receive it: no callables.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -125,7 +125,7 @@ class SettingsRegistry {
 	/**
 	 * Every field element, keyed by id.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
@@ -147,7 +147,7 @@ class SettingsRegistry {
 	 * The scope may be a page id or a subpage id: plugin-ui saves per subpage
 	 * when one is active and per page otherwise.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $scope_id A page or subpage id.
 	 *
@@ -169,7 +169,7 @@ class SettingsRegistry {
 	/**
 	 * Forget the processed schema so the next read rebuilds it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -180,7 +180,7 @@ class SettingsRegistry {
 	/**
 	 * Every element id below a node, recursively.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<int, array<string, mixed>> $elements  Flat schema.
 	 * @param string                           $parent_id The node to start from.
@@ -219,7 +219,7 @@ class SettingsRegistry {
 	 *
 	 * The key reads `flyaffiliate_settings_{page}_{subpage}_{section}_{field}_children`.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<int, array<string, mixed>> $elements Flat schema.
 	 *
@@ -268,7 +268,7 @@ class SettingsRegistry {
 	/**
 	 * The parent of an element, resolved through its pointer.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed>                $element The element.
 	 * @param array<string, array<string, mixed>> $lookup  `type:id` => element.
@@ -297,7 +297,7 @@ class SettingsRegistry {
 	/**
 	 * Let extensions inject children under every structural node.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<int, array<string, mixed>> $elements Flat schema.
 	 *
@@ -325,7 +325,7 @@ class SettingsRegistry {
 			 * The hook name is dynamic: `flyaffiliate_settings_{path}_children`,
 			 * e.g. `flyaffiliate_settings_commission_rates_rate_settings_children`.
 			 *
-			 * @since FLYAFFILIATE_SINCE
+			 * @since 1.0.0
 			 *
 			 * @param array<int, array<string, mixed>> $children The node's current children.
 			 * @param array<string, mixed>             $node     The node itself.
@@ -352,7 +352,7 @@ class SettingsRegistry {
 	/**
 	 * Give every element the properties the UI expects, even when the schema omitted them.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<int, array<string, mixed>> $elements Flat schema.
 	 *
@@ -391,7 +391,7 @@ class SettingsRegistry {
 	 *
 	 * A field that already declares a value (a read-only display field) keeps it.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<int, array<string, mixed>> $elements Flat schema.
 	 *
@@ -418,7 +418,7 @@ class SettingsRegistry {
 	 * An expensive option list (pages from the database, say) is declared as a
 	 * closure so the query only runs when the schema is built for the UI.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<int, array<string, mixed>> $elements Flat schema.
 	 *
@@ -438,7 +438,7 @@ class SettingsRegistry {
 	/**
 	 * Validate the schema while debugging, logging every problem found.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array<int, array<string, mixed>> $elements Flat schema.
 	 *

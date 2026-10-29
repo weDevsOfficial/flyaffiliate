@@ -22,7 +22,7 @@ use FlyAffiliate\DependencyManagement\BootableServiceProvider;
  * here also carries the `container-service` tag, so the bootstrap can resolve
  * the whole group in one call.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class ServiceProvider extends BootableServiceProvider {
 
@@ -60,7 +60,7 @@ class ServiceProvider extends BootableServiceProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -82,7 +82,7 @@ class ServiceProvider extends BootableServiceProvider {
 	/**
 	 * Add the remaining providers.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

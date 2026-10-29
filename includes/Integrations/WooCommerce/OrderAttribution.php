@@ -30,7 +30,7 @@ use WC_Order_Item;
  * idempotent: the order remembers its affiliate, and the commissions table
  * refuses a second row for an order item.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class OrderAttribution implements Hookable {
 
@@ -65,7 +65,7 @@ class OrderAttribution implements Hookable {
 	/**
 	 * Constructor.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Tracker      $tracker The tracker.
 	 * @param RateResolver $rates   The rate resolver.
@@ -78,7 +78,7 @@ class OrderAttribution implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -90,7 +90,7 @@ class OrderAttribution implements Hookable {
 	/**
 	 * Attribute an order and create its commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WC_Order|int $order The order.
 	 *
@@ -127,7 +127,7 @@ class OrderAttribution implements Hookable {
 		/**
 		 * Filters whether a referred order is attributed at all.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param bool      $attribute Default true.
 		 * @param WC_Order  $order     The order.
@@ -158,7 +158,7 @@ class OrderAttribution implements Hookable {
 		/**
 		 * Fires after an order is attributed to an affiliate.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param WC_Order     $order       The order.
 		 * @param Affiliate    $affiliate   The affiliate.
@@ -172,7 +172,7 @@ class OrderAttribution implements Hookable {
 	/**
 	 * Whether the buyer is the affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WC_Order  $order     The order.
 	 * @param Affiliate $affiliate The affiliate.
@@ -201,7 +201,7 @@ class OrderAttribution implements Hookable {
 	 *
 	 * Line items always; shipping items only when shipping is not excluded.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WC_Order $order The order.
 	 *
@@ -220,7 +220,7 @@ class OrderAttribution implements Hookable {
 	/**
 	 * Create the commission for one order item.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WC_Order      $order     The order.
 	 * @param WC_Order_Item $item      The item.
@@ -251,7 +251,7 @@ class OrderAttribution implements Hookable {
 		 * 0 on a single-merchant store; a marketplace integration resolves the
 		 * product's store owner.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param int           $vendor_id  Default 0.
 		 * @param WC_Order_Item $item       The item.

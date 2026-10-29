@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * money has been sent — by hand, or by an automatic payout method once its
  * transfer settles — is what marks its commissions paid (ADR-0012, ADR-0016).
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Payout extends BaseModel {
 
@@ -87,7 +87,7 @@ class Payout extends BaseModel {
 	/**
 	 * Whether the money has been sent.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -98,7 +98,7 @@ class Payout extends BaseModel {
 	/**
 	 * The commissions this payout covers.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return Commission[]
 	 */

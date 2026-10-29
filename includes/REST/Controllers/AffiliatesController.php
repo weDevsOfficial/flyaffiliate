@@ -21,7 +21,7 @@ use WP_REST_Server;
 /**
  * `flyaffiliate/v1/affiliates` — the admin's view of the affiliate roster.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class AffiliatesController extends AdminBaseController {
 
@@ -35,7 +35,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Register the routes.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -107,7 +107,7 @@ class AffiliatesController extends AdminBaseController {
 	 * Filled once per collection request so the list does not run a grouped
 	 * query per row.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @var array<int, array>
 	 */
@@ -116,7 +116,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * List affiliates.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -166,7 +166,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Get one affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -185,7 +185,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Create an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -219,7 +219,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Update an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -246,7 +246,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Delete an affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -280,7 +280,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * Turn an affiliate into a response.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate       $item    The affiliate.
 	 * @param WP_REST_Request $request The request.
@@ -326,7 +326,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * The links for one affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $item The affiliate.
 	 *
@@ -360,7 +360,7 @@ class AffiliatesController extends AdminBaseController {
 	 * Clearing the field is how an admin sends payouts back to the account
 	 * email, so the empty string passes; anything else must be an address.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed           $value   The submitted value.
 	 * @param WP_REST_Request $request The request.
@@ -379,7 +379,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * An affiliate's details for every payout method that asks for some.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -400,7 +400,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * The accounts an affiliate is paid to without entering anything, by method.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -428,7 +428,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -584,7 +584,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -627,7 +627,7 @@ class AffiliatesController extends AdminBaseController {
 	/**
 	 * The 404 this controller returns for a missing affiliate.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return WP_Error
 	 */

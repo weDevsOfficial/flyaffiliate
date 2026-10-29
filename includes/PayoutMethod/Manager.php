@@ -30,7 +30,7 @@ use FlyAffiliate\Models\Payout;
  * the middle of a request, and the instances it returns are its own shared
  * services, so building the list is cheap.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Manager {
 
@@ -96,7 +96,7 @@ class Manager {
 	/**
 	 * Every registered method, Manual first.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, PayoutMethod> Method id => method.
 	 */
@@ -111,7 +111,7 @@ class Manager {
 		 * a payout method, or whose id is not lowercase `a-z0-9_` of at most 20
 		 * characters, is dropped.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param array<string, PayoutMethod> $methods Method id => method.
 		 */
@@ -138,7 +138,7 @@ class Manager {
 	/**
 	 * One method.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id Method id.
 	 *
@@ -151,7 +151,7 @@ class Manager {
 	/**
 	 * Whether a method is registered.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id Method id.
 	 *
@@ -164,7 +164,7 @@ class Manager {
 	/**
 	 * The methods affiliates can be paid by right now.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, PayoutMethod>
 	 */
@@ -178,7 +178,7 @@ class Manager {
 	/**
 	 * Whether a method is registered and switched on.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id Method id.
 	 *
@@ -191,7 +191,7 @@ class Manager {
 	/**
 	 * Every method's label.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Method id => translated label.
 	 */
@@ -202,7 +202,7 @@ class Manager {
 	/**
 	 * A method's label, or the id itself when the method is not registered.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id Method id.
 	 *
@@ -219,7 +219,7 @@ class Manager {
 	 *
 	 * The `method` setting, as long as that method is switched on; Manual otherwise.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return PayoutMethod
 	 */
@@ -236,7 +236,7 @@ class Manager {
 	 * The override (an admin's "Switch to Manual" on the preview), then the
 	 * affiliate's own choice, then the default — each only when switched on.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 * @param string    $override  A method chosen for this payout only.
@@ -261,7 +261,7 @@ class Manager {
 	 * One call per method. A method that throws reports nothing rather than
 	 * breaking the screen that asked.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout[] $payouts Payments, any method.
 	 *
@@ -306,7 +306,7 @@ class Manager {
 	/**
 	 * The latest transfer of one payment.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout $payout The payment.
 	 *
@@ -324,7 +324,7 @@ class Manager {
 	 * than Manual, which always is), since nothing then knows where the money
 	 * is. A failed transfer, or none, leaves the payment free.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout     $payout The payment.
 	 * @param array|null $states Payment id => state, from `get_states()`, when the caller has
@@ -355,7 +355,7 @@ class Manager {
 		 * method whose plugin is gone for good, after checking the money with
 		 * the service that sent it.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param bool   $locked Whether the payment is locked.
 		 * @param Payout $payout The payment.
@@ -373,7 +373,7 @@ class Manager {
 	/**
 	 * Whether a payment is locked.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout     $payout The payment.
 	 * @param array|null $states Payment id => state, when the caller already has them.
@@ -387,7 +387,7 @@ class Manager {
 	/**
 	 * What to tell an admin who tries to change a locked payment.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout $payout The payment.
 	 * @param string $reason The lock, from `get_lock()`.
@@ -419,7 +419,7 @@ class Manager {
 	 * and the last transfer must have failed in a way worth retrying — or never
 	 * have been made.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout     $payout The payment.
 	 * @param array|null $states Payment id => state, when the caller already has them.
@@ -449,7 +449,7 @@ class Manager {
 	/**
 	 * The methods as the apps see them.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param bool $enabled_only Only the methods switched on (the affiliate dashboard).
 	 *
@@ -476,7 +476,7 @@ class Manager {
 	/**
 	 * A method's affiliate fields with every key the apps read.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $fields As returned by `get_affiliate_fields()`.
 	 *
@@ -507,7 +507,7 @@ class Manager {
 	/**
 	 * The built-in Manual method.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return Manual
 	 */
@@ -522,7 +522,7 @@ class Manager {
 	/**
 	 * A state as a method reported it, with every key, or null when it is not a state.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $state What the method returned for one payment.
 	 *
@@ -548,7 +548,7 @@ class Manager {
 	 * anything was sent, where its payout method pays this affiliate (the
 	 * PayPal email for PayPal, the payment email for Manual).
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Payout         $payout    The payment.
 	 * @param Affiliate|null $affiliate Its affiliate, when known.

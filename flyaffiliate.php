@@ -89,7 +89,7 @@ if ( ! function_exists( 'flyaffiliate_get_container' ) ) {
 	/**
 	 * The dependency injection container.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return FlyAffiliate\DependencyManagement\Container
 	 */
@@ -107,7 +107,7 @@ if ( ! function_exists( 'flyaffiliate' ) ) {
 	 * Services are reachable through it by name: `flyaffiliate()->affiliate`,
 	 * `flyaffiliate()->settings`, and so on.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return FlyAffiliate_Plugin
 	 */

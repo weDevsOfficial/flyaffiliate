@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Those method names are camelCase because they are League's names. They are the
  * one exception to this codebase's snake_case rule.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Container {
 
@@ -56,7 +56,7 @@ class Container {
 	/**
 	 * Register an entry.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id       Identifier, typically a class or interface name or a short alias.
 	 * @param mixed  $concrete What to build. Null means "build the class named by $id".
@@ -74,7 +74,7 @@ class Container {
 	/**
 	 * Register a shared entry: every `get()` returns the same instance.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id       Identifier.
 	 * @param mixed  $concrete What to build.
@@ -88,7 +88,7 @@ class Container {
 	/**
 	 * Whether the container knows an identifier or a tag.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id Identifier or tag.
 	 *
@@ -110,7 +110,7 @@ class Container {
 	 * groups (`common-service`, `admin-service`, …) and the `Hookable` interface
 	 * tag are read at bootstrap.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id  Identifier or tag.
 	 * @param bool   $fresh Force fresh instances even for shared entries.
@@ -139,7 +139,7 @@ class Container {
 	 * service group with nothing in it yet is a normal state during bootstrap, not
 	 * a wiring mistake.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $tag Tag name.
 	 * @param bool   $fresh Force fresh instances even for shared entries.
@@ -159,7 +159,7 @@ class Container {
 	/**
 	 * Get an existing definition so it can be further configured.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id Identifier.
 	 *
@@ -181,7 +181,7 @@ class Container {
 	 * A bootable provider's `boot()` runs straight after its `register()`, and may
 	 * add further providers — which is how the root provider assembles the rest.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param ServiceProviderInterface $provider The provider.
 	 *
@@ -209,7 +209,7 @@ class Container {
 	/**
 	 * Whether a provider has already been added.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $identifier The provider identifier, normally its class name.
 	 *
@@ -222,7 +222,7 @@ class Container {
 	/**
 	 * Every identifier the container knows.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[]
 	 */
@@ -233,7 +233,7 @@ class Container {
 	/**
 	 * Resolve one definition, guarding against a dependency cycle.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Definition $definition The definition.
 	 * @param bool       $fresh      Force a fresh instance.
@@ -269,7 +269,7 @@ class Container {
 	/**
 	 * Every definition carrying a tag.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $tag Tag name.
 	 *

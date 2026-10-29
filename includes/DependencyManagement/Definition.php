@@ -26,7 +26,7 @@ use Throwable;
  * method: FlyAffiliate has no installed base whose subclasses a constructor
  * signature change could break.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Definition {
 
@@ -89,7 +89,7 @@ class Definition {
 	/**
 	 * Construct a definition.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $id       Identifier, typically a class or interface name or a short alias.
 	 * @param mixed  $concrete What to build. Null means "build the class named by $id".
@@ -102,7 +102,7 @@ class Definition {
 	/**
 	 * Get the identifier.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -113,7 +113,7 @@ class Definition {
 	/**
 	 * Set the container used to resolve this definition's dependencies.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Container $container The container.
 	 *
@@ -128,7 +128,7 @@ class Definition {
 	/**
 	 * Mark the entry shared, so every `get()` returns the same instance.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param bool $shared Whether the entry is shared.
 	 *
@@ -143,7 +143,7 @@ class Definition {
 	/**
 	 * Whether the entry is shared.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
@@ -154,7 +154,7 @@ class Definition {
 	/**
 	 * Add a tag to the entry.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $tag Tag name — a service group such as `common-service`, or an interface name.
 	 *
@@ -171,7 +171,7 @@ class Definition {
 	/**
 	 * Whether the entry carries a tag.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $tag Tag name.
 	 *
@@ -184,7 +184,7 @@ class Definition {
 	/**
 	 * Get every tag on the entry.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return string[]
 	 */
@@ -198,7 +198,7 @@ class Definition {
 	 * A string that names a container entry is resolved through the container;
 	 * anything else is passed through as the literal value.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param mixed $argument The argument.
 	 *
@@ -213,7 +213,7 @@ class Definition {
 	/**
 	 * Supply several constructor arguments explicitly, in order.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param array $arguments The arguments.
 	 *
@@ -230,7 +230,7 @@ class Definition {
 	/**
 	 * Build the entry.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param bool $fresh Force a fresh instance even when the entry is shared.
 	 *
@@ -256,7 +256,7 @@ class Definition {
 	/**
 	 * Discard the cached instance of a shared entry.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -268,7 +268,7 @@ class Definition {
 	/**
 	 * Turn the concrete into a value.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return mixed
 	 *
@@ -296,7 +296,7 @@ class Definition {
 	/**
 	 * Instantiate a class, autowiring its constructor.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param string $class_name Fully qualified class name.
 	 *
@@ -357,7 +357,7 @@ class Definition {
 	 * else falls back to the parameter's default, then to null when it is
 	 * nullable. A parameter that is none of those is a wiring mistake and says so.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param ReflectionParameter $parameter  The parameter.
 	 * @param string              $class_name The class being built, for the error message.
@@ -403,7 +403,7 @@ class Definition {
 	/**
 	 * Resolve explicitly supplied arguments, looking up strings that name container entries.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

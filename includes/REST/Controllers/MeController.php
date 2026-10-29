@@ -27,7 +27,7 @@ use WP_REST_Server;
  * controllers' `prepare_item_for_response()`, so the dashboard and the admin
  * app share one set of types.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class MeController extends AffiliateBaseController {
 
@@ -41,7 +41,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -172,7 +172,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The affiliate, with their totals.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -207,7 +207,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * One of the affiliate's commissions, with the item it paid on and the visit it came from.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -236,7 +236,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The product a commission paid on: its name, and a link while it is published.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission.
 	 *
@@ -268,7 +268,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The visit an order was attributed through.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission   The commission.
 	 * @param int        $affiliate_id The affiliate the visit must belong to.
@@ -295,7 +295,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * Change the payment email or the promotion note.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -329,7 +329,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The affiliate's commissions.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -356,7 +356,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The affiliate's visits.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -377,7 +377,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * The affiliate's payouts.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -415,7 +415,7 @@ class MeController extends AffiliateBaseController {
 	 * A link is listed whatever the dashboard's date range; the range is a
 	 * filter on traffic, and the list is of links.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -440,7 +440,7 @@ class MeController extends AffiliateBaseController {
 	 * Saving a page that is already in the list returns that link with a 200
 	 * rather than a second copy with a 201.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -467,7 +467,7 @@ class MeController extends AffiliateBaseController {
 	 *
 	 * The link keeps working wherever it was shared; see ReferralLink\Manager.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
@@ -498,7 +498,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * Query arguments from the paging and sorting parameters.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request  The request.
 	 * @param array           $where    Conditions, always scoped to the affiliate.
@@ -525,7 +525,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * Run a list query and shape the rows the way the admin controller does.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param \WP_REST_Controller $controller The admin controller for the resource.
 	 * @param object              $manager    The resource manager: has `query()` and `count()`.
@@ -547,7 +547,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -586,7 +586,7 @@ class MeController extends AffiliateBaseController {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

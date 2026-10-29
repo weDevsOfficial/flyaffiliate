@@ -34,7 +34,7 @@ use WP_User;
  *   role away on the profile does nothing: to stop someone being an affiliate,
  *   change their status on the Affiliates screen or delete the affiliate.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class Role implements Hookable {
 
@@ -48,7 +48,7 @@ class Role implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -63,7 +63,7 @@ class Role implements Hookable {
 	/**
 	 * Register the role. Safe to call again: `add_role()` leaves an existing role alone.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -74,7 +74,7 @@ class Role implements Hookable {
 	/**
 	 * Register the role if an install or upgrade has not done so yet.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -87,7 +87,7 @@ class Role implements Hookable {
 	/**
 	 * Give a new affiliate's user the role.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Affiliate $affiliate The affiliate.
 	 *
@@ -100,7 +100,7 @@ class Role implements Hookable {
 	/**
 	 * Take the role from a deleted affiliate's user.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int            $affiliate_id The deleted affiliate's id.
 	 * @param Affiliate|null $affiliate    The affiliate as it was before deletion.
@@ -116,7 +116,7 @@ class Role implements Hookable {
 	/**
 	 * Keep a user's role and affiliate row in step after their profile is saved or created.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $user_id The user.
 	 *
@@ -153,7 +153,7 @@ class Role implements Hookable {
 	/**
 	 * Add the role to a user.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $user_id The user.
 	 *
@@ -170,7 +170,7 @@ class Role implements Hookable {
 	/**
 	 * Remove the role from a user.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $user_id The user.
 	 *

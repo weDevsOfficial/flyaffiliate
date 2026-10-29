@@ -19,7 +19,7 @@ use FlyAffiliate\DependencyManagement\BaseServiceProvider;
  * Sample-data generation lives here and nowhere else: it runs only when an
  * administrator asks for it from the command line, never on a page load.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class CliServiceProvider extends BaseServiceProvider {
 
@@ -42,7 +42,7 @@ class CliServiceProvider extends BaseServiceProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

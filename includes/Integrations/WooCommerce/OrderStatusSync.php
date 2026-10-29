@@ -37,7 +37,7 @@ use WP_Error;
  * through `Commission\Manager::set_status()`, so the status hook fires, and a
  * second firing finds nothing left to change.
  *
- * @since FLYAFFILIATE_SINCE
+ * @since 1.0.0
  */
 class OrderStatusSync implements Hookable {
 
@@ -72,7 +72,7 @@ class OrderStatusSync implements Hookable {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -87,7 +87,7 @@ class OrderStatusSync implements Hookable {
 	/**
 	 * React to an order status change.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int           $order_id The order.
 	 * @param string        $from     The previous status.
@@ -127,7 +127,7 @@ class OrderStatusSync implements Hookable {
 	/**
 	 * Make the commissions of an order that was already paid at checkout unpaid.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WC_Order $order The order.
 	 *
@@ -140,7 +140,7 @@ class OrderStatusSync implements Hookable {
 	/**
 	 * Reject the commissions of an order moved to the trash.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int $order_id The order.
 	 *
@@ -153,7 +153,7 @@ class OrderStatusSync implements Hookable {
 	/**
 	 * Whether an order's status means its commissions are earned.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WC_Order $order The order.
 	 *
@@ -170,7 +170,7 @@ class OrderStatusSync implements Hookable {
 		/**
 		 * Filters the order statuses under which a commission becomes unpaid.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.0
 		 *
 		 * @param string[] $statuses Default processing and completed.
 		 */
@@ -180,7 +180,7 @@ class OrderStatusSync implements Hookable {
 	/**
 	 * Make a paid order's pending and rejected commissions unpaid.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param WC_Order $order The order, already known to be paid.
 	 *
@@ -193,7 +193,7 @@ class OrderStatusSync implements Hookable {
 	/**
 	 * Record why a commission stayed where it was.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param Commission $commission The commission.
 	 * @param string     $to         The status it was meant to get.
@@ -222,7 +222,7 @@ class OrderStatusSync implements Hookable {
 	/**
 	 * Move an order's WooCommerce commissions from some statuses to another.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.0
 	 *
 	 * @param int      $order_id The order.
 	 * @param string[] $from     The statuses to move.
