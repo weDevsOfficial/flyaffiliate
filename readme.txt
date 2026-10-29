@@ -124,7 +124,13 @@ A. FlyAffiliate works on any WordPress site. Integrations are optional and switc
 
 == Screenshots ==
 
-1. The affiliates list, with status filters and per-affiliate earnings.
+1. Dashboard with referral revenue, net revenue, payouts, conversion rate and your most valuable affiliates at a glance.
+2. Affiliates list with status tabs, paid and unpaid earnings, and each affiliate's payment email.
+3. Commissions created per order item, with pending, unpaid, paid and rejected statuses.
+4. Visits log showing each referral visit, the landing page, the referrer and whether it converted.
+5. Payouts that pay affiliates in one batch, mark payments paid and export to CSV.
+6. Extensions page to switch on Pro integrations and payout methods, such as Dokan and PayPal Payouts.
+7. Settings for commission rates, the hold period, tracking, payouts and emails.
 
 == Changelog ==
 
