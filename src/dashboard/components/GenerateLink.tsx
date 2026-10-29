@@ -36,10 +36,7 @@ const bareHost = ( host: string ) => host.toLowerCase().replace( /^www\./, '' );
  * @param {string} referralUrl Their own referral link, which carries the variable and id.
  * @return {Result} The link, or why there is none.
  */
-export function buildReferralLink(
-	input: string,
-	referralUrl: string
-): Result {
+function buildReferralLink( input: string, referralUrl: string ): Result {
 	const value = input.trim();
 
 	if ( ! value ) {

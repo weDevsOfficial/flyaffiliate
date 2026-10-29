@@ -81,8 +81,17 @@ export default function App() {
 	// The picker only reports a range once Apply is pressed; the debounce keeps
 	// a quick re-pick or a clear from firing a round of requests each.
 	useEffect( () => {
+		// Same dates, same object: the first debounce after mount would otherwise
+		// fetch the dashboard a second time with the arguments it already has.
 		const timer = window.setTimeout(
-			() => setDates( toDateArgs( range ) ),
+			() =>
+				setDates( ( previous ) => {
+					const next = toDateArgs( range );
+
+					return JSON.stringify( previous ) === JSON.stringify( next )
+						? previous
+						: next;
+				} ),
 			RANGE_DEBOUNCE_MS
 		);
 
