@@ -38,6 +38,9 @@ global $wpdb;
 // the WP-Cron event a site without it runs — the same pair deactivation clears.
 FlyAffiliate\Install\Installer::clear_scheduled_events();
 
+// The Appsero SDK's weekly send, named after the plugin's directory (FlyAffiliate\Tracker).
+wp_clear_scheduled_hook( 'flyaffiliate_tracker_send_event' );
+
 // The pages the installer created.
 $flyaffiliate_pages = get_option( FlyAffiliate\Install\Installer::PAGES_OPTION, [] );
 
@@ -75,6 +78,9 @@ foreach ( $flyaffiliate_options as $flyaffiliate_option ) {
 
 // The lock the upgrade routine holds while it runs, in case a request died mid-upgrade.
 delete_transient( FlyAffiliate\Upgrade\Manager::LOCK_KEY );
+
+// The setup wizard's one-time redirect, when uninstall follows activation at once.
+delete_transient( FlyAffiliate\Admin\SetupWizard::REDIRECT_TRANSIENT );
 
 // Per-user notice dismissals and any other user meta this plugin wrote. A meta_key
 // LIKE sweep is the only way to reach them: there is no WordPress API for
