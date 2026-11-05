@@ -6,7 +6,7 @@ import { chromium, type FullConfig } from '@playwright/test';
 import { execSync } from 'child_process';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
-import { ADMIN, urls } from './utils/site';
+import { ADMIN, logIn } from './utils/site';
 
 async function globalSetup( config: FullConfig ): Promise< void > {
 	const baseURL = config.projects[ 0 ].use.baseURL ?? 'http://localhost:8888';
@@ -25,11 +25,7 @@ async function globalSetup( config: FullConfig ): Promise< void > {
 	const browser = await chromium.launch();
 	const page = await browser.newPage( { baseURL } );
 
-	await page.goto( urls.login );
-	await page.fill( '#user_login', ADMIN.username );
-	await page.fill( '#user_pass', ADMIN.password );
-	await page.click( '#wp-submit' );
-	await page.waitForURL( /wp-admin/ );
+	await logIn( page, ADMIN.username, ADMIN.password );
 	await page
 		.context()
 		.storageState( { path: join( __dirname, '.auth', 'admin.json' ) } );
