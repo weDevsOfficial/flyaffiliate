@@ -15,6 +15,7 @@ import {
 	loginAs,
 	orderCommissions,
 	pageUrls,
+	placeBlockOrder,
 	refireStatus,
 	setOrderStatus,
 	withSettings,
@@ -111,13 +112,7 @@ test.describe( 'Money journey @money @smoke', () => {
 			await state.fill( 'CA' );
 		}
 		await page.locator( '#billing-postcode' ).fill( '90001' );
-		await page.getByRole( 'button', { name: 'Place Order' } ).click();
-
-		await page.waitForURL( /order-received/, { timeout: 60 * 1000 } );
-		order = Number(
-			new URL( page.url() ).searchParams.get( 'order-received' ) ??
-				page.url().match( /order-received\/(\d+)/ )?.[ 1 ]
-		);
+		order = await placeBlockOrder( page );
 		expect( order ).toBeGreaterThan( 0 );
 		await guest.close();
 	} );

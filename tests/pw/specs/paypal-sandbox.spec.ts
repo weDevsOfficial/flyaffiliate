@@ -27,6 +27,7 @@ import {
 	loginAs,
 	orderCommissions,
 	pageUrls,
+	placeBlockOrder,
 	restoreSettings,
 	setOrderStatus,
 	setSettings,
@@ -241,12 +242,7 @@ test.describe( 'PayPal sandbox, end to end @pro @money @paypal-live', () => {
 			await state.fill( 'CA' );
 		}
 		await page.locator( '#billing-postcode' ).fill( '90001' );
-		await page.getByRole( 'button', { name: 'Place Order' } ).click();
-		await page.waitForURL( /order-received/, { timeout: 60 * 1000 } );
-		order = Number(
-			new URL( page.url() ).searchParams.get( 'order-received' ) ??
-				page.url().match( /order-received\/(\d+)/ )?.[ 1 ]
-		);
+		order = await placeBlockOrder( page );
 		await guest.close();
 
 		const rows = orderCommissions( order );

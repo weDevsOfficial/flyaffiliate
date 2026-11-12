@@ -3,7 +3,13 @@
  * settings. Each returns ids, so assertions can be exact instead of
  * counting global rows the seeder or another spec also touches.
  */
-import { test, type Browser, type BrowserContext } from '@playwright/test';
+import {
+	expect,
+	test,
+	type Browser,
+	type BrowserContext,
+	type Page,
+} from '@playwright/test';
 import { join } from 'path';
 import { BASE_URL } from './api';
 import { logIn } from './site';
@@ -453,6 +459,49 @@ export function signedCookie( affiliateId: number, visitId: number ): string {
 export function pageUrls(): { dashboard: string; register: string } {
 	return php(
 		`return [ 'dashboard' => flyaffiliate_get_page_url( 'affiliate_dashboard' ), 'register' => flyaffiliate_get_page_url( 'affiliate_register' ) ];`
+	);
+}
+
+/**
+ * Place the order on a filled block checkout and return its id.
+ *
+ * WooCommerce ignores a Place Order click that lands while its debounced
+ * `cart/update-customer` request is in flight: nothing is sent and the button
+ * stays put (seen on the WP 6.6 CI job). So click again until the checkout
+ * request leaves. A click that sent nothing cannot place an order, so the
+ * retry never orders twice; one that did is not repeated.
+ *
+ * @param page The guest's page, on the checkout with every field filled.
+ * @return The order id from the order-received URL.
+ */
+export async function placeBlockOrder( page: Page ): Promise< number > {
+	let sent = false;
+	const watch = ( r: { method: () => string; url: () => string } ) => {
+		if (
+			r.method() === 'POST' &&
+			/wc\/store\/v1\/checkout/.test( r.url() )
+		) {
+			sent = true;
+		}
+	};
+	page.on( 'request', watch );
+	try {
+		await expect( async () => {
+			if ( ! sent ) {
+				await page
+					.getByRole( 'button', { name: 'Place Order' } )
+					.click();
+			}
+			expect( sent, 'the checkout request was sent' ).toBe( true );
+		} ).toPass( { intervals: [ 2000 ], timeout: 30 * 1000 } );
+	} finally {
+		page.off( 'request', watch );
+	}
+
+	await page.waitForURL( /order-received/, { timeout: 60 * 1000 } );
+	return Number(
+		new URL( page.url() ).searchParams.get( 'order-received' ) ??
+			page.url().match( /order-received\/(\d+)/ )?.[ 1 ]
 	);
 }
 
