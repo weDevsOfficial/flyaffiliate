@@ -323,7 +323,7 @@ class PayoutsController extends AdminBaseController {
 	 * The value must parse as a date and print back unchanged, which refuses
 	 * `2025-13-45` (no such day) and `2025-1-5` (not the Y-m-d form) alike.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.2
 	 *
 	 * @param mixed           $value   The submitted value.
 	 * @param WP_REST_Request $request The request.

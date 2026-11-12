@@ -148,7 +148,7 @@ class CommissionsController extends AdminBaseController {
 	/**
 	 * Load the payments of the paid commissions about to be prepared, once.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.2
 	 *
 	 * @param Commission[] $commissions The commissions.
 	 *
@@ -341,7 +341,7 @@ class CommissionsController extends AdminBaseController {
 	 * Only a payment that is itself paid counts. A commission recorded as paid
 	 * by hand, outside a payment or inside one still unpaid, has none.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.2
 	 *
 	 * @param Commission $item The commission.
 	 *

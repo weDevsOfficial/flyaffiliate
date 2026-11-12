@@ -908,7 +908,7 @@ class SettingsSchema {
 	 * With `p`, `s` or `page_id` as the variable, every plain post link
 	 * (`/?p=12`) would credit the affiliate whose id matches the post.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.2
 	 *
 	 * @param mixed $value Submitted value.
 	 *

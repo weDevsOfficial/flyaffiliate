@@ -335,7 +335,7 @@ class MeController extends AffiliateBaseController {
 	 * A typo used to pass through `sanitize_email()` as an empty string and
 	 * come back as the account email behind a 200; it is refused instead.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.2
 	 *
 	 * @param mixed           $value   The submitted value.
 	 * @param WP_REST_Request $request The request.

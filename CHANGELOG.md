@@ -1,3 +1,21 @@
+### v1.0.2 ( Nov 12, 2026 ) ###
+
+- **new:** A commission marked paid by hand now shows an info icon beside its Paid status in the admin lists and on the affiliate dashboard, so it no longer looks the same as one a payout paid.
+- **new:** The commission form now warns, when you set a commission to Paid for an affiliate paid through an automatic payout method, that saving sends no money, and links to Payouts.
+- **new:** Affiliates now see the transaction reference of a payout an automatic payout method sent, on their Payouts tab and in the payout's details.
+- **update:** The admin's not-found page now follows Dokan's 404 page and says what is missing, with a way back.
+- **update:** The commission note in the affiliate's commission details now sits behind its info icon, as it does in the lists.
+- **fix:** The referral variable can no longer be set to one of WordPress's own query variables, such as `p` or `page_id`, which credited affiliates for ordinary visits; a site that already saved one falls back to `affiliate`.
+- **fix:** A payout preview that is refused, such as one with no affiliate chosen, now clears the previous preview, so it can no longer be paid by mistake.
+- **fix:** A referral link now tracks only a plain affiliate ID; values such as `-5`, `5abc` or an array no longer credit an affiliate.
+- **fix:** Settings now refuse a switch value other than on or off instead of saving it.
+- **fix:** Affiliates can no longer save an invalid payment email from their dashboard.
+- **fix:** Removing the last commission from a payment is now refused, so no empty payment is left; delete the payment instead.
+- **fix:** Opening a payment that does not exist now shows the not-found page instead of an empty payment.
+- **fix:** Paying a payout that does not exist through the REST API now returns not found, and a payout period must be a real calendar date.
+- **fix:** The affiliate dashboard's tabs now wrap on a phone instead of pushing the page sideways.
+- **fix:** Long names and amounts on the admin dashboard and in stat cards are now cut with an ellipsis, the full value in a tooltip, instead of overlapping.
+
 ### v1.0.1 ( Nov 02, 2026 ) ###
 
 - **update:** Rewrote the plugin page with a clearer description, the free and Pro feature lists, and new FAQ answers.

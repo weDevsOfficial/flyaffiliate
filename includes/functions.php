@@ -77,7 +77,7 @@ if ( ! function_exists( 'flyaffiliate_get_reserved_query_vars' ) ) {
 	 * (`/?p=12`) would credit the affiliate whose id matches the post. A save
 	 * refuses these names and the tracker ignores one already stored.
 	 *
-	 * @since FLYAFFILIATE_SINCE
+	 * @since 1.0.2
 	 *
 	 * @return string[]
 	 */
@@ -89,7 +89,7 @@ if ( ! function_exists( 'flyaffiliate_get_reserved_query_vars' ) ) {
 		/**
 		 * Filters the query variables the referral variable cannot be.
 		 *
-		 * @since FLYAFFILIATE_SINCE
+		 * @since 1.0.2
 		 *
 		 * @param string[] $reserved WordPress's public and private query variables.
 		 */
