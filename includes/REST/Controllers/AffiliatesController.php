@@ -298,6 +298,7 @@ class AffiliatesController extends AdminBaseController {
 			'status'        => (string) $item->get( 'status' ),
 			'payment_email' => $item->get_payment_email(),
 			'payout_method' => $item->get_payout_method(),
+			'effective_payout_method' => flyaffiliate()->payout_method->resolve_for( $item )->get_id(),
 			'promo_method'  => (string) $item->get( 'promo_method', '' ),
 			'website'       => $item->get_website(),
 			'referral_url'  => $item->get_referral_url(),
@@ -500,6 +501,12 @@ class AffiliatesController extends AdminBaseController {
 					'arg_options' => [
 						'sanitize_callback' => 'sanitize_key',
 					],
+				],
+				'effective_payout_method' => [
+					'description' => __( 'The payout method that pays the affiliate today: their choice while it is switched on, the default otherwise.', 'flyaffiliate' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
 				],
 				'payout_details' => [
 					'description'          => __( 'The details each payout method needs, method id => field id => value. Only with context=edit.', 'flyaffiliate' ),

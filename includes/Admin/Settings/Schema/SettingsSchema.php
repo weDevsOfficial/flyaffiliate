@@ -281,6 +281,7 @@ class SettingsSchema {
 				'validations'       => [
 					self::rule( 'required', __( 'The referral variable cannot be empty.', 'flyaffiliate' ) ),
 				],
+				'validate_callback' => [ self::class, 'validate_referral_variable' ],
 				'sanitize_callback' => [ self::class, 'sanitize_referral_variable' ],
 			],
 			self::days_field(
@@ -899,6 +900,29 @@ class SettingsSchema {
 		$key = sanitize_key( (string) $value );
 
 		return '' !== $key ? $key : 'affiliate';
+	}
+
+	/**
+	 * Refuse a referral variable WordPress itself reads.
+	 *
+	 * With `p`, `s` or `page_id` as the variable, every plain post link
+	 * (`/?p=12`) would credit the affiliate whose id matches the post.
+	 *
+	 * @since 1.0.2
+	 *
+	 * @param mixed $value Submitted value.
+	 *
+	 * @return true|string True when allowed, otherwise the message refusing it.
+	 */
+	public static function validate_referral_variable( $value ) {
+		$key = self::sanitize_referral_variable( $value );
+
+		if ( in_array( $key, flyaffiliate_get_reserved_query_vars(), true ) ) {
+			// translators: %s: the submitted referral variable.
+			return sprintf( __( '"%s" is a WordPress query variable. Choose another referral variable.', 'flyaffiliate' ), $key );
+		}
+
+		return true;
 	}
 
 	/**

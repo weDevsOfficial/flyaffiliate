@@ -4,7 +4,6 @@
  */
 import { useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Info } from 'lucide-react';
 import {
 	Dialog,
 	DialogContent,
@@ -14,7 +13,8 @@ import {
 } from '@wedevs/plugin-ui';
 import DateTime from '@/components/DateTime';
 import Money from '@/components/Money';
-import StatusBadge from '@/components/StatusBadge';
+import CommissionAmount from '@/components/CommissionAmount';
+import CommissionStatus from '@/components/CommissionStatus';
 import { errorMessage, fetchOne } from '@/lib/api';
 import type { CommissionDetail } from '../types';
 
@@ -31,7 +31,7 @@ function Row( {
 	children: React.ReactNode;
 } ) {
 	return (
-		<div className="grid grid-cols-[9rem_1fr] gap-3 py-2 text-sm">
+		<div className="grid grid-cols-[9rem_1fr] gap-3 px-4 py-2 text-sm">
 			<dt className="text-muted-foreground">{ label }</dt>
 			<dd className="min-w-0 break-words text-foreground">
 				{ children }
@@ -50,7 +50,7 @@ function Section( {
 	return (
 		<section className="flex flex-col gap-1">
 			<h4 className="text-sm font-semibold text-foreground">{ title }</h4>
-			<dl className="divide-y divide-border rounded-md border border-border px-4">
+			<dl className="divide-y divide-border rounded-md border border-border">
 				{ children }
 			</dl>
 		</section>
@@ -153,27 +153,15 @@ export default function CommissionDetails( { commissionId, onClose }: Props ) {
 								<Row
 									label={ __( 'Commission', 'flyaffiliate' ) }
 								>
-									<Money
+									<CommissionAmount
 										amount={ detail.amount }
-										className="font-semibold"
+										note={ detail.note }
 									/>
-									{ detail.note && (
-										<p
-											className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground"
-											data-testid="flyaffiliate-commission-note"
-										>
-											<Info
-												className="mt-px size-3.5 shrink-0"
-												aria-hidden="true"
-											/>
-											{ detail.note }
-										</p>
-									) }
 								</Row>
 								<Row label={ __( 'Status', 'flyaffiliate' ) }>
-									<StatusBadge
-										status={ detail.status }
-										kind="commission"
+									<CommissionStatus
+										commission={ detail }
+										detailed
 									/>
 								</Row>
 								<Row label={ __( 'Date', 'flyaffiliate' ) }>
@@ -219,7 +207,7 @@ export default function CommissionDetails( { commissionId, onClose }: Props ) {
 										</Row>
 									</>
 								) : (
-									<p className="py-3 text-sm text-muted-foreground">
+									<p className="px-4 py-3 text-sm text-muted-foreground">
 										{ __(
 											'This commission did not come from a tracked visit.',
 											'flyaffiliate'

@@ -31,8 +31,9 @@ test.describe( 'Navigation', () => {
 	test( 'an unknown route shows the not-found page', async ( { page } ) => {
 		const admin = new AdminPage( page );
 		await admin.goto( `${ urls.app }#/nowhere` );
+		// PR #22 redrew the page as Dokan's admin 404.
 		await expect( admin.heading ).toHaveText(
-			'Sorry, that page cannot be found'
+			/Sorry, the page can.t be found/
 		);
 	} );
 } );

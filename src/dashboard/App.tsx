@@ -160,7 +160,7 @@ export default function App() {
 					className="gap-6"
 				>
 					<div className="flex flex-wrap items-center justify-between gap-3">
-						<TabsList className="h-11 gap-2 bg-muted p-1">
+						<TabsList className="h-auto min-h-11 flex-wrap gap-2 bg-muted p-1">
 							<TabsTrigger
 								value="overview"
 								className={ TAB_TRIGGER }

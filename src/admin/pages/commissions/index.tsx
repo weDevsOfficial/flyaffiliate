@@ -31,7 +31,7 @@ import {
 	type DataViewState,
 } from '@wedevs/plugin-ui';
 import PageHeader from '@/components/PageHeader';
-import StatusBadge from '@/components/StatusBadge';
+import CommissionStatus from '@/components/CommissionStatus';
 import DateTime from '@/components/DateTime';
 import Matures from '@/components/Matures';
 import Money from '@/components/Money';
@@ -271,9 +271,7 @@ export function CommissionsTable( {
 		{
 			id: 'status',
 			label: __( 'Status', 'flyaffiliate' ),
-			render: ( { item } ) => (
-				<StatusBadge status={ item.status } kind="commission" />
-			),
+			render: ( { item } ) => <CommissionStatus commission={ item } />,
 		},
 		{
 			id: 'matures_at',

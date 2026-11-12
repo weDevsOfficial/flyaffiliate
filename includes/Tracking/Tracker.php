@@ -55,7 +55,12 @@ class Tracker implements Hookable {
 	public static function get_variable(): string {
 		$variable = (string) flyaffiliate_get_option( 'referral_variable', 'affiliate' );
 
-		return '' !== $variable ? $variable : 'affiliate';
+		// A reserved name saved before saves refused it is not read: `/?p=12` is a post link.
+		if ( '' === $variable || in_array( $variable, flyaffiliate_get_reserved_query_vars(), true ) ) {
+			return 'affiliate';
+		}
+
+		return $variable;
 	}
 
 	/**
@@ -69,7 +74,10 @@ class Tracker implements Hookable {
 		$variable = self::get_variable();
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a referral link is a public GET; there is no form to protect.
-		$affiliate_id = isset( $_GET[ $variable ] ) ? absint( wp_unslash( $_GET[ $variable ] ) ) : 0;
+		$value = isset( $_GET[ $variable ] ) ? sanitize_text_field( wp_unslash( $_GET[ $variable ] ) ) : '';
+
+		// Only a plain id counts: an array, a sign or trailing text credits nobody.
+		$affiliate_id = ctype_digit( $value ) ? (int) $value : 0;
 
 		if ( 0 === $affiliate_id ) {
 			return;

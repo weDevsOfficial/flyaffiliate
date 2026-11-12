@@ -24,6 +24,8 @@ export type Affiliate = {
 	payment_email: string;
 	/** The payout method the affiliate chose; empty for the default. */
 	payout_method?: string;
+	/** The method that pays them today: their choice while it is switched on, the default otherwise. */
+	effective_payout_method?: string;
 	/** Method id => field id => value. Only with context=edit (and on `/me`). */
 	payout_details?: Record< string, Record< string, string > >;
 	/** Method id => an account they are paid to without entering anything. Only with context=edit (and on `/me`). */
@@ -65,6 +67,8 @@ export type Commission = {
 	type: string;
 	status: string;
 	payout_id: number | null;
+	/** The method of the payment that paid it; null when not paid, or recorded as paid outside a payout. */
+	paid_by?: { method: string; method_label: string } | null;
 	matures_at: string | null;
 	created_at: string | null;
 	updated_at: string | null;

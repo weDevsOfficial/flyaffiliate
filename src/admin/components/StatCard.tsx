@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Card, Skeleton, cn } from '@wedevs/plugin-ui';
 import Hint from './Hint';
+import TruncatedLine from './TruncatedLine';
 
 type Props = {
 	icon: LucideIcon;
@@ -30,6 +31,7 @@ export default function StatCard( {
 	// A figure (an amount, a count, a rate) takes Dokan's 30px; a name, a
 	// link or a list of methods reads at a calmer size, or a long one
 	// crowds the tile.
+	// A figure too wide for its tile is cut, the whole of it in a tooltip; it borrows 8px of padding first.
 	const isFigure = 'string' === typeof value || 'number' === typeof value;
 
 	return (
@@ -60,11 +62,20 @@ export default function StatCard( {
 				className={ cn(
 					'min-w-0 leading-tight text-foreground',
 					isFigure
-						? '-mt-1 whitespace-nowrap text-3xl font-bold tabular-nums'
+						? '-me-2 -mt-1 text-3xl font-bold tabular-nums'
 						: 'text-lg font-semibold'
 				) }
 			>
-				{ value }
+				{ isFigure ? (
+					<TruncatedLine
+						tooltip={ String( value ) }
+						className="cursor-default"
+					>
+						{ value }
+					</TruncatedLine>
+				) : (
+					value
+				) }
 			</div>
 		</Card>
 	);

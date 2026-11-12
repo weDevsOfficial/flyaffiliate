@@ -28,9 +28,10 @@ unpaid again if it was marked by mistake. The product asked for the same.
   reverses it, and the commissions stay attached so they cannot be paid twice.
   `pay_batch()` marks every unpaid payment of a batch paid.
 - `remove_commission()` takes a commission out of an *unpaid* payment
-  (`payout_id = 0`, payment amount reduced); `delete()` removes an unpaid
-  payment and detaches its commissions; `delete_batch()` refuses if any payment
-  in it is paid.
+  (`payout_id = 0`, payment amount reduced) and refuses the last one, so no
+  payment of 0.00 is left behind; `delete()` removes an unpaid payment and
+  detaches its commissions; `delete_batch()` refuses if any payment in it is
+  paid.
 - `preview()` keeps excluding any commission whose `payout_id` is set, so a
   commission waiting in an unpaid payment is never put into a second one.
 - **A payment holds its commissions, the admin still edits them.**

@@ -164,6 +164,8 @@ function Fact( {
 export default function PayoutCommissions( { payout, onClose }: Props ) {
 	// The last payout stays for the title while the dialog closes.
 	const [ shown, setShown ] = useState< Payout | null >( payout );
+	// The reference noted for the payout, or the transaction its method recorded.
+	const reference = shown?.reference || shown?.transfer?.reference;
 
 	useEffect( () => {
 		if ( payout ) {
@@ -199,9 +201,7 @@ export default function PayoutCommissions( { payout, onClose }: Props ) {
 						<dl
 							className={ cn(
 								'm-0 grid grid-cols-2 gap-4',
-								shown.reference
-									? 'sm:grid-cols-4'
-									: 'sm:grid-cols-3'
+								reference ? 'sm:grid-cols-4' : 'sm:grid-cols-3'
 							) }
 						>
 							<Fact label={ __( 'Date', 'flyaffiliate' ) }>
@@ -224,12 +224,12 @@ export default function PayoutCommissions( { payout, onClose }: Props ) {
 									badgeOnly
 								/>
 							</Fact>
-							{ shown.reference && (
+							{ reference && (
 								<Fact
 									label={ __( 'Reference', 'flyaffiliate' ) }
 								>
-									<span title={ shown.reference }>
-										{ shown.reference }
+									<span title={ reference }>
+										{ reference }
 									</span>
 								</Fact>
 							) }

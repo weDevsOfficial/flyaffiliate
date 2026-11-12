@@ -129,6 +129,31 @@ class MeControllerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * An invalid payment email is refused, not silently replaced; an empty one
+	 * sends payouts to the account email.
+	 *
+	 * @return void
+	 */
+	public function test_an_invalid_payment_email_is_refused(): void {
+		$user = $this->factory()->user->create( [ 'role' => 'customer', 'user_email' => 'account@example.test' ] );
+		$id   = $this->factory()->affiliate->create( [ 'user_id' => $user, 'status' => Affiliate::STATUS_ACTIVE, 'payment_email' => 'pay@example.test' ] );
+
+		$this->acting_as( $user );
+
+		foreach ( [ 'not-an-email', 'a@b', [ 'pay@example.test' ] ] as $bad ) {
+			$response = $this->put_request( '/me', [ 'payment_email' => $bad ] );
+
+			$this->assertSame( 400, $response->get_status() );
+			$this->assertSame( 'pay@example.test', Affiliate::find( $id )->get( 'payment_email' ), 'unchanged' );
+		}
+
+		$response = $this->put_request( '/me', [ 'payment_email' => '' ] );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'account@example.test', $response->get_data()['payment_email'], 'empty means the account email' );
+	}
+
+	/**
 	 * A date range narrows the lists, the counts and the totals; a malformed day is refused.
 	 *
 	 * @return void

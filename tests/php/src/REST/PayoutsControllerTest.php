@@ -260,6 +260,95 @@ class PayoutsControllerTest extends FlyAffiliateTestCase {
 	}
 
 	/**
+	 * Once the transfer is paid the affiliate sees its reference too, and still no message.
+	 *
+	 * @return void
+	 */
+	public function test_the_affiliate_sees_the_reference_of_a_paid_transfer(): void {
+		$affiliate = $this->fake_affiliate( 30 );
+
+		$this->acting_as( $this->admin_id );
+
+		$created = $this->post_request( '/payouts', [ 'minimum_amount' => 0 ] )->get_data();
+		$id      = $created['payouts'][0]['id'];
+
+		$this->fake->states[ $id ] = [
+			'status'    => PayoutMethod::STATE_PROCESSING,
+			'message'   => 'Sent from the store account',
+			'reference' => 'ITEM1',
+		];
+
+		$this->acting_as( (int) Affiliate::find( $affiliate )->get( 'user_id' ) );
+
+		$this->assertSame( [ 'status' => 'processing' ], $this->get_request( '/me/payouts' )->get_data()[0]['transfer'] );
+
+		$this->fake->states[ $id ] = [
+			'status'    => PayoutMethod::STATE_PAID,
+			'message'   => 'Paid from the store account',
+			'reference' => 'TXN1',
+		];
+
+		$this->assertSame(
+			[
+				'status'    => 'paid',
+				'reference' => 'TXN1',
+			],
+			$this->get_request( '/me/payouts' )->get_data()[0]['transfer']
+		);
+	}
+
+	/**
+	 * A paid commission names the method of the payment that paid it. One
+	 * recorded as paid by hand, outside a payment or inside one still unpaid,
+	 * names none.
+	 *
+	 * @return void
+	 */
+	public function test_a_paid_commission_says_what_paid_it(): void {
+		$affiliate = $this->fake_affiliate( 30 );
+		$user      = (int) Affiliate::find( $affiliate )->get( 'user_id' );
+		$outside   = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 5, 'status' => Commission::STATUS_PAID ] );
+		$inside    = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 7, 'status' => Commission::STATUS_UNPAID ] );
+
+		$this->acting_as( $this->admin_id );
+
+		$payment = $this->post_request( '/payouts', [ 'minimum_amount' => 0 ] )->get_data()['payouts'][0];
+		$sent    = current( array_diff( $payment['commissions'], [ $inside ] ) );
+
+		$this->assertContains( $inside, $payment['commissions'] );
+		$this->assertNull( $this->get_request( '/commissions/' . $sent )->get_data()['paid_by'], 'not paid yet' );
+		$this->assertNull( $this->get_request( '/commissions/' . $outside )->get_data()['paid_by'], 'paid by hand, in no payment' );
+
+		// Marked paid by hand while its payment waits: the payment did not pay it.
+		$this->assertSame( 200, $this->put_request( '/commissions/' . $inside, [ 'status' => 'paid' ] )->get_status() );
+		$this->assertNull( $this->get_request( '/commissions/' . $inside )->get_data()['paid_by'] );
+
+		flyaffiliate()->payout->mark_paid( $payment['id'], true );
+
+		$paid_by = [
+			'method'       => 'fake',
+			'method_label' => 'Fake',
+		];
+
+		$this->assertSame( $paid_by, $this->get_request( '/commissions/' . $sent )->get_data()['paid_by'] );
+
+		$rows = array_column( $this->get_request( '/commissions', [ 'affiliate_id' => $affiliate ] )->get_data(), 'paid_by', 'id' );
+
+		$this->assertSame( $paid_by, $rows[ $sent ] );
+		$this->assertNull( $rows[ $outside ] );
+
+		// The affiliate's dashboard reads the same.
+		$this->acting_as( $user );
+
+		$rows = array_column( $this->get_request( '/me/commissions' )->get_data(), 'paid_by', 'id' );
+
+		$this->assertSame( $paid_by, $rows[ $sent ] );
+		$this->assertNull( $rows[ $outside ] );
+		$this->assertSame( $paid_by, $this->get_request( '/me/commissions/' . $sent )->get_data()['paid_by'] );
+		$this->assertNull( $this->get_request( '/me/commissions/' . $outside )->get_data()['paid_by'] );
+	}
+
+	/**
 	 * The affiliate chooses a method and gives its details; a method switched off or a bad detail is refused.
 	 *
 	 * @return void
@@ -356,6 +445,7 @@ class PayoutsControllerTest extends FlyAffiliateTestCase {
 		$view = $this->get_request( '/affiliates/' . $id )->get_data();
 
 		$this->assertSame( 'fake', $view['payout_method'] );
+		$this->assertSame( 'fake', $view['effective_payout_method'] );
 		$this->assertArrayNotHasKey( 'payout_details', $view );
 
 		$edit = $this->get_request( '/affiliates/' . $id, [ 'context' => 'edit' ] )->get_data();
@@ -366,6 +456,65 @@ class PayoutsControllerTest extends FlyAffiliateTestCase {
 
 		$this->assertSame( 200, $updated->get_status() );
 		$this->assertSame( 'manual', $updated->get_data()['payout_method'] );
+		$this->assertSame( 'manual', $updated->get_data()['effective_payout_method'] );
 		$this->assertSame( 400, $this->put_request( '/affiliates/' . $id, [ 'payout_method' => 'nope' ] )->get_status() );
+	}
+
+	/**
+	 * The method that pays an affiliate is their choice while it is switched on, the default otherwise.
+	 *
+	 * @return void
+	 */
+	public function test_an_affiliate_names_the_method_that_pays_them(): void {
+		$this->acting_as( $this->admin_id );
+
+		$chose   = $this->fake_affiliate( 10 );
+		$default = $this->factory()->affiliate->create();
+		$method  = fn( int $id ): string => $this->get_request( '/affiliates/' . $id )->get_data()['effective_payout_method'];
+
+		$this->assertSame( 'fake', $method( $chose ) );
+		$this->assertSame( 'manual', $method( $default ) );
+
+		flyaffiliate_update_option( 'method', 'fake' );
+
+		$this->assertSame( 'fake', $method( $default ), 'the default covers an affiliate who chose nothing' );
+
+		$this->fake->enabled = false;
+
+		$this->assertSame( 'manual', $method( $chose ), 'a method switched off pays nobody' );
+		$this->assertSame( 'manual', $method( $default ) );
+	}
+
+	/**
+	 * A period bound must be a calendar date: `2025-13-45` matches the Y-m-d
+	 * pattern and is no date.
+	 *
+	 * @return void
+	 */
+	public function test_an_impossible_period_date_is_refused(): void {
+		$this->acting_as( $this->admin_id );
+
+		foreach ( [ '2025-13-45', '2025-02-30', '2025-1-5', 'nope' ] as $bad ) {
+			$this->assertSame( 400, $this->post_request( '/payouts/preview', [ 'period_start' => $bad ] )->get_status(), $bad );
+			$this->assertSame( 400, $this->post_request( '/payouts/preview', [ 'period_end' => $bad ] )->get_status(), $bad );
+			$this->assertSame( 400, $this->post_request( '/payouts', [ 'period_start' => $bad ] )->get_status(), $bad );
+		}
+
+		$response = $this->post_request( '/payouts/preview', [ 'period_start' => '2024-02-29', 'period_end' => '2025-12-31' ] );
+
+		$this->assertSame( 200, $response->get_status() );
+	}
+
+	/**
+	 * Paying a batch that does not exist is 404, like reading or deleting it.
+	 *
+	 * @return void
+	 */
+	public function test_paying_an_unknown_batch_is_not_found(): void {
+		$this->acting_as( $this->admin_id );
+
+		$this->assertSame( 404, $this->post_request( '/payouts/batch/nope/pay' )->get_status() );
+		$this->assertSame( 404, $this->get_request( '/payouts/batch/nope' )->get_status() );
+		$this->assertSame( 404, $this->delete_request( '/payouts/batch/nope' )->get_status() );
 	}
 }

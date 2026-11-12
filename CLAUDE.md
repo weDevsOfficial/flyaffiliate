@@ -22,6 +22,7 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 - **`flyaffiliate-dev-cycle`** — Build, lint, PHPUnit, Plugin Check, release-zip workflows and test-writing conventions.
 - **`flyaffiliate-wporg-compliance`** — WordPress.org submission rules and the Plugin Check gate. **Invoke before every commit that touches PHP, assets, readme.txt, or the plugin header, and before any release.**
 - **`flyaffiliate-code-review`** — Review standards: security, money-rule, and architecture violations to flag; severity levels; output format.
+- **`flyaffiliate-playwright-e2e`** — Playwright e2e suite (`tests/pw`): the ADR-derived scenario catalogue, data setup through wp-env CLI/REST, role sessions, the release gate. **Invoke before writing or changing any e2e spec.**
 - **`flyaffiliate-git`** — Branching, commit format, PR template, CI checks.
 - **`flyaffiliate-wp-env-worktrees`** — A branch or PR in its own worktree and wp-env: ports, an isolated or cloned database. A change that also touches Pro uses Pro's `flyaffiliate-pro-wp-env-worktrees`.
 
@@ -57,13 +58,13 @@ The `.claude/skills/` directory contains procedural HOW-TO instructions:
 
 ```bash
 # PHP
-composer install            # Dev tools; Mozart re-prefixes the Appsero SDK into vendor-prefixed/ — nothing from vendor/ ships
+composer install            # Dev dependencies only — nothing from vendor/ ships
 composer phpcs              # PHP CodeSniffer (WordPress-Extra + PHPCompatibilityWP)
 composer phpcbf             # Auto-fix code style
 composer test               # PHPUnit (needs a provisioned WP test install or wp-env)
 composer test-f <filter>    # PHPUnit with --filter
 
-# Assets (the two React apps, and the plain front-end stylesheet)
+# Assets (Phase 1 admin is PHP-rendered; the build pipeline exists for later React work)
 npm run start               # Dev build with watch
 npm run build               # Production build
 npm run lint:js / lint:css
@@ -80,7 +81,6 @@ npm run test:phpunit        # env:start → phpunit → env:stop
 
 # WordPress.org gate
 npm run release             # Builds build/flyaffiliate-v<version>.zip honouring .distignore
-npm run version             # Stamps package.json's version on every FLYAFFILIATE_SINCE (the release commit only)
 npm run plugin-check        # Runs Plugin Check against the built zip (wp-env)
 ```
 
@@ -109,30 +109,27 @@ flyaffiliate/
 ├── readme.txt
 ├── includes/                      # PHP backend, PSR-4 root for FlyAffiliate\
 │   ├── Abstracts/                 # Shortcode, PayoutMethod (safe defaults + the affiliate-details store)
-│   ├── Admin/                     # Menu (hash routes), Dashboard/Stats, Notices/, PayoutExport, ProExtensions, Settings/{Schema,Repository,Manager}, SetupWizard, UserProfile
+│   ├── Admin/                     # Menu (hash routes), PayoutExport, Settings/{Schema,Repository,Manager}, Notices, SetupWizard, UserProfile
 │   ├── Affiliate/                 # Manager, Registration, Role (the flyaffiliate_affiliate user role)
-│   ├── CLI/                       # Seeder (`wp flyaffiliate seed`)
-│   ├── Commission/                # Manager, RateResolver
+│   ├── Commission/                # Manager, Commission model, Calculator, RateResolver, Hooks
 │   ├── Contracts/                 # Hookable, PayoutMethod
 │   ├── DependencyManagement/      # Container, Definition, BaseServiceProvider, Providers/
-│   ├── Frontend/                  # Shortcodes, AffiliateDashboard, RegistrationForm
+│   ├── Frontend/                  # Shortcodes, AffiliateDashboard, Hooks
 │   ├── Install/                   # Installer (dbDelta, pages, options, cron)
 │   ├── Integrations/
-│   │   └── WooCommerce/           # Integration (the announcement), OrderAttribution (checkout), OrderStatusSync, Analytics
-│   ├── Models/                    # BaseModel + Affiliate, Commission, Visit, Payout, ReferralLink over the custom tables
-│   ├── Payout/                    # Manager, CsvExporter
+│   │   └── WooCommerce/           # OrderAttribution (checkout), OrderStatusSync, HPOS-safe helpers
+│   ├── Models/                    # BaseModel + data stores over the custom tables
+│   ├── Payout/                    # Manager, Payout model, CsvExporter
 │   ├── PayoutMethod/              # Manager (the `flyaffiliate_payout_methods` registry, locks), Manual
 │   ├── ReferralLink/              # Manager: the affiliate's saved referral links and their visit counts
 │   ├── REST/                      # Manager, BaseController, AdminBaseController, controllers
-│   ├── Tracking/                  # Tracker (query var → cookie), Manager (visits)
-│   ├── Upgrade/                   # Manager: the versioned upgraders run from here
-│   ├── Utilities/                 # Money
+│   ├── Tracking/                  # Tracker (query var → cookie), Visit model, Hooks
+│   ├── Upgrade/                   # Manager + Upgrades/ versioned upgraders
+│   ├── Utilities/
 │   ├── Assets.php
-│   ├── Tracker.php                # Appsero Insights, opt-in, as Dokan Lite's Tracker (ADR-0018)
 │   └── functions.php              # flyaffiliate_get_option(), flyaffiliate_get_template_part(), helpers
 ├── templates/                     # Overridable templates: admin/ (app mount, profile), affiliate-dashboard/, registration/
-├── assets/                        # css/, js/ (built output only; plain sources in assets/src/), images/ (the plugin icon)
-├── vendor-prefixed/               # Mozart output: the Appsero SDK as FlyAffiliate\Dependencies\ — committed, never edited
+├── assets/                        # css/, js/ (built output only; plain sources in assets/src/)
 ├── src/admin/                     # The React admin app: App.tsx (routes), pages/, components/, hooks/, lib/, tailwind.css + admin.scss
 ├── src/dashboard/                 # The affiliate dashboard app (frontend): App.tsx (tabs), pages/, tables/, tailwind.css + dashboard.scss
 ├── src/styles/tailwind.css        # The Tailwind entry both apps import: plugin-ui tokens, scoped preflight and utilities
@@ -150,7 +147,7 @@ flyaffiliate/
 ### Service Container
 Services are accessed via `flyaffiliate()->service_name` (magic getter) or `flyaffiliate()->get_container()->get( 'service_name' )`.
 
-Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `payout_method`, `tracking`, `referral_link`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`, `tracker`. Add a name here in the same commit that registers it.
+Named services **registered today**: `affiliate`, `registration`, `commission`, `payout`, `payout_method`, `tracking`, `referral_link`, `settings`, `assets`, `api`, `upgrades`, `installer`, `admin_notices`. Add a name here in the same commit that registers it.
 
 The admin is one React app (`src/admin`, built to `assets/js/admin.js`) mounted by `Admin\Menu` on `admin.php?page=flyaffiliate`; every submenu entry is a hash route. Lists are plugin-ui `<DataViews>` over the REST controllers; forms are plugin-ui dialogs (the commission add/edit form is a route); the settings screen is plugin-ui `<Settings>` fed by `Admin\Settings\Schema\SettingsSchema`. Shortcodes extend `Abstracts\Shortcode`. While FlyAffiliate Pro is not active (`flyaffiliate_is_pro_active()`), `Admin\ProExtensions` adds an Extensions page that previews Pro's extensions with an upgrade dialog, as Dokan Lite shows Dokan Pro's modules; with Pro running, Pro's page takes its place (Pro's ADR-0005). See ADR-0010 and `.claude/skills/flyaffiliate-backend-dev` ("Settings", "Admin app").
 
@@ -173,8 +170,7 @@ Namespace `flyaffiliate/v1`. Controllers extend `FlyAffiliate\REST\AdminBaseCont
 
 ## Key Patterns
 
-- Service-based architecture with an in-house, League-shaped DI container (no third-party runtime packages ship in the zip, except the Mozart-prefixed Appsero SDK in `vendor-prefixed/`, ADR-0018)
-- Appsero Insights, opt-in as in Dokan Lite (`FlyAffiliate\Tracker`, as Dokan Lite's; not `Tracking\Tracker`, the referral tracker; ADR-0018): nothing is sent until an admin allows it through Share Essentials in the setup wizard or the SDK's notice
+- Service-based architecture with an in-house, League-shaped DI container (no third-party runtime packages ship in the zip)
 - WordPress hooks for extensibility; every hook name starts with `flyaffiliate_`
 - Overridable templates (`templates/` → theme `flyaffiliate/`)
 - Custom tables via `dbDelta` in `Install\Installer`, versioned upgrades in `Upgrade\Manager`

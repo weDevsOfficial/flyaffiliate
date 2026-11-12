@@ -7,6 +7,7 @@
 
 namespace FlyAffiliate\Test\Tracking;
 
+use FlyAffiliate\Admin\Settings\Repository\SettingsRepository;
 use FlyAffiliate\Models\Affiliate;
 use FlyAffiliate\Test\FlyAffiliateTestCase;
 use FlyAffiliate\Tracking\Tracker;
@@ -30,14 +31,14 @@ class TrackerTest extends FlyAffiliateTestCase {
 		parent::set_up();
 
 		$this->tracker = new Tracker();
-		unset( $_COOKIE[ Tracker::COOKIE ], $_GET['affiliate'] );
+		unset( $_COOKIE[ Tracker::COOKIE ], $_GET['affiliate'], $_GET['p'], $_GET['via'] );
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function tear_down() {
-		unset( $_COOKIE[ Tracker::COOKIE ], $_GET['affiliate'] );
+		unset( $_COOKIE[ Tracker::COOKIE ], $_GET['affiliate'], $_GET['p'], $_GET['via'] );
 
 		parent::tear_down();
 	}
@@ -128,6 +129,109 @@ class TrackerTest extends FlyAffiliateTestCase {
 			$this->tracker->track();
 		}
 
+		$this->assertSame( 0, flyaffiliate()->tracking->count() );
+		$this->assertArrayNotHasKey( Tracker::COOKIE, $_COOKIE );
+	}
+
+	/**
+	 * A malformed referral value credits nobody. Read through absint(), an array
+	 * (`?affiliate[]=…`) was 1 and `-5` or `5abc` was 5: a visit and a cookie
+	 * for an affiliate nobody linked to.
+	 *
+	 * @return void
+	 */
+	public function test_a_malformed_referral_value_credits_nobody(): void {
+		$affiliate_id = $this->factory()->affiliate->create();
+
+		$malformed = [
+			[ '999' ],
+			[ (string) $affiliate_id ],
+			'-' . $affiliate_id,
+			$affiliate_id . 'abc',
+			$affiliate_id . '.0',
+			' ',
+			'0',
+		];
+
+		foreach ( $malformed as $value ) {
+			$_GET['affiliate'] = $value;
+			$this->tracker->track();
+		}
+
+		$this->assertSame( 0, flyaffiliate()->tracking->count() );
+		$this->assertArrayNotHasKey( Tracker::COOKIE, $_COOKIE );
+
+		// The plain id still counts.
+		$_GET['affiliate'] = (string) $affiliate_id;
+		$this->tracker->track();
+
+		$this->assertSame( 1, flyaffiliate()->tracking->count() );
+		$this->assertSame( $affiliate_id, Tracker::parse( (string) $_COOKIE[ Tracker::COOKIE ] )['affiliate_id'] );
+	}
+
+	/**
+	 * A WordPress query variable already stored as the referral variable is not
+	 * read. A save refuses `p` now, but a site that saved it earlier keeps it,
+	 * and every plain post link (`/?p=12`) credited the affiliate whose id
+	 * matched the post.
+	 *
+	 * @return void
+	 */
+	public function test_a_stored_wordpress_query_variable_is_not_read(): void {
+		$affiliate_id = $this->factory()->affiliate->create();
+
+		// Straight into the option, past the validator, as the earlier version stored it.
+		update_option( SettingsRepository::OPTION_KEY, [ 'referral_variable' => 'p' ] + (array) get_option( SettingsRepository::OPTION_KEY, [] ) );
+		$this->assertSame( 'p', flyaffiliate_get_option( 'referral_variable' ) );
+
+		$_GET['p']              = (string) $affiliate_id;
+		$_SERVER['REQUEST_URI'] = '/?p=' . $affiliate_id;
+
+		$this->tracker->track();
+
+		$this->assertSame( 0, flyaffiliate()->tracking->count() );
+		$this->assertArrayNotHasKey( Tracker::COOKIE, $_COOKIE );
+
+		// The default stands in, for the tracker and for the links affiliates are given.
+		$this->assertSame( 'affiliate', Tracker::get_variable() );
+		$this->assertSame( home_url( '/?affiliate=' . $affiliate_id ), flyaffiliate()->affiliate->get( $affiliate_id )->get_referral_url() );
+
+		$_GET['affiliate'] = (string) $affiliate_id;
+		$this->tracker->track();
+
+		$this->assertSame( 1, flyaffiliate()->tracking->count() );
+		$this->assertSame( $affiliate_id, Tracker::parse( (string) $_COOKIE[ Tracker::COOKIE ] )['affiliate_id'] );
+	}
+
+	/**
+	 * The reserved names are one list with a filter: a name added to it is
+	 * refused on save and ignored once stored, like WordPress's own.
+	 *
+	 * @return void
+	 */
+	public function test_a_name_added_to_the_reserved_list_is_refused_and_ignored(): void {
+		$affiliate_id = $this->factory()->affiliate->create();
+
+		$this->assertNotWPError( flyaffiliate()->settings->save( [ 'referral_variable' => 'via' ] ) );
+		$this->assertSame( 'via', Tracker::get_variable() );
+
+		add_filter(
+			'flyaffiliate_reserved_query_vars',
+			static function ( array $reserved ): array {
+				$reserved[] = 'via';
+
+				return $reserved;
+			}
+		);
+
+		$this->assertContains( 'p', flyaffiliate_get_reserved_query_vars() );
+		$this->assertContains( 'via', flyaffiliate_get_reserved_query_vars() );
+		$this->assertWPError( flyaffiliate()->settings->save( [ 'referral_variable' => 'via' ] ) );
+
+		$_GET['via'] = (string) $affiliate_id;
+		$this->tracker->track();
+
+		$this->assertSame( 'affiliate', Tracker::get_variable() );
 		$this->assertSame( 0, flyaffiliate()->tracking->count() );
 		$this->assertArrayNotHasKey( Tracker::COOKIE, $_COOKIE );
 	}

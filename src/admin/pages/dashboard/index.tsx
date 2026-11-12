@@ -141,8 +141,8 @@ const PRODUCTS_VIEW: DataViewState = {
 	layout: {
 		styles: {
 			name: { width: '48%' },
-			commissions: { width: '32%' },
-			revenue: { width: '20%' },
+			commissions: { width: '28%' },
+			revenue: { width: '24%' },
 		},
 	},
 };
@@ -156,10 +156,10 @@ const VISITS_VIEW: DataViewState = {
 	titleField: 'url',
 	layout: {
 		styles: {
-			url: { width: '34%' },
+			url: { width: '32%' },
 			affiliate: { width: '24%' },
 			created_at: { width: '22%' },
-			converted: { width: '20%' },
+			converted: { width: '22%' },
 		},
 	},
 };
@@ -424,14 +424,26 @@ export default function DashboardPage() {
 			id: 'commissions',
 			label: __( 'Commissions', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) => item.commissions,
+			render: ( { item } ) => (
+				<TruncatedLine
+					tooltip={ String( item.commissions ) }
+					className="cursor-default"
+				>
+					{ item.commissions }
+				</TruncatedLine>
+			),
 		},
 		{
 			id: 'revenue',
 			label: __( 'Revenue', 'flyaffiliate' ),
 			enableSorting: false,
 			render: ( { item } ) => (
-				<Money amount={ item.revenue } className="font-semibold" />
+				<TruncatedLine
+					tooltip={ formatMoney( item.revenue ) }
+					className="cursor-default"
+				>
+					<Money amount={ item.revenue } className="font-semibold" />
+				</TruncatedLine>
 			),
 		},
 	];
@@ -454,38 +466,57 @@ export default function DashboardPage() {
 			id: 'affiliate',
 			label: __( 'Affiliate', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) => (
-				<Link
-					to={ `/affiliates/${ item.affiliate_id }` }
-					className="font-medium text-primary hover:underline"
-				>
-					{ item.affiliate_name || `#${ item.affiliate_id }` }
-				</Link>
-			),
+			render: ( { item } ) => {
+				const name = item.affiliate_name || `#${ item.affiliate_id }`;
+
+				return (
+					<TruncatedLine tooltip={ name }>
+						<Link
+							to={ `/affiliates/${ item.affiliate_id }` }
+							className="font-medium text-primary hover:underline"
+						>
+							{ name }
+						</Link>
+					</TruncatedLine>
+				);
+			},
 		},
 		{
 			id: 'created_at',
 			label: __( 'Date', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) => <DateTime value={ item.created_at } />,
+			render: ( { item } ) => (
+				<TruncatedLine
+					tooltip={ formatDate( item.created_at ) }
+					className="cursor-default"
+				>
+					<DateTime value={ item.created_at } />
+				</TruncatedLine>
+			),
 		},
 		{
 			id: 'converted',
 			label: __( 'Result', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) => (
-				<span
-					className={
-						item.converted
-							? 'font-medium text-foreground'
-							: 'text-muted-foreground'
-					}
-				>
-					{ item.converted
-						? __( 'Converted', 'flyaffiliate' )
-						: __( 'Not converted', 'flyaffiliate' ) }
-				</span>
-			),
+			render: ( { item } ) => {
+				const result = item.converted
+					? __( 'Converted', 'flyaffiliate' )
+					: __( 'Not converted', 'flyaffiliate' );
+
+				return (
+					<TruncatedLine
+						tooltip={ result }
+						className={ cn(
+							'cursor-default',
+							item.converted
+								? 'font-medium text-foreground'
+								: 'text-muted-foreground'
+						) }
+					>
+						{ result }
+					</TruncatedLine>
+				);
+			},
 		},
 	];
 
@@ -1008,57 +1039,62 @@ export default function DashboardPage() {
 								data-testid="flyaffiliate-dashboard-top-affiliates"
 							>
 								{ ( stats?.top_affiliates ?? [] ).map(
-									( affiliate, index ) => (
-										<li
-											key={ affiliate.id }
-											className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/40"
-										>
-											<span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-												#{ index + 1 }
-											</span>
-											<div className="flex min-w-0 flex-1 flex-col gap-0.5">
-												<Link
-													to={ `/affiliates/${ affiliate.id }` }
-													className="block truncate text-sm font-semibold leading-5 text-foreground hover:text-primary hover:underline"
-												>
-													{ affiliate.name ||
-														`#${ affiliate.id }` }
-												</Link>
-												<div className="text-xs leading-4 text-muted-foreground">
-													{ sprintf(
-														/* translators: 1: amount earned, 2: commission count, 3: visit count */
-														__(
-															'%1$s · %2$s · %3$s',
-															'flyaffiliate'
-														),
-														formatMoney(
-															affiliate.earned
-														),
-														sprintf(
-															/* translators: %d: number of commissions */
-															_n(
-																'%d commission',
-																'%d commissions',
-																affiliate.commissions,
-																'flyaffiliate'
-															),
-															affiliate.commissions
-														),
-														sprintf(
-															/* translators: %d: number of visits */
-															_n(
-																'%d visit',
-																'%d visits',
-																affiliate.visits,
-																'flyaffiliate'
-															),
-															affiliate.visits
-														)
-													) }
+									( affiliate, index ) => {
+										const summary = sprintf(
+											/* translators: 1: amount earned, 2: commission count, 3: visit count */
+											__(
+												'%1$s · %2$s · %3$s',
+												'flyaffiliate'
+											),
+											formatMoney( affiliate.earned ),
+											sprintf(
+												/* translators: %d: number of commissions */
+												_n(
+													'%d commission',
+													'%d commissions',
+													affiliate.commissions,
+													'flyaffiliate'
+												),
+												affiliate.commissions
+											),
+											sprintf(
+												/* translators: %d: number of visits */
+												_n(
+													'%d visit',
+													'%d visits',
+													affiliate.visits,
+													'flyaffiliate'
+												),
+												affiliate.visits
+											)
+										);
+
+										return (
+											<li
+												key={ affiliate.id }
+												className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/40"
+											>
+												<span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+													#{ index + 1 }
+												</span>
+												<div className="flex min-w-0 flex-1 flex-col gap-0.5">
+													<Link
+														to={ `/affiliates/${ affiliate.id }` }
+														className="block truncate text-sm font-semibold leading-5 text-foreground hover:text-primary hover:underline"
+													>
+														{ affiliate.name ||
+															`#${ affiliate.id }` }
+													</Link>
+													<TruncatedLine
+														tooltip={ summary }
+														className="cursor-default text-xs leading-4 text-muted-foreground"
+													>
+														{ summary }
+													</TruncatedLine>
 												</div>
-											</div>
-										</li>
-									)
+											</li>
+										);
+									}
 								) }
 							</ol>
 						) }

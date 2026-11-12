@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use FlyAffiliate\Models\Affiliate;
 use FlyAffiliate\Models\Payout;
 use FlyAffiliate\REST\AdminBaseController;
+use DateTimeImmutable;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -284,14 +285,14 @@ class PayoutsController extends AdminBaseController {
 				'minimum' => 0,
 			],
 			'period_start'   => [
-				'description' => __( 'Only commissions created on or after this date (Y-m-d).', 'flyaffiliate' ),
-				'type' => 'string',
-				'pattern' => '^\d{4}-\d{2}-\d{2}$',
+				'description'       => __( 'Only commissions created on or after this date (Y-m-d).', 'flyaffiliate' ),
+				'type'              => 'string',
+				'validate_callback' => [ $this, 'validate_date' ],
 			],
 			'period_end'     => [
-				'description' => __( 'Only commissions created on or before this date (Y-m-d).', 'flyaffiliate' ),
-				'type' => 'string',
-				'pattern' => '^\d{4}-\d{2}-\d{2}$',
+				'description'       => __( 'Only commissions created on or before this date (Y-m-d).', 'flyaffiliate' ),
+				'type'              => 'string',
+				'validate_callback' => [ $this, 'validate_date' ],
 			],
 			'note'           => [
 				'description' => __( 'A description shown as the payout title.', 'flyaffiliate' ),
@@ -314,6 +315,35 @@ class PayoutsController extends AdminBaseController {
 				'default'              => [],
 			],
 		];
+	}
+
+	/**
+	 * A period bound: a calendar date written Y-m-d.
+	 *
+	 * The value must parse as a date and print back unchanged, which refuses
+	 * `2025-13-45` (no such day) and `2025-1-5` (not the Y-m-d form) alike.
+	 *
+	 * @since 1.0.2
+	 *
+	 * @param mixed           $value   The submitted value.
+	 * @param WP_REST_Request $request The request.
+	 * @param string          $param   The parameter name.
+	 *
+	 * @return true|WP_Error True when valid, WP_Error otherwise.
+	 */
+	public function validate_date( $value, $request, $param ) {
+		$date = is_string( $value ) ? DateTimeImmutable::createFromFormat( 'Y-m-d', $value ) : false;
+
+		if ( $date && $date->format( 'Y-m-d' ) === $value ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'rest_invalid_param',
+			// translators: %s: the parameter name.
+			sprintf( __( '%s must be a calendar date written as Y-m-d.', 'flyaffiliate' ), $param ),
+			[ 'status' => 400 ]
+		);
 	}
 
 	/**
@@ -569,10 +599,12 @@ class PayoutsController extends AdminBaseController {
 	 *
 	 * @param WP_REST_Request $request The request.
 	 *
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function pay_batch( $request ) {
-		return rest_ensure_response( [ 'paid' => flyaffiliate()->payout->pay_batch( (string) $request['batch_key'] ) ] );
+		$paid = flyaffiliate()->payout->pay_batch( (string) $request['batch_key'] );
+
+		return is_wp_error( $paid ) ? $paid : rest_ensure_response( [ 'paid' => $paid ] );
 	}
 
 	/**

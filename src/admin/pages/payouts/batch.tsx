@@ -294,7 +294,22 @@ export default function PayoutBatchPage() {
 	}
 
 	if ( ! summary ) {
-		return <NotFound />;
+		return (
+			<NotFound
+				title={ __(
+					'Sorry, the payout can’t be found',
+					'flyaffiliate'
+				) }
+				description={ __(
+					'It may have been deleted, or the link is wrong.',
+					'flyaffiliate'
+				) }
+				backTo={ {
+					to: '/payouts',
+					label: __( 'Back to payouts', 'flyaffiliate' ),
+				} }
+			/>
+		);
 	}
 
 	const { counts } = summary;

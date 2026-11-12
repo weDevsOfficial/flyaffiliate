@@ -1,6 +1,7 @@
 /**
- * Nothing to show yet: an icon in a tinted circle, a title and a line under
- * it, the same shape plugin-ui's lists use when they are empty.
+ * Nothing to show yet: an icon in a circle tinted with the brand colour, a
+ * title and a line under it, the same shape plugin-ui's lists use when they
+ * are empty and the 404 page's circle.
  */
 import type { ReactNode } from 'react';
 import { FileSearch, type LucideIcon } from 'lucide-react';
@@ -35,7 +36,7 @@ export default function EmptyState( {
 			) }
 		>
 			<div className="text-center">
-				<div className="mx-auto mb-4 flex size-32 items-center justify-center rounded-full bg-accent text-primary">
+				<div className="mx-auto mb-4 flex size-32 items-center justify-center rounded-full bg-primary/10 text-primary">
 					<Icon size={ 52 } aria-hidden="true" />
 				</div>
 				<Title className="text-lg font-semibold text-foreground">

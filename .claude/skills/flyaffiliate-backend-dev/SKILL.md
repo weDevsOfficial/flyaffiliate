@@ -202,6 +202,10 @@ with the `flyaffiliate_settings_schema` filter or a node's generated
   sets the signed cookie `flyaffiliate_ref` (`affiliate|visit|hmac`, lifetime =
   `cookie_duration` days). `Tracker::sign()` / `parse()` build and verify it;
   tests set `$_COOKIE[ Tracker::COOKIE ]` with `sign()`.
+- Read the referral variable with `Tracker::get_variable()`, never the option.
+  A name in `flyaffiliate_get_reserved_query_vars()` (WordPress's query
+  variables, filter `flyaffiliate_reserved_query_vars`) is refused on save
+  and, when already stored, read as `affiliate`: `/?p=12` is a post link.
 - `Integrations\WooCommerce\OrderAttribution` hooks both
   `woocommerce_checkout_order_created` and
   `woocommerce_store_api_checkout_order_processed`. Guards in order:
@@ -252,7 +256,8 @@ preview into one `unpaid` payment row per affiliate and sets `payout_id` on
 the commissions, which stay `unpaid`; `mark_paid()` / `pay_batch()` is what
 marks a payment and its commissions `paid`; `mark_unpaid()` reverses a mistake
 (commissions back to `unpaid`, still attached); `remove_commission()` and
-`delete()` only work on unpaid payments; `delete_batch()` refuses once any
+`delete()` only work on unpaid payments, and the last commission leaves only
+with its payment (`remove_commission()` answers 409 for it); `delete_batch()` refuses once any
 payment is paid. `preview()` skips every commission with a `payout_id`. Only
 the payout manager moves a commission to or from `paid` —
 `Commission\Manager::can_transition()` allows any move, so an admin can
@@ -281,6 +286,17 @@ keys of its own (passed through). It shows them in a payments-table column
 (`summarize()`'s `stats`, through `flyaffiliate_payout_summary`).
 FlyAffiliate never interprets them: a method's own concepts stay in the
 plugin that adds the method.
+
+What paid a commission: its response carries `paid_by`, the method of its
+payment once that payment is itself paid, and null for a commission recorded
+as paid by hand (outside a payment, or inside one still unpaid). The apps show
+it through `CommissionStatus`, behind an info icon beside the pill, never as
+a second line. An affiliate's response carries `effective_payout_method`
+(`resolve_for()`); the commission form reads it to warn before a commission is
+marked paid by hand for an affiliate an automatic method pays. A state's
+`reference` is the transaction once the transfer is paid; `/me/payouts` passes
+it on for a paid transfer only, and the screens show a payment's own
+`reference` first.
 
 ## The affiliate role
 

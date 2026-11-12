@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use FlyAffiliate\Tracking\Tracker;
+
 /**
  * One row of `{prefix}flyaffiliate_affiliates`.
  *
@@ -197,8 +199,6 @@ class Affiliate extends BaseModel {
 	 * @return string
 	 */
 	public function get_referral_url( string $url = '' ): string {
-		$variable = flyaffiliate_get_option( 'referral_variable', 'affiliate' );
-
-		return add_query_arg( rawurlencode( $variable ), $this->get_id(), '' !== $url ? $url : home_url( '/' ) );
+		return add_query_arg( rawurlencode( Tracker::get_variable() ), $this->get_id(), '' !== $url ? $url : home_url( '/' ) );
 	}
 }

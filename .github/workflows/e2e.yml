@@ -1,0 +1,407 @@
+name: E2E (Playwright)
+
+# The Playwright suite (tests/pw) against wp-env: WordPress + WooCommerce on
+# :8888, the tests site on :8889 (release-zip spec). One worker, one database
+# (the suite is serial by design).
+#
+# FlyAffiliate Pro (a private repo) is added on pushes to develop/master and on
+# manual runs when the FLYAFFILIATE_PRO_DEPLOY_KEY secret holds a read-only
+# deploy key for weDevsOfficial/flyaffiliate-pro (or FLYAFFILIATE_PRO_TOKEN a
+# token that can read it, e.g. a fine-grained one on a fork); its specs (pro-core,
+# pro-paypal, and paypal-sandbox with the PAYPAL_SANDBOX_* secrets) then run.
+# Pull requests, forks and runs without the key leave Pro out and those specs
+# skip themselves. The Dokan spec skips in the "e2e" job; the "marketplace" job
+# (end of this file) runs it on a Dokan site with Dokan Pro.
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+    paths:
+      - '**.php'
+      - 'src/**'
+      - 'assets/**'
+      - 'templates/**'
+      - 'tests/pw/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.wp-env.json'
+      - 'webpack.config.js'
+      - '.github/workflows/e2e.yml'
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: 'Spec file(s) under tests/pw/specs, e.g. specs/payouts.spec.ts (empty = all)'
+        required: false
+        default: ''
+      grep:
+        description: 'Only tests whose title matches, e.g. @money or @smoke (empty = all)'
+        required: false
+        default: ''
+      wp:
+        description: 'WordPress version for wp-env core (latest, or e.g. 6.6)'
+        required: false
+        default: 'latest'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: WP ${{ matrix.wp }} · PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        # A pull request runs the latest WordPress; develop/master also run the
+        # minimum (6.6, CLAUDE.md), the release gate's matrix. A manual run
+        # takes the version it is given.
+        include: ${{ fromJSON( github.event_name == 'pull_request' && '[{"wp":"latest","php":"8.1"}]' || github.event_name == 'workflow_dispatch' && format('[{{"wp":"{0}","php":"8.1"}}]', inputs.wp) || '[{"wp":"latest","php":"8.1"},{"wp":"6.6","php":"8.1"}]' ) }}
+
+    env:
+      CI: '1'
+      # '1' when FlyAffiliate Pro is checked out and activated (see the header).
+      WITH_PRO: ${{ github.event_name != 'pull_request' && ( secrets.FLYAFFILIATE_PRO_DEPLOY_KEY != '' || secrets.FLYAFFILIATE_PRO_TOKEN != '' ) && '1' || '' }}
+      # Optional: specs/paypal-sandbox.spec.ts runs only with these (and Pro),
+      # and skips otherwise.
+      PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
+      PAYPAL_SANDBOX_SECRET: ${{ secrets.PAYPAL_SANDBOX_SECRET }}
+      PAYPAL_SANDBOX_RECEIVER: ${{ secrets.PAYPAL_SANDBOX_RECEIVER }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          # The host PHP builds the release zip (bin/build-zip.php) for the
+          # release-zip spec; the site's PHP is wp-env's (phpVersion below).
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install PHP dependencies
+        # The plugin needs vendor/autoload.php to load at all.
+        run: composer install --prefer-dist --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build assets
+        run: npm run build
+
+      # Pro is checked out inside the workspace (actions/checkout's rule), then
+      # moved beside the plugin, where the override below finds ../flyaffiliate-pro.
+      - name: Check out FlyAffiliate Pro
+        if: env.WITH_PRO == '1'
+        uses: actions/checkout@v4
+        with:
+          repository: weDevsOfficial/flyaffiliate-pro
+          ref: ${{ vars.FLYAFFILIATE_PRO_REF || 'develop' }}
+          # A deploy key (needs admin on the Pro repo to add) or, e.g. on a
+          # personal fork, a token that can read the Pro repo.
+          ssh-key: ${{ secrets.FLYAFFILIATE_PRO_DEPLOY_KEY }}
+          token: ${{ secrets.FLYAFFILIATE_PRO_TOKEN || github.token }}
+          path: _flyaffiliate-pro
+          persist-credentials: false
+
+      - name: Build FlyAffiliate Pro
+        if: env.WITH_PRO == '1'
+        run: |
+          mv _flyaffiliate-pro ../flyaffiliate-pro
+          cd ../flyaffiliate-pro
+          # Runtime only: the prefixed Appsero SDK (dependencies/) is committed.
+          composer install --no-dev --prefer-dist --no-progress
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      - name: Install Playwright Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      # wp-env reads .wp-env.override.json on top of .wp-env.json.
+      - name: Configure the test environment
+        env:
+          WP_VERSION: ${{ matrix.wp }}
+          PHP_VERSION: ${{ matrix.php }}
+        run: |
+          # The latest WooCommerce follows the latest WordPress (10.x needs 6.7+),
+          # so an older WordPress gets the last WooCommerce that supports it.
+          WC='https://downloads.wordpress.org/plugin/woocommerce.zip'
+          if [ "$WP_VERSION" = "latest" ]; then
+            CORE='https://wordpress.org/latest.zip'
+          elif [[ "$WP_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+            CORE="WordPress/WordPress#${WP_VERSION}"
+            case "$WP_VERSION" in
+              6.6|6.6.*) WC='https://downloads.wordpress.org/plugin/woocommerce.9.8.6.zip' ;;
+            esac
+          else
+            echo "::error::Unsupported WordPress version: $WP_VERSION"
+            exit 1
+          fi
+          PRO=''
+          if [ "$WITH_PRO" = '1' ]; then
+            PRO=', "../flyaffiliate-pro"'
+          fi
+          cat > .wp-env.override.json <<JSON
+          {
+            "core": "${CORE}",
+            "phpVersion": "${PHP_VERSION}",
+            "plugins": [ "${WC}", "."${PRO} ],
+            "env": {
+              "tests": {
+                "plugins": [ "${WC}", "https://downloads.wordpress.org/plugin/plugin-check.zip" ]
+              }
+            }
+          }
+          JSON
+          cat .wp-env.override.json
+
+      - name: Start wp-env
+        # Downloads (WordPress, WooCommerce, images) fail now and then: retry once.
+        run: npx wp-env start --update || (sleep 10 && npx wp-env start --update)
+
+      - name: Site info
+        run: |
+          npx wp-env run cli wp core version
+          npx wp-env run cli wp plugin list --fields=name,status,version
+          curl -sS -o /dev/null -w 'dev site: %{http_code}\n' http://localhost:8888/
+          curl -sS -o /dev/null -w 'tests site: %{http_code}\n' http://localhost:8889/
+
+      - name: Run the e2e suite
+        env:
+          SPEC: ${{ inputs.spec }}
+          GREP: ${{ inputs.grep }}
+        run: |
+          ARGS=()
+          if [ -n "$SPEC" ]; then read -r -a FILES <<< "$SPEC"; ARGS+=("${FILES[@]}"); fi
+          if [ -n "$GREP" ]; then ARGS+=(-g "$GREP"); fi
+          npm run test:e2e -- "${ARGS[@]}"
+
+      - name: Test report
+        if: always()
+        run: node tests/pw/ci-summary.mjs "E2E · WP ${{ matrix.wp }} · PHP ${{ matrix.php }}${{ env.WITH_PRO == '1' && ' · with Pro' || '' }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Collect PHP and WordPress logs
+        if: always()
+        run: |
+          mkdir -p tests/pw/test-results/logs
+          npx wp-env run cli bash -c 'cat wp-content/pw-php.log 2>/dev/null' > tests/pw/test-results/logs/pw-php.log || true
+          npx wp-env run cli bash -c 'cat wp-content/debug.log 2>/dev/null' > tests/pw/test-results/logs/debug.log || true
+          npx wp-env run tests-cli bash -c 'cat wp-content/debug.log 2>/dev/null' > tests/pw/test-results/logs/tests-debug.log || true
+
+      - name: Upload the HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-wp${{ matrix.wp }}-php${{ matrix.php }}
+          path: tests/pw/report
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload traces, screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-wp${{ matrix.wp }}-php${{ matrix.php }}
+          path: tests/pw/test-results
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Stop wp-env
+        if: always()
+        run: npx wp-env stop
+
+  # FlyAffiliate Pro on a Dokan marketplace: WooCommerce + Dokan Lite (WordPress.org)
+  # + Dokan Pro (its GitHub release zip) + FlyAffiliate + FlyAffiliate Pro, running
+  # the Dokan spec and the Pro specs. Dokan has its own job: an active Dokan changes
+  # a plain store (vendor-owned coupons, WooCommerce reactivation), which the free
+  # specs do not expect. Runs where Pro runs (pushes to develop/master, manual runs)
+  # and needs a token that can read both private repos: DOKAN_PRO_TOKEN, or
+  # FLYAFFILIATE_PRO_TOKEN when one token reads both. Without one it skips itself.
+  marketplace:
+    name: Marketplace · Dokan + Pro · WP latest
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      CI: '1'
+      MARKETPLACE_TOKEN: ${{ secrets.DOKAN_PRO_TOKEN || secrets.FLYAFFILIATE_PRO_TOKEN }}
+      # Which Dokan Pro release asset (dokan-<plan>-<version>.zip) and release tag.
+      DOKAN_PRO_PLAN: ${{ vars.DOKAN_PRO_PLAN || 'business' }}
+      DOKAN_PRO_TAG: ${{ vars.DOKAN_PRO_TAG || '' }}
+      PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
+      PAYPAL_SANDBOX_SECRET: ${{ secrets.PAYPAL_SANDBOX_SECRET }}
+      PAYPAL_SANDBOX_RECEIVER: ${{ secrets.PAYPAL_SANDBOX_RECEIVER }}
+
+    steps:
+      - name: Needs a token for the private repos
+        id: gate
+        run: |
+          if [ -z "$MARKETPLACE_TOKEN" ]; then
+            echo "::notice::Marketplace job skipped: set DOKAN_PRO_TOKEN (or FLYAFFILIATE_PRO_TOKEN) to a token that can read getdokan/dokan-pro and weDevsOfficial/flyaffiliate-pro."
+            echo "run=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == '1'
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        if: steps.gate.outputs.run == '1'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.run == '1'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install and build FlyAffiliate
+        if: steps.gate.outputs.run == '1'
+        run: |
+          composer install --prefer-dist --no-progress
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Check out FlyAffiliate Pro
+        if: steps.gate.outputs.run == '1'
+        uses: actions/checkout@v4
+        with:
+          repository: weDevsOfficial/flyaffiliate-pro
+          ref: ${{ vars.FLYAFFILIATE_PRO_REF || 'develop' }}
+          token: ${{ env.MARKETPLACE_TOKEN }}
+          path: _flyaffiliate-pro
+          persist-credentials: false
+
+      - name: Build FlyAffiliate Pro
+        if: steps.gate.outputs.run == '1'
+        run: |
+          mv _flyaffiliate-pro ../flyaffiliate-pro
+          cd ../flyaffiliate-pro
+          composer install --no-dev --prefer-dist --no-progress
+          npm ci --no-audit --no-fund
+          npm run build
+
+      # The release zip is built already (vendor/ and assets inside): no build here.
+      - name: Download Dokan Pro
+        if: steps.gate.outputs.run == '1'
+        env:
+          GH_TOKEN: ${{ env.MARKETPLACE_TOKEN }}
+        run: |
+          mkdir -p /tmp/dokan-pro
+          gh release download ${DOKAN_PRO_TAG:+"$DOKAN_PRO_TAG"} -R getdokan/dokan-pro \
+            --pattern "dokan-${DOKAN_PRO_PLAN}-*.zip" --dir /tmp/dokan-pro
+          ls /tmp/dokan-pro
+          unzip -q /tmp/dokan-pro/dokan-${DOKAN_PRO_PLAN}-*.zip -d ..
+          test -f ../dokan-pro/dokan-pro.php
+          grep -m1 'Version' ../dokan-pro/dokan-pro.php
+
+      - name: Install Playwright Chromium
+        if: steps.gate.outputs.run == '1'
+        run: npx playwright install --with-deps chromium
+
+      - name: Configure the marketplace site
+        if: steps.gate.outputs.run == '1'
+        run: |
+          cat > .wp-env.override.json <<JSON
+          {
+            "core": "https://wordpress.org/latest.zip",
+            "phpVersion": "8.1",
+            "plugins": [
+              "https://downloads.wordpress.org/plugin/woocommerce.zip",
+              "https://downloads.wordpress.org/plugin/dokan-lite.zip",
+              "../dokan-pro",
+              ".",
+              "../flyaffiliate-pro"
+            ],
+            "config": { "WP_MEMORY_LIMIT": "512M", "WP_MAX_MEMORY_LIMIT": "512M" }
+          }
+          JSON
+          cat .wp-env.override.json
+
+      - name: Start wp-env
+        if: steps.gate.outputs.run == '1'
+        run: npx wp-env start --update || (sleep 10 && npx wp-env start --update)
+
+      - name: Site info
+        if: steps.gate.outputs.run == '1'
+        run: |
+          npx wp-env run cli wp core version
+          npx wp-env run cli wp plugin list --fields=name,status,version
+
+      - name: Run the marketplace specs
+        if: steps.gate.outputs.run == '1'
+        run: npm run test:e2e -- specs/dokan.spec.ts specs/pro-core.spec.ts specs/pro-paypal.spec.ts
+
+      - name: Test report
+        if: always() && steps.gate.outputs.run == '1'
+        run: node tests/pw/ci-summary.mjs "Marketplace · Dokan + Pro · WP latest" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Collect PHP and WordPress logs
+        if: always() && steps.gate.outputs.run == '1'
+        run: |
+          mkdir -p tests/pw/test-results/logs
+          npx wp-env run cli bash -c 'cat wp-content/pw-php.log 2>/dev/null' > tests/pw/test-results/logs/pw-php.log || true
+          npx wp-env run cli bash -c 'cat wp-content/debug.log 2>/dev/null' > tests/pw/test-results/logs/debug.log || true
+
+      - name: Upload the HTML report
+        if: always() && steps.gate.outputs.run == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-marketplace
+          path: tests/pw/report
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload traces, screenshots and logs
+        if: always() && steps.gate.outputs.run == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-marketplace
+          path: tests/pw/test-results
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Stop wp-env
+        if: always() && steps.gate.outputs.run == '1'
+        run: npx wp-env stop

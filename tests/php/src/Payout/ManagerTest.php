@@ -431,11 +431,14 @@ class ManagerTest extends FlyAffiliateTestCase {
 			]
 		);
 
+		// A second row, so the first can leave the payment on its own below.
+		$this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 10, 'status' => Commission::STATUS_UNPAID ] );
+
 		$payout = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0];
 
 		$this->assertNotWPError( flyaffiliate()->commission->update( $commission, [ 'amount' => 5 ] ), 'the admin edits it as in SliceWP' );
 		$this->assertCentsEquals( 500, flyaffiliate()->commission->get( $commission )->get( 'amount' ) );
-		$this->assertCentsEquals( 500, flyaffiliate()->payout->get( $payout->get_id() )->get( 'amount' ), 'and the unpaid payment re-sums' );
+		$this->assertCentsEquals( 1500, flyaffiliate()->payout->get( $payout->get_id() )->get( 'amount' ), 'and the unpaid payment re-sums' );
 		$this->assertFalse( flyaffiliate()->commission->delete( $commission ), 'but the payment keeps it from being deleted' );
 
 		// Out of the payment, it is an ordinary unpaid commission again.
@@ -443,5 +446,41 @@ class ManagerTest extends FlyAffiliateTestCase {
 
 		$this->assertNotWPError( flyaffiliate()->commission->set_status( $commission, Commission::STATUS_REJECTED ) );
 		$this->assertTrue( flyaffiliate()->commission->delete( $commission ) );
+	}
+
+	/**
+	 * The last commission cannot be taken out alone: an unpaid payment of 0.00
+	 * is a record of nothing. Deleting the payment is the way to free it.
+	 *
+	 * @return void
+	 */
+	public function test_the_last_commission_leaves_with_its_payment(): void {
+		$affiliate  = $this->factory()->affiliate->create();
+		$commission = $this->factory()->commission->create( [ 'affiliate_id' => $affiliate, 'amount' => 10, 'status' => Commission::STATUS_UNPAID ] );
+		$payout_id  = flyaffiliate()->payout->create( [ 'minimum_amount' => 0 ] )['payouts'][0]->get_id();
+
+		$refused = flyaffiliate()->payout->remove_commission( $payout_id, $commission );
+
+		$this->assertWPError( $refused );
+		$this->assertSame( 'flyaffiliate_payout_last_commission', $refused->get_error_code() );
+		$this->assertSame( 409, $refused->get_error_data()['status'] );
+		$this->assertSame( $payout_id, (int) flyaffiliate()->commission->get( $commission )->get( 'payout_id' ), 'still inside' );
+		$this->assertCentsEquals( 1000, flyaffiliate()->payout->get( $payout_id )->get( 'amount' ) );
+		$this->assertCount( 1, Payout::query( [ 'where' => [ 'affiliate_id' => $affiliate ], 'per_page' => -1 ] ), 'no empty payment appeared' );
+
+		$this->assertTrue( flyaffiliate()->payout->delete( $payout_id ) );
+		$this->assertSame( 0, (int) flyaffiliate()->commission->get( $commission )->get( 'payout_id' ), 'delete() frees it' );
+	}
+
+	/**
+	 * Paying a batch that does not exist is not found, not "0 paid".
+	 *
+	 * @return void
+	 */
+	public function test_pay_batch_refuses_an_unknown_batch(): void {
+		$result = flyaffiliate()->payout->pay_batch( 'nope' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 404, $result->get_error_data()['status'] );
 	}
 }

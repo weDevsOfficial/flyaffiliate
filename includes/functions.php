@@ -68,6 +68,35 @@ if ( ! function_exists( 'flyaffiliate_update_option' ) ) {
 	}
 }
 
+if ( ! function_exists( 'flyaffiliate_get_reserved_query_vars' ) ) {
+	/**
+	 * The query variables the referral variable cannot be.
+	 *
+	 * WordPress's own and the ones registered with it (post types, taxonomies,
+	 * endpoints): with `p` as the referral variable, every plain post link
+	 * (`/?p=12`) would credit the affiliate whose id matches the post. A save
+	 * refuses these names and the tracker ignores one already stored.
+	 *
+	 * @since 1.0.2
+	 *
+	 * @return string[]
+	 */
+	function flyaffiliate_get_reserved_query_vars(): array {
+		global $wp;
+
+		$reserved = $wp instanceof WP ? array_merge( $wp->public_query_vars, $wp->private_query_vars ) : [];
+
+		/**
+		 * Filters the query variables the referral variable cannot be.
+		 *
+		 * @since 1.0.2
+		 *
+		 * @param string[] $reserved WordPress's public and private query variables.
+		 */
+		return (array) apply_filters( 'flyaffiliate_reserved_query_vars', $reserved );
+	}
+}
+
 if ( ! function_exists( 'flyaffiliate_template_path' ) ) {
 	/**
 	 * The directory inside a theme that overrides this plugin's templates.

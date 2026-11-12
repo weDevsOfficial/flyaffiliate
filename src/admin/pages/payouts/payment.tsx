@@ -36,6 +36,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import DateTime from '@/components/DateTime';
 import Money from '@/components/Money';
 import NoticeCard from '@/components/NoticeCard';
+import NotFound from '@/components/NotFound';
 import PageHeader from '@/components/PageHeader';
 import Reference from '@/components/Reference';
 import {
@@ -91,6 +92,8 @@ export default function PaymentPage() {
 	const { statuses } = getGlobals();
 	const [ payment, setPayment ] = useState< Payout | null >( null );
 	const [ loading, setLoading ] = useState( true );
+	// No payment with that id: the page says so instead of showing an empty one.
+	const [ missing, setMissing ] = useState( false );
 	// The commission form comes back here when it is done.
 	const here = { from: location.pathname };
 	const [ dialog, setDialog ] = useState< 'pay' | 'delete' | null >( null );
@@ -98,8 +101,14 @@ export default function PaymentPage() {
 
 	const load = useCallback( () => {
 		fetchOne< Payout >( `/payouts/${ paymentId }` )
-			.then( setPayment )
-			.catch( () => setPayment( null ) )
+			.then( ( loaded ) => {
+				setPayment( loaded );
+				setMissing( false );
+			} )
+			.catch( () => {
+				setPayment( null );
+				setMissing( true );
+			} )
 			.finally( () => setLoading( false ) );
 	}, [ paymentId ] );
 
@@ -318,6 +327,25 @@ export default function PaymentPage() {
 				<StatGridSkeleton />
 				<TableSkeleton tabs={ 0 } rows={ 4 } columns={ 7 } />
 			</div>
+		);
+	}
+
+	if ( missing ) {
+		return (
+			<NotFound
+				title={ __(
+					'Sorry, the payment can’t be found',
+					'flyaffiliate'
+				) }
+				description={ __(
+					'It may have been deleted, or the link is wrong.',
+					'flyaffiliate'
+				) }
+				backTo={ {
+					to: '/payouts',
+					label: __( 'Back to payouts', 'flyaffiliate' ),
+				} }
+			/>
 		);
 	}
 

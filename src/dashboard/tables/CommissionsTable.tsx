@@ -10,7 +10,7 @@ import {
 	type DataViewField,
 	type DataViewState,
 } from '@wedevs/plugin-ui';
-import StatusBadge from '@/components/StatusBadge';
+import CommissionStatus from '@/components/CommissionStatus';
 import DateTime from '@/components/DateTime';
 import Matures from '@/components/Matures';
 import Money from '@/components/Money';
@@ -110,9 +110,7 @@ export default function CommissionsTable( { dates }: { dates: DateArgs } ) {
 			id: 'status',
 			label: __( 'Status', 'flyaffiliate' ),
 			enableSorting: false,
-			render: ( { item } ) => (
-				<StatusBadge status={ item.status } kind="commission" />
-			),
+			render: ( { item } ) => <CommissionStatus commission={ item } />,
 		},
 		{
 			id: 'matures_at',

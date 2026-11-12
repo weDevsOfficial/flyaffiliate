@@ -232,6 +232,19 @@ class Manager {
 	public function validate_field( array $field, $value, array $values = [] ): array {
 		$errors = [];
 
+		// A switch is on or off; anything else is refused, never read as off (ADR-0010).
+		if ( in_array( (string) ( $field['variant'] ?? '' ), [ 'switch', 'danger_switch' ], true ) ) {
+			$states = [
+				(string) ( $field['enable_state']['value'] ?? 'on' ),
+				(string) ( $field['disable_state']['value'] ?? 'off' ),
+			];
+
+			if ( ! is_string( $value ) || ! in_array( $value, $states, true ) ) {
+				// translators: 1: the value that switches the setting on, 2: the value that switches it off.
+				$errors[] = sprintf( __( 'Use %1$s or %2$s.', 'flyaffiliate' ), $states[0], $states[1] );
+			}
+		}
+
 		foreach ( (array) ( $field['validations'] ?? [] ) as $validation ) {
 			if ( ! is_array( $validation ) || empty( $validation['rules'] ) ) {
 				continue;

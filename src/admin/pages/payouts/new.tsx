@@ -185,6 +185,10 @@ export default function NewPayoutPage() {
 		event?.preventDefault();
 
 		if ( mode !== 'all' && selected.length === 0 ) {
+			// Nothing can be shown for this filter, so nothing older stays payable.
+			setPreview( null );
+			setTicked( new Set() );
+			setOverrides( {} );
 			toast.error(
 				__( 'Choose at least one affiliate.', 'flyaffiliate' )
 			);

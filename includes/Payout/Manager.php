@@ -713,12 +713,18 @@ class Manager {
 	 *
 	 * @param string $batch_key The batch.
 	 *
-	 * @return int How many payments were marked paid.
+	 * @return int|WP_Error How many payments were marked paid, or not found for an unknown batch.
 	 */
-	public function pay_batch( string $batch_key ): int {
+	public function pay_batch( string $batch_key ) {
+		$payouts = $this->get_batch( $batch_key );
+
+		if ( [] === $payouts ) {
+			return $this->not_found();
+		}
+
 		$paid = 0;
 
-		foreach ( $this->get_batch( $batch_key ) as $payout ) {
+		foreach ( $payouts as $payout ) {
 			if ( $payout->is_paid() ) {
 				continue;
 			}
@@ -1076,6 +1082,15 @@ class Manager {
 
 		if ( null === $commission || (int) $commission->get( 'payout_id', 0 ) !== $payout_id ) {
 			return new WP_Error( 'flyaffiliate_commission_not_in_payout', __( 'That commission is not part of this payment.', 'flyaffiliate' ), [ 'status' => 404 ] );
+		}
+
+		// The last commission leaves with its payment, never alone; delete() frees it (ADR-0012).
+		if ( count( $payout->get_commissions() ) < 2 ) {
+			return new WP_Error(
+				'flyaffiliate_payout_last_commission',
+				__( 'This is the only commission in the payment. Delete the payment instead; that frees the commission for the next payout.', 'flyaffiliate' ),
+				[ 'status' => 409 ]
+			);
 		}
 
 		$this->detach( $commission );

@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use FlyAffiliate\Models\Commission;
+use FlyAffiliate\Models\Payout;
 use FlyAffiliate\REST\AdminBaseController;
 use WP_Error;
 use WP_REST_Request;
@@ -33,6 +34,13 @@ class CommissionsController extends AdminBaseController {
 	 * @var string
 	 */
 	protected $rest_base = 'commissions';
+
+	/**
+	 * The payments of the page being prepared, by id; null outside a list.
+	 *
+	 * @var array<int, Payout>|null
+	 */
+	protected ?array $payments = null;
 
 	/**
 	 * Register the routes.
@@ -123,13 +131,51 @@ class CommissionsController extends AdminBaseController {
 			'page'     => (int) $request['page'],
 		];
 
-		$items = [];
+		$items       = [];
+		$commissions = flyaffiliate()->commission->query( $args );
 
-		foreach ( flyaffiliate()->commission->query( $args ) as $commission ) {
+		$this->prime_payments( $commissions );
+
+		foreach ( $commissions as $commission ) {
 			$items[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $commission, $request ) );
 		}
 
+		$this->payments = null;
+
 		return $this->prepare_collection_response( $items, flyaffiliate()->commission->count( $args ), $per_page );
+	}
+
+	/**
+	 * Load the payments of the paid commissions about to be prepared, once.
+	 *
+	 * @since 1.0.2
+	 *
+	 * @param Commission[] $commissions The commissions.
+	 *
+	 * @return void
+	 */
+	public function prime_payments( array $commissions ): void {
+		$ids            = [];
+		$this->payments = [];
+
+		foreach ( $commissions as $commission ) {
+			if ( Commission::STATUS_PAID === (string) $commission->get( 'status' ) && $commission->is_in_payout() ) {
+				$ids[ (int) $commission->get( 'payout_id' ) ] = true;
+			}
+		}
+
+		if ( [] === $ids ) {
+			return;
+		}
+
+		$args = [
+			'where'    => [ 'id' => array_keys( $ids ) ],
+			'per_page' => -1,
+		];
+
+		foreach ( flyaffiliate()->payout->query( $args ) as $payout ) {
+			$this->payments[ $payout->get_id() ] = $payout;
+		}
 	}
 
 	/**
@@ -277,6 +323,7 @@ class CommissionsController extends AdminBaseController {
 			'type'          => (string) $item->get( 'type' ),
 			'status'        => (string) $item->get( 'status' ),
 			'payout_id'     => (int) $item->get( 'payout_id', 0 ) > 0 ? (int) $item->get( 'payout_id' ) : null,
+			'paid_by'       => $this->get_paid_by( $item ),
 			'matures_at'    => $this->prepare_date( $item->get( 'matures_at' ) ),
 			'created_at'    => $this->prepare_date( $item->get( 'created_at' ) ),
 			'updated_at'    => $this->prepare_date( $item->get( 'updated_at' ) ),
@@ -286,6 +333,39 @@ class CommissionsController extends AdminBaseController {
 		$response = rest_ensure_response( $this->filter_response_fields( $data, $request ) );
 
 		return $this->add_links( $response, $this->prepare_links( $item ) );
+	}
+
+	/**
+	 * What paid a commission: the payout method of the payment that paid it.
+	 *
+	 * Only a payment that is itself paid counts. A commission recorded as paid
+	 * by hand, outside a payment or inside one still unpaid, has none.
+	 *
+	 * @since 1.0.2
+	 *
+	 * @param Commission $item The commission.
+	 *
+	 * @return array{method: string, method_label: string}|null
+	 */
+	protected function get_paid_by( Commission $item ): ?array {
+		$payout_id = (int) $item->get( 'payout_id', 0 );
+
+		if ( Commission::STATUS_PAID !== (string) $item->get( 'status' ) || $payout_id <= 0 ) {
+			return null;
+		}
+
+		$payout = null === $this->payments ? flyaffiliate()->payout->get( $payout_id ) : ( $this->payments[ $payout_id ] ?? null );
+
+		if ( null === $payout || ! $payout->is_paid() ) {
+			return null;
+		}
+
+		$method = (string) $payout->get( 'method' );
+
+		return [
+			'method'       => $method,
+			'method_label' => flyaffiliate()->payout_method->get_label( $method ),
+		];
 	}
 
 	/**
@@ -479,6 +559,17 @@ class CommissionsController extends AdminBaseController {
 						'description' => __( 'The payment holding it, once a payout has taken it.', 'flyaffiliate' ),
 						'type' => [ 'integer', 'null' ],
 						'context' => [ 'view', 'edit' ],
+					]
+				),
+				'paid_by'       => $ro(
+					[
+						'description' => __( 'The payout method of the payment that paid it. Null for a commission that is not paid, or that was recorded as paid by hand outside a paid payment.', 'flyaffiliate' ),
+						'type' => [ 'object', 'null' ],
+						'context' => [ 'view', 'edit' ],
+						'properties' => [
+							'method'       => [ 'type' => 'string' ],
+							'method_label' => [ 'type' => 'string' ],
+						],
 					]
 				),
 				'matures_at'    => $ro(

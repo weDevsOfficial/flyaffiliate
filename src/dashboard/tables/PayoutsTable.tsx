@@ -103,12 +103,15 @@ export default function PayoutsTable( { dates }: { dates: DateArgs } ) {
 					),
 				];
 
-				if ( item.reference ) {
+				// The reference noted for the payout, or the transaction its method recorded.
+				const reference = item.reference || item.transfer?.reference;
+
+				if ( reference ) {
 					covers.push(
 						sprintf(
 							/* translators: %s: the payment's reference, e.g. a bank transfer id */
 							__( 'Reference %s', 'flyaffiliate' ),
-							item.reference
+							reference
 						)
 					);
 				}
