@@ -37,8 +37,11 @@ npm run env:start       # WordPress + WooCommerce in Docker
   `bin/plugin-check.sh` to drop the built release directory into. That is what
   makes Plugin Check see the real slug.
 
-PHP is 8.1 by default. To work against 8.3 locally, write a
-`.wp-env.override.json` (gitignored) with `{ "phpVersion": "8.3" }` and restart.
+PHP is 8.1 by default; the plugin's floor is 7.4 (ADR-0019). To work against
+7.4 or 8.3 locally, write a `.wp-env.override.json` (gitignored) with
+`{ "phpVersion": "7.4" }` and restart. Run the suite on 7.4 before a change
+that adds PHP: PHPCompatibility 9 predates PHP 8 and does not flag its syntax,
+so only `php -l` and the tests on 7.4 do.
 
 ## PHP
 
@@ -123,7 +126,7 @@ or it lands in the zip.
 | Workflow | Trigger | What fails it |
 |---|---|---|
 | `phpcs.yml` | PR touching `**.php` | Any violation on a changed file (no `--graceful-warnings`) |
-| `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 8.1/8.3 |
+| `phpunit.yml` | push to `main`, PRs | A PHP file that does not parse, or any failing test, on PHP 7.4/8.1/8.3 |
 | `plugin-check.yml` | push, PR, manual | Any Plugin Check error **or warning** on the built zip |
 | `deploy.yml` | `v*` tag, manual on a tag | Publishes to the wp.org SVN and creates the GitHub release |
 
