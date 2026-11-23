@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4', '8.1', '8.3']
+        php: ['8.1', '8.3']
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,8 +37,7 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      # Every tracked PHP file must parse on the leg's PHP. On 7.4 this catches
-      # PHP 8 syntax in files no test loads (ADR-0001).
+      # Every tracked PHP file must parse on the leg's PHP.
       - name: Lint PHP files
         run: |
           ! git ls-files -z '*.php' | xargs -0 -n1 php -l 2>&1 | grep -v '^No syntax errors detected'
@@ -71,3 +70,140 @@ jobs:
       - name: Stop wp-env
         if: always()
         run: npx wp-env stop
+
+  # The floor (ADR-0001) runs on the runner, not in wp-env: wp-env builds its
+  # PHP 7.4 image on Debian 11, whose packages Debian no longer serves.
+  phpunit-php74:
+    name: PHP 7.4
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      WP_CORE_DIR: /tmp/wordpress
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mysqli
+          coverage: none
+          tools: composer:v2
+
+      # Every tracked PHP file must parse on 7.4: this catches PHP 8 syntax in
+      # files no test loads.
+      - name: Lint PHP files
+        run: |
+          ! git ls-files -z '*.php' | xargs -0 -n1 php -l 2>&1 | grep -v '^No syntax errors detected'
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress
+
+      # The latest WordPress, and the test library from wordpress-develop at
+      # the same version, as wp-env sets them up. The plugins directory is the
+      # checkout's parent, so the plugin keeps its slug (plugin_basename()),
+      # with WooCommerce beside it, as in wp-env.
+      - name: Install WordPress and its test library
+        run: |
+          mkdir -p "$WP_CORE_DIR" "$WP_TESTS_DIR"
+          curl -sSL https://wordpress.org/latest.tar.gz | tar -xz --strip-components=1 -C "$WP_CORE_DIR"
+          WP_VERSION="$(php -r "include '$WP_CORE_DIR/wp-includes/version.php'; echo \$wp_version;")"
+          echo "WordPress $WP_VERSION" | tee -a "$GITHUB_STEP_SUMMARY"
+          git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$WP_VERSION" --filter=blob:none --sparse \
+            https://github.com/WordPress/wordpress-develop.git /tmp/wordpress-develop
+          git -C /tmp/wordpress-develop sparse-checkout set tests/phpunit/includes tests/phpunit/data
+          cp -R /tmp/wordpress-develop/tests/phpunit/includes /tmp/wordpress-develop/tests/phpunit/data "$WP_TESTS_DIR/"
+          sed -e "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR/':" \
+            -e "s/youremptytestdbnamehere/wordpress_test/" \
+            -e "s/yourusernamehere/root/" \
+            -e "s/yourpasswordhere/root/" \
+            -e "s/'localhost'/'127.0.0.1'/" \
+            /tmp/wordpress-develop/wp-tests-config-sample.php > "$WP_TESTS_DIR/wp-tests-config.php"
+          echo "define( 'WP_PLUGIN_DIR', '$(dirname "$PWD")' );" >> "$WP_TESTS_DIR/wp-tests-config.php"
+
+      - name: Install WooCommerce
+        run: |
+          curl -sSL https://downloads.wordpress.org/plugin/woocommerce.zip -o /tmp/woocommerce.zip
+          unzip -q /tmp/woocommerce.zip -d ..
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit -c phpunit.xml
+
+  # PHP 7.4, the plugin's floor (ADR-0001), without wp-env: its PHP 7.4 image
+  # no longer builds (the Debian 11 packages it installs answer 404 on
+  # deb.debian.org, seen 2026-11-23). The runner's PHP runs the suite against
+  # wp-env's database image, in a WordPress tree with WooCommerce beside the
+  # plugin, where the bootstrap looks for it.
+  phpunit-74:
+    name: PHP 7.4
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:lts
+        env:
+          MARIADB_ROOT_PASSWORD: password
+          MARIADB_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      WP_DB_NAME: wordpress_test
+      WP_DB_USER: root
+      WP_DB_PASS: password
+      WP_DB_HOST: 127.0.0.1:3306
+    defaults:
+      run:
+        working-directory: wordpress/wp-content/plugins/flyaffiliate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: wordpress/wp-content/plugins/flyaffiliate
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mysqli
+          coverage: none
+          tools: composer:v2
+
+      # Every tracked PHP file must parse on 7.4: this catches PHP 8 syntax in
+      # files no test loads (ADR-0001).
+      - name: Lint PHP files
+        run: |
+          ! git ls-files -z '*.php' | xargs -0 -n1 php -l 2>&1 | grep -v '^No syntax errors detected'
+
+      # WordPress core around the checkout, and WooCommerce beside it.
+      - name: Download WordPress and WooCommerce
+        working-directory: ${{ github.workspace }}
+        run: |
+          curl -fsSL https://wordpress.org/latest.zip -o "$RUNNER_TEMP/wordpress.zip"
+          unzip -qo "$RUNNER_TEMP/wordpress.zip" -d .
+          curl -fsSL https://downloads.wordpress.org/plugin/woocommerce.zip -o "$RUNNER_TEMP/woocommerce.zip"
+          unzip -qo "$RUNNER_TEMP/woocommerce.zip" -d wordpress/wp-content/plugins
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPUnit
+        run: WP_PHPUNIT__DIR="$PWD/vendor/wp-phpunit/wp-phpunit" vendor/bin/phpunit -c phpunit.xml

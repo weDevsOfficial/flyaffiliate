@@ -59,6 +59,11 @@ WooCommerce share.
   still fails the 7.4 leg. PHPCS's `testVersion` is `7.4-`, but the locked
   PHPCompatibility (9.3) predates PHP 8 and does not flag its syntax: a clean
   PHPCS run proves nothing here.
+- The 7.4 leg runs on the runner, not in wp-env. wp-env builds its PHP 7.4
+  image on Debian 11, whose packages Debian's mirrors no longer serve (404
+  since its support ended), so that image cannot be built. The job installs
+  WordPress, its test library at the same version, and WooCommerce beside
+  the plugin, the way wp-env lays them out.
 - Still on 8.1: the dev wp-env, the PHPCS, Plugin Check and deploy runners,
   and the e2e matrix, whose develop/master legs activate FlyAffiliate Pro,
   which requires 8.1. When Pro drops to 7.4, the WP 6.6 leg becomes the
