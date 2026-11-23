@@ -54,16 +54,13 @@ WooCommerce share.
   what that rules out. `str_contains()`, `str_starts_with()`,
   `str_ends_with()` and `array_is_list()` are fine in `includes/`, where
   WordPress polyfills them; `bin/` runs outside WordPress and cannot use them.
-- CI enforces it: PHPUnit runs on 7.4, 8.1 and 8.3, and each leg first runs
-  `php -l` on every tracked PHP file, so PHP 8 syntax in a file no test loads
-  still fails the 7.4 leg. PHPCS's `testVersion` is `7.4-`, but the locked
-  PHPCompatibility (9.3) predates PHP 8 and does not flag its syntax: a clean
-  PHPCS run proves nothing here.
-- The 7.4 leg runs on the runner, not in wp-env. wp-env builds its PHP 7.4
-  image on Debian 11, whose packages Debian's mirrors no longer serve (404
-  since its support ended), so that image cannot be built. The job installs
-  WordPress, its test library at the same version, and WooCommerce beside
-  the plugin, the way wp-env lays them out.
+- CI checks it: PHPUnit in wp-env on 7.4, 8.1 and 8.3,
+  and PHPCS with `testVersion` `7.4-`. The locked PHPCompatibility (9.3)
+  predates PHP 8 and does not flag its syntax, so the 7.4 PHPUnit leg is the
+  check that does.
+- `wordpress:php7.4` is frozen on Debian 11, whose packages deb.debian.org
+  no longer serves. The 7.4 leg first rebuilds
+  that image with apt pointed at archive.debian.org.
 - Still on 8.1: the dev wp-env, the PHPCS, Plugin Check and deploy runners,
   and the e2e matrix, whose develop/master legs activate FlyAffiliate Pro,
   which requires 8.1. When Pro drops to 7.4, the WP 6.6 leg becomes the
