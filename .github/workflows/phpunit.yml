@@ -38,7 +38,7 @@ jobs:
           tools: composer:v2
 
       # Every tracked PHP file must parse on the leg's PHP. On 7.4 this catches
-      # PHP 8 syntax in files no test loads (ADR-0019).
+      # PHP 8 syntax in files no test loads (ADR-0001).
       - name: Lint PHP files
         run: |
           ! git ls-files -z '*.php' | xargs -0 -n1 php -l 2>&1 | grep -v '^No syntax errors detected'

@@ -37,7 +37,7 @@ npm run env:start       # WordPress + WooCommerce in Docker
   `bin/plugin-check.sh` to drop the built release directory into. That is what
   makes Plugin Check see the real slug.
 
-PHP is 8.1 by default; the plugin's floor is 7.4 (ADR-0019). To work against
+PHP is 8.1 by default; the plugin's floor is 7.4 (ADR-0001). To work against
 7.4 or 8.3 locally, write a `.wp-env.override.json` (gitignored) with
 `{ "phpVersion": "7.4" }` and restart. Run the suite on 7.4 before a change
 that adds PHP: PHPCompatibility 9 predates PHP 8 and does not flag its syntax,

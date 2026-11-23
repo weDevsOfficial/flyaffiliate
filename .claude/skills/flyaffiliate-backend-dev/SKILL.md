@@ -73,7 +73,7 @@ The `ABSPATH` guard is required in **every** file, templates included.
   (`addShared`, `addServiceProvider`, `setShared`, `addTag`) — ADR-0002.
 - Type hints on parameters and returns wherever PHP 7.4 allows. Typed properties
   are encouraged: `protected int $affiliate_id = 0;`.
-- The floor is PHP 7.4 (ADR-0019), so no PHP 8 syntax: no union, `mixed`,
+- The floor is PHP 7.4 (ADR-0001), so no PHP 8 syntax: no union, `mixed`,
   `static` or `never` types (say it in the docblock instead), no constructor
   promotion, `match`, `?->`, named arguments, enums, `readonly`, `foo(...)`,
   `new` in a default, throw expressions, catch without a variable, a trailing
