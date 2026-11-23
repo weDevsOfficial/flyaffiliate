@@ -55,13 +55,13 @@ WooCommerce share.
   `str_ends_with()` and `array_is_list()` are fine in `includes/`, where
   WordPress polyfills them; `bin/` runs outside WordPress and cannot use them.
 - CI checks it: PHPUnit in wp-env on 7.4, 8.1 and 8.3,
-  and PHPCS with `testVersion` `7.4-`. The locked PHPCompatibility (9.3)
+  and PHPCS on PHP 7.4 with `testVersion` `7.4-`. The locked PHPCompatibility (9.3)
   predates PHP 8 and does not flag its syntax, so the 7.4 PHPUnit leg is the
   check that does.
 - `wordpress:php7.4` is frozen on Debian 11, whose packages deb.debian.org
   no longer serves. The 7.4 leg first rebuilds
   that image with apt pointed at archive.debian.org.
-- Still on 8.1: the dev wp-env, the PHPCS, Plugin Check and deploy runners,
+- Still on 8.1: the dev wp-env, the Plugin Check and deploy runners,
   and the e2e matrix, whose develop/master legs activate FlyAffiliate Pro,
   which requires 8.1. When Pro drops to 7.4, the WP 6.6 leg becomes the
   PHP 7.4 leg.
