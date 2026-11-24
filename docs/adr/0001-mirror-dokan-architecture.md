@@ -57,9 +57,14 @@ on.
   `str_ends_with()` and `array_is_list()` are fine in `includes/`, where
   WordPress polyfills them; `bin/` runs outside WordPress and cannot use them.
 - CI checks it: PHPUnit in wp-env on 7.4, 8.1 and 8.3,
-  and PHPCS on PHP 7.4 with `testVersion` `7.4-`. The locked PHPCompatibility (9.3)
-  predates PHP 8 and does not flag its syntax, so the 7.4 PHPUnit leg is the
-  check that does.
+  and PHPCS on PHP 7.4 with `testVersion` `7.4-`. PHPCompatibilityWP is
+  required at `dev-master`: that brings
+  PHPCompatibility 10, which reports PHP 8 syntax and functions in the files
+  a pull request changes (the stable 9.3 predates PHP 8 and reports none).
+  It misses throw expressions and unpacking an array with string keys, and
+  it passes the functions WordPress polyfills everywhere, `bin/` included.
+  Those three stay a convention, which the 7.4 PHPUnit leg backs only for
+  code the suite runs.
 - `wordpress:php7.4` is frozen on Debian 11, whose packages deb.debian.org
   no longer serves. The 7.4 leg first rebuilds
   that image with apt pointed at archive.debian.org.

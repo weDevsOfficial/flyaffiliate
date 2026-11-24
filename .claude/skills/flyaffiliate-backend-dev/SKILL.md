@@ -80,7 +80,9 @@ The `ABSPATH` guard is required in **every** file, templates included.
   comma in a parameter list, or unpacking an array with string keys.
   `str_contains()`, `str_starts_with()`, `str_ends_with()` and `array_is_list()`
   are fine in `includes/` (WordPress polyfills them); `bin/` runs outside
-  WordPress and cannot use them.
+  WordPress and cannot use them. `composer phpcs` reports the syntax above,
+  except a throw expression and string-key unpacking, and says nothing about
+  a polyfilled function in `bin/`.
 - Strict comparisons (`===`, `!==`), `in_array( $needle, $haystack, true )`.
 - Yoda conditions are not enforced.
 - New code carries `@since FLYAFFILIATE_SINCE`. **Never guess a version number.**
