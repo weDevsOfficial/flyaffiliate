@@ -44,8 +44,10 @@ see [ADR-0002](0002-in-house-container.md) and
 ## PHP version (2026-11-23)
 
 FlyAffiliate first declared PHP 8.1, although no file used PHP 8 syntax:
-every one already parsed on 7.4. It is now 7.4, the floor WordPress and
-WooCommerce share.
+every one already parsed on 7.4. It is now 7.4, which WordPress and
+WooCommerce 11.3 run on. WooCommerce 11.6, planned for February 2027,
+requires PHP 8.1, so a 7.4 site stays on WooCommerce 11.5 or older from then
+on.
 
 - 7.4 is set in the plugin header's `Requires PHP`, the readme,
   `FlyAffiliate_Plugin::$min_php` and Composer's `require.php`;
@@ -62,9 +64,7 @@ WooCommerce share.
   no longer serves. The 7.4 leg first rebuilds
   that image with apt pointed at archive.debian.org.
 - Still on 8.1: the dev wp-env, the Plugin Check and deploy runners,
-  and the e2e matrix, whose develop/master legs activate FlyAffiliate Pro,
-  which requires 8.1. When Pro drops to 7.4, the WP 6.6 leg becomes the
-  PHP 7.4 leg.
+  and the e2e matrix.
 - What behaves differently before PHP 8.0 stays the code's job: `sort()` is
   not stable, `"abc" == 0` is true (strict comparisons are already the rule),
   and `is_numeric()` rejects trailing whitespace.
