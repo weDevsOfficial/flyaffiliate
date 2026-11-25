@@ -42,7 +42,7 @@ foreach ( $sources as $source ) {
 	foreach ( $files as $file ) {
 		$contents = (string) file_get_contents( $file->getPathname() );
 
-		if ( ! str_contains( $contents, 'FLYAFFILIATE_SINCE' ) ) {
+		if ( false === strpos( $contents, 'FLYAFFILIATE_SINCE' ) ) {
 			continue;
 		}
 

@@ -8,7 +8,7 @@ Welcome to the **FlyAffiliate** repository on **GitHub**!
 
 Here you can find the **source code**, **open issues**, and **contribute** to the development of the plugin.
 
-- **Requires:** PHP 8.1+, WordPress 6.6+. WooCommerce 8.5+ for the order integration, which loads only when WooCommerce is active.
+- **Requires:** PHP 7.4+, WordPress 6.6+. WooCommerce 8.5+ for the order integration, which loads only when WooCommerce is active.
 - **Licence:** GPL-2.0-or-later
 - **Reference behaviour:** commission and payout semantics match SliceWP where the two overlap, so anyone coming from there feels at home. The differences that exist are deliberate and recorded in [`docs/adr/`](docs/adr/).
 
@@ -20,7 +20,7 @@ To get up and running with **FlyAffiliate development**, make sure you have inst
 
 * **[Node.js](https://nodejs.org/en/download) (>= 22.x)** — we recommend [**NVM**](https://github.com/nvm-sh/nvm#installing-and-updating) to pin the version.
 * **[npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)** — manages the JavaScript dependencies and runs the build and test scripts.
-* **[PHP 8.1](https://www.php.net/manual/en/install.php)+** — the plugin's minimum, and what Composer and the PHP tooling run on.
+* **[PHP 7.4](https://www.php.net/manual/en/install.php)+** — the plugin's minimum, and the oldest PHP Composer and the PHP tooling run on.
 * **[Composer](https://getcomposer.org/doc/00-intro.md)** — installs the PHP development dependencies (nothing from `vendor/` ships).
 * **[Docker](https://www.docker.com/)** — `wp-env` runs WordPress + WooCommerce in containers for PHPUnit, Playwright and Plugin Check.
 
