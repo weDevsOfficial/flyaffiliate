@@ -37,8 +37,15 @@ npm run env:start       # WordPress + WooCommerce in Docker
   `bin/plugin-check.sh` to drop the built release directory into. That is what
   makes Plugin Check see the real slug.
 
-PHP is 8.1 by default. To work against 8.3 locally, write a
-`.wp-env.override.json` (gitignored) with `{ "phpVersion": "8.3" }` and restart.
+PHP is 8.1 by default; the plugin's floor is 7.4 (ADR-0001). To work against
+7.4 or 8.3 locally, write a `.wp-env.override.json` (gitignored) with
+`{ "phpVersion": "7.4" }` and restart. `composer phpcs` reports PHP 8 syntax
+and functions (PHPCompatibility 10, through PHPCompatibilityWP `dev-master`);
+run the suite on 7.4 for the little it misses (ADR-0001)
+and for what only behaves differently there.
+If the 7.4 image build fails with 404s from deb.debian.org, rebuild
+`wordpress:php7.4` against archive.debian.org first, as the 7.4 leg of
+`.github/workflows/phpunit.yml` does.
 
 ## PHP
 
@@ -123,8 +130,8 @@ or it lands in the zip.
 | Workflow | Trigger | What fails it |
 |---|---|---|
 | `phpcs.yml` | PR touching `**.php` | Any violation on a changed file (no `--graceful-warnings`) |
-| `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 8.1/8.3 |
-| `plugin-check.yml` | push, PR, manual | Any Plugin Check error **or warning** on the built zip |
+| `phpunit.yml` | push to `develop`, PR (PHP and test config) | Any failing test on PHP 7.4/8.1/8.3 |
+| `plugin-check.yml` | push to `develop`, PR (what can reach the zip), manual | Any Plugin Check error **or warning** on the built zip |
 | `deploy.yml` | `v*` tag, manual on a tag | Publishes to the wp.org SVN and creates the GitHub release |
 
 ## When something is broken

@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-09-07
+**Note (2026-11-23):** the PHP floor is 7.4. See "PHP version" below.
 
 ## Context
 
@@ -33,11 +34,45 @@ FlyAffiliate mirrors Dokan Lite's architecture:
   `plugins_loaded` (ADR-0013; it was `woocommerce_loaded` while WooCommerce
   was required).
 - PHPUnit with WP-PHPUnit, a `FlyAffiliateTestCase` base class, and factories.
+- A PHP floor of 7.4, checked on activation (`$min_php`); see below.
 
 The names, file layout and boot order follow Dokan's so that the mapping is
 one-to-one. Where FlyAffiliate diverges, the divergence is recorded in an ADR:
 see [ADR-0002](0002-in-house-container.md) and
 [ADR-0003](0003-wporg-over-dokan-conventions.md).
+
+## PHP version (2026-11-23)
+
+FlyAffiliate first declared PHP 8.1, although no file used PHP 8 syntax:
+every one already parsed on 7.4. It is now 7.4, which WordPress and
+WooCommerce 11.3 run on. WooCommerce 11.6, planned for February 2027,
+requires PHP 8.1, so a 7.4 site stays on WooCommerce 11.5 or older from then
+on.
+
+- 7.4 is set in the plugin header's `Requires PHP`, the readme,
+  `FlyAffiliate_Plugin::$min_php` and Composer's `require.php`;
+  `config.platform.php` resolves the dev tools for it.
+- No PHP 8 syntax and no PHP 8-only function; the backend-dev skill lists
+  what that rules out. `str_contains()`, `str_starts_with()`,
+  `str_ends_with()` and `array_is_list()` are fine in `includes/`, where
+  WordPress polyfills them; `bin/` runs outside WordPress and cannot use them.
+- CI checks it: PHPUnit in wp-env on 7.4, 8.1 and 8.3,
+  and PHPCS on PHP 7.4 with `testVersion` `7.4-`. PHPCompatibilityWP is
+  required at `dev-master`: that brings
+  PHPCompatibility 10, which reports PHP 8 syntax and functions in the files
+  a pull request changes (the stable 9.3 predates PHP 8 and reports none).
+  It misses throw expressions and unpacking an array with string keys, and
+  it passes the functions WordPress polyfills everywhere, `bin/` included.
+  Those three stay a convention, which the 7.4 PHPUnit leg backs only for
+  code the suite runs.
+- `wordpress:php7.4` is frozen on Debian 11, whose packages deb.debian.org
+  no longer serves. The 7.4 leg first rebuilds
+  that image with apt pointed at archive.debian.org.
+- Still on 8.1: the dev wp-env, the Plugin Check and deploy runners,
+  and the e2e matrix.
+- What behaves differently before PHP 8.0 stays the code's job: `sort()` is
+  not stable, `"abc" == 0` is true (strict comparisons are already the rule),
+  and `is_numeric()` rejects trailing whitespace.
 
 ## Consequences
 

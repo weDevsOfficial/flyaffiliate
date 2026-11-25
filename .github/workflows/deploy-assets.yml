@@ -1,0 +1,32 @@
+# Publishes the WordPress.org listing assets (banner, icon, screenshots) and
+# readme.txt without cutting a release. deploy.yml can't do this: it names the
+# SVN tag after the git tag, so it only runs on a `v*` tag.
+#
+# Run by hand. IGNORE_OTHER_FILES keeps the plugin's code out of it: only
+# `.wordpress-org/` goes to SVN `/assets`, and readme.txt to trunk and the
+# stable tag. Needs the SVN_USERNAME / SVN_PASSWORD secrets. See RELEASE.md.
+name: Deploy assets to WordPress.org
+
+on:
+  workflow_dispatch:
+
+jobs:
+  assets:
+    name: Update listing assets and readme
+    runs-on: ubuntu-latest
+    environment: wordpress-org
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: WordPress.org assets and readme update
+        uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: flyaffiliate
+          ASSETS_DIR: .wordpress-org
+          IGNORE_OTHER_FILES: true

@@ -103,10 +103,11 @@ class CsvExporter {
 		// what this export exists to avoid.
 		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output is a stream; WP_Filesystem has no stream API.
 
-		fputcsv( $output, $this->get_headings() );
+		// PHP's own separator, enclosure and escape, written out: PHP 8.4 deprecates leaving the escape to its default.
+		fputcsv( $output, $this->get_headings(), ',', '"', '\\' );
 
 		foreach ( $this->get_rows( $payouts ) as $row ) {
-			fputcsv( $output, $row );
+			fputcsv( $output, $row, ',', '"', '\\' );
 		}
 
 		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closes the php://output stream opened above.

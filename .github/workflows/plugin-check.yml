@@ -1,11 +1,32 @@
 name: Plugin Check
 
 on:
+  # Not master: a release merges the same code into develop, which runs it.
+  # Only changes that can reach the built zip: not docs, tests, agent tooling,
+  # the listing art or the other workflows. The two paths lists are the same;
+  # change them together.
   push:
     branches:
       - develop
-      - master
+    paths:
+      - '**'
+      - '!**.md'
+      - '!docs/**'
+      - '!tests/**'
+      - '!.claude/**'
+      - '!.wordpress-org/**'
+      - '!.github/**'
+      - '.github/workflows/plugin-check.yml'
   pull_request:
+    paths:
+      - '**'
+      - '!**.md'
+      - '!docs/**'
+      - '!tests/**'
+      - '!.claude/**'
+      - '!.wordpress-org/**'
+      - '!.github/**'
+      - '.github/workflows/plugin-check.yml'
   workflow_dispatch:
 
 concurrency:

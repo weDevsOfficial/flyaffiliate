@@ -4,7 +4,7 @@ name: E2E (Playwright)
 # :8888, the tests site on :8889 (release-zip spec). One worker, one database
 # (the suite is serial by design).
 #
-# FlyAffiliate Pro (a private repo) is added on pushes to develop/master and on
+# FlyAffiliate Pro (a private repo) is added on pushes to develop and on
 # manual runs when the FLYAFFILIATE_PRO_DEPLOY_KEY secret holds a read-only
 # deploy key for weDevsOfficial/flyaffiliate-pro (or FLYAFFILIATE_PRO_TOKEN a
 # token that can read it, e.g. a fine-grained one on a fork); its specs (pro-core,
@@ -14,10 +14,24 @@ name: E2E (Playwright)
 # (end of this file) runs it on a Dokan site with Dokan Pro.
 
 on:
+  # Not master: a release merges the same code into develop, which runs it.
+  # The two paths lists are the same; change them together.
   push:
     branches:
       - develop
-      - master
+    paths:
+      - '**.php'
+      - 'src/**'
+      - 'assets/**'
+      - 'templates/**'
+      - 'tests/pw/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.wp-env.json'
+      - 'webpack.config.js'
+      - '.github/workflows/e2e.yml'
   pull_request:
     paths:
       - '**.php'
@@ -62,8 +76,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # A pull request runs the latest WordPress; develop/master also run the
-        # minimum (6.6, CLAUDE.md), the release gate's matrix. A manual run
+        # A pull request runs the latest WordPress; a push to develop also runs
+        # the minimum (6.6, CLAUDE.md), the release gate's matrix. A manual run
         # takes the version it is given.
         include: ${{ fromJSON( github.event_name == 'pull_request' && '[{"wp":"latest","php":"8.1"}]' || github.event_name == 'workflow_dispatch' && format('[{{"wp":"{0}","php":"8.1"}}]', inputs.wp) || '[{"wp":"latest","php":"8.1"},{"wp":"6.6","php":"8.1"}]' ) }}
 
@@ -247,7 +261,7 @@ jobs:
   # + Dokan Pro (its GitHub release zip) + FlyAffiliate + FlyAffiliate Pro, running
   # the Dokan spec and the Pro specs. Dokan has its own job: an active Dokan changes
   # a plain store (vendor-owned coupons, WooCommerce reactivation), which the free
-  # specs do not expect. Runs where Pro runs (pushes to develop/master, manual runs)
+  # specs do not expect. Runs where Pro runs (pushes to develop, manual runs)
   # and needs a token that can read both private repos: DOKAN_PRO_TOKEN, or
   # FLYAFFILIATE_PRO_TOKEN when one token reads both. Without one it skips itself.
   marketplace:

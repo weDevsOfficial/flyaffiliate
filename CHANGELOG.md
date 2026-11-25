@@ -1,3 +1,7 @@
+### v1.0.3 ( Nov 25, 2026 ) ###
+
+- **update:** FlyAffiliate now runs on PHP 7.4 and newer.
+
 ### v1.0.2 ( Nov 12, 2026 ) ###
 
 - **new:** A commission marked paid by hand now shows an info icon beside its Paid status in the admin lists and on the affiliate dashboard, so it no longer looks the same as one a payout paid.

@@ -32,3 +32,12 @@ tag, as Dokan Lite's deploy does. It reads the `SVN_USERNAME` /
 `SVN_PASSWORD` repository secrets. The review took its zip through the plugin directory's upload
 form; since its approval every version, the first included, is an SVN commit,
 made by this action on the tag or by hand from `build/flyaffiliate`.
+
+## Update the listing without a release
+
+A new banner, icon or screenshot, or a readme.txt correction, does not need a
+version. Commit it to `develop` and run `deploy-assets.yml` by hand
+(`gh workflow run deploy-assets.yml --ref develop`). It sends `.wordpress-org/`
+to the SVN `/assets` directory and readme.txt to trunk and the stable tag, and
+leaves the plugin's code alone. Run it only while `develop`'s readme.txt still
+describes the released version.

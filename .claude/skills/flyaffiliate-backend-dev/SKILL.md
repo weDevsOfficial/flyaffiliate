@@ -71,8 +71,18 @@ The `ABSPATH` guard is required in **every** file, templates included.
 - Methods and properties: `snake_case`. The **one** exception is the DI
   container, which mirrors `league/container`'s camelCase public API
   (`addShared`, `addServiceProvider`, `setShared`, `addTag`) — ADR-0002.
-- Type hints on parameters and returns wherever PHP 8.1 allows. Typed properties
+- Type hints on parameters and returns wherever PHP 7.4 allows. Typed properties
   are encouraged: `protected int $affiliate_id = 0;`.
+- The floor is PHP 7.4 (ADR-0001), so no PHP 8 syntax: no union, `mixed`,
+  `static` or `never` types (say it in the docblock instead), no constructor
+  promotion, `match`, `?->`, named arguments, enums, `readonly`, `foo(...)`,
+  `new` in a default, throw expressions, catch without a variable, a trailing
+  comma in a parameter list, or unpacking an array with string keys.
+  `str_contains()`, `str_starts_with()`, `str_ends_with()` and `array_is_list()`
+  are fine in `includes/` (WordPress polyfills them); `bin/` runs outside
+  WordPress and cannot use them. `composer phpcs` reports the syntax above,
+  except a throw expression and string-key unpacking, and says nothing about
+  a polyfilled function in `bin/`.
 - Strict comparisons (`===`, `!==`), `in_array( $needle, $haystack, true )`.
 - Yoda conditions are not enforced.
 - New code carries `@since FLYAFFILIATE_SINCE`. **Never guess a version number.**
