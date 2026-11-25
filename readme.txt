@@ -5,7 +5,7 @@ Tags: affiliate, affiliate marketing, referral program, commission, woocommerce 
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -193,6 +193,9 @@ No. FlyAffiliate focuses on single-tier affiliate programs.
 7. Settings for commission rates, the hold period, tracking, payouts and emails.
 
 == Changelog ==
+
+= v1.0.3 ( Nov 25, 2026 ) =
+- **update:** FlyAffiliate now runs on PHP 7.4 and newer.
 
 = v1.0.2 ( Nov 12, 2026 ) =
 - **new:** A commission marked paid by hand now shows an info icon beside its Paid status in the admin lists and on the affiliate dashboard, so it no longer looks the same as one a payout paid.
