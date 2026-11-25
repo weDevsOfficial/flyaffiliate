@@ -1,10 +1,17 @@
 name: PHPUnit
 
 on:
+  # Not master: a release merges the same code into develop, which runs it.
+  # The two paths lists are the same; change them together.
   push:
     branches:
       - develop
-      - master
+    paths:
+      - '**.php'
+      - 'phpunit.xml'
+      - 'composer.json'
+      - '.wp-env.json'
+      - '.github/workflows/phpunit.yml'
   pull_request:
     paths:
       - '**.php'

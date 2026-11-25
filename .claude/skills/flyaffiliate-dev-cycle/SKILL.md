@@ -130,8 +130,8 @@ or it lands in the zip.
 | Workflow | Trigger | What fails it |
 |---|---|---|
 | `phpcs.yml` | PR touching `**.php` | Any violation on a changed file (no `--graceful-warnings`) |
-| `phpunit.yml` | push to `main`, PRs | Any failing test on PHP 7.4/8.1/8.3 |
-| `plugin-check.yml` | push, PR, manual | Any Plugin Check error **or warning** on the built zip |
+| `phpunit.yml` | push to `develop`, PR (PHP and test config) | Any failing test on PHP 7.4/8.1/8.3 |
+| `plugin-check.yml` | push to `develop`, PR (what can reach the zip), manual | Any Plugin Check error **or warning** on the built zip |
 | `deploy.yml` | `v*` tag, manual on a tag | Publishes to the wp.org SVN and creates the GitHub release |
 
 ## When something is broken
